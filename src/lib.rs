@@ -1,6 +1,8 @@
 pub mod context;
 pub mod error;
-mod init_options;
+pub mod node;
+pub mod publisher;
+pub mod qos;
 mod rcl;
 
 #[cfg(test)]
@@ -8,9 +10,11 @@ mod tests {
     use std::error::Error;
 
     #[test]
-    fn context() -> Result<(), Box<dyn Error>> {
+    fn test_create_node() -> Result<(), Box<dyn Error>> {
         use crate::*;
-        context::Context::new()?;
+        let ctx = context::Context::new()?;
+        let _node = node::Node::new(ctx, "test_create_node", None, Default::default());
+
         Ok(())
     }
 }

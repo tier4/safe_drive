@@ -1,13 +1,18 @@
-use std::{env, ffi::CString};
+pub mod options;
 
-use crate::{error::*, init_options::InitOptions, rcl};
+use crate::{context::options::InitOptions, error::*, rcl};
+use std::{
+    env,
+    ffi::CString,
+    sync::{Arc, Mutex},
+};
 
 pub struct Context {
     context: rcl::rcl_context_t,
 }
 
 impl Context {
-    pub fn new() -> RCLResult<Context> {
+    pub fn new() -> RCLResult<Arc<Mutex<Self>>> {
         // allocate context
         let mut context = unsafe { rcl::rcl_get_zero_initialized_context() };
 
@@ -27,8 +32,17 @@ impl Context {
             )
         })?;
 
-        Ok(Context { context })
+        Ok(Arc::new(Mutex::new(Context { context })))
+    }
+
+    pub(crate) fn as_ptr_mut(&mut self) -> *mut rcl::rcl_context_t {
+        &mut self.context as _
     }
 }
 
-
+impl Drop for Context {
+    fn drop(&mut self) {
+        ret_val_to_err(unsafe { rcl::rcl_shutdown(&mut self.context) }).unwrap();
+        ret_val_to_err(unsafe { rcl::rcl_context_fini(&mut self.context) }).unwrap();
+    }
+}

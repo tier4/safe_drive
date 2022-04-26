@@ -4,6 +4,7 @@
 #![allow(deref_nullptr)]
 #![allow(non_snake_case)]
 #![allow(improper_ctypes)]
+#![allow(clippy::upper_case_acronyms)]
 
 mod galactic;
 
