@@ -1,7 +1,7 @@
 pub mod policy;
 
 use crate::rcl;
-use num_traits::FromPrimitive;
+use num_traits::{FromPrimitive, ToPrimitive};
 use policy::*;
 use std::time::Duration;
 
@@ -85,8 +85,8 @@ impl Profile {
     }
 }
 
-impl From<rcl::rmw_qos_profile_t> for Profile {
-    fn from(qos: rcl::rmw_qos_profile_t) -> Self {
+impl From<&rcl::rmw_qos_profile_t> for Profile {
+    fn from(qos: &rcl::rmw_qos_profile_t) -> Self {
         Self {
             history: FromPrimitive::from_u32(qos.history).unwrap_or(HistoryPolicy::Unknown),
             depth: qos.depth as usize,
@@ -96,12 +96,29 @@ impl From<rcl::rmw_qos_profile_t> for Profile {
                 .unwrap_or(DurabilityPolicy::Unknown),
             liveliness: FromPrimitive::from_u32(qos.liveliness)
                 .unwrap_or(LivelinessPolicy::Unknown),
-            deadline: Duration::new(qos.deadline.sec, qos.deadline.nsec as u32),
-            lifespan: Duration::new(qos.lifespan.sec, qos.lifespan.nsec as u32),
-            liveliness_lease_duration: Duration::new(
-                qos.liveliness_lease_duration.sec,
-                qos.liveliness_lease_duration.nsec as u32,
-            ),
+            deadline: qos.deadline.into(),
+            lifespan: qos.lifespan.into(),
+            liveliness_lease_duration: qos.liveliness_lease_duration.into(),
+            avoid_ros_namespace_conventions: qos.avoid_ros_namespace_conventions,
+        }
+    }
+}
+
+impl From<&Profile> for rcl::rmw_qos_profile_t {
+    fn from(qos: &Profile) -> Self {
+        rcl::rmw_qos_profile_t {
+            history: ToPrimitive::to_u32(&qos.history)
+                .unwrap_or(rcl::rmw_qos_history_policy_t_RMW_QOS_POLICY_HISTORY_UNKNOWN),
+            depth: qos.depth as u64,
+            reliability: ToPrimitive::to_u32(&qos.reliability)
+                .unwrap_or(rcl::rmw_qos_reliability_policy_t_RMW_QOS_POLICY_RELIABILITY_UNKNOWN),
+            durability: ToPrimitive::to_u32(&qos.durability)
+                .unwrap_or(rcl::rmw_qos_durability_policy_t_RMW_QOS_POLICY_DURABILITY_UNKNOWN),
+            liveliness: ToPrimitive::to_u32(&qos.liveliness)
+                .unwrap_or(rcl::rmw_qos_liveliness_policy_t_RMW_QOS_POLICY_LIVELINESS_UNKNOWN),
+            deadline: qos.deadline.into(),
+            lifespan: qos.lifespan.into(),
+            liveliness_lease_duration: qos.liveliness_lease_duration.into(),
             avoid_ros_namespace_conventions: qos.avoid_ros_namespace_conventions,
         }
     }

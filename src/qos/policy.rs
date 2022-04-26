@@ -3,7 +3,7 @@ use num_derive::{FromPrimitive, ToPrimitive};
 
 #[repr(u32)]
 /// QoS history enumerations describing how samples endure
-#[derive(Debug, Copy, Clone, Hash, PartialEq, Eq, FromPrimitive, ToPrimitive)]
+#[derive(Debug, Copy, Clone, PartialEq, Eq, FromPrimitive, ToPrimitive)]
 pub enum HistoryPolicy {
     /// Implementation default for history policy
     SystemDefault = rcl::rmw_qos_history_policy_t_RMW_QOS_POLICY_HISTORY_SYSTEM_DEFAULT,

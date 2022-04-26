@@ -46,6 +46,14 @@ impl Node {
             _context: context,
         })
     }
+
+    pub(crate) fn as_ptr(&self) -> *const rcl::rcl_node_t {
+        &self.node
+    }
+
+    pub(crate) fn as_ptr_mut(&mut self) -> *mut rcl::rcl_node_t {
+        &mut self.node
+    }
 }
 
 impl Drop for Node {

@@ -20,7 +20,7 @@ impl NodeOptions {
     }
 
     pub(crate) fn as_ptr(&self) -> *const rcl::rcl_node_options_t {
-        &self.options as _
+        &self.options
     }
 }
 

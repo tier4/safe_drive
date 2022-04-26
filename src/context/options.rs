@@ -20,11 +20,11 @@ impl InitOptions {
     }
 
     pub fn as_ptr(&self) -> *const rcl::rcl_init_options_t {
-        &self.options as _
+        &self.options
     }
 
     pub fn as_ptr_mut(&mut self) -> *mut rcl::rcl_init_options_t {
-        &mut self.options as _
+        &mut self.options
     }
 }
 

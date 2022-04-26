@@ -36,7 +36,7 @@ impl Context {
     }
 
     pub(crate) fn as_ptr_mut(&mut self) -> *mut rcl::rcl_context_t {
-        &mut self.context as _
+        &mut self.context
     }
 }
 

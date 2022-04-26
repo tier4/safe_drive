@@ -4,6 +4,7 @@ pub mod node;
 pub mod publisher;
 pub mod qos;
 mod rcl;
+mod time;
 
 #[cfg(test)]
 mod tests {
