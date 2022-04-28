@@ -1,5 +1,5 @@
 [package]
-name = "safe_robo"
+name = "safe_drive"
 version = "0.1.0"
 edition = "2021"
 
