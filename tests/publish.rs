@@ -19,7 +19,10 @@ fn test_publish() -> Result<(), Box<dyn Error>> {
             ) as *const ()
         },
         Default::default(),
-    );
+    )?;
+
+    let msg = common::num::sample_msg__msg__Num { num: 100 };
+    publisher.send(msg)?;
 
     Ok(())
 }
