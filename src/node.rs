@@ -1,9 +1,6 @@
-pub mod options;
-
 use crate::{
     context::Context,
     error::{ret_val_to_err, RCLResult},
-    node::options::NodeOptions,
     rcl,
 };
 use std::{
@@ -59,5 +56,35 @@ impl Node {
 impl Drop for Node {
     fn drop(&mut self) {
         ret_val_to_err(unsafe { rcl::rcl_node_fini(&mut self.node) }).unwrap();
+    }
+}
+
+/// Options for nodes.
+pub struct NodeOptions {
+    options: rcl::rcl_node_options_t,
+}
+
+impl Default for NodeOptions {
+    fn default() -> Self {
+        let options = unsafe { rcl::rcl_node_get_default_options() };
+        NodeOptions { options }
+    }
+}
+
+impl NodeOptions {
+    /// Create options to create a node
+    pub fn new() -> Self {
+        // TODO: allow setting options
+        Default::default()
+    }
+
+    pub(crate) fn as_ptr(&self) -> *const rcl::rcl_node_options_t {
+        &self.options
+    }
+}
+
+impl Drop for NodeOptions {
+    fn drop(&mut self) {
+        ret_val_to_err(unsafe { rcl::rcl_node_options_fini(&mut self.options) }).unwrap();
     }
 }

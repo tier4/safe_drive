@@ -1,5 +1,3 @@
-mod options;
-
 use crate::{
     error::{ret_val_to_err, RCLResult},
     node::Node,
@@ -28,7 +26,7 @@ impl<T> Publisher<T> {
         let mut publisher = unsafe { rcl::rcl_get_zero_initialized_publisher() };
 
         let topic_name = CString::new(topic_name).unwrap_or_default();
-        let options = options::Options::new(&qos.unwrap_or_default());
+        let options = Options::new(&qos.unwrap_or_default());
 
         ret_val_to_err(unsafe {
             rcl::rcl_publisher_init(
@@ -62,5 +60,25 @@ impl<T> Drop for Publisher<T> {
             rcl::rcl_publisher_fini(publisher, node.lock().unwrap().as_ptr_mut())
         })
         .unwrap();
+    }
+}
+
+/// Options for publishers.
+pub struct Options {
+    options: rcl::rcl_publisher_options_t,
+}
+
+impl Options {
+    pub fn new(qos: &qos::Profile) -> Self {
+        let options = rcl::rcl_publisher_options_t {
+            qos: qos.into(),
+            allocator: unsafe { rcl::rcutils_get_default_allocator() },
+            rmw_publisher_options: unsafe { rcl::rmw_get_default_publisher_options() },
+        };
+        Options { options }
+    }
+
+    pub(crate) fn as_ptr(&self) -> *const rcl::rcl_publisher_options_t {
+        &self.options
     }
 }

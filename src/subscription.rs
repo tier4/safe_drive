@@ -1,5 +1,3 @@
-pub mod options;
-
 use crate::{
     error::{ret_val_to_err, RCLResult},
     node::Node,
@@ -29,7 +27,7 @@ impl<T> Subscription<T> {
         let mut subscription = unsafe { rcl::rcl_get_zero_initialized_subscription() };
 
         let topic_name = CString::new(topic_name).unwrap_or_default();
-        let options = options::Options::new(&qos.unwrap_or_default());
+        let options = Options::new(&qos.unwrap_or_default());
 
         ret_val_to_err(unsafe {
             rcl::rcl_subscription_init(
@@ -48,6 +46,9 @@ impl<T> Subscription<T> {
         })
     }
 
+    /// Because is rcl::rcl_take is non-blocking,
+    /// recv returns Err(RCLError::SubscriptionTakeFailed) if
+    /// data is not available.
     pub fn recv(&self) -> RCLResult<T> {
         let mut ros_message: T = unsafe { MaybeUninit::zeroed().assume_init() };
 
@@ -71,5 +72,25 @@ impl<T> Drop for Subscription<T> {
             rcl::rcl_subscription_fini(subscription, node.lock().unwrap().as_ptr_mut())
         })
         .unwrap();
+    }
+}
+
+/// Options for subscribers.
+pub struct Options {
+    options: rcl::rcl_subscription_options_t,
+}
+
+impl Options {
+    pub fn new(qos: &qos::Profile) -> Self {
+        let options = rcl::rcl_subscription_options_t {
+            qos: qos.into(),
+            allocator: unsafe { rcl::rcutils_get_default_allocator() },
+            rmw_subscription_options: unsafe { rcl::rmw_get_default_subscription_options() },
+        };
+        Options { options }
+    }
+
+    pub(crate) fn as_ptr(&self) -> *const rcl::rcl_subscription_options_t {
+        &self.options
     }
 }
