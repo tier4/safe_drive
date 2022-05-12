@@ -1,45 +1,38 @@
-use crate::{
-    context::Context,
-    error::{ret_val_to_err, RCLResult},
-    rcl,
-};
-use std::{
-    ffi::CString,
-    sync::{Arc, Mutex},
-};
+use crate::{context::Context, error::RCLResult, rcl, selector::Selector};
+use std::{ffi::CString, sync::Arc};
 
 pub struct Node {
     node: rcl::rcl_node_t,
-    _context: Arc<Mutex<Context>>,
+    pub(crate) selector: Arc<Selector>,
+    _context: Arc<Context>,
 }
 
 impl Node {
     pub fn new(
-        context: Arc<Mutex<Context>>,
+        context: Arc<Context>,
         name: &str,
         namespace: Option<&str>,
         options: NodeOptions,
     ) -> RCLResult<Self> {
-        let mut node = unsafe { rcl::rcl_get_zero_initialized_node() };
+        let mut node = rcl::MTSafeFn::rcl_get_zero_initialized_node();
 
         let name = CString::new(name).unwrap();
         let namespace = CString::new(namespace.unwrap_or_default()).unwrap();
 
         {
-            let mut guard = context.lock().unwrap();
-            ret_val_to_err(unsafe {
-                rcl::rcl_node_init(
-                    &mut node,
-                    name.as_ptr(),
-                    namespace.as_ptr(),
-                    guard.as_ptr_mut(),
-                    options.as_ptr(),
-                )
-            })?;
+            let guard = rcl::MT_UNSAFE_FN.lock().unwrap();
+            guard.rcl_node_init(
+                &mut node,
+                name.as_ptr(),
+                namespace.as_ptr(),
+                unsafe { context.as_ptr_mut() },
+                options.as_ptr(),
+            )?;
         }
 
         Ok(Node {
             node,
+            selector: Arc::new(Selector::new()),
             _context: context,
         })
     }
@@ -48,14 +41,15 @@ impl Node {
         &self.node
     }
 
-    pub(crate) fn as_ptr_mut(&mut self) -> *mut rcl::rcl_node_t {
-        &mut self.node
+    pub(crate) unsafe fn as_ptr_mut(&self) -> *mut rcl::rcl_node_t {
+        &self.node as *const _ as *mut _
     }
 }
 
 impl Drop for Node {
     fn drop(&mut self) {
-        ret_val_to_err(unsafe { rcl::rcl_node_fini(&mut self.node) }).unwrap();
+        let guard = rcl::MT_UNSAFE_FN.lock().unwrap();
+        guard.rcl_node_fini(&mut self.node).unwrap();
     }
 }
 
@@ -66,7 +60,7 @@ pub struct NodeOptions {
 
 impl Default for NodeOptions {
     fn default() -> Self {
-        let options = unsafe { rcl::rcl_node_get_default_options() };
+        let options = rcl::MTSafeFn::rcl_node_get_default_options();
         NodeOptions { options }
     }
 }
@@ -85,6 +79,7 @@ impl NodeOptions {
 
 impl Drop for NodeOptions {
     fn drop(&mut self) {
-        ret_val_to_err(unsafe { rcl::rcl_node_options_fini(&mut self.options) }).unwrap();
+        let guard = rcl::MT_UNSAFE_FN.lock().unwrap();
+        guard.rcl_node_options_fini(&mut self.options).unwrap();
     }
 }

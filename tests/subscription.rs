@@ -1,10 +1,7 @@
 pub mod common;
 
 use safe_drive::{self, error::RCLError};
-use std::{
-    error::Error,
-    sync::{Arc, Mutex},
-};
+use std::{error::Error, sync::Arc};
 
 #[test]
 fn test_subscription() -> Result<(), Box<dyn Error>> {
@@ -13,7 +10,7 @@ fn test_subscription() -> Result<(), Box<dyn Error>> {
         safe_drive::node::Node::new(ctx, "test_create_node", None, Default::default()).unwrap();
     let subscription =
         safe_drive::subscriber::Subscriber::<common::num::sample_msg__msg__Num>::new(
-            Arc::new(Mutex::new(node)),
+            Arc::new(node),
             "test_subscription",
             unsafe {
                 common::num::rosidl_typesupport_c__get_message_type_support_handle__sample_msg__msg__Num(
@@ -22,7 +19,7 @@ fn test_subscription() -> Result<(), Box<dyn Error>> {
             Default::default(),
         )?;
 
-    match subscription.recv() {
+    match subscription.try_recv() {
         Err(RCLError::SubscriptionTakeFailed) => Ok(()), // must fail because there is no publisher
         _ => panic!(),
     }

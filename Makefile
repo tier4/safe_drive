@@ -26,8 +26,8 @@ $(AddThreeInts_C): $(AddThreeInts_IN)
 $(AddThreeInts_RUST): $(AddThreeInts_C)
 	bindgen $(AddThreeInts_C) -- $(INCLUDE) > $(AddThreeInts_RUST)
 
-test:
-	export LD_LIBRARY_PATH=$(NUM_LIBDIR):$(AddThreeInts_LIBDIR):$(LD_LIBRARY_PATH) && cargo test
+test: all
+	export LD_LIBRARY_PATH=$(NUM_LIBDIR):$(AddThreeInts_LIBDIR):$(LD_LIBRARY_PATH) && cargo test -- --nocapture
 
 check:
 	cargo check
