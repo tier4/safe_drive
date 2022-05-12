@@ -12,7 +12,7 @@ fn test_subscription() -> Result<(), Box<dyn Error>> {
     let node =
         safe_drive::node::Node::new(ctx, "test_create_node", None, Default::default()).unwrap();
     let subscription =
-        safe_drive::subscription::Subscription::<common::num::sample_msg__msg__Num>::new(
+        safe_drive::subscriber::Subscriber::<common::num::sample_msg__msg__Num>::new(
             Arc::new(Mutex::new(node)),
             "test_subscription",
             unsafe {

@@ -11,13 +11,13 @@ use std::{
     sync::{Arc, Mutex},
 };
 
-pub struct Subscription<T> {
+pub struct Subscriber<T> {
     subscription: rcl::rcl_subscription_t,
     node: Arc<Mutex<Node>>,
     _phantom: PhantomData<T>,
 }
 
-impl<T> Subscription<T> {
+impl<T> Subscriber<T> {
     pub fn new(
         node: Arc<Mutex<Node>>,
         topic_name: &str,
@@ -39,7 +39,7 @@ impl<T> Subscription<T> {
             )
         })?;
 
-        Ok(Subscription {
+        Ok(Subscriber {
             subscription,
             node,
             _phantom: Default::default(),
@@ -47,7 +47,7 @@ impl<T> Subscription<T> {
     }
 
     /// Because is rcl::rcl_take is non-blocking,
-    /// recv returns Err(RCLError::SubscriptionTakeFailed) if
+    /// recv returns Err(RCLError::SubscriberTakeFailed) if
     /// data is not available.
     pub fn recv(&self) -> RCLResult<T> {
         let mut ros_message: T = unsafe { MaybeUninit::zeroed().assume_init() };
@@ -65,7 +65,7 @@ impl<T> Subscription<T> {
     }
 }
 
-impl<T> Drop for Subscription<T> {
+impl<T> Drop for Subscriber<T> {
     fn drop(&mut self) {
         let (node, subscription) = (&mut self.node, &mut self.subscription);
         ret_val_to_err(unsafe {

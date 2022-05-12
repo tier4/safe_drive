@@ -4,7 +4,7 @@ pub mod node;
 pub mod publisher;
 pub mod qos;
 mod rcl;
-pub mod subscription;
+pub mod subscriber;
 mod time;
 
 #[cfg(test)]
