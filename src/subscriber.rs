@@ -2,7 +2,6 @@ use crate::{
     error::{RCLError, RCLResult},
     node::Node,
     qos, rcl,
-    selector::Selector,
 };
 use std::{
     error::Error,
@@ -17,9 +16,8 @@ use std::{
 };
 
 pub(crate) struct RCLSubscription {
-    subscription: Box<rcl::rcl_subscription_t>,
+    pub(crate) subscription: Box<rcl::rcl_subscription_t>,
     node: Arc<Node>,
-    selector: Arc<Selector>,
 }
 
 impl Drop for RCLSubscription {
@@ -34,7 +32,7 @@ impl Drop for RCLSubscription {
 }
 
 pub struct Subscriber<T> {
-    subscription: Arc<RCLSubscription>,
+    pub(crate) subscription: Arc<RCLSubscription>,
     _phantom: PhantomData<T>,
 }
 
@@ -50,7 +48,6 @@ impl<T> Subscriber<T> {
         let topic_name = CString::new(topic_name).unwrap_or_default();
         let options = Options::new(&qos.unwrap_or_default());
 
-        let selector = node.selector.clone();
         {
             let guard = rcl::MT_UNSAFE_FN.lock().unwrap();
 
@@ -64,11 +61,7 @@ impl<T> Subscriber<T> {
         }
 
         Ok(Subscriber {
-            subscription: Arc::new(RCLSubscription {
-                subscription,
-                node,
-                selector,
-            }),
+            subscription: Arc::new(RCLSubscription { subscription, node }),
             _phantom: Default::default(),
         })
     }

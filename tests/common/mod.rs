@@ -8,3 +8,40 @@
 
 pub mod add_three_ints;
 pub mod num;
+
+use safe_drive::{self, node::Node, publisher::Publisher, subscriber::Subscriber};
+use std::{error::Error, sync::Arc};
+
+pub fn create_publisher(
+    node: Arc<Node>,
+    topic_name: &str,
+) -> Result<Publisher<num::sample_msg__msg__Num>, Box<dyn Error>> {
+    let publisher = safe_drive::publisher::Publisher::<num::sample_msg__msg__Num>::new(
+        node,
+        topic_name,
+        unsafe {
+            num::rosidl_typesupport_c__get_message_type_support_handle__sample_msg__msg__Num()
+                as *const ()
+        },
+        Default::default(),
+    )?;
+
+    Ok(publisher)
+}
+
+pub fn create_subscriber(
+    node: Arc<Node>,
+    topic_name: &str,
+) -> Result<Subscriber<num::sample_msg__msg__Num>, Box<dyn Error>> {
+    let subscriber = safe_drive::subscriber::Subscriber::<num::sample_msg__msg__Num>::new(
+        node,
+        topic_name,
+        unsafe {
+            num::rosidl_typesupport_c__get_message_type_support_handle__sample_msg__msg__Num()
+                as *const ()
+        },
+        Default::default(),
+    )?;
+
+    Ok(subscriber)
+}

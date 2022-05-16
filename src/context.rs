@@ -83,3 +83,6 @@ impl Drop for InitOptions {
         guard.rcl_init_options_fini(self.as_ptr_mut()).unwrap();
     }
 }
+
+unsafe impl Sync for Context {}
+unsafe impl Send for Context {}

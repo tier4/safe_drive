@@ -34,11 +34,11 @@ impl MTUnsafeFn {
         options: *const rcl_init_options_t,
         context: *mut rcl_context_t,
     ) -> RCLResult<()> {
-        ret_val_to_err(unsafe { crate::rcl::rcl_init(argc, argv, options, context) })
+        ret_val_to_err(unsafe { self::rcl_init(argc, argv, options, context) })
     }
 
     pub fn rcl_context_fini(&self, context: *mut rcl_context_t) -> RCLResult<()> {
-        ret_val_to_err(unsafe { crate::rcl::rcl_context_fini(context) })
+        ret_val_to_err(unsafe { self::rcl_context_fini(context) })
     }
 
     pub fn rcl_init_options_init(
@@ -46,11 +46,11 @@ impl MTUnsafeFn {
         init_options: *mut rcl_init_options_t,
         allocator: rcl_allocator_t,
     ) -> RCLResult<()> {
-        ret_val_to_err(unsafe { crate::rcl::rcl_init_options_init(init_options, allocator) })
+        ret_val_to_err(unsafe { self::rcl_init_options_init(init_options, allocator) })
     }
 
     pub fn rcl_init_options_fini(&self, init_options: *mut rcl_init_options_t) -> RCLResult<()> {
-        ret_val_to_err(unsafe { crate::rcl::rcl_init_options_fini(init_options) })
+        ret_val_to_err(unsafe { self::rcl_init_options_fini(init_options) })
     }
 
     pub fn rcl_node_init(
@@ -61,17 +61,15 @@ impl MTUnsafeFn {
         context: *mut rcl_context_t,
         options: *const rcl_node_options_t,
     ) -> RCLResult<()> {
-        ret_val_to_err(unsafe {
-            crate::rcl::rcl_node_init(node, name, namespace_, context, options)
-        })
+        ret_val_to_err(unsafe { self::rcl_node_init(node, name, namespace_, context, options) })
     }
 
     pub fn rcl_node_fini(&self, node: *mut rcl_node_t) -> RCLResult<()> {
-        ret_val_to_err(unsafe { crate::rcl::rcl_node_fini(node) })
+        ret_val_to_err(unsafe { self::rcl_node_fini(node) })
     }
 
     pub fn rcl_node_options_fini(&self, options: *mut rcl_node_options_t) -> RCLResult<()> {
-        ret_val_to_err(unsafe { crate::rcl::rcl_node_options_fini(options) })
+        ret_val_to_err(unsafe { self::rcl_node_options_fini(options) })
     }
 
     pub fn rcl_publisher_init(
@@ -83,7 +81,7 @@ impl MTUnsafeFn {
         options: *const rcl_publisher_options_t,
     ) -> RCLResult<()> {
         ret_val_to_err(unsafe {
-            crate::rcl::rcl_publisher_init(publisher, node, type_support, topic_name, options)
+            self::rcl_publisher_init(publisher, node, type_support, topic_name, options)
         })
     }
 
@@ -92,7 +90,7 @@ impl MTUnsafeFn {
         publisher: *mut rcl_publisher_t,
         node: *mut rcl_node_t,
     ) -> RCLResult<()> {
-        ret_val_to_err(unsafe { crate::rcl::rcl_publisher_fini(publisher, node) })
+        ret_val_to_err(unsafe { self::rcl_publisher_fini(publisher, node) })
     }
 
     pub fn rcl_subscription_fini(
@@ -100,7 +98,7 @@ impl MTUnsafeFn {
         subscription: *mut rcl_subscription_t,
         node: *mut rcl_node_t,
     ) -> RCLResult<()> {
-        ret_val_to_err(unsafe { crate::rcl::rcl_subscription_fini(subscription, node) })
+        ret_val_to_err(unsafe { self::rcl_subscription_fini(subscription, node) })
     }
 
     pub fn rcl_subscription_init(
@@ -112,7 +110,7 @@ impl MTUnsafeFn {
         options: *const rcl_subscription_options_t,
     ) -> RCLResult<()> {
         ret_val_to_err(unsafe {
-            crate::rcl::rcl_subscription_init(subscription, node, type_support, topic_name, options)
+            self::rcl_subscription_init(subscription, node, type_support, topic_name, options)
         })
     }
 
@@ -124,8 +122,77 @@ impl MTUnsafeFn {
         allocation: *mut rmw_subscription_allocation_t,
     ) -> RCLResult<()> {
         ret_val_to_err(unsafe {
-            crate::rcl::rcl_take(subscription, ros_message, message_info, allocation)
+            self::rcl_take(subscription, ros_message, message_info, allocation)
         })
+    }
+
+    pub fn rcl_wait_set_init(
+        &self,
+        wait_set: *mut rcl_wait_set_t,
+        number_of_subscriptions: size_t,
+        number_of_guard_conditions: size_t,
+        number_of_timers: size_t,
+        number_of_clients: size_t,
+        number_of_services: size_t,
+        number_of_events: size_t,
+        context: *mut rcl_context_t,
+        allocator: rcl_allocator_t,
+    ) -> RCLResult<()> {
+        ret_val_to_err(unsafe {
+            self::rcl_wait_set_init(
+                wait_set,
+                number_of_subscriptions,
+                number_of_guard_conditions,
+                number_of_timers,
+                number_of_clients,
+                number_of_services,
+                number_of_events,
+                context,
+                allocator,
+            )
+        })
+    }
+
+    pub fn rcl_wait_set_clear(&self, wait_set: *mut rcl_wait_set_t) -> RCLResult<()> {
+        ret_val_to_err(unsafe { self::rcl_wait_set_clear(wait_set) })
+    }
+
+    pub fn rcl_wait_set_resize(
+        &self,
+        wait_set: *mut rcl_wait_set_t,
+        subscriptions_size: size_t,
+        guard_conditions_size: size_t,
+        timers_size: size_t,
+        clients_size: size_t,
+        services_size: size_t,
+        events_size: size_t,
+    ) -> RCLResult<()> {
+        ret_val_to_err(unsafe {
+            self::rcl_wait_set_resize(
+                wait_set,
+                subscriptions_size,
+                guard_conditions_size,
+                timers_size,
+                clients_size,
+                services_size,
+                events_size,
+            )
+        })
+    }
+
+    pub fn rcl_wait_set_add_subscription(
+        &self,
+        wait_set: *mut rcl_wait_set_t,
+        subscription: *const rcl_subscription_t,
+        index: *mut size_t,
+    ) -> RCLResult<()> {
+        ret_val_to_err(unsafe {
+            self::rcl_wait_set_add_subscription(wait_set, subscription, index)
+        })
+    }
+
+    pub fn rcl_wait_set_fini(&self, wait_set: *mut rcl_wait_set_t) -> RCLResult<()> {
+        ret_val_to_err(unsafe { self::rcl_wait_set_fini(wait_set) })
     }
 }
 
@@ -135,31 +202,31 @@ pub struct MTSafeFn {
 
 impl MTSafeFn {
     pub fn rcl_get_zero_initialized_context() -> rcl_context_t {
-        unsafe { crate::rcl::rcl_get_zero_initialized_context() }
+        unsafe { self::rcl_get_zero_initialized_context() }
     }
 
     pub fn rcl_shutdown(context: *mut rcl_context_t) -> RCLResult<()> {
-        ret_val_to_err(unsafe { crate::rcl::rcl_shutdown(context) })
+        ret_val_to_err(unsafe { self::rcl_shutdown(context) })
     }
 
     pub fn rcutils_get_default_allocator() -> rcutils_allocator_t {
-        unsafe { crate::rcl::rcutils_get_default_allocator() }
+        unsafe { self::rcutils_get_default_allocator() }
     }
 
     pub fn rcl_get_zero_initialized_init_options() -> rcl_init_options_t {
-        unsafe { crate::rcl::rcl_get_zero_initialized_init_options() }
+        unsafe { self::rcl_get_zero_initialized_init_options() }
     }
 
     pub fn rcl_get_zero_initialized_node() -> rcl_node_t {
-        unsafe { crate::rcl::rcl_get_zero_initialized_node() }
+        unsafe { self::rcl_get_zero_initialized_node() }
     }
 
     pub fn rcl_node_get_default_options() -> rcl_node_options_t {
-        unsafe { crate::rcl::rcl_node_get_default_options() }
+        unsafe { self::rcl_node_get_default_options() }
     }
 
     pub fn rcl_get_zero_initialized_publisher() -> rcl_publisher_t {
-        unsafe { crate::rcl::rcl_get_zero_initialized_publisher() }
+        unsafe { self::rcl_get_zero_initialized_publisher() }
     }
 
     pub fn rcl_publish(
@@ -167,18 +234,26 @@ impl MTSafeFn {
         ros_message: *const ::std::os::raw::c_void,
         allocation: *mut rmw_publisher_allocation_t,
     ) -> RCLResult<()> {
-        ret_val_to_err(unsafe { crate::rcl::rcl_publish(publisher, ros_message, allocation) })
+        ret_val_to_err(unsafe { self::rcl_publish(publisher, ros_message, allocation) })
     }
 
     pub fn rmw_get_default_publisher_options() -> rmw_publisher_options_t {
-        unsafe { crate::rcl::rmw_get_default_publisher_options() }
+        unsafe { self::rmw_get_default_publisher_options() }
     }
 
     pub fn rcl_get_zero_initialized_subscription() -> rcl_subscription_t {
-        unsafe { crate::rcl::rcl_get_zero_initialized_subscription() }
+        unsafe { self::rcl_get_zero_initialized_subscription() }
     }
 
     pub fn rmw_get_default_subscription_options() -> rmw_subscription_options_t {
-        unsafe { crate::rcl::rmw_get_default_subscription_options() }
+        unsafe { self::rmw_get_default_subscription_options() }
+    }
+
+    pub fn rcl_get_zero_initialized_wait_set() -> self::rcl_wait_set_t {
+        unsafe { self::rcl_get_zero_initialized_wait_set() }
+    }
+
+    pub fn rcl_wait(wait_set: *mut rcl_wait_set_t, timeout: i64) -> rcl_ret_t {
+        unsafe { self::rcl_wait(wait_set, timeout) }
     }
 }

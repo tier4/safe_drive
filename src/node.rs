@@ -1,9 +1,8 @@
-use crate::{context::Context, error::RCLResult, rcl, selector::Selector};
+use crate::{context::Context, error::RCLResult, rcl};
 use std::{ffi::CString, sync::Arc};
 
 pub struct Node {
     node: rcl::rcl_node_t,
-    pub(crate) selector: Arc<Selector>,
     _context: Arc<Context>,
 }
 
@@ -13,7 +12,7 @@ impl Node {
         name: &str,
         namespace: Option<&str>,
         options: NodeOptions,
-    ) -> RCLResult<Self> {
+    ) -> RCLResult<Arc<Self>> {
         let mut node = rcl::MTSafeFn::rcl_get_zero_initialized_node();
 
         let name = CString::new(name).unwrap();
@@ -30,11 +29,10 @@ impl Node {
             )?;
         }
 
-        Ok(Node {
+        Ok(Arc::new(Node {
             node,
-            selector: Arc::new(Selector::new()),
             _context: context,
-        })
+        }))
     }
 
     pub(crate) fn as_ptr(&self) -> *const rcl::rcl_node_t {
@@ -83,3 +81,6 @@ impl Drop for NodeOptions {
         guard.rcl_node_options_fini(&mut self.options).unwrap();
     }
 }
+
+unsafe impl Sync for Node {}
+unsafe impl Send for Node {}
