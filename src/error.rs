@@ -55,7 +55,6 @@ impl fmt::Display for RCLError {
 
 impl Error for RCLError {}
 
-#[must_use]
 pub type RCLResult<T> = Result<T, RCLError>;
 
 /// Convert a rcl-style, C-style, return value to a Rust-style value.

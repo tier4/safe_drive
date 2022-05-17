@@ -1,10 +1,11 @@
 pub mod common;
 
 use safe_drive::{self, error::RCLError, node::Node, selector::Selector};
-use std::{error::Error, sync::Arc, thread, time::Duration};
+use std::{error::Error, rc::Rc, sync::Arc, thread, time::Duration};
 
 const TOPIC_NAME_1: &str = "test_select_1";
 const TOPIC_NAME_2: &str = "test_select_2";
+const TOPIC_NAME_3: &str = "test_select_3";
 const INIT_1: i64 = 0;
 const INIT_2: i64 = 100;
 const COUNT: usize = 5;
@@ -53,8 +54,8 @@ fn test_select_subscriptions() -> Result<(), Box<dyn Error>> {
     let s2 = common::create_subscriber(node_sub2, TOPIC_NAME_2).unwrap();
 
     let mut selector = Selector::new(ctx)?;
-    selector.add_subscriber(&s1);
-    selector.add_subscriber(&s2);
+    selector.add_subscriber(&s1, Box::new(|| ()));
+    selector.add_subscriber(&s2, Box::new(|| ()));
 
     let mut cnt1 = INIT_1;
     let mut cnt2 = INIT_2;
@@ -100,4 +101,51 @@ fn pub_thread(node: Arc<Node>, topic_name: &str, dur: Duration, init: i64) {
         let msg = common::num::sample_msg__msg__Num { num: n };
         publisher.send(msg).unwrap(); // send message
     }
+}
+
+#[test]
+fn test_callback() -> Result<(), Box<dyn Error>> {
+    // create a context
+    let ctx = safe_drive::context::Context::new()?;
+
+    // create nodes
+    let node_pub = safe_drive::node::Node::new(
+        ctx.clone(),
+        "test_callback_pub_node",
+        None,
+        Default::default(),
+    )?;
+    let node_sub = safe_drive::node::Node::new(
+        ctx.clone(),
+        "test_callback_pub_node",
+        None,
+        Default::default(),
+    )?;
+
+    // create a publisher
+    let p = thread::spawn(move || {
+        pub_thread(node_pub, TOPIC_NAME_3, Duration::from_millis(40), INIT_1)
+    });
+
+    // create a subscriber
+    let s = Rc::new(common::create_subscriber(node_sub, TOPIC_NAME_3).unwrap());
+    let s2 = s.clone();
+
+    // register callback
+    let mut selector = Selector::new(ctx)?;
+    selector.add_subscriber(
+        &s2,
+        Box::new(move || {
+            let n = s.try_recv().unwrap();
+            println!("callback: num = {}", n.num);
+        }),
+    );
+
+    for _ in 0..COUNT {
+        selector.wait(None)?;
+    }
+
+    p.join().unwrap();
+
+    Ok(())
 }

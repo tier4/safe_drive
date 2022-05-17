@@ -194,6 +194,40 @@ impl MTUnsafeFn {
     pub fn rcl_wait_set_fini(&self, wait_set: *mut rcl_wait_set_t) -> RCLResult<()> {
         ret_val_to_err(unsafe { self::rcl_wait_set_fini(wait_set) })
     }
+
+    pub fn rcl_guard_condition_init(
+        &self,
+        guard_condition: *mut rcl_guard_condition_t,
+        context: *mut rcl_context_t,
+        options: rcl_guard_condition_options_t,
+    ) -> RCLResult<()> {
+        ret_val_to_err(unsafe { self::rcl_guard_condition_init(guard_condition, context, options) })
+    }
+
+    pub fn rcl_trigger_guard_condition(
+        &self,
+        guard_condition: *mut rcl_guard_condition_t,
+    ) -> RCLResult<()> {
+        ret_val_to_err(unsafe { self::rcl_trigger_guard_condition(guard_condition) })
+    }
+
+    pub fn rcl_guard_condition_fini(
+        &self,
+        guard_condition: *mut rcl_guard_condition_t,
+    ) -> RCLResult<()> {
+        ret_val_to_err(unsafe { self::rcl_guard_condition_fini(guard_condition) })
+    }
+
+    pub fn rcl_wait_set_add_guard_condition(
+        &self,
+        wait_set: *mut rcl_wait_set_t,
+        guard_condition: *const rcl_guard_condition_t,
+        index: *mut size_t,
+    ) -> RCLResult<()> {
+        ret_val_to_err(unsafe {
+            self::rcl_wait_set_add_guard_condition(wait_set, guard_condition, index)
+        })
+    }
 }
 
 pub struct MTSafeFn {
@@ -255,5 +289,9 @@ impl MTSafeFn {
 
     pub fn rcl_wait(wait_set: *mut rcl_wait_set_t, timeout: i64) -> rcl_ret_t {
         unsafe { self::rcl_wait(wait_set, timeout) }
+    }
+
+    pub fn rcl_get_zero_initialized_guard_condition() -> rcl_guard_condition_t {
+        unsafe { self::rcl_get_zero_initialized_guard_condition() }
     }
 }
