@@ -54,8 +54,8 @@ fn test_select_subscriptions() -> Result<(), Box<dyn Error>> {
     let s2 = common::create_subscriber(node_sub2, TOPIC_NAME_2).unwrap();
 
     let mut selector = Selector::new(ctx)?;
-    selector.add_subscriber(&s1, Box::new(|| ()));
-    selector.add_subscriber(&s2, Box::new(|| ()));
+    selector.add_subscriber(&s1, None, false);
+    selector.add_subscriber(&s2, None, false);
 
     let mut cnt1 = INIT_1;
     let mut cnt2 = INIT_2;
@@ -135,10 +135,11 @@ fn test_callback() -> Result<(), Box<dyn Error>> {
     let mut selector = Selector::new(ctx)?;
     selector.add_subscriber(
         &s2,
-        Box::new(move || {
+        Some(Box::new(move || {
             let n = s.try_recv().unwrap();
             println!("callback: num = {}", n.num);
-        }),
+        })),
+        false,
     );
 
     for _ in 0..COUNT {
@@ -146,6 +147,20 @@ fn test_callback() -> Result<(), Box<dyn Error>> {
     }
 
     p.join().unwrap();
+
+    Ok(())
+}
+
+#[test]
+fn test_async() -> Result<(), Box<dyn Error>> {
+    // create a context
+    let ctx = safe_drive::context::Context::new()?;
+
+    // create nodes
+    let node_pub =
+        safe_drive::node::Node::new(ctx.clone(), "test_sync_pub_node", None, Default::default())?;
+    let node_sub =
+        safe_drive::node::Node::new(ctx.clone(), "test_sync_pub_node", None, Default::default())?;
 
     Ok(())
 }

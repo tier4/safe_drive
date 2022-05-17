@@ -2,6 +2,7 @@ use crate::{
     error::{RCLError, RCLResult},
     node::Node,
     qos, rcl,
+    selector::async_selector::{self, SELECTOR},
 };
 use std::{
     error::Error,
@@ -30,6 +31,9 @@ impl Drop for RCLSubscription {
             .unwrap();
     }
 }
+
+unsafe impl Sync for RCLSubscription {}
+unsafe impl Send for RCLSubscription {}
 
 pub struct Subscriber<T> {
     pub(crate) subscription: Arc<RCLSubscription>,
@@ -88,7 +92,7 @@ pub struct AsyncReceiver<'a, T> {
 }
 
 impl<'a, T> Future for AsyncReceiver<'a, T> {
-    type Output = Result<T, Box<dyn Error>>;
+    type Output = Result<T, Box<dyn Error + Send + Sync + 'static>>;
 
     fn poll(self: Pin<&mut Self>, cx: &mut task::Context<'_>) -> Poll<Self::Output> {
         // try to take 1 message
@@ -98,17 +102,16 @@ impl<'a, T> Future for AsyncReceiver<'a, T> {
             Err(e) => return Poll::Ready(Err(e.into())), // error
         }
 
-        todo!();
-        // match self
-        //     .subscription
-        //     .selector
-        //     .select(selector::Op::Subscription(
-        //         self.subscription.clone(),
-        //         cx.waker().clone(),
-        //     )) {
-        //     Ok(_) => (),
-        //     Err(e) => return Poll::Ready(Err(e.to_string().into())),
-        // }
+        let mut guard = SELECTOR.lock().unwrap();
+        let waker = cx.waker().clone();
+
+        guard.register(
+            &self.subscription.node.context,
+            async_selector::Command::Subscription(
+                self.subscription.clone(),
+                Box::new(move || waker.clone().wake()),
+            ),
+        )?;
 
         Poll::Pending
     }

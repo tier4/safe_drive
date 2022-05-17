@@ -1,19 +1,19 @@
+use self::guard_condition::{GuardCondition, RCLGuardCondition};
 use crate::{
     context::Context,
     error::RCLResult,
     rcl,
     subscriber::{RCLSubscription, Subscriber},
 };
-use std::{
-    collections::BTreeMap,
-    ptr::{null, null_mut},
-    sync::Arc,
-    time::Duration,
-};
+use std::{collections::BTreeMap, ptr::null_mut, sync::Arc, time::Duration};
+
+pub(crate) mod async_selector;
+mod guard_condition;
 
 struct ConditionHandler<T> {
+    is_once: bool,
     event: T,
-    handler: Box<dyn Fn()>,
+    handler: Option<Box<dyn Fn()>>,
 }
 
 pub struct Selector {
@@ -50,22 +50,38 @@ impl Selector {
         })
     }
 
-    pub fn add_subscriber<T>(&mut self, subscriber: &Subscriber<T>, handler: Box<dyn Fn()>) {
+    pub fn add_subscriber<T>(
+        &mut self,
+        subscriber: &Subscriber<T>,
+        handler: Option<Box<dyn Fn()>>,
+        is_once: bool,
+    ) {
+        self.add_rcl_subscription(subscriber.subscription.clone(), handler, is_once)
+    }
+
+    pub(crate) fn add_rcl_subscription(
+        &mut self,
+        subscription: Arc<RCLSubscription>,
+        handler: Option<Box<dyn Fn()>>,
+        is_once: bool,
+    ) {
         self.subscriptions.insert(
-            subscriber.subscription.subscription.as_ref(),
+            subscription.subscription.as_ref(),
             ConditionHandler {
-                event: subscriber.subscription.clone(),
+                event: subscription.clone(),
                 handler,
+                is_once,
             },
         );
     }
 
-    fn add_guard_condition(&mut self, cond: &GuardCondition, handler: Box<dyn Fn()>) {
+    fn add_guard_condition(&mut self, cond: &GuardCondition, handler: Option<Box<dyn Fn()>>) {
         self.cond.insert(
             cond.cond.cond.as_ref(),
             ConditionHandler {
                 event: cond.cond.clone(),
                 handler,
+                is_once: false,
             },
         );
     }
@@ -117,11 +133,16 @@ impl Selector {
         // notify subscritions
         for i in 0..self.subscriptions.len() {
             unsafe {
-                let p = self.wait_set.subscriptions.offset(i as isize);
-                if *p != null() {
+                let p = self.wait_set.subscriptions.add(i);
+                if p.is_null() {
                     debug_assert!(self.subscriptions.contains_key(&*p));
                     if let Some(h) = self.subscriptions.get(&*p) {
-                        (h.handler)();
+                        if let Some(hdl) = &h.handler {
+                            hdl()
+                        }
+                        if h.is_once {
+                            self.subscriptions.remove(&*p);
+                        }
                     }
                 }
             }
@@ -130,11 +151,13 @@ impl Selector {
         // notify guard conditions
         for i in 0..self.cond.len() {
             unsafe {
-                let p = self.wait_set.guard_conditions.offset(i as isize);
-                if *p != null() {
+                let p = self.wait_set.guard_conditions.add(i);
+                if !p.is_null() {
                     debug_assert!(self.cond.contains_key(&*p));
                     if let Some(h) = self.cond.get(&*p) {
-                        (h.handler)();
+                        if let Some(hdl) = &h.handler {
+                            hdl()
+                        }
                     }
                 }
             }
@@ -150,58 +173,6 @@ impl Drop for Selector {
         guard.rcl_wait_set_fini(&mut self.wait_set).unwrap()
     }
 }
-
-struct RCLGuardCondition {
-    cond: Box<rcl::rcl_guard_condition_t>,
-    _context: Arc<Context>,
-}
-
-impl RCLGuardCondition {
-    unsafe fn as_ptr_mut(&self) -> *mut rcl::rcl_guard_condition_t {
-        self.cond.as_ref() as *const _ as *mut _
-    }
-}
-
-impl Drop for RCLGuardCondition {
-    fn drop(&mut self) {
-        let guard = rcl::MT_UNSAFE_FN.lock().unwrap();
-        guard.rcl_guard_condition_fini(self.cond.as_mut()).unwrap();
-    }
-}
-
-struct GuardCondition {
-    cond: Arc<RCLGuardCondition>,
-}
-
-impl GuardCondition {
-    fn new(context: Arc<Context>) -> RCLResult<Arc<Self>> {
-        let mut guard_condition = rcl::MTSafeFn::rcl_get_zero_initialized_guard_condition();
-        let allocator = rcl::MTSafeFn::rcutils_get_default_allocator();
-
-        {
-            let guard = rcl::MT_UNSAFE_FN.lock().unwrap();
-            guard.rcl_guard_condition_init(
-                &mut guard_condition,
-                unsafe { context.as_ptr_mut() },
-                rcl::rcl_guard_condition_options_t { allocator },
-            )?;
-        }
-
-        let cond = Arc::new(RCLGuardCondition {
-            cond: Box::new(guard_condition),
-            _context: context,
-        });
-        Ok(Arc::new(GuardCondition { cond: cond }))
-    }
-
-    fn trigger(&self) -> RCLResult<()> {
-        let guard = rcl::MT_UNSAFE_FN.lock().unwrap();
-        guard.rcl_trigger_guard_condition(unsafe { self.cond.as_ptr_mut() })
-    }
-}
-
-unsafe impl Sync for GuardCondition {}
-unsafe impl Send for GuardCondition {}
 
 #[cfg(test)]
 mod test {
@@ -219,7 +190,7 @@ mod test {
 
         let w = thread::spawn(move || {
             let mut selector = super::Selector::new(ctx2).unwrap();
-            selector.add_guard_condition(&cond2, Box::new(|| println!("triggerd!")));
+            selector.add_guard_condition(&cond2, Some(Box::new(|| println!("triggerd!"))));
             selector.wait(None).unwrap();
         });
 

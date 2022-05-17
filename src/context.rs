@@ -1,8 +1,19 @@
 use crate::{error::*, rcl};
-use std::{env, ffi::CString, sync::Arc};
+use once_cell::sync::Lazy;
+use std::{
+    env,
+    ffi::CString,
+    sync::{
+        atomic::{AtomicUsize, Ordering},
+        Arc,
+    },
+};
+
+pub static NUM_CONTEXT: Lazy<AtomicUsize> = Lazy::new(|| AtomicUsize::new(0));
 
 pub struct Context {
     context: rcl::rcl_context_t,
+    pub(crate) id: usize,
 }
 
 impl Context {
@@ -28,7 +39,11 @@ impl Context {
             )?;
         }
 
-        Ok(Arc::new(Context { context }))
+        NUM_CONTEXT.fetch_add(1, Ordering::Relaxed);
+        Ok(Arc::new(Context {
+            context,
+            id: NUM_CONTEXT.load(Ordering::Relaxed),
+        }))
     }
 
     pub(crate) unsafe fn as_ptr_mut(&self) -> *mut rcl::rcl_context_t {

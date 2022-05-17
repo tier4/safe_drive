@@ -37,7 +37,7 @@ fn test_pubsub() -> Result<(), Box<dyn Error>> {
 
     // wait messages
     let mut selector = Selector::new(ctx)?;
-    selector.add_subscriber(&subscriber, Box::new(|| ()));
+    selector.add_subscriber(&subscriber, None, false);
     selector.wait(None)?;
 
     // receive the message

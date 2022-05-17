@@ -3,7 +3,7 @@ use std::{ffi::CString, sync::Arc};
 
 pub struct Node {
     node: rcl::rcl_node_t,
-    _context: Arc<Context>,
+    pub(crate) context: Arc<Context>,
 }
 
 impl Node {
@@ -29,10 +29,7 @@ impl Node {
             )?;
         }
 
-        Ok(Arc::new(Node {
-            node,
-            _context: context,
-        }))
+        Ok(Arc::new(Node { node, context }))
     }
 
     pub(crate) fn as_ptr(&self) -> *const rcl::rcl_node_t {
