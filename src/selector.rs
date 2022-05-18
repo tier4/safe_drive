@@ -1,7 +1,7 @@
 use self::guard_condition::{GuardCondition, RCLGuardCondition};
 use crate::{
     context::Context,
-    error::RCLResult,
+    error::{RCLError, RCLResult},
     rcl,
     subscriber::{RCLSubscription, Subscriber},
 };
@@ -125,23 +125,27 @@ impl Selector {
         }
 
         if let Some(t) = timeout {
-            rcl::MTSafeFn::rcl_wait(&mut self.wait_set, t.as_secs() as i64);
+            match rcl::MTSafeFn::rcl_wait(&mut self.wait_set, t.as_secs() as i64) {
+                Ok(_) | Err(RCLError::Timeout) => (),
+                Err(e) => return Err(e),
+            }
         } else {
-            rcl::MTSafeFn::rcl_wait(&mut self.wait_set, -1); // wait forever until arriving events
+            // wait forever until arriving events
+            rcl::MTSafeFn::rcl_wait(&mut self.wait_set, -1)?;
         }
 
         // notify subscritions
         for i in 0..self.subscriptions.len() {
             unsafe {
-                let p = self.wait_set.subscriptions.add(i);
-                if p.is_null() {
-                    debug_assert!(self.subscriptions.contains_key(&*p));
-                    if let Some(h) = self.subscriptions.get(&*p) {
+                let p = *self.wait_set.subscriptions.add(i);
+                if !p.is_null() {
+                    debug_assert!(self.subscriptions.contains_key(&p));
+                    if let Some(h) = self.subscriptions.get(&p) {
                         if let Some(hdl) = &h.handler {
                             hdl()
                         }
                         if h.is_once {
-                            self.subscriptions.remove(&*p);
+                            self.subscriptions.remove(&p);
                         }
                     }
                 }
@@ -151,10 +155,10 @@ impl Selector {
         // notify guard conditions
         for i in 0..self.cond.len() {
             unsafe {
-                let p = self.wait_set.guard_conditions.add(i);
+                let p = *self.wait_set.guard_conditions.add(i);
                 if !p.is_null() {
-                    debug_assert!(self.cond.contains_key(&*p));
-                    if let Some(h) = self.cond.get(&*p) {
+                    debug_assert!(self.cond.contains_key(&p));
+                    if let Some(h) = self.cond.get(&p) {
                         if let Some(hdl) = &h.handler {
                             hdl()
                         }
@@ -176,9 +180,8 @@ impl Drop for Selector {
 
 #[cfg(test)]
 mod test {
-    use std::thread;
-
     use crate::{context::Context, error::RCLResult};
+    use std::thread;
 
     #[test]
     fn test_guard_condition() -> RCLResult<()> {

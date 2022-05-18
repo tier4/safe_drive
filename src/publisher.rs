@@ -72,3 +72,6 @@ impl Options {
         &self.options
     }
 }
+
+unsafe impl<T> Sync for Publisher<T> {}
+unsafe impl<T> Send for Publisher<T> {}

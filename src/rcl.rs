@@ -287,8 +287,8 @@ impl MTSafeFn {
         unsafe { self::rcl_get_zero_initialized_wait_set() }
     }
 
-    pub fn rcl_wait(wait_set: *mut rcl_wait_set_t, timeout: i64) -> rcl_ret_t {
-        unsafe { self::rcl_wait(wait_set, timeout) }
+    pub fn rcl_wait(wait_set: *mut rcl_wait_set_t, timeout: i64) -> RCLResult<()> {
+        ret_val_to_err(unsafe { self::rcl_wait(wait_set, timeout) })
     }
 
     pub fn rcl_get_zero_initialized_guard_condition() -> rcl_guard_condition_t {

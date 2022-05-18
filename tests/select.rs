@@ -16,25 +16,25 @@ fn test_select_subscriptions() -> Result<(), Box<dyn Error>> {
     let ctx = safe_drive::context::Context::new()?;
 
     // create nodes
-    let node_pub1 = safe_drive::node::Node::new(
+    let node_pub1 = Node::new(
         ctx.clone(),
         "test_select_pub1_node",
         None,
         Default::default(),
     )?;
-    let node_pub2 = safe_drive::node::Node::new(
+    let node_pub2 = Node::new(
         ctx.clone(),
         "test_select_pub2_node",
         None,
         Default::default(),
     )?;
-    let node_sub1 = safe_drive::node::Node::new(
+    let node_sub1 = Node::new(
         ctx.clone(),
         "test_select_sub1_node",
         None,
         Default::default(),
     )?;
-    let node_sub2 = safe_drive::node::Node::new(
+    let node_sub2 = Node::new(
         ctx.clone(),
         "test_select_sub2_node",
         None,
@@ -109,13 +109,13 @@ fn test_callback() -> Result<(), Box<dyn Error>> {
     let ctx = safe_drive::context::Context::new()?;
 
     // create nodes
-    let node_pub = safe_drive::node::Node::new(
+    let node_pub = Node::new(
         ctx.clone(),
         "test_callback_pub_node",
         None,
         Default::default(),
     )?;
-    let node_sub = safe_drive::node::Node::new(
+    let node_sub = Node::new(
         ctx.clone(),
         "test_callback_pub_node",
         None,
@@ -147,20 +147,6 @@ fn test_callback() -> Result<(), Box<dyn Error>> {
     }
 
     p.join().unwrap();
-
-    Ok(())
-}
-
-#[test]
-fn test_async() -> Result<(), Box<dyn Error>> {
-    // create a context
-    let ctx = safe_drive::context::Context::new()?;
-
-    // create nodes
-    let node_pub =
-        safe_drive::node::Node::new(ctx.clone(), "test_sync_pub_node", None, Default::default())?;
-    let node_sub =
-        safe_drive::node::Node::new(ctx.clone(), "test_sync_pub_node", None, Default::default())?;
 
     Ok(())
 }
