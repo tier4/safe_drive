@@ -1,6 +1,6 @@
 pub mod common;
 
-use safe_drive::{self, selector::Selector};
+use safe_drive::{self, context::Context};
 use std::error::Error;
 
 const TOPIC_NAME: &str = "test_pubsub";
@@ -8,23 +8,13 @@ const TOPIC_NAME: &str = "test_pubsub";
 #[test]
 fn test_pubsub() -> Result<(), Box<dyn Error>> {
     // create a context
-    let ctx = safe_drive::context::Context::new()?;
+    let ctx = Context::new()?;
 
     // create a publish node
-    let node_pub = safe_drive::node::Node::new(
-        ctx.clone(),
-        "test_pubusub_pub_node",
-        None,
-        Default::default(),
-    )?;
+    let node_pub = ctx.create_node("test_pubusub_pub_node", None, Default::default())?;
 
     // create a subscribe node
-    let node_sub = safe_drive::node::Node::new(
-        ctx.clone(),
-        "test_pubusub_sub_node",
-        None,
-        Default::default(),
-    )?;
+    let node_sub = ctx.create_node("test_pubusub_sub_node", None, Default::default())?;
 
     // create a publisher and a subscriber
     let publisher = common::create_publisher(node_pub, TOPIC_NAME)?;
@@ -36,7 +26,7 @@ fn test_pubsub() -> Result<(), Box<dyn Error>> {
     publisher.send(msg)?; // send message
 
     // wait messages
-    let mut selector = Selector::new(ctx)?;
+    let mut selector = ctx.create_selector()?;
     selector.add_subscriber(&subscriber, None, false);
     selector.wait(None)?;
 

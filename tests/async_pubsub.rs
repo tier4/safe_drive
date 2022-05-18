@@ -1,9 +1,8 @@
 pub mod common;
 
 #[allow(unused_imports)]
-use async_std::prelude::*;
-
-use safe_drive::{self, node::Node, publisher::Publisher, subscriber::Subscriber};
+use async_std::{future, prelude::*};
+use safe_drive::{self, context::Context, publisher::Publisher, subscriber::Subscriber};
 use std::{error::Error, time::Duration};
 
 const TOPIC_NAME: &str = "test_async_pubsub";
@@ -11,11 +10,11 @@ const TOPIC_NAME: &str = "test_async_pubsub";
 #[test]
 fn test_async() -> Result<(), Box<dyn Error>> {
     // create a context
-    let ctx = safe_drive::context::Context::new()?;
+    let ctx = Context::new()?;
 
     // create nodes
-    let node_pub = Node::new(ctx.clone(), "test_async_pub_node", None, Default::default())?;
-    let node_sub = Node::new(ctx.clone(), "test_async_sub_node", None, Default::default())?;
+    let node_pub = ctx.create_node("test_async_pub_node", None, Default::default())?;
+    let node_sub = ctx.create_node("test_async_sub_node", None, Default::default())?;
 
     // create a publisher
     let p = common::create_publisher(node_pub, TOPIC_NAME).unwrap();
@@ -44,17 +43,27 @@ async fn run_publisher(p: Publisher<common::num::sample_msg__msg__Num>) {
 
         // sleep 100[ms]
         async_std::task::sleep(dur).await;
-        println!("async publish: {n}");
+        println!("async publish: msg = {n}");
     }
 }
 
 /// The subscriber
-async fn run_subscriber(s: Subscriber<common::num::sample_msg__msg__Num>) {
-    for n in 0..3 {
-        // receive a message
-        let msg = s.recv().await.unwrap(); // receive a message asynchrnously
-        println!("async subscribe: {}", msg.num);
-
-        assert_eq!(msg.num, n);
+async fn run_subscriber(mut s: Subscriber<common::num::sample_msg__msg__Num>) {
+    let dur = Duration::from_millis(500);
+    for n in 0.. {
+        // receive a message specifying timeout of 500ms
+        match future::timeout(dur, s.recv()).await {
+            Ok(Ok(msg)) => {
+                // received a message
+                println!("async subscribe: msg = {}", msg.num);
+                assert_eq!(msg.num, n);
+            }
+            Ok(Err(e)) => panic!("{}", e), // fatal error
+            Err(_) => {
+                // timeout
+                println!("async subscribe: timeout");
+                break;
+            }
+        }
     }
 }

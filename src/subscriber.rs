@@ -3,6 +3,7 @@ use crate::{
     node::Node,
     qos, rcl,
     selector::async_selector::{self, SELECTOR},
+    PhantomUnsync,
 };
 use std::{
     error::Error,
@@ -17,8 +18,8 @@ use std::{
 };
 
 pub(crate) struct RCLSubscription {
-    pub(crate) subscription: Box<rcl::rcl_subscription_t>,
-    node: Arc<Node>,
+    pub subscription: Box<rcl::rcl_subscription_t>,
+    pub node: Arc<Node>,
 }
 
 impl Drop for RCLSubscription {
@@ -38,10 +39,11 @@ unsafe impl Send for RCLSubscription {}
 pub struct Subscriber<T> {
     pub(crate) subscription: Arc<RCLSubscription>,
     _phantom: PhantomData<T>,
+    _unsync: PhantomUnsync,
 }
 
 impl<T> Subscriber<T> {
-    pub fn new(
+    pub(crate) fn new(
         node: Arc<Node>,
         topic_name: &str,
         type_support: *const (),
@@ -67,27 +69,49 @@ impl<T> Subscriber<T> {
         Ok(Subscriber {
             subscription: Arc::new(RCLSubscription { subscription, node }),
             _phantom: Default::default(),
+            _unsync: Default::default(),
         })
     }
 
-    /// Because is rcl::rcl_take is non-blocking,
-    /// try_recv returns Err(RCLError::SubscriberTakeFailed) if
+    /// Because `rcl::rcl_take` is non-blocking,
+    /// `try_recv()` returns `Err(RCLError::SubscriberTakeFailed)` if
     /// data is not available.
+    /// So, please retry later if `Err(RCLError::SubscriberTakeFailed)` is returned.
+    ///
+    /// Errors:
+    ///
+    /// - `RCLError::InvalidArgument` if any arguments are invalid, or
+    /// - `RCLError::SubscriptionInvalid` if the subscription is invalid, or
+    /// - `RCLError::BadAlloc if allocating` memory failed, or
+    /// - `RCLError::SubscriptionTakeFailed` if take failed but *no error* occurred in the middleware, or
+    /// - `RCLError::Error` if an unspecified error occurs.
     pub fn try_recv(&self) -> RCLResult<T> {
         rcl_take::<T>(self.subscription.subscription.as_ref())
     }
 
-    pub fn recv(&self) -> AsyncReceiver<T> {
+    /// Receive a message asynchronously.
+    /// This waits and blocks forever until a message arrives.
+    /// In order to call `recv()` with timeout,
+    /// use mechanisms provided by asynchronous libraries,
+    /// such as `async_std::future::timeout`.
+    ///
+    /// Errors:
+    ///
+    /// - `RCLError::InvalidArgument` if any arguments are invalid, or
+    /// - `RCLError::SubscriptionInvalid` if the subscription is invalid, or
+    /// - `RCLError::BadAlloc` if allocating memory failed, or
+    /// - `RCLError::Error` if an unspecified error occurs.
+    pub fn recv(&mut self) -> AsyncReceiver<T> {
         AsyncReceiver {
-            subscription: &self.subscription,
+            subscription: &mut self.subscription,
             _phantom: Default::default(),
         }
     }
 }
 
-/// Asyncrhonous receiver of subscribers.
+/// Asynchronous receiver of subscribers.
 pub struct AsyncReceiver<'a, T> {
-    subscription: &'a Arc<RCLSubscription>,
+    subscription: &'a mut Arc<RCLSubscription>,
     _phantom: PhantomData<T>,
 }
 
@@ -95,8 +119,10 @@ impl<'a, T> Future for AsyncReceiver<'a, T> {
     type Output = Result<T, Box<dyn Error + Send + Sync + 'static>>;
 
     fn poll(self: Pin<&mut Self>, cx: &mut task::Context<'_>) -> Poll<Self::Output> {
+        let s = self.subscription.subscription.as_ref();
+
         // try to take 1 message
-        match rcl_take::<T>(self.subscription.subscription.as_ref()) {
+        match rcl_take::<T>(s) {
             Ok(value) => return Poll::Ready(Ok(value)),  // got
             Err(RCLError::SubscriptionTakeFailed) => (), // no availabe data
             Err(e) => return Poll::Ready(Err(e.into())), // error
@@ -105,7 +131,7 @@ impl<'a, T> Future for AsyncReceiver<'a, T> {
         let mut guard = SELECTOR.lock().unwrap();
         let waker = cx.waker().clone();
 
-        guard.register(
+        guard.send_command(
             &self.subscription.node.context,
             async_selector::Command::Subscription(
                 self.subscription.clone(),
@@ -114,6 +140,18 @@ impl<'a, T> Future for AsyncReceiver<'a, T> {
         )?;
 
         Poll::Pending
+    }
+}
+
+impl<'a, T> Drop for AsyncReceiver<'a, T> {
+    fn drop(&mut self) {
+        let mut guard = SELECTOR.lock().unwrap();
+        guard
+            .send_command(
+                &self.subscription.node.context,
+                async_selector::Command::RemoveSubscription(self.subscription.clone()),
+            )
+            .unwrap();
     }
 }
 

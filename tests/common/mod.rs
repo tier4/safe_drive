@@ -16,8 +16,7 @@ pub fn create_publisher(
     node: Arc<Node>,
     topic_name: &str,
 ) -> Result<Publisher<num::sample_msg__msg__Num>, Box<dyn Error>> {
-    let publisher = safe_drive::publisher::Publisher::<num::sample_msg__msg__Num>::new(
-        node,
+    let publisher = node.create_publisher::<num::sample_msg__msg__Num>(
         topic_name,
         unsafe {
             num::rosidl_typesupport_c__get_message_type_support_handle__sample_msg__msg__Num()
@@ -33,8 +32,7 @@ pub fn create_subscriber(
     node: Arc<Node>,
     topic_name: &str,
 ) -> Result<Subscriber<num::sample_msg__msg__Num>, Box<dyn Error>> {
-    let subscriber = safe_drive::subscriber::Subscriber::<num::sample_msg__msg__Num>::new(
-        node,
+    let subscriber = node.create_subscriber::<num::sample_msg__msg__Num>(
         topic_name,
         unsafe {
             num::rosidl_typesupport_c__get_message_type_support_handle__sample_msg__msg__Num()

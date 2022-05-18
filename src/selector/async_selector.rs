@@ -16,6 +16,7 @@ pub(crate) static SELECTOR: Lazy<Mutex<AsyncSelector>> =
 
 pub(crate) enum Command {
     Subscription(Arc<RCLSubscription>, Box<dyn Fn() + Send + Sync + 'static>),
+    RemoveSubscription(Arc<RCLSubscription>),
 }
 
 struct SelectorData {
@@ -28,6 +29,9 @@ pub(crate) struct AsyncSelector {
     contexts: BTreeMap<usize, SelectorData>,
 }
 
+unsafe impl Sync for AsyncSelector {}
+unsafe impl Send for AsyncSelector {}
+
 impl AsyncSelector {
     fn new() -> Self {
         AsyncSelector {
@@ -35,7 +39,7 @@ impl AsyncSelector {
         }
     }
 
-    pub(crate) fn register(
+    pub(crate) fn send_command(
         &mut self,
         context: &Arc<Context>,
         cmd: Command,
@@ -81,6 +85,7 @@ fn select(
         for cmd in rx.try_iter() {
             match cmd {
                 Command::Subscription(s, h) => selector.add_rcl_subscription(s, Some(h), true),
+                Command::RemoveSubscription(s) => selector.remove_rcl_subscription(s),
             }
         }
 

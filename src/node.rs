@@ -1,4 +1,6 @@
-use crate::{context::Context, error::RCLResult, rcl};
+use crate::{
+    context::Context, error::RCLResult, publisher::Publisher, qos, rcl, subscriber::Subscriber,
+};
 use std::{ffi::CString, sync::Arc};
 
 pub struct Node {
@@ -7,7 +9,7 @@ pub struct Node {
 }
 
 impl Node {
-    pub fn new(
+    pub(crate) fn new(
         context: Arc<Context>,
         name: &str,
         namespace: Option<&str>,
@@ -38,6 +40,24 @@ impl Node {
 
     pub(crate) unsafe fn as_ptr_mut(&self) -> *mut rcl::rcl_node_t {
         &self.node as *const _ as *mut _
+    }
+
+    pub fn create_publisher<T>(
+        self: &Arc<Self>,
+        topic_name: &str,
+        type_support: *const (),
+        qos: Option<qos::Profile>,
+    ) -> RCLResult<Publisher<T>> {
+        Publisher::new(self.clone(), topic_name, type_support, qos)
+    }
+
+    pub fn create_subscriber<T>(
+        self: &Arc<Self>,
+        topic_name: &str,
+        type_support: *const (),
+        qos: Option<qos::Profile>,
+    ) -> RCLResult<Subscriber<T>> {
+        Subscriber::new(self.clone(), topic_name, type_support, qos)
     }
 }
 

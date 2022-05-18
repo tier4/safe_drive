@@ -1,4 +1,9 @@
-use crate::{error::*, rcl};
+use crate::{
+    error::*,
+    node::{Node, NodeOptions},
+    rcl,
+    selector::Selector,
+};
 use once_cell::sync::Lazy;
 use std::{
     env,
@@ -44,6 +49,23 @@ impl Context {
             context,
             id: NUM_CONTEXT.load(Ordering::Relaxed),
         }))
+    }
+
+    pub fn create_node(
+        self: &Arc<Self>,
+        name: &str,
+        namespace: Option<&str>,
+        options: NodeOptions,
+    ) -> RCLResult<Arc<Node>> {
+        Node::new(self.clone(), name, namespace, options)
+    }
+
+    pub fn create_selector(self: &Arc<Self>) -> RCLResult<Selector> {
+        Selector::new(self.clone())
+    }
+
+    pub(crate) fn as_ptr(&self) -> *const rcl::rcl_context_t {
+        &self.context as *const _
     }
 
     pub(crate) unsafe fn as_ptr_mut(&self) -> *mut rcl::rcl_context_t {

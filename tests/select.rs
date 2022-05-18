@@ -1,6 +1,6 @@
 pub mod common;
 
-use safe_drive::{self, error::RCLError, node::Node, selector::Selector};
+use safe_drive::{self, error::RCLError, node::Node};
 use std::{error::Error, rc::Rc, sync::Arc, thread, time::Duration};
 
 const TOPIC_NAME_1: &str = "test_select_1";
@@ -16,30 +16,10 @@ fn test_select_subscriptions() -> Result<(), Box<dyn Error>> {
     let ctx = safe_drive::context::Context::new()?;
 
     // create nodes
-    let node_pub1 = Node::new(
-        ctx.clone(),
-        "test_select_pub1_node",
-        None,
-        Default::default(),
-    )?;
-    let node_pub2 = Node::new(
-        ctx.clone(),
-        "test_select_pub2_node",
-        None,
-        Default::default(),
-    )?;
-    let node_sub1 = Node::new(
-        ctx.clone(),
-        "test_select_sub1_node",
-        None,
-        Default::default(),
-    )?;
-    let node_sub2 = Node::new(
-        ctx.clone(),
-        "test_select_sub2_node",
-        None,
-        Default::default(),
-    )?;
+    let node_pub1 = ctx.create_node("test_select_pub1_node", None, Default::default())?;
+    let node_pub2 = ctx.create_node("test_select_pub2_node", None, Default::default())?;
+    let node_sub1 = ctx.create_node("test_select_sub1_node", None, Default::default())?;
+    let node_sub2 = ctx.create_node("test_select_sub2_node", None, Default::default())?;
 
     // create publishers
     let p1 = thread::spawn(move || {
@@ -53,7 +33,7 @@ fn test_select_subscriptions() -> Result<(), Box<dyn Error>> {
     let s1 = common::create_subscriber(node_sub1, TOPIC_NAME_1).unwrap();
     let s2 = common::create_subscriber(node_sub2, TOPIC_NAME_2).unwrap();
 
-    let mut selector = Selector::new(ctx)?;
+    let mut selector = ctx.create_selector()?;
     selector.add_subscriber(&s1, None, false);
     selector.add_subscriber(&s2, None, false);
 
@@ -109,18 +89,8 @@ fn test_callback() -> Result<(), Box<dyn Error>> {
     let ctx = safe_drive::context::Context::new()?;
 
     // create nodes
-    let node_pub = Node::new(
-        ctx.clone(),
-        "test_callback_pub_node",
-        None,
-        Default::default(),
-    )?;
-    let node_sub = Node::new(
-        ctx.clone(),
-        "test_callback_pub_node",
-        None,
-        Default::default(),
-    )?;
+    let node_pub = ctx.create_node("test_callback_pub_node", None, Default::default())?;
+    let node_sub = ctx.create_node("test_callback_pub_node", None, Default::default())?;
 
     // create a publisher
     let p = thread::spawn(move || {
@@ -132,7 +102,7 @@ fn test_callback() -> Result<(), Box<dyn Error>> {
     let s2 = s.clone();
 
     // register callback
-    let mut selector = Selector::new(ctx)?;
+    let mut selector = ctx.create_selector()?;
     selector.add_subscriber(
         &s2,
         Some(Box::new(move || {

@@ -20,11 +20,11 @@ pub struct Selector {
     wait_set: rcl::rcl_wait_set_t,
     subscriptions: BTreeMap<*const rcl::rcl_subscription_t, ConditionHandler<Arc<RCLSubscription>>>,
     cond: BTreeMap<*const rcl::rcl_guard_condition_t, ConditionHandler<Arc<RCLGuardCondition>>>,
-    _context: Arc<Context>,
+    context: Arc<Context>,
 }
 
 impl Selector {
-    pub fn new(context: Arc<Context>) -> RCLResult<Self> {
+    pub(crate) fn new(context: Arc<Context>) -> RCLResult<Self> {
         let mut wait_set = rcl::MTSafeFn::rcl_get_zero_initialized_wait_set();
 
         {
@@ -46,7 +46,7 @@ impl Selector {
             wait_set,
             subscriptions: Default::default(),
             cond: Default::default(),
-            _context: context,
+            context,
         })
     }
 
@@ -55,8 +55,13 @@ impl Selector {
         subscriber: &Subscriber<T>,
         handler: Option<Box<dyn Fn()>>,
         is_once: bool,
-    ) {
-        self.add_rcl_subscription(subscriber.subscription.clone(), handler, is_once)
+    ) -> bool {
+        if self.context.as_ptr() == subscriber.subscription.node.context.as_ptr() {
+            self.add_rcl_subscription(subscriber.subscription.clone(), handler, is_once);
+            true
+        } else {
+            false
+        }
     }
 
     pub(crate) fn add_rcl_subscription(
@@ -89,6 +94,11 @@ impl Selector {
     pub fn remove_subscriber<T>(&mut self, subscriber: &Subscriber<T>) {
         self.subscriptions
             .remove(&(subscriber.subscription.subscription.as_ref() as *const _));
+    }
+
+    pub(crate) fn remove_rcl_subscription(&mut self, subscription: Arc<RCLSubscription>) {
+        self.subscriptions
+            .remove(&(subscription.subscription.as_ref() as *const _));
     }
 
     pub fn wait(&mut self, timeout: Option<Duration>) -> RCLResult<()> {
