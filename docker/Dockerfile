@@ -5,7 +5,7 @@ RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
 
 RUN apt-get -y update && \
     apt-get -y upgrade && \
-    apt-get -y install build-essential zsh git curl libncurses5-dev gnupg clang
+    apt-get -y install build-essential zsh git curl libncurses5-dev gnupg clang default-jre
 
 RUN apt-get -y install software-properties-common && \
     add-apt-repository universe
