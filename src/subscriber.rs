@@ -104,6 +104,7 @@ impl<T> Subscriber<T> {
     pub fn recv(&mut self) -> AsyncReceiver<T> {
         AsyncReceiver {
             subscription: &mut self.subscription,
+            is_waiting: false,
             _phantom: Default::default(),
         }
     }
@@ -112,6 +113,7 @@ impl<T> Subscriber<T> {
 /// Asynchronous receiver of subscribers.
 pub struct AsyncReceiver<'a, T> {
     subscription: &'a mut Arc<RCLSubscription>,
+    is_waiting: bool,
     _phantom: PhantomData<T>,
 }
 
@@ -119,7 +121,10 @@ impl<'a, T> Future for AsyncReceiver<'a, T> {
     type Output = Result<T, Box<dyn Error + Send + Sync + 'static>>;
 
     fn poll(self: Pin<&mut Self>, cx: &mut task::Context<'_>) -> Poll<Self::Output> {
-        let s = self.subscription.subscription.as_ref();
+        let this = unsafe { self.get_unchecked_mut() };
+        this.is_waiting = false;
+
+        let s = this.subscription.subscription.as_ref();
 
         // try to take 1 message
         match rcl_take::<T>(s) {
@@ -132,26 +137,29 @@ impl<'a, T> Future for AsyncReceiver<'a, T> {
         let waker = cx.waker().clone();
 
         guard.send_command(
-            &self.subscription.node.context,
+            &this.subscription.node.context,
             async_selector::Command::Subscription(
-                self.subscription.clone(),
+                this.subscription.clone(),
                 Box::new(move || waker.clone().wake()),
             ),
         )?;
 
+        this.is_waiting = true;
         Poll::Pending
     }
 }
 
 impl<'a, T> Drop for AsyncReceiver<'a, T> {
     fn drop(&mut self) {
-        let mut guard = SELECTOR.lock().unwrap();
-        guard
-            .send_command(
-                &self.subscription.node.context,
-                async_selector::Command::RemoveSubscription(self.subscription.clone()),
-            )
-            .unwrap();
+        if self.is_waiting {
+            let mut guard = SELECTOR.lock().unwrap();
+            guard
+                .send_command(
+                    &self.subscription.node.context,
+                    async_selector::Command::RemoveSubscription(self.subscription.clone()),
+                )
+                .unwrap();
+        }
     }
 }
 

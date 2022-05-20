@@ -1,7 +1,14 @@
-# memo
+# Specification and Model Cheking
 
-Pass modules to Java by using `-cp` option.
+## Setting-up
 
-```
--cp /safe_drive/supplements/tlaplus/CommunityModules.jar:/root/.vscode-server/extensions/alygin.vscode-tlaplus-1.5.4/tools/tla2tools.jar
-```
+We use [TLA+](https://lamport.azurewebsites.net/tla/tla.html) to specify and check whether our algorithms are safe.
+
+In order to check the specifications, we use [TLA+'s community modules](https://github.com/tlaplus/CommunityModules).
+To use the modules, please install Java 9 or later.
+Pass required modules to Java by using `-cp` option when you try these files.
+See [tlaplus_community_jar](https://github.com/ytakano/tlaplus_community_jar) for more information.
+
+## Specifications
+
+- [Scheduler](./scheduler/)

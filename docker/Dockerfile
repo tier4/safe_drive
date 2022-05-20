@@ -1,11 +1,11 @@
-FROM nvidia/cuda:11.6.2-runtime-ubuntu20.04
+FROM nvidia/cuda:11.7.0-runtime-ubuntu20.04
 
 ENV TZ=Asia/Tokyo
 RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
 
 RUN apt-get -y update && \
     apt-get -y upgrade && \
-    apt-get -y install build-essential zsh git curl libncurses5-dev gnupg clang default-jre
+    apt-get -y install build-essential zsh git curl libncurses5-dev gnupg clang
 
 RUN apt-get -y install software-properties-common && \
     add-apt-repository universe
