@@ -8,9 +8,9 @@ use crate::{
 };
 use std::{ffi::CString, marker::PhantomData, mem::MaybeUninit, os::raw::c_void, sync::Arc};
 
-struct ServerData {
-    service: rcl::rcl_service_t,
-    node: Arc<Node>,
+pub(crate) struct ServerData {
+    pub(crate) service: rcl::rcl_service_t,
+    pub(crate) node: Arc<Node>,
 }
 
 impl Drop for ServerData {
@@ -23,7 +23,7 @@ impl Drop for ServerData {
 }
 
 pub struct Server<T1, T2> {
-    data: Arc<ServerData>,
+    pub(crate) data: Arc<ServerData>,
     _phantom: PhantomData<(T1, T2)>,
     _unsync: PhantomUnsync,
 }
@@ -61,11 +61,25 @@ impl<T1, T2> Server<T1, T2> {
         })
     }
 
+    /// Receive a request.
+    /// `try_recv` is a non-blocking function, and
+    /// this returns `Err(RCLError::ServiceTakeFailed)` if there is no available data.
+    /// So, please retry later if this error is returned.
+    ///
+    /// # Errors
+    ///
+    /// - `RCLError::InvalidArgument` if any arguments are invalid, or
+    /// - `RCLError::ServiceInvalid` if the service is invalid, or
+    /// - `RCLError::BadAlloc` if allocating memory failed, or
+    /// - `RCLError::ServiceTakeFailed` if take failed but no error occurred in the middleware, or
+    /// - `RCLError::Error` if an unspecified error occurs.
     pub fn try_recv(self) -> SrvResult<(ServerSend<T1, T2>, T1), Self> {
         let (s, d, _) = self.try_recv_with_header()?;
         Ok((s, d))
     }
 
+    /// `try_recv_with_header` equivalent to `try_recv`, but
+    /// this function returns `super::Header` including some information together.
     pub fn try_recv_with_header(self) -> SrvResult<(ServerSend<T1, T2>, T1, Header), Self> {
         let (request, header) = match rcl_take_request_with_info::<T1>(&self.data.service) {
             Ok(data) => data,
@@ -95,6 +109,19 @@ pub struct ServerSend<T1, T2> {
 }
 
 impl<T1, T2> ServerSend<T1, T2> {
+    /// Send a response to the client.
+    ///
+    /// # Errors
+    ///
+    /// - `RCLError::InvalidArgument` if any arguments are invalid, or
+    /// - `RCLError::ServiceInvalid` if the service is invalid, or
+    /// - `RCLError::Error` if an unspecified error occurs.
+    ///
+    /// # Notes
+    ///
+    /// `self` and `data` should be immutable, but `rcl_send_response` provided
+    /// by ROS2 takes normal pointers instead of `const` pointers.
+    /// So, currently, `send` takes mutable variables.
     pub fn send(mut self, mut data: T2) -> SrvResult<Server<T1, T2>, Self> {
         if let Err(e) = rcl::MTSafeFn::rcl_send_response(
             &self.data.service,

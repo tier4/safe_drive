@@ -4,7 +4,7 @@
 
 ## Premises
 
-- Worker threads make use of the work-stealing strategy, which is used by async_std and Tokio.
+- Worker threads make use of the work-stealing strategy, which is used by `async_std` and `Tokio`.
 - Servers, clients, and subscribers can take messages periodically.
 
 If servers, clients, or subscribers are ready,
@@ -39,7 +39,9 @@ $$
 
 ## Processes
 
--
+- `shceduler` : the scheduler of `safe_drive`
+- `trigger_*` : event trigger of servers, clients, and subscribers
+- `worker` : worker threads provided by asynchronous libraries like `async_std` or `Tokio`
 
 # Prioritized Scheduler
 

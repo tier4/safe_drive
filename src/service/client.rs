@@ -2,9 +2,9 @@ use super::{Header, SrvResult};
 use crate::{error::RCLResult, node::Node, qos::Profile, rcl, PhantomUnsync};
 use std::{ffi::CString, marker::PhantomData, mem::MaybeUninit, os::raw::c_void, sync::Arc};
 
-struct ClientData {
-    client: rcl::rcl_client_t,
-    node: Arc<Node>,
+pub(crate) struct ClientData {
+    pub(crate) client: rcl::rcl_client_t,
+    pub(crate) node: Arc<Node>,
 }
 
 impl Drop for ClientData {
@@ -53,11 +53,18 @@ impl<T1, T2> Client<T1, T2> {
         })
     }
 
+    /// # Errors
+    ///
+    /// - `RCLError::InvalidArgument` if any arguments are invalid, or
+    /// - `RCLError::ClientInvalid` if the client is invalid, or
+    /// - `RCLError::Error` if an unspecified error occurs.
     pub fn send(self, data: T1) -> SrvResult<ClientRecv<T1, T2>, Self> {
         let (s, _) = self.send_with_seq(data)?;
         Ok(s)
     }
 
+    /// `send_with_seq` is equivalent to `send`, but this returns
+    /// the sequence number together.
     pub fn send_with_seq(self, data: T1) -> SrvResult<(ClientRecv<T1, T2>, i64), Self> {
         let mut seq: i64 = 0;
         if let Err(e) = rcl::MTSafeFn::rcl_send_request(
@@ -80,17 +87,30 @@ impl<T1, T2> Client<T1, T2> {
 }
 
 pub struct ClientRecv<T1, T2> {
-    data: Arc<ClientData>,
+    pub(crate) data: Arc<ClientData>,
     _phantom: PhantomData<(T1, T2)>,
     _unsync: PhantomUnsync,
 }
 
 impl<T1, T2> ClientRecv<T1, T2> {
+    /// Receive a message.
+    /// `try_recv` is a non-blocking function, and this
+    /// returns `Err(RCLError::ClientTakeFailed)`.
+    /// So, please retry later if this error is returned.
+    ///
+    /// # Errors
+    ///
+    /// - `RCLError::InvalidArgument` if any arguments are invalid, or
+    /// - `RCLError::ClientInvalid` if the client is invalid, or
+    /// - `RCLError::ClientTakeFailed` if take failed but no error occurred in the middleware, or
+    /// - `RCLError::Error` if an unspecified error occurs.
     pub fn try_recv(self) -> SrvResult<(Client<T1, T2>, T2), Self> {
         let (s, d, _) = self.try_recv_with_header()?;
         Ok((s, d))
     }
 
+    /// `try_recv_with_header` is equivalent to `try_recv`, but
+    /// this returns `super::Header` including some information together.
     pub fn try_recv_with_header(self) -> SrvResult<(Client<T1, T2>, T2, Header), Self> {
         let (response, header) = match rcl_take_response_with_info::<T2>(&self.data.client) {
             Ok(data) => data,

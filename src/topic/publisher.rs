@@ -37,11 +37,13 @@ impl<T> Publisher<T> {
         })
     }
 
-    /// Errors:
+    /// Send a message.
     ///
-    /// - RCLError::InvalidArgument if any arguments are invalid, or
-    /// - RCLError::PublisherInvalid if the publisher is invalid, or
-    /// - RCLError::Error if an unspecified error occurs.
+    /// # Errors
+    ///
+    /// - `RCLError::InvalidArgument` if any arguments are invalid, or
+    /// - `RCLError::PublisherInvalid` if the publisher is invalid, or
+    /// - `RCLError::Error` if an unspecified error occurs.
     pub fn send(&self, msg: T) -> RCLResult<()> {
         rcl::MTSafeFn::rcl_publish(&self.publisher, &msg as *const T as _, null_mut())?;
         Ok(())

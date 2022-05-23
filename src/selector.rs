@@ -3,6 +3,10 @@ use crate::{
     context::Context,
     error::{RCLError, RCLResult},
     rcl,
+    service::{
+        client::{ClientData, ClientRecv},
+        server::{Server, ServerData},
+    },
     topic::subscriber::{RCLSubscription, Subscriber},
 };
 use std::{collections::BTreeMap, ptr::null_mut, sync::Arc, time::Duration};
@@ -18,6 +22,8 @@ struct ConditionHandler<T> {
 
 pub struct Selector {
     wait_set: rcl::rcl_wait_set_t,
+    services: BTreeMap<*const rcl::rcl_service_t, ConditionHandler<Arc<ServerData>>>,
+    clients: BTreeMap<*const rcl::rcl_client_t, ConditionHandler<Arc<ClientData>>>,
     subscriptions: BTreeMap<*const rcl::rcl_subscription_t, ConditionHandler<Arc<RCLSubscription>>>,
     cond: BTreeMap<*const rcl::rcl_guard_condition_t, ConditionHandler<Arc<RCLGuardCondition>>>,
     context: Arc<Context>,
@@ -45,6 +51,8 @@ impl Selector {
         Ok(Selector {
             wait_set,
             subscriptions: Default::default(),
+            services: Default::default(),
+            clients: Default::default(),
             cond: Default::default(),
             context,
         })
@@ -78,6 +86,48 @@ impl Selector {
                 is_once,
             },
         );
+    }
+
+    pub fn add_server<T1, T2>(
+        &mut self,
+        server: &Server<T1, T2>,
+        handler: Option<Box<dyn Fn()>>,
+        is_once: bool,
+    ) -> bool {
+        if self.context.as_ptr() == server.data.node.context.as_ptr() {
+            self.services.insert(
+                &server.data.service,
+                ConditionHandler {
+                    event: server.data.clone(),
+                    handler,
+                    is_once,
+                },
+            );
+            true
+        } else {
+            false
+        }
+    }
+
+    pub fn add_client<T1, T2>(
+        &mut self,
+        client: &ClientRecv<T1, T2>,
+        handler: Option<Box<dyn Fn()>>,
+        is_once: bool,
+    ) -> bool {
+        if self.context.as_ptr() == client.data.node.context.as_ptr() {
+            self.clients.insert(
+                &client.data.client,
+                ConditionHandler {
+                    event: client.data.clone(),
+                    handler,
+                    is_once,
+                },
+            );
+            true
+        } else {
+            false
+        }
     }
 
     fn add_guard_condition(&mut self, cond: &GuardCondition, handler: Option<Box<dyn Fn()>>) {

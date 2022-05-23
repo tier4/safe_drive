@@ -2,6 +2,7 @@ use std::{cell::Cell, marker::PhantomData, sync::MutexGuard};
 
 pub mod context;
 pub mod error;
+pub mod logger;
 pub mod node;
 pub mod qos;
 mod rcl;

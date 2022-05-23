@@ -79,7 +79,7 @@ impl<T> Subscriber<T> {
     /// data is not available.
     /// So, please retry later if `Err(RCLError::SubscriberTakeFailed)` is returned.
     ///
-    /// Errors:
+    /// # Errors
     ///
     /// - `RCLError::InvalidArgument` if any arguments are invalid, or
     /// - `RCLError::SubscriptionInvalid` if the subscription is invalid, or
@@ -96,7 +96,7 @@ impl<T> Subscriber<T> {
     /// use mechanisms provided by asynchronous libraries,
     /// such as `async_std::future::timeout`.
     ///
-    /// Errors:
+    /// # Errors
     ///
     /// - `RCLError::InvalidArgument` if any arguments are invalid, or
     /// - `RCLError::SubscriptionInvalid` if the subscription is invalid, or

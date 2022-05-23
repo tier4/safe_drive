@@ -53,7 +53,7 @@ impl AsyncSelector {
                 cond.trigger()?;
                 return Ok(());
             } else {
-                let (tx, rx) = crossbeam_channel::bounded(64);
+                let (tx, rx) = crossbeam_channel::bounded(256);
                 let guard = super::guard_condition::GuardCondition::new(context.clone())?;
                 self.contexts.insert(
                     context.id,
