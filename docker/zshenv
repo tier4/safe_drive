@@ -1,4 +1,3 @@
 . "$HOME/.cargo/env"
 source /opt/ros/galactic/setup.zsh
 source /opt/ros/galactic/share/ros2cli/environment/ros2-argcomplete.zsh
-export JAVA_HOME=`echo $(dirname $(readlink $(readlink $(which java)))) | sed -e 's/\/bin$//g' | sed -e 's/\/jre$//g'`

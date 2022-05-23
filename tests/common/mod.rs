@@ -9,7 +9,11 @@
 pub mod add_three_ints;
 pub mod num;
 
-use safe_drive::{self, node::Node, publisher::Publisher, subscriber::Subscriber};
+use safe_drive::{
+    self,
+    node::Node,
+    topic::{publisher::Publisher, subscriber::Subscriber},
+};
 use std::{error::Error, sync::Arc};
 
 pub fn create_publisher(

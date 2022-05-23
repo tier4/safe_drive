@@ -7,10 +7,11 @@ use crate::{
 };
 use std::{
     error::Error,
-    ffi::{c_void, CString},
+    ffi::CString,
     future::Future,
     marker::PhantomData,
     mem::MaybeUninit,
+    os::raw::c_void,
     pin::Pin,
     ptr::null_mut,
     sync::Arc,

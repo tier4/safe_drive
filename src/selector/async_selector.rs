@@ -1,13 +1,11 @@
 use super::guard_condition::GuardCondition;
-use crate::{context::Context, subscriber::RCLSubscription};
+use crate::{context::Context, topic::subscriber::RCLSubscription};
+use crossbeam_channel::{Receiver, Sender};
 use once_cell::sync::Lazy;
 use std::{
     collections::BTreeMap,
     error::Error,
-    sync::{
-        mpsc::{sync_channel, Receiver, SyncSender},
-        Arc, Mutex,
-    },
+    sync::{Arc, Mutex},
     thread,
 };
 
@@ -20,7 +18,7 @@ pub(crate) enum Command {
 }
 
 struct SelectorData {
-    tx: SyncSender<Command>,
+    tx: Sender<Command>,
     _context: Arc<Context>,
     cond: Arc<GuardCondition>,
 }
@@ -55,7 +53,7 @@ impl AsyncSelector {
                 cond.trigger()?;
                 return Ok(());
             } else {
-                let (tx, rx) = sync_channel::<Command>(64);
+                let (tx, rx) = crossbeam_channel::bounded(64);
                 let guard = super::guard_condition::GuardCondition::new(context.clone())?;
                 self.contexts.insert(
                     context.id,

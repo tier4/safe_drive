@@ -2,7 +2,11 @@ pub mod common;
 
 #[allow(unused_imports)]
 use async_std::{future, prelude::*};
-use safe_drive::{self, context::Context, publisher::Publisher, subscriber::Subscriber};
+use safe_drive::{
+    self,
+    context::Context,
+    topic::{publisher::Publisher, subscriber::Subscriber},
+};
 use std::{error::Error, time::Duration};
 
 const TOPIC_NAME: &str = "test_async_pubsub";

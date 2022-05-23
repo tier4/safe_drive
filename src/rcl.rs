@@ -5,6 +5,7 @@
 #![allow(non_snake_case)]
 #![allow(improper_ctypes)]
 #![allow(clippy::upper_case_acronyms)]
+#![allow(clippy::too_many_arguments)]
 
 mod galactic;
 
@@ -228,6 +229,70 @@ impl MTUnsafeFn {
             self::rcl_wait_set_add_guard_condition(wait_set, guard_condition, index)
         })
     }
+
+    pub fn rcl_service_init(
+        &self,
+        service: *mut rcl_service_t,
+        node: *const rcl_node_t,
+        type_support: *const rosidl_service_type_support_t,
+        service_name: *const ::std::os::raw::c_char,
+        options: *const rcl_service_options_t,
+    ) -> RCLResult<()> {
+        ret_val_to_err(unsafe {
+            self::rcl_service_init(service, node, type_support, service_name, options)
+        })
+    }
+
+    pub fn rcl_service_fini(
+        &self,
+        service: *mut rcl_service_t,
+        node: *mut rcl_node_t,
+    ) -> RCLResult<()> {
+        ret_val_to_err(unsafe { self::rcl_service_fini(service, node) })
+    }
+
+    pub fn rcl_take_request_with_info(
+        &self,
+        service: *const rcl_service_t,
+        request_header: *mut rmw_service_info_t,
+        ros_request: *mut ::std::os::raw::c_void,
+    ) -> RCLResult<()> {
+        ret_val_to_err(unsafe {
+            self::rcl_take_request_with_info(service, request_header, ros_request)
+        })
+    }
+
+    pub fn rcl_client_init(
+        &self,
+        client: *mut rcl_client_t,
+        node: *const rcl_node_t,
+        type_support: *const rosidl_service_type_support_t,
+        service_name: *const ::std::os::raw::c_char,
+        options: *const rcl_client_options_t,
+    ) -> RCLResult<()> {
+        ret_val_to_err(unsafe {
+            self::rcl_client_init(client, node, type_support, service_name, options)
+        })
+    }
+
+    pub fn rcl_client_fini(
+        &self,
+        client: *mut rcl_client_t,
+        node: *mut rcl_node_t,
+    ) -> RCLResult<()> {
+        ret_val_to_err(unsafe { self::rcl_client_fini(client, node) })
+    }
+
+    pub fn rcl_take_response_with_info(
+        &self,
+        client: *const rcl_client_t,
+        request_header: *mut rmw_service_info_t,
+        ros_response: *mut ::std::os::raw::c_void,
+    ) -> RCLResult<()> {
+        ret_val_to_err(unsafe {
+            self::rcl_take_response_with_info(client, request_header, ros_response)
+        })
+    }
 }
 
 pub struct MTSafeFn {
@@ -293,5 +358,29 @@ impl MTSafeFn {
 
     pub fn rcl_get_zero_initialized_guard_condition() -> rcl_guard_condition_t {
         unsafe { self::rcl_get_zero_initialized_guard_condition() }
+    }
+
+    pub fn rcl_get_zero_initialized_service() -> rcl_service_t {
+        unsafe { self::rcl_get_zero_initialized_service() }
+    }
+
+    pub fn rcl_send_response(
+        service: *const rcl_service_t,
+        response_header: *mut rmw_request_id_t,
+        ros_response: *mut ::std::os::raw::c_void,
+    ) -> RCLResult<()> {
+        ret_val_to_err(unsafe { self::rcl_send_response(service, response_header, ros_response) })
+    }
+
+    pub fn rcl_get_zero_initialized_client() -> rcl_client_t {
+        unsafe { self::rcl_get_zero_initialized_client() }
+    }
+
+    pub fn rcl_send_request(
+        client: *const rcl_client_t,
+        ros_request: *const ::std::os::raw::c_void,
+        sequence_number: *mut i64,
+    ) -> RCLResult<()> {
+        ret_val_to_err(unsafe { self::rcl_send_request(client, ros_request, sequence_number) })
     }
 }

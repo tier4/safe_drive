@@ -3,7 +3,7 @@ use crate::{
     context::Context,
     error::{RCLError, RCLResult},
     rcl,
-    subscriber::{RCLSubscription, Subscriber},
+    topic::subscriber::{RCLSubscription, Subscriber},
 };
 use std::{collections::BTreeMap, ptr::null_mut, sync::Arc, time::Duration};
 

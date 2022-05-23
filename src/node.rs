@@ -1,5 +1,10 @@
 use crate::{
-    context::Context, error::RCLResult, publisher::Publisher, qos, rcl, subscriber::Subscriber,
+    context::Context,
+    error::RCLResult,
+    qos, rcl,
+    service::{client::Client, server::Server},
+    topic::publisher::Publisher,
+    topic::subscriber::Subscriber,
 };
 use std::{ffi::CString, sync::Arc};
 
@@ -58,6 +63,24 @@ impl Node {
         qos: Option<qos::Profile>,
     ) -> RCLResult<Subscriber<T>> {
         Subscriber::new(self.clone(), topic_name, type_support, qos)
+    }
+
+    pub fn create_server<T1, T2>(
+        self: &Arc<Self>,
+        service_name: &str,
+        type_support: *const (),
+        qos: Option<qos::Profile>,
+    ) -> RCLResult<Server<T1, T2>> {
+        Server::new(self.clone(), service_name, type_support, qos)
+    }
+
+    pub fn create_client<T1, T2>(
+        self: &Arc<Self>,
+        service_name: &str,
+        type_support: *const (),
+        qos: Option<qos::Profile>,
+    ) -> RCLResult<Client<T1, T2>> {
+        Client::new(self.clone(), service_name, type_support, qos)
     }
 }
 

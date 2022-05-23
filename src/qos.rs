@@ -83,6 +83,10 @@ impl Profile {
             avoid_ros_namespace_conventions: false,
         }
     }
+
+    pub fn service_default() -> Self {
+        (&unsafe { rcl::rmw_qos_profile_services_default }).into()
+    }
 }
 
 impl From<&rcl::rmw_qos_profile_t> for Profile {
