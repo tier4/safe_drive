@@ -33,9 +33,8 @@ starvation_free == \A event \in AllTask: event \in wait_set ~> <>(event \in runn
 This is equivalent to
 
 $$
-\forall \mathrm{event} \in \mathrm{AllTask}(\mathrm{event} \in \mathrm{wait_set} \Rightarrow \diamond(\mathrm{event} \in \mathrm{running})
+\forall \mathrm{event} \in \mathrm{AllTask}(\mathrm{event} \in \mathrm{wait\verb|_|set} \Rightarrow \lozenge(\mathrm{event} \in \mathrm{running})).
 $$
-
 
 ## Processes
 
