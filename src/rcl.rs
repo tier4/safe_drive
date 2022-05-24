@@ -9,15 +9,17 @@
 
 mod galactic;
 
-pub use galactic::*;
+pub(crate) use galactic::*;
+pub use galactic::{rosidl_message_type_support_t, rosidl_service_type_support_t};
 
 use crate::error::{ret_val_to_err, RCLResult};
 use once_cell::sync::Lazy;
 use std::{marker::PhantomData, sync::Mutex};
 
-pub static MT_UNSAFE_FN: Lazy<Mutex<MTUnsafeFn>> = Lazy::new(|| Mutex::new(MTUnsafeFn::new()));
+pub(crate) static MT_UNSAFE_FN: Lazy<Mutex<MTUnsafeFn>> =
+    Lazy::new(|| Mutex::new(MTUnsafeFn::new()));
 
-pub struct MTUnsafeFn {
+pub(crate) struct MTUnsafeFn {
     _phantom: PhantomData<usize>,
 }
 
@@ -293,9 +295,27 @@ impl MTUnsafeFn {
             self::rcl_take_response_with_info(client, request_header, ros_response)
         })
     }
+
+    pub fn rcl_wait_set_add_client(
+        &self,
+        wait_set: *mut rcl_wait_set_t,
+        client: *const rcl_client_t,
+        index: *mut size_t,
+    ) -> RCLResult<()> {
+        ret_val_to_err(unsafe { self::rcl_wait_set_add_client(wait_set, client, index) })
+    }
+
+    pub fn rcl_wait_set_add_service(
+        &self,
+        wait_set: *mut rcl_wait_set_t,
+        service: *const rcl_service_t,
+        index: *mut size_t,
+    ) -> RCLResult<()> {
+        ret_val_to_err(unsafe { self::rcl_wait_set_add_service(wait_set, service, index) })
+    }
 }
 
-pub struct MTSafeFn {
+pub(crate) struct MTSafeFn {
     _phantom: PhantomData<usize>,
 }
 

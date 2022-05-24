@@ -160,8 +160,8 @@ impl Selector {
                 self.subscriptions.len() as rcl::size_t,
                 self.cond.len() as rcl::size_t,
                 0,
-                0,
-                0,
+                self.clients.len() as rcl::size_t,
+                self.services.len() as rcl::size_t,
                 0,
             )?;
 
@@ -182,6 +182,16 @@ impl Selector {
                     null_mut(),
                 )?;
             }
+
+            // set clients
+            for (_, h) in self.clients.iter() {
+                guard.rcl_wait_set_add_client(&mut self.wait_set, &h.event.client, null_mut())?;
+            }
+
+            // set services
+            for (_, h) in self.services.iter() {
+                guard.rcl_wait_set_add_service(&mut self.wait_set, &h.event.service, null_mut())?;
+            }
         }
 
         if let Some(t) = timeout {
@@ -194,38 +204,17 @@ impl Selector {
             rcl::MTSafeFn::rcl_wait(&mut self.wait_set, -1)?;
         }
 
-        // notify subscritions
-        for i in 0..self.subscriptions.len() {
-            unsafe {
-                let p = *self.wait_set.subscriptions.add(i);
-                if !p.is_null() {
-                    debug_assert!(self.subscriptions.contains_key(&p));
-                    if let Some(h) = self.subscriptions.get(&p) {
-                        if let Some(hdl) = &h.handler {
-                            hdl()
-                        }
-                        if h.is_once {
-                            self.subscriptions.remove(&p);
-                        }
-                    }
-                }
-            }
-        }
+        // notify subscriptions
+        notify(&mut self.subscriptions, self.wait_set.subscriptions);
+
+        // notify services
+        notify(&mut self.services, self.wait_set.services);
+
+        // notify clients
+        notify(&mut self.clients, self.wait_set.clients);
 
         // notify guard conditions
-        for i in 0..self.cond.len() {
-            unsafe {
-                let p = *self.wait_set.guard_conditions.add(i);
-                if !p.is_null() {
-                    debug_assert!(self.cond.contains_key(&p));
-                    if let Some(h) = self.cond.get(&p) {
-                        if let Some(hdl) = &h.handler {
-                            hdl()
-                        }
-                    }
-                }
-            }
-        }
+        notify(&mut self.cond, self.wait_set.guard_conditions);
 
         Ok(())
     }
@@ -235,6 +224,25 @@ impl Drop for Selector {
     fn drop(&mut self) {
         let guard = rcl::MT_UNSAFE_FN.lock().unwrap();
         guard.rcl_wait_set_fini(&mut self.wait_set).unwrap()
+    }
+}
+
+fn notify<K, V>(m: &mut BTreeMap<*const K, ConditionHandler<V>>, array: *const *const K) {
+    for i in 0..m.len() {
+        unsafe {
+            let p = *array.add(i);
+            if !p.is_null() {
+                debug_assert!(m.contains_key(&p));
+                if let Some(h) = m.get(&p) {
+                    if let Some(hdl) = &h.handler {
+                        hdl()
+                    }
+                    if h.is_once {
+                        m.remove(&p);
+                    }
+                }
+            }
+        }
     }
 }
 

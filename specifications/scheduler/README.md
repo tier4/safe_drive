@@ -42,7 +42,3 @@ $$
 - `shceduler` : the scheduler of `safe_drive`
 - `trigger_*` : event trigger of servers, clients, and subscribers
 - `worker` : worker threads provided by asynchronous libraries like `async_std` or `Tokio`
-
-# Prioritized Scheduler
-
-TODO

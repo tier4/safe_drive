@@ -12,8 +12,7 @@ fn test_subscription() -> Result<(), Box<dyn Error>> {
     let subscription = node.create_subscriber::<common::num::sample_msg__msg__Num>(
             "test_subscription",
             unsafe {
-                common::num::rosidl_typesupport_c__get_message_type_support_handle__sample_msg__msg__Num(
-            ) as *const ()
+                common::num::rosidl_typesupport_c__get_message_type_support_handle__sample_msg__msg__Num()
             },
             Default::default(),
         )?;

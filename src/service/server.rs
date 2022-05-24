@@ -37,7 +37,7 @@ impl<T1, T2> Server<T1, T2> {
     ) -> RCLResult<Self> {
         let mut service = rcl::MTSafeFn::rcl_get_zero_initialized_service();
         let service_name = CString::new(service_name).unwrap_or_default();
-        let profile = qos.unwrap_or_else(Profile::service_default);
+        let profile = qos.unwrap_or_else(Profile::services_default);
         let options = rcl::rcl_service_options_t {
             qos: (&profile).into(),
             allocator: rcl::MTSafeFn::rcutils_get_default_allocator(),
@@ -119,9 +119,9 @@ impl<T1, T2> ServerSend<T1, T2> {
     ///
     /// # Notes
     ///
-    /// `self` and `data` should be immutable, but `rcl_send_response` provided
+    /// `data` should be immutable, but `rcl_send_response` provided
     /// by ROS2 takes normal pointers instead of `const` pointers.
-    /// So, currently, `send` takes mutable variables.
+    /// So, currently, `send` takes `data` as mutable.
     pub fn send(mut self, mut data: T2) -> SrvResult<Server<T1, T2>, Self> {
         if let Err(e) = rcl::MTSafeFn::rcl_send_response(
             &self.data.service,

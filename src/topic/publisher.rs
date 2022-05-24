@@ -1,4 +1,9 @@
-use crate::{error::RCLResult, node::Node, qos, rcl};
+use crate::{
+    error::RCLResult,
+    node::Node,
+    qos,
+    rcl::{self, rosidl_message_type_support_t},
+};
 use std::{ffi::CString, marker::PhantomData, ptr::null_mut, sync::Arc};
 
 pub struct Publisher<T> {
@@ -11,7 +16,7 @@ impl<T> Publisher<T> {
     pub fn new(
         node: Arc<Node>,
         topic_name: &str,
-        type_support: *const (),
+        type_support: *const rosidl_message_type_support_t,
         qos: Option<qos::Profile>,
     ) -> RCLResult<Self> {
         let mut publisher = rcl::MTSafeFn::rcl_get_zero_initialized_publisher();

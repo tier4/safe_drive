@@ -31,10 +31,10 @@ begin
                      clients = tasks \intersect Clients,
                      subscribers = tasks \intersect Subscribers do
                         \* push to run_queue
-                        run_queue := run_queue \o SetToSeq(servers) \o SetToSeq(clients) \o SetToSeq(subscribers);
+                        run_queue := run_queue \o SetToSeq(subscribers) \o SetToSeq(servers) \o SetToSeq(clients);
 
                         \* change state
-                        waiting := ((waiting \ servers) \ clients) \ subscribers;
+                        waiting := ((waiting \ subscribers) \ servers) \ clients;
                 end with;
         end while;
 end process;
@@ -84,7 +84,7 @@ begin
 end process;
 
 end algorithm; *)
-\* BEGIN TRANSLATION (chksum(pcal) = "3af7a303" /\ chksum(tla) = "a6607055")
+\* BEGIN TRANSLATION (chksum(pcal) = "f261a5cb" /\ chksum(tla) = "14a8e3c0")
 CONSTANT defaultInitValue
 VARIABLES wait_set, run_queue, running, waiting, pc
 
@@ -116,8 +116,8 @@ start_sched == /\ pc["scheduler"] = "start_sched"
                     LET servers == tasks \intersect Servers IN
                       LET clients == tasks \intersect Clients IN
                         LET subscribers == tasks \intersect Subscribers IN
-                          /\ run_queue' = run_queue \o SetToSeq(servers) \o SetToSeq(clients) \o SetToSeq(subscribers)
-                          /\ waiting' = ((waiting \ servers) \ clients) \ subscribers
+                          /\ run_queue' = run_queue \o SetToSeq(subscribers) \o SetToSeq(servers) \o SetToSeq(clients)
+                          /\ waiting' = ((waiting \ subscribers) \ servers) \ clients
                /\ pc' = [pc EXCEPT !["scheduler"] = "start_sched"]
                /\ UNCHANGED << wait_set, running, task >>
 

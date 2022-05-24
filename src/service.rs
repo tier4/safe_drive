@@ -6,6 +6,7 @@ pub mod server;
 
 type SrvResult<T, E> = Result<T, (E, RCLError)>;
 
+#[derive(Debug)]
 pub struct Header {
     header: rcl::rmw_service_info_t,
 }

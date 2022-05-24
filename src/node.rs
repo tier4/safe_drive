@@ -1,7 +1,8 @@
 use crate::{
     context::Context,
     error::RCLResult,
-    qos, rcl,
+    qos,
+    rcl::{self, rosidl_message_type_support_t},
     service::{client::Client, server::Server},
     topic::publisher::Publisher,
     topic::subscriber::Subscriber,
@@ -50,7 +51,7 @@ impl Node {
     pub fn create_publisher<T>(
         self: &Arc<Self>,
         topic_name: &str,
-        type_support: *const (),
+        type_support: *const rosidl_message_type_support_t,
         qos: Option<qos::Profile>,
     ) -> RCLResult<Publisher<T>> {
         Publisher::new(self.clone(), topic_name, type_support, qos)
@@ -59,7 +60,7 @@ impl Node {
     pub fn create_subscriber<T>(
         self: &Arc<Self>,
         topic_name: &str,
-        type_support: *const (),
+        type_support: *const rosidl_message_type_support_t,
         qos: Option<qos::Profile>,
     ) -> RCLResult<Subscriber<T>> {
         Subscriber::new(self.clone(), topic_name, type_support, qos)

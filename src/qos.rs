@@ -84,8 +84,24 @@ impl Profile {
         }
     }
 
-    pub fn service_default() -> Self {
-        (&unsafe { rcl::rmw_qos_profile_services_default }).into()
+    /// Services QoS class
+    /// - History: Keep last,
+    /// - Depth: 10,
+    /// - Reliability: Reliable,
+    /// - Durability: Volatile,
+    /// - Deadline: Default,
+    /// - Lifespan: Default,
+    /// - Liveliness: System default,
+    /// - Liveliness lease duration: Default,
+    /// - Avoid ros namespace conventions: false
+    pub fn services_default() -> Self {
+        Self {
+            history: HistoryPolicy::KeepLast,
+            depth: 10,
+            reliability: ReliabilityPolicy::Reliable,
+            durability: DurabilityPolicy::Volatile,
+            ..Self::common()
+        }
     }
 }
 

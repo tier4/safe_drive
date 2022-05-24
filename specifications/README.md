@@ -1,4 +1,4 @@
-# Specification and Model Cheking
+# Specification and Model Checking
 
 ## Setting-up
 
@@ -11,4 +11,6 @@ See [tlaplus_community_jar](https://github.com/ytakano/tlaplus_community_jar) fo
 
 ## Specifications
 
-- [Scheduler](./scheduler/)
+- [Basic Scheduler](./scheduler/)
+- TODO: Prioritized Scheduler
+- TODO: Callback Based Execution

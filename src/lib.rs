@@ -5,7 +5,7 @@ pub mod error;
 pub mod logger;
 pub mod node;
 pub mod qos;
-mod rcl;
+pub mod rcl;
 pub mod selector;
 pub mod service;
 mod time;
