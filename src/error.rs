@@ -2,7 +2,10 @@ use num_derive::{FromPrimitive, ToPrimitive};
 use num_traits::FromPrimitive;
 
 use crate::rcl;
-use std::{error::Error, fmt};
+use std::{
+    error::Error,
+    fmt::{self, Debug},
+};
 
 #[repr(u32)]
 #[derive(Debug, Clone, PartialEq, Eq, FromPrimitive, ToPrimitive)]
@@ -56,6 +59,7 @@ impl fmt::Display for RCLError {
 impl Error for RCLError {}
 
 pub type RCLResult<T> = Result<T, RCLError>;
+pub type DynError = Box<dyn Error + Send + Sync + 'static>;
 
 /// Convert a rcl-style, C-style, return value to a Rust-style value.
 /// If `n` indicates successful, this returns Ok(()),

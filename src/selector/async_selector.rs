@@ -1,10 +1,14 @@
 use super::guard_condition::GuardCondition;
-use crate::{context::Context, topic::subscriber::RCLSubscription};
+use crate::{
+    context::Context,
+    error::DynError,
+    service::{client::ClientData, server::ServerData},
+    topic::subscriber::RCLSubscription,
+};
 use crossbeam_channel::{Receiver, Sender};
 use once_cell::sync::Lazy;
 use std::{
     collections::BTreeMap,
-    error::Error,
     sync::{Arc, Mutex},
     thread,
 };
@@ -15,6 +19,10 @@ pub(crate) static SELECTOR: Lazy<Mutex<AsyncSelector>> =
 pub(crate) enum Command {
     Subscription(Arc<RCLSubscription>, Box<dyn Fn() + Send + Sync + 'static>),
     RemoveSubscription(Arc<RCLSubscription>),
+    Server(Arc<ServerData>, Box<dyn Fn() + Send + Sync + 'static>),
+    RemoveServer(Arc<ServerData>),
+    Client(Arc<ClientData>, Box<dyn Fn() + Send + Sync + 'static>),
+    RemoveClient(Arc<ClientData>),
 }
 
 struct SelectorData {
@@ -41,7 +49,7 @@ impl AsyncSelector {
         &mut self,
         context: &Arc<Context>,
         cmd: Command,
-    ) -> Result<(), Box<dyn Error + Send + Sync + 'static>> {
+    ) -> Result<(), DynError> {
         loop {
             if let Some(SelectorData {
                 tx,
@@ -74,7 +82,7 @@ fn select(
     context: Arc<Context>,
     guard: Arc<GuardCondition>,
     rx: Receiver<Command>,
-) -> Result<(), Box<dyn Error + Send + Sync + 'static>> {
+) -> Result<(), DynError> {
     let mut selector = super::Selector::new(context)?;
 
     selector.add_guard_condition(&guard, None);
@@ -83,7 +91,11 @@ fn select(
         for cmd in rx.try_iter() {
             match cmd {
                 Command::Subscription(s, h) => selector.add_rcl_subscription(s, Some(h), true),
-                Command::RemoveSubscription(s) => selector.remove_rcl_subscription(s),
+                Command::RemoveSubscription(s) => selector.remove_rcl_subscription(&s),
+                Command::Server(s, h) => selector.add_server_data(s, Some(h), true),
+                Command::RemoveServer(s) => selector.remove_server_data(&s),
+                Command::Client(c, h) => selector.add_client_data(c, Some(h), true),
+                Command::RemoveClient(c) => selector.remove_client_data(&c),
             }
         }
 

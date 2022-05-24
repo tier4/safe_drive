@@ -1,12 +1,16 @@
-use super::{Header, SrvResult};
+use super::Header;
 use crate::{
-    error::RCLResult,
+    error::{DynError, RCLError, RCLResult},
     node::Node,
     qos::Profile,
     rcl::{self, rmw_request_id_t},
+    selector::async_selector::{self, SELECTOR},
     PhantomUnsync,
 };
-use std::{ffi::CString, marker::PhantomData, mem::MaybeUninit, os::raw::c_void, sync::Arc};
+use std::{
+    ffi::CString, future::Future, marker::PhantomData, mem::MaybeUninit, os::raw::c_void,
+    sync::Arc, task::Poll,
+};
 
 pub(crate) struct ServerData {
     pub(crate) service: rcl::rcl_service_t,
@@ -21,6 +25,9 @@ impl Drop for ServerData {
             .unwrap();
     }
 }
+
+unsafe impl Sync for ServerData {}
+unsafe impl Send for ServerData {}
 
 pub struct Server<T1, T2> {
     pub(crate) data: Arc<ServerData>,
@@ -66,24 +73,50 @@ impl<T1, T2> Server<T1, T2> {
     /// this returns `Err(RCLError::ServiceTakeFailed)` if there is no available data.
     /// So, please retry later if this error is returned.
     ///
+    /// # Return value
+    ///
+    /// `Ok((ServerSend<T1, T2>, T1))` is returned.
+    /// `T1` is a type of request.
+    /// After receiving a request, `ServerSend` can be used to send a response.
+    ///
     /// # Errors
+    ///
+    /// `Err((self, RCLError))` is returned when error.
     ///
     /// - `RCLError::InvalidArgument` if any arguments are invalid, or
     /// - `RCLError::ServiceInvalid` if the service is invalid, or
     /// - `RCLError::BadAlloc` if allocating memory failed, or
     /// - `RCLError::ServiceTakeFailed` if take failed but no error occurred in the middleware, or
     /// - `RCLError::Error` if an unspecified error occurs.
-    pub fn try_recv(self) -> SrvResult<(ServerSend<T1, T2>, T1), Self> {
+    pub fn try_recv(self) -> RCLResult<(ServerSend<T1, T2>, T1)> {
         let (s, d, _) = self.try_recv_with_header()?;
         Ok((s, d))
     }
 
     /// `try_recv_with_header` equivalent to `try_recv`, but
     /// this function returns `super::Header` including some information together.
-    pub fn try_recv_with_header(self) -> SrvResult<(ServerSend<T1, T2>, T1, Header), Self> {
+    /// `Err(RCLError::ServiceTakeFailed)` is returned if there is no available data.
+    /// So, please retry later if this error is returned.
+    ///
+    /// # Return value
+    ///
+    /// `Ok((ServerSend<T1, T2>, T1, Header))` is returned.
+    /// `T1` is a type of request.
+    /// After receiving a request, `ServerSend` can be used to send a response.
+    ///
+    /// # Errors
+    ///
+    /// `Err((self, RCLError))` is returned when error.
+    ///
+    /// - `RCLError::InvalidArgument` if any arguments are invalid, or
+    /// - `RCLError::ServiceInvalid` if the service is invalid, or
+    /// - `RCLError::BadAlloc` if allocating memory failed, or
+    /// - `RCLError::ServiceTakeFailed` if take failed but no error occurred in the middleware, or
+    /// - `RCLError::Error` if an unspecified error occurs.
+    pub fn try_recv_with_header(self) -> RCLResult<(ServerSend<T1, T2>, T1, Header)> {
         let (request, header) = match rcl_take_request_with_info::<T1>(&self.data.service) {
             Ok(data) => data,
-            Err(e) => return Err((self, e)),
+            Err(e) => return Err(e),
         };
 
         Ok((
@@ -96,6 +129,53 @@ impl<T1, T2> Server<T1, T2> {
             request,
             Header { header },
         ))
+    }
+
+    /// Receive a request asynchronously.
+    /// This function returns `super::Header` including some information together.
+    ///
+    /// # Return value
+    ///
+    /// `Ok((ServerSend<T1, T2>, T1, Header))` is returned.
+    /// `T1` is a type of request.
+    /// After receiving a request, `ServerSend` can be used to send a response.
+    ///
+    /// # Errors
+    ///
+    /// `Err((self, RCLError))` is returned when error.
+    ///
+    /// - `RCLError::InvalidArgument` if any arguments are invalid, or
+    /// - `RCLError::ServiceInvalid` if the service is invalid, or
+    /// - `RCLError::BadAlloc` if allocating memory failed, or
+    /// - `RCLError::Error` if an unspecified error occurs.
+    pub async fn recv_with_header(self) -> Result<(ServerSend<T1, T2>, T1, Header), DynError> {
+        AsyncReceiver {
+            server: self,
+            is_waiting: false,
+            _phantom: Default::default(),
+        }
+        .await
+    }
+
+    /// Receive a request asynchronously.
+    ///
+    /// # Return value
+    ///
+    /// `Ok((ServerSend<T1, T2>, T1))` is returned.
+    /// `T1` is a type of request.
+    /// After receiving a request, `ServerSend` can be used to send a response.
+    ///
+    /// # Errors
+    ///
+    /// `Err((self, RCLError))` is returned when error.
+    ///
+    /// - `RCLError::InvalidArgument` if any arguments are invalid, or
+    /// - `RCLError::ServiceInvalid` if the service is invalid, or
+    /// - `RCLError::BadAlloc` if allocating memory failed, or
+    /// - `RCLError::Error` if an unspecified error occurs.
+    pub async fn recv(self) -> Result<(ServerSend<T1, T2>, T1), DynError> {
+        let (srv, val, _) = self.recv_with_header().await?;
+        Ok((srv, val))
     }
 }
 
@@ -122,13 +202,13 @@ impl<T1, T2> ServerSend<T1, T2> {
     /// `data` should be immutable, but `rcl_send_response` provided
     /// by ROS2 takes normal pointers instead of `const` pointers.
     /// So, currently, `send` takes `data` as mutable.
-    pub fn send(mut self, mut data: T2) -> SrvResult<Server<T1, T2>, Self> {
+    pub fn send(mut self, mut data: T2) -> RCLResult<Server<T1, T2>> {
         if let Err(e) = rcl::MTSafeFn::rcl_send_response(
             &self.data.service,
             &mut self.request_id,
             &mut data as *mut _ as *mut c_void,
         ) {
-            return Err((self, e));
+            return Err(e);
         }
 
         Ok(Server {
@@ -153,4 +233,69 @@ fn rcl_take_request_with_info<T>(
     )?;
 
     Ok((ros_request, header))
+}
+
+pub struct AsyncReceiver<T1, T2> {
+    server: Server<T1, T2>,
+    is_waiting: bool,
+    _phantom: PhantomData<(T1, T2)>,
+}
+
+impl<T1, T2> Future for AsyncReceiver<T1, T2> {
+    type Output = Result<(ServerSend<T1, T2>, T1, Header), DynError>;
+
+    fn poll(
+        self: std::pin::Pin<&mut Self>,
+        cx: &mut std::task::Context<'_>,
+    ) -> std::task::Poll<Self::Output> {
+        let (server, is_waiting) = unsafe {
+            let this = self.get_unchecked_mut();
+            (&this.server, &mut this.is_waiting)
+        };
+        *is_waiting = false;
+
+        match rcl_take_request_with_info::<T1>(&server.data.service) {
+            Ok((request, header)) => Poll::Ready(Ok((
+                ServerSend {
+                    data: server.data.clone(),
+                    request_id: header.request_id,
+                    _phantom: Default::default(),
+                    _unsync: Default::default(),
+                },
+                request,
+                Header { header },
+            ))),
+            Err(RCLError::ServiceTakeFailed) => {
+                let waker = cx.waker().clone();
+                let mut guard = SELECTOR.lock().unwrap();
+                if let Err(e) = guard.send_command(
+                    &server.data.node.context,
+                    async_selector::Command::Server(
+                        server.data.clone(),
+                        Box::new(move || waker.clone().wake()),
+                    ),
+                ) {
+                    return Poll::Ready(Err(e));
+                }
+
+                *is_waiting = true;
+                Poll::Pending
+            }
+            Err(e) => Poll::Ready(Err(e.into())),
+        }
+    }
+}
+
+impl<T1, T2> Drop for AsyncReceiver<T1, T2> {
+    fn drop(&mut self) {
+        if self.is_waiting {
+            let mut guard = SELECTOR.lock().unwrap();
+            guard
+                .send_command(
+                    &self.server.data.node.context,
+                    async_selector::Command::RemoveServer(self.server.data.clone()),
+                )
+                .unwrap();
+        }
+    }
 }

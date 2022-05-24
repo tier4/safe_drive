@@ -1,5 +1,5 @@
 use crate::{
-    error::{RCLError, RCLResult},
+    error::{DynError, RCLError, RCLResult},
     node::Node,
     qos,
     rcl::{self, rosidl_message_type_support_t},
@@ -7,7 +7,6 @@ use crate::{
     PhantomUnsync,
 };
 use std::{
-    error::Error,
     ffi::CString,
     future::Future,
     marker::PhantomData,
@@ -103,12 +102,13 @@ impl<T> Subscriber<T> {
     /// - `RCLError::SubscriptionInvalid` if the subscription is invalid, or
     /// - `RCLError::BadAlloc` if allocating memory failed, or
     /// - `RCLError::Error` if an unspecified error occurs.
-    pub fn recv(&mut self) -> AsyncReceiver<T> {
+    pub async fn recv(&mut self) -> Result<T, DynError> {
         AsyncReceiver {
             subscription: &mut self.subscription,
             is_waiting: false,
             _phantom: Default::default(),
         }
+        .await
     }
 }
 
@@ -120,34 +120,37 @@ pub struct AsyncReceiver<'a, T> {
 }
 
 impl<'a, T> Future for AsyncReceiver<'a, T> {
-    type Output = Result<T, Box<dyn Error + Send + Sync + 'static>>;
+    type Output = Result<T, DynError>;
 
     fn poll(self: Pin<&mut Self>, cx: &mut task::Context<'_>) -> Poll<Self::Output> {
-        let this = unsafe { self.get_unchecked_mut() };
-        this.is_waiting = false;
+        let (is_waiting, subscription) = unsafe {
+            let this = self.get_unchecked_mut();
+            (&mut this.is_waiting, &this.subscription)
+        };
+        *is_waiting = false;
 
-        let s = this.subscription.subscription.as_ref();
+        let s = subscription.subscription.as_ref();
 
         // try to take 1 message
         match rcl_take::<T>(s) {
-            Ok(value) => return Poll::Ready(Ok(value)),  // got
-            Err(RCLError::SubscriptionTakeFailed) => (), // no availabe data
-            Err(e) => return Poll::Ready(Err(e.into())), // error
+            Ok(value) => Poll::Ready(Ok(value)), // got
+            Err(RCLError::SubscriptionTakeFailed) => {
+                let mut guard = SELECTOR.lock().unwrap();
+                let waker = cx.waker().clone();
+
+                guard.send_command(
+                    &subscription.node.context,
+                    async_selector::Command::Subscription(
+                        (*subscription).clone(),
+                        Box::new(move || waker.clone().wake()),
+                    ),
+                )?;
+
+                *is_waiting = true;
+                Poll::Pending
+            }
+            Err(e) => Poll::Ready(Err(e.into())), // error
         }
-
-        let mut guard = SELECTOR.lock().unwrap();
-        let waker = cx.waker().clone();
-
-        guard.send_command(
-            &this.subscription.node.context,
-            async_selector::Command::Subscription(
-                this.subscription.clone(),
-                Box::new(move || waker.clone().wake()),
-            ),
-        )?;
-
-        this.is_waiting = true;
-        Poll::Pending
     }
 }
 

@@ -81,7 +81,7 @@ impl Selector {
         self.subscriptions.insert(
             subscription.subscription.as_ref(),
             ConditionHandler {
-                event: subscription.clone(),
+                event: subscription,
                 handler,
                 is_once,
             },
@@ -95,17 +95,28 @@ impl Selector {
         is_once: bool,
     ) -> bool {
         if self.context.as_ptr() == server.data.node.context.as_ptr() {
+            self.add_server_data(server.data.clone(), handler, is_once);
+            true
+        } else {
+            false
+        }
+    }
+
+    pub(crate) fn add_server_data(
+        &mut self,
+        server: Arc<ServerData>,
+        handler: Option<Box<dyn Fn()>>,
+        is_once: bool,
+    ) {
+        if self.context.as_ptr() == server.node.context.as_ptr() {
             self.services.insert(
-                &server.data.service,
+                &server.service,
                 ConditionHandler {
-                    event: server.data.clone(),
+                    event: server,
                     handler,
                     is_once,
                 },
             );
-            true
-        } else {
-            false
         }
     }
 
@@ -116,18 +127,27 @@ impl Selector {
         is_once: bool,
     ) -> bool {
         if self.context.as_ptr() == client.data.node.context.as_ptr() {
-            self.clients.insert(
-                &client.data.client,
-                ConditionHandler {
-                    event: client.data.clone(),
-                    handler,
-                    is_once,
-                },
-            );
+            self.add_client_data(client.data.clone(), handler, is_once);
             true
         } else {
             false
         }
+    }
+
+    pub(crate) fn add_client_data(
+        &mut self,
+        client: Arc<ClientData>,
+        handler: Option<Box<dyn Fn()>>,
+        is_once: bool,
+    ) {
+        self.clients.insert(
+            &client.client,
+            ConditionHandler {
+                event: client,
+                handler,
+                is_once,
+            },
+        );
     }
 
     fn add_guard_condition(&mut self, cond: &GuardCondition, handler: Option<Box<dyn Fn()>>) {
@@ -146,9 +166,17 @@ impl Selector {
             .remove(&(subscriber.subscription.subscription.as_ref() as *const _));
     }
 
-    pub(crate) fn remove_rcl_subscription(&mut self, subscription: Arc<RCLSubscription>) {
+    pub(crate) fn remove_rcl_subscription(&mut self, subscription: &Arc<RCLSubscription>) {
         self.subscriptions
             .remove(&(subscription.subscription.as_ref() as *const _));
+    }
+
+    pub(crate) fn remove_server_data(&mut self, server: &Arc<ServerData>) {
+        self.services.remove(&(&server.service as *const _));
+    }
+
+    pub(crate) fn remove_client_data(&mut self, client: &Arc<ClientData>) {
+        self.clients.remove(&(&client.client as *const _));
     }
 
     pub fn wait(&mut self, timeout: Option<Duration>) -> RCLResult<()> {

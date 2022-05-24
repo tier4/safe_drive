@@ -1,6 +1,16 @@
-use super::{Header, SrvResult};
-use crate::{error::RCLResult, node::Node, qos::Profile, rcl, PhantomUnsync};
-use std::{ffi::CString, marker::PhantomData, mem::MaybeUninit, os::raw::c_void, sync::Arc};
+use super::Header;
+use crate::{
+    error::{DynError, RCLError, RCLResult},
+    node::Node,
+    qos::Profile,
+    rcl,
+    selector::async_selector::{self, SELECTOR},
+    PhantomUnsync,
+};
+use std::{
+    ffi::CString, future::Future, marker::PhantomData, mem::MaybeUninit, os::raw::c_void,
+    sync::Arc, task::Poll,
+};
 
 pub(crate) struct ClientData {
     pub(crate) client: rcl::rcl_client_t,
@@ -15,6 +25,9 @@ impl Drop for ClientData {
             .unwrap();
     }
 }
+
+unsafe impl Sync for ClientData {}
+unsafe impl Send for ClientData {}
 
 pub struct Client<T1, T2> {
     data: Arc<ClientData>,
@@ -58,21 +71,21 @@ impl<T1, T2> Client<T1, T2> {
     /// - `RCLError::InvalidArgument` if any arguments are invalid, or
     /// - `RCLError::ClientInvalid` if the client is invalid, or
     /// - `RCLError::Error` if an unspecified error occurs.
-    pub fn send(self, data: T1) -> SrvResult<ClientRecv<T1, T2>, Self> {
+    pub fn send(self, data: T1) -> RCLResult<ClientRecv<T1, T2>> {
         let (s, _) = self.send_with_seq(data)?;
         Ok(s)
     }
 
     /// `send_with_seq` is equivalent to `send`, but this returns
     /// the sequence number together.
-    pub fn send_with_seq(self, data: T1) -> SrvResult<(ClientRecv<T1, T2>, i64), Self> {
+    pub fn send_with_seq(self, data: T1) -> RCLResult<(ClientRecv<T1, T2>, i64)> {
         let mut seq: i64 = 0;
         if let Err(e) = rcl::MTSafeFn::rcl_send_request(
             &self.data.client,
             &data as *const _ as *const c_void,
             &mut seq,
         ) {
-            return Err((self, e));
+            return Err(e);
         }
 
         Ok((
@@ -87,6 +100,7 @@ impl<T1, T2> Client<T1, T2> {
     }
 }
 
+#[derive(Clone)]
 pub struct ClientRecv<T1, T2> {
     pub(crate) data: Arc<ClientData>,
     seq: i64,
@@ -106,18 +120,27 @@ impl<T1, T2> ClientRecv<T1, T2> {
     /// - `RCLError::ClientInvalid` if the client is invalid, or
     /// - `RCLError::ClientTakeFailed` if take failed but no error occurred in the middleware, or
     /// - `RCLError::Error` if an unspecified error occurs.
-    pub fn try_recv(self) -> SrvResult<(Client<T1, T2>, T2), Self> {
+    pub fn try_recv(self) -> RCLResult<(Client<T1, T2>, T2)> {
         let (s, d, _) = self.try_recv_with_header()?;
         Ok((s, d))
     }
 
     /// `try_recv_with_header` is equivalent to `try_recv`, but
     /// this returns `super::Header` including some information together.
-    pub fn try_recv_with_header(self) -> SrvResult<(Client<T1, T2>, T2, Header), Self> {
+    /// `Err(RCLError::ClientTakeFailed)` is returned if there is no available response.
+    /// So, please retry later if this error is returned.
+    ///
+    /// # Errors
+    ///
+    /// - `RCLError::InvalidArgument` if any arguments are invalid, or
+    /// - `RCLError::ClientInvalid` if the client is invalid, or
+    /// - `RCLError::ClientTakeFailed` if take failed but no error occurred in the middleware, or
+    /// - `RCLError::Error` if an unspecified error occurs.
+    pub fn try_recv_with_header(self) -> RCLResult<(Client<T1, T2>, T2, Header)> {
         let (response, header) =
             match rcl_take_response_with_info::<T2>(&self.data.client, self.seq) {
                 Ok(data) => data,
-                Err(e) => return Err((self, e)),
+                Err(e) => return Err(e),
             };
 
         Ok((
@@ -129,6 +152,35 @@ impl<T1, T2> ClientRecv<T1, T2> {
             response,
             Header { header },
         ))
+    }
+
+    /// Receive a response asynchronously.
+    /// this returns `super::Header` including some information together.
+    ///
+    /// # Errors
+    ///
+    /// - `RCLError::InvalidArgument` if any arguments are invalid, or
+    /// - `RCLError::ClientInvalid` if the client is invalid, or
+    /// - `RCLError::Error` if an unspecified error occurs.
+    pub async fn recv_with_header(self) -> Result<(Client<T1, T2>, T2, Header), DynError> {
+        AsyncReceiver {
+            client: self,
+            is_waiting: false,
+            _phantom: Default::default(),
+        }
+        .await
+    }
+
+    /// Receive a message asynchronously.
+    ///
+    /// # Errors
+    ///
+    /// - `RCLError::InvalidArgument` if any arguments are invalid, or
+    /// - `RCLError::ClientInvalid` if the client is invalid, or
+    /// - `RCLError::Error` if an unspecified error occurs.
+    pub async fn recv(self) -> Result<(Client<T1, T2>, T2), DynError> {
+        let (client, val, _) = self.recv_with_header().await?;
+        Ok((client, val))
     }
 }
 
@@ -149,4 +201,68 @@ fn rcl_take_response_with_info<T>(
     )?;
 
     Ok((ros_response, header))
+}
+
+pub struct AsyncReceiver<T1, T2> {
+    client: ClientRecv<T1, T2>,
+    is_waiting: bool,
+    _phantom: PhantomData<(T1, T2)>,
+}
+
+impl<T1, T2> Future for AsyncReceiver<T1, T2> {
+    type Output = Result<(Client<T1, T2>, T2, Header), DynError>;
+
+    fn poll(
+        self: std::pin::Pin<&mut Self>,
+        cx: &mut std::task::Context<'_>,
+    ) -> std::task::Poll<Self::Output> {
+        let (client, is_waiting) = unsafe {
+            let this = self.get_unchecked_mut();
+            (&this.client, &mut this.is_waiting)
+        };
+        *is_waiting = false;
+
+        match rcl_take_response_with_info(&client.data.client, client.seq) {
+            Ok((val, header)) => Poll::Ready(Ok((
+                Client {
+                    data: client.data.clone(),
+                    _phantom: Default::default(),
+                    _unsync: Default::default(),
+                },
+                val,
+                Header { header },
+            ))),
+            Err(RCLError::ClientTakeFailed) => {
+                let waker = cx.waker().clone();
+                let mut guard = SELECTOR.lock().unwrap();
+                if let Err(e) = guard.send_command(
+                    &client.data.node.context,
+                    async_selector::Command::Client(
+                        client.data.clone(),
+                        Box::new(move || waker.clone().wake()),
+                    ),
+                ) {
+                    return Poll::Ready(Err(e));
+                }
+
+                *is_waiting = true;
+                Poll::Pending
+            }
+            Err(e) => Poll::Ready(Err(e.into())),
+        }
+    }
+}
+
+impl<T1, T2> Drop for AsyncReceiver<T1, T2> {
+    fn drop(&mut self) {
+        if self.is_waiting {
+            let mut guard = SELECTOR.lock().unwrap();
+            guard
+                .send_command(
+                    &self.client.data.node.context,
+                    async_selector::Command::RemoveClient(self.client.data.clone()),
+                )
+                .unwrap();
+        }
+    }
 }

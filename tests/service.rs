@@ -30,7 +30,7 @@ fn test_service() -> Result<(), Box<dyn Error>> {
             println!("Client: seq = {seq}");
             c
         }
-        Err((_, e)) => {
+        Err(e) => {
             return Err(e.into());
         }
     };
@@ -50,7 +50,7 @@ fn test_service() -> Result<(), Box<dyn Error>> {
             // Server: send a response
             let _ = srv_send.send(response);
         }
-        Err((_, e)) => {
+        Err(e) => {
             return Err(e.into());
         }
     }
@@ -66,6 +66,6 @@ fn test_service() -> Result<(), Box<dyn Error>> {
             assert_eq!(data.sum, 8);
             Ok(())
         }
-        Err((_, e)) => Err(e.into()),
+        Err(e) => Err(e.into()),
     }
 }

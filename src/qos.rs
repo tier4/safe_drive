@@ -49,15 +49,15 @@ pub struct Profile {
 
 impl Default for Profile {
     /// Default QoS class
-    ///    - History: Keep last,
-    ///    - Depth: 10,
-    ///    - Reliability: Reliable,
-    ///    - Durability: Volatile,
-    ///    - Deadline: Default,
-    ///    - Lifespan: Default,
-    ///    - Liveliness: System default,
-    ///    - Liveliness lease duration: Default,
-    ///    - Avoid ros namespace conventions: false
+    /// - History: Keep last,
+    /// - Depth: 10,
+    /// - Reliability: Reliable,
+    /// - Durability: Volatile,
+    /// - Deadline: Default,
+    /// - Lifespan: Default,
+    /// - Liveliness: System default,
+    /// - Liveliness lease duration: Default,
+    /// - Avoid ros namespace conventions: false
     fn default() -> Self {
         Self {
             history: HistoryPolicy::KeepLast,
