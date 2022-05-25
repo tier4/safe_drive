@@ -10,4 +10,20 @@ See [tests](./tests/).
 
 ## Specifications
 
-See [specifications](./specifications/)
+See [specifications](./specifications/).
+
+## Progress
+
+- [x] Topic (Pub/Sub)
+- [x] Service (Client/Server)
+- [x] Asynchronous programming (async/await)
+- [x] Callback based programming
+- [x] Logging
+- [ ] Parameter
+- [ ] Timer
+- [ ] Action (service + topic)
+- [ ] Rust code generation from .msg and .srv files
+- Formal Specification
+  - [ ] Callback based
+  - [x] Basic scheduler
+  - [ ] Prioritized scheduler

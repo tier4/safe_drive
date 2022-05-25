@@ -8,7 +8,7 @@ use std::{
 };
 
 #[repr(u32)]
-#[derive(Debug, Clone, PartialEq, Eq, FromPrimitive, ToPrimitive)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, FromPrimitive, ToPrimitive)]
 pub enum RCLError {
     Error = rcl::RCL_RET_ERROR,
     Timeout = rcl::RCL_RET_TIMEOUT,
