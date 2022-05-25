@@ -1,4 +1,4 @@
-use crate::{error::RCLError, rcl, time::rcl_time_to_system_time};
+use crate::{rcl, time::rcl_time_to_system_time};
 use std::time::SystemTime;
 
 pub mod client;

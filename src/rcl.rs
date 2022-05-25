@@ -14,20 +14,20 @@ pub use galactic::{rosidl_message_type_support_t, rosidl_service_type_support_t}
 
 use crate::error::{ret_val_to_err, RCLResult};
 use once_cell::sync::Lazy;
-use std::{marker::PhantomData, sync::Mutex};
+use std::sync::Mutex;
 
 pub(crate) static MT_UNSAFE_FN: Lazy<Mutex<MTUnsafeFn>> =
     Lazy::new(|| Mutex::new(MTUnsafeFn::new()));
 
-pub(crate) struct MTUnsafeFn {
-    _phantom: PhantomData<usize>,
-}
+pub(crate) static MT_UNSAFE_LOG_FN: Lazy<Mutex<MTUnsafeLogFn>> =
+    Lazy::new(|| Mutex::new(MTUnsafeLogFn::new()));
+
+pub(crate) struct MTUnsafeFn;
+pub(crate) struct MTUnsafeLogFn;
 
 impl MTUnsafeFn {
     fn new() -> Self {
-        MTUnsafeFn {
-            _phantom: Default::default(),
-        }
+        Self
     }
 
     pub fn rcl_init(
@@ -315,9 +315,31 @@ impl MTUnsafeFn {
     }
 }
 
-pub(crate) struct MTSafeFn {
-    _phantom: PhantomData<usize>,
+impl MTUnsafeLogFn {
+    fn new() -> Self {
+        Self
+    }
+
+    pub fn rcutils_logging_initialize(&self) -> RCLResult<()> {
+        ret_val_to_err(unsafe { self::rcutils_logging_initialize() })
+    }
+
+    pub fn rcutils_logging_logger_is_enabled_for(&self, name: *const i8, severity: i32) -> bool {
+        unsafe { self::rcutils_logging_logger_is_enabled_for(name, severity) }
+    }
+
+    pub fn rcutils_log(
+        &self,
+        location: *const rcutils_log_location_t,
+        severity: ::std::os::raw::c_int,
+        name: *const ::std::os::raw::c_char,
+        format: *const ::std::os::raw::c_char,
+    ) {
+        unsafe { self::rcutils_log(location, severity, name, format) }
+    }
 }
+
+pub(crate) struct MTSafeFn;
 
 impl MTSafeFn {
     pub fn rcl_get_zero_initialized_context() -> rcl_context_t {
