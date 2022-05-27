@@ -81,8 +81,6 @@ impl<T1, T2> Server<T1, T2> {
     ///
     /// # Errors
     ///
-    /// `Err((self, RCLError))` is returned when error.
-    ///
     /// - `RCLError::InvalidArgument` if any arguments are invalid, or
     /// - `RCLError::ServiceInvalid` if the service is invalid, or
     /// - `RCLError::BadAlloc` if allocating memory failed, or
@@ -105,8 +103,6 @@ impl<T1, T2> Server<T1, T2> {
     /// After receiving a request, `ServerSend` can be used to send a response.
     ///
     /// # Errors
-    ///
-    /// `Err((self, RCLError))` is returned when error.
     ///
     /// - `RCLError::InvalidArgument` if any arguments are invalid, or
     /// - `RCLError::ServiceInvalid` if the service is invalid, or
@@ -141,8 +137,6 @@ impl<T1, T2> Server<T1, T2> {
     /// After receiving a request, `ServerSend` can be used to send a response.
     ///
     /// # Errors
-    ///
-    /// `Err((self, RCLError))` is returned when error.
     ///
     /// - `RCLError::InvalidArgument` if any arguments are invalid, or
     /// - `RCLError::ServiceInvalid` if the service is invalid, or
