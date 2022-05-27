@@ -9,7 +9,7 @@
 
 If servers, clients, or subscribers are ready,
 the events are inserted into `wait_set`.
-The scheduler pick the events and wake-up the tasks are waiting the events.
+The scheduler pick the events up and wake-up the tasks waiting the events.
 
 There are three states for a task. The scheduler changes the state
 and execute it.

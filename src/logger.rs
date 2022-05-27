@@ -1,15 +1,12 @@
 use crate::{
     error::{DynError, RCLResult},
+    helper::InitOnce,
     rcl,
 };
 use num_derive::{FromPrimitive, ToPrimitive};
-use std::{
-    ffi::CString,
-    sync::atomic::{AtomicBool, Ordering},
-};
+use std::ffi::CString;
 
-static LOCK: AtomicBool = AtomicBool::new(false);
-static IS_INIT: AtomicBool = AtomicBool::new(false);
+static INITIALIZER: InitOnce = InitOnce::new();
 
 #[macro_export]
 macro_rules! function {
@@ -186,25 +183,15 @@ impl Logger {
 }
 
 fn init_once() -> RCLResult<()> {
-    while !IS_INIT.load(Ordering::Relaxed) {
-        if !LOCK.load(Ordering::Relaxed) {
-            // acquire spin lock
-            if LOCK
-                .compare_exchange_weak(false, true, Ordering::Acquire, Ordering::Relaxed)
-                .is_ok()
-            {
-                let guard = rcl::MT_UNSAFE_LOG_FN.lock().unwrap();
-
-                // initialize
-                guard.rcutils_logging_initialize()?;
-
-                IS_INIT.store(true, Ordering::Relaxed);
-                LOCK.store(false, Ordering::Release);
-                break;
-            }
-        }
-    }
-    Ok(())
+    INITIALIZER.init(
+        || {
+            // initialize
+            let guard = rcl::MT_UNSAFE_LOG_FN.lock().unwrap();
+            guard.rcutils_logging_initialize()?;
+            Ok(())
+        },
+        Ok(()),
+    )
 }
 
 #[cfg(test)]

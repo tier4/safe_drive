@@ -3,7 +3,7 @@ EXTENDS TLC, Sequences, SequencesExt, FiniteSets
 
 CONSTANTS Subscribers, Servers, Clients, Workers
 
-AllTask == Subscribers \union Subscribers
+AllTask == Subscribers \union Servers \union Clients
 
 (* --algorithm scheduler
 variables
@@ -25,13 +25,17 @@ begin
         while TRUE do
                 await wait_set /= {};
 
-                \* pick runnable tasks and change the states to run_queue from waiting
+                \* pick runnable tasks up and change the states to run_queue from waiting
                 with tasks = waiting \intersect wait_set,
                      servers = tasks \intersect Servers,
                      clients = tasks \intersect Clients,
                      subscribers = tasks \intersect Subscribers do
                         \* push to run_queue
-                        run_queue := run_queue \o SetToSeq(subscribers) \o SetToSeq(servers) \o SetToSeq(clients);
+                        run_queue :=
+                            run_queue \o
+                            SetToSeq(subscribers) \o
+                            SetToSeq(servers) \o
+                            SetToSeq(clients);
 
                         \* change state
                         waiting := ((waiting \ subscribers) \ servers) \ clients;
@@ -84,7 +88,7 @@ begin
 end process;
 
 end algorithm; *)
-\* BEGIN TRANSLATION (chksum(pcal) = "f261a5cb" /\ chksum(tla) = "14a8e3c0")
+\* BEGIN TRANSLATION (chksum(pcal) = "e7be2e0c" /\ chksum(tla) = "373ff876")
 CONSTANT defaultInitValue
 VARIABLES wait_set, run_queue, running, waiting, pc
 
@@ -116,7 +120,10 @@ start_sched == /\ pc["scheduler"] = "start_sched"
                     LET servers == tasks \intersect Servers IN
                       LET clients == tasks \intersect Clients IN
                         LET subscribers == tasks \intersect Subscribers IN
-                          /\ run_queue' = run_queue \o SetToSeq(subscribers) \o SetToSeq(servers) \o SetToSeq(clients)
+                          /\ run_queue' = run_queue \o
+                                          SetToSeq(subscribers) \o
+                                          SetToSeq(servers) \o
+                                          SetToSeq(clients)
                           /\ waiting' = ((waiting \ subscribers) \ servers) \ clients
                /\ pc' = [pc EXCEPT !["scheduler"] = "start_sched"]
                /\ UNCHANGED << wait_set, running, task >>

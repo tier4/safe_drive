@@ -14,3 +14,4 @@ See [tlaplus_community_jar](https://github.com/ytakano/tlaplus_community_jar) fo
 - [Basic Scheduler](./scheduler/)
 - TODO: Prioritized Scheduler
 - TODO: Callback Based Execution
+- [Initialize Once](./init_once/)
