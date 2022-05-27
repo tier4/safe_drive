@@ -19,7 +19,7 @@ pub(crate) struct ServerData {
 
 impl Drop for ServerData {
     fn drop(&mut self) {
-        let guard = rcl::MT_UNSAFE_FN.lock().unwrap();
+        let guard = rcl::MT_UNSAFE_FN.lock();
         guard
             .rcl_service_fini(&mut self.service, unsafe { self.node.as_ptr_mut() })
             .unwrap();
@@ -51,7 +51,7 @@ impl<T1, T2> Server<T1, T2> {
         };
 
         {
-            let guard = rcl::MT_UNSAFE_FN.lock().unwrap();
+            let guard = rcl::MT_UNSAFE_FN.lock();
             guard.rcl_service_init(
                 &mut service,
                 node.as_ptr(),
@@ -225,7 +225,7 @@ fn rcl_take_request_with_info<T>(
     let mut header: rcl::rmw_service_info_t = unsafe { MaybeUninit::zeroed().assume_init() };
     let mut ros_request: T = unsafe { MaybeUninit::zeroed().assume_init() };
 
-    let guard = rcl::MT_UNSAFE_FN.lock().unwrap();
+    let guard = rcl::MT_UNSAFE_FN.lock();
     guard.rcl_take_request_with_info(
         service,
         &mut header,
@@ -267,7 +267,7 @@ impl<T1, T2> Future for AsyncReceiver<T1, T2> {
             ))),
             Err(RCLError::ServiceTakeFailed) => {
                 let waker = cx.waker().clone();
-                let mut guard = SELECTOR.lock().unwrap();
+                let mut guard = SELECTOR.lock();
                 if let Err(e) = guard.send_command(
                     &server.data.node.context,
                     async_selector::Command::Server(
@@ -289,7 +289,7 @@ impl<T1, T2> Future for AsyncReceiver<T1, T2> {
 impl<T1, T2> Drop for AsyncReceiver<T1, T2> {
     fn drop(&mut self) {
         if self.is_waiting {
-            let mut guard = SELECTOR.lock().unwrap();
+            let mut guard = SELECTOR.lock();
             guard
                 .send_command(
                     &self.server.data.node.context,

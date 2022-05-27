@@ -7,11 +7,8 @@ use crate::{
 };
 use crossbeam_channel::{Receiver, Sender};
 use once_cell::sync::Lazy;
-use std::{
-    collections::BTreeMap,
-    sync::{Arc, Mutex},
-    thread,
-};
+use parking_lot::Mutex;
+use std::{collections::BTreeMap, sync::Arc, thread};
 
 pub(crate) static SELECTOR: Lazy<Mutex<AsyncSelector>> =
     Lazy::new(|| Mutex::new(AsyncSelector::new()));

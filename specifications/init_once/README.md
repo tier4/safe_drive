@@ -20,9 +20,11 @@ pids = {};
 
 ## What do we check?
 
+- Deadlock freedom
+- Termination
 - Initialization is performed at most once
 
-This can be checked as follows.
+The at most once property can be tested as follows.
 
 ```tla+
 at_most_one == Cardinality(pids) <= 1

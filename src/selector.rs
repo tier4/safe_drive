@@ -34,7 +34,7 @@ impl Selector {
         let mut wait_set = rcl::MTSafeFn::rcl_get_zero_initialized_wait_set();
 
         {
-            let guard = rcl::MT_UNSAFE_FN.lock().unwrap();
+            let guard = rcl::MT_UNSAFE_FN.lock();
             guard.rcl_wait_set_init(
                 &mut wait_set,
                 0,
@@ -181,7 +181,7 @@ impl Selector {
 
     pub fn wait(&mut self, timeout: Option<Duration>) -> RCLResult<()> {
         {
-            let guard = rcl::MT_UNSAFE_FN.lock().unwrap();
+            let guard = rcl::MT_UNSAFE_FN.lock();
             guard.rcl_wait_set_clear(&mut self.wait_set)?;
             guard.rcl_wait_set_resize(
                 &mut self.wait_set,
@@ -250,7 +250,7 @@ impl Selector {
 
 impl Drop for Selector {
     fn drop(&mut self) {
-        let guard = rcl::MT_UNSAFE_FN.lock().unwrap();
+        let guard = rcl::MT_UNSAFE_FN.lock();
         guard.rcl_wait_set_fini(&mut self.wait_set).unwrap()
     }
 }

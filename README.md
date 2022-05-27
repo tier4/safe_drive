@@ -24,6 +24,7 @@ See [specifications](./specifications/).
 - [ ] Action (service + topic)
 - [ ] Rust code generation from .msg and .srv files
 - Formal Specification
-  - [ ] Callback based
+  - [ ] Callback based executer
   - [x] Basic scheduler
   - [ ] Prioritized scheduler
+  - [x] Initializer performed at most once

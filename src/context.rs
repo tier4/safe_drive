@@ -33,7 +33,7 @@ impl Context {
         let options = InitOptions::new()?;
 
         {
-            let guard = rcl::MT_UNSAFE_FN.lock().unwrap();
+            let guard = rcl::MT_UNSAFE_FN.lock();
 
             // initialize context
             guard.rcl_init(
@@ -77,7 +77,7 @@ impl Drop for Context {
     fn drop(&mut self) {
         rcl::MTSafeFn::rcl_shutdown(&mut self.context).unwrap();
 
-        let guard = rcl::MT_UNSAFE_FN.lock().unwrap();
+        let guard = rcl::MT_UNSAFE_FN.lock();
         guard.rcl_context_fini(&mut self.context).unwrap();
     }
 }
@@ -95,7 +95,7 @@ impl InitOptions {
 
         // initialize options
         {
-            let guard = rcl::MT_UNSAFE_FN.lock().unwrap();
+            let guard = rcl::MT_UNSAFE_FN.lock();
             guard.rcl_init_options_init(
                 &mut options,
                 rcl::MTSafeFn::rcutils_get_default_allocator(),
@@ -116,7 +116,7 @@ impl InitOptions {
 
 impl Drop for InitOptions {
     fn drop(&mut self) {
-        let guard = rcl::MT_UNSAFE_FN.lock().unwrap();
+        let guard = rcl::MT_UNSAFE_FN.lock();
         guard.rcl_init_options_fini(self.as_ptr_mut()).unwrap();
     }
 }

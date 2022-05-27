@@ -115,7 +115,7 @@ impl Logger {
             line_number,
         };
 
-        let guard = rcl::MT_UNSAFE_LOG_FN.lock().unwrap();
+        let guard = rcl::MT_UNSAFE_LOG_FN.lock();
         guard.rcutils_log(
             &logging_location,
             severity as i32,
@@ -177,7 +177,7 @@ impl Logger {
     }
 
     pub fn is_enable_for(&self, severity: Severity) -> bool {
-        let guard = rcl::MT_UNSAFE_LOG_FN.lock().unwrap();
+        let guard = rcl::MT_UNSAFE_LOG_FN.lock();
         guard.rcutils_logging_logger_is_enabled_for(self.name.as_ptr(), severity as i32)
     }
 }
@@ -186,7 +186,7 @@ fn init_once() -> RCLResult<()> {
     INITIALIZER.init(
         || {
             // initialize
-            let guard = rcl::MT_UNSAFE_LOG_FN.lock().unwrap();
+            let guard = rcl::MT_UNSAFE_LOG_FN.lock();
             guard.rcutils_logging_initialize()?;
             Ok(())
         },

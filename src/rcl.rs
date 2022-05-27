@@ -11,10 +11,10 @@ mod galactic;
 
 pub(crate) use galactic::*;
 pub use galactic::{rosidl_message_type_support_t, rosidl_service_type_support_t};
+use parking_lot::Mutex;
 
 use crate::error::{ret_val_to_err, RCLResult};
 use once_cell::sync::Lazy;
-use std::sync::Mutex;
 
 pub(crate) static MT_UNSAFE_FN: Lazy<Mutex<MTUnsafeFn>> =
     Lazy::new(|| Mutex::new(MTUnsafeFn::new()));

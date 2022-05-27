@@ -19,12 +19,18 @@ $(NUM_C): $(NUM_IN)
 
 $(NUM_RUST): $(NUM_C)
 	bindgen $(NUM_C) -- $(INCLUDE) > $(NUM_RUST)
+	sed -i -e 's/pub struct rosidl_message_type_support_t/struct rosidl_message_type_support_t_/' $(NUM_RUST)
+	sed -i -e 's/pub struct rosidl_service_type_support_t/struct rosidl_service_type_support_t_/' $(NUM_RUST)
+	sed -i '1ipub use safe_drive::rcl::{rosidl_message_type_support_t, rosidl_service_type_support_t};' $(NUM_RUST)
 
 $(AddThreeInts_C): $(AddThreeInts_IN)
 	cd supplements/ros2 && colcon build --packages-select sample_msg
 
 $(AddThreeInts_RUST): $(AddThreeInts_C)
 	bindgen $(AddThreeInts_C) -- $(INCLUDE) > $(AddThreeInts_RUST)
+	sed -i -e 's/pub struct rosidl_message_type_support_t/struct rosidl_message_type_support_t_/' $(AddThreeInts_RUST)
+	sed -i -e 's/pub struct rosidl_service_type_support_t/struct rosidl_service_type_support_t_/' $(AddThreeInts_RUST)
+	sed -i '1ipub use safe_drive::rcl::{rosidl_message_type_support_t, rosidl_service_type_support_t};' $(AddThreeInts_RUST)
 
 test: all
 	export LD_LIBRARY_PATH=$(NUM_LIBDIR):$(AddThreeInts_LIBDIR):$(LD_LIBRARY_PATH) && cargo test -- --nocapture

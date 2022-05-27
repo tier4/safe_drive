@@ -26,7 +26,7 @@ pub(crate) struct RCLSubscription {
 impl Drop for RCLSubscription {
     fn drop(&mut self) {
         let (node, subscription) = (&mut self.node, &mut self.subscription);
-        let guard = rcl::MT_UNSAFE_FN.lock().unwrap();
+        let guard = rcl::MT_UNSAFE_FN.lock();
 
         guard
             .rcl_subscription_fini(subscription.as_mut(), unsafe { node.as_ptr_mut() })
@@ -56,7 +56,7 @@ impl<T> Subscriber<T> {
         let options = Options::new(&qos.unwrap_or_default());
 
         {
-            let guard = rcl::MT_UNSAFE_FN.lock().unwrap();
+            let guard = rcl::MT_UNSAFE_FN.lock();
 
             guard.rcl_subscription_init(
                 subscription.as_mut(),
@@ -135,7 +135,7 @@ impl<'a, T> Future for AsyncReceiver<'a, T> {
         match rcl_take::<T>(s) {
             Ok(value) => Poll::Ready(Ok(value)), // got
             Err(RCLError::SubscriptionTakeFailed) => {
-                let mut guard = SELECTOR.lock().unwrap();
+                let mut guard = SELECTOR.lock();
                 let waker = cx.waker().clone();
 
                 guard.send_command(
@@ -157,7 +157,7 @@ impl<'a, T> Future for AsyncReceiver<'a, T> {
 impl<'a, T> Drop for AsyncReceiver<'a, T> {
     fn drop(&mut self) {
         if self.is_waiting {
-            let mut guard = SELECTOR.lock().unwrap();
+            let mut guard = SELECTOR.lock();
             guard
                 .send_command(
                     &self.subscription.node.context,
@@ -191,7 +191,7 @@ impl Options {
 fn rcl_take<T>(subscription: &rcl::rcl_subscription_t) -> RCLResult<T> {
     let mut ros_message: T = unsafe { MaybeUninit::zeroed().assume_init() };
 
-    let guard = rcl::MT_UNSAFE_FN.lock().unwrap();
+    let guard = rcl::MT_UNSAFE_FN.lock();
     guard.rcl_take(
         subscription,
         &mut ros_message as *mut _ as *mut c_void,

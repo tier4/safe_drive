@@ -14,7 +14,7 @@ impl RCLGuardCondition {
 
 impl Drop for RCLGuardCondition {
     fn drop(&mut self) {
-        let guard = rcl::MT_UNSAFE_FN.lock().unwrap();
+        let guard = rcl::MT_UNSAFE_FN.lock();
         guard.rcl_guard_condition_fini(self.cond.as_mut()).unwrap();
     }
 }
@@ -29,7 +29,7 @@ impl GuardCondition {
         let allocator = rcl::MTSafeFn::rcutils_get_default_allocator();
 
         {
-            let guard = rcl::MT_UNSAFE_FN.lock().unwrap();
+            let guard = rcl::MT_UNSAFE_FN.lock();
             guard.rcl_guard_condition_init(
                 &mut guard_condition,
                 unsafe { context.as_ptr_mut() },
@@ -45,7 +45,7 @@ impl GuardCondition {
     }
 
     pub(super) fn trigger(&self) -> RCLResult<()> {
-        let guard = rcl::MT_UNSAFE_FN.lock().unwrap();
+        let guard = rcl::MT_UNSAFE_FN.lock();
         guard.rcl_trigger_guard_condition(unsafe { self.cond.as_ptr_mut() })
     }
 }

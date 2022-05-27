@@ -25,7 +25,7 @@ impl<T> Publisher<T> {
         let options = Options::new(&qos.unwrap_or_default());
 
         {
-            let guard = rcl::MT_UNSAFE_FN.lock().unwrap();
+            let guard = rcl::MT_UNSAFE_FN.lock();
             guard.rcl_publisher_init(
                 &mut publisher,
                 node.as_ptr(),
@@ -58,7 +58,7 @@ impl<T> Publisher<T> {
 impl<T> Drop for Publisher<T> {
     fn drop(&mut self) {
         let (node, publisher) = (&mut self.node, &mut self.publisher);
-        let guard = rcl::MT_UNSAFE_FN.lock().unwrap();
+        let guard = rcl::MT_UNSAFE_FN.lock();
         guard
             .rcl_publisher_fini(publisher, unsafe { node.as_ptr_mut() })
             .unwrap();

@@ -19,7 +19,7 @@ pub(crate) struct ClientData {
 
 impl Drop for ClientData {
     fn drop(&mut self) {
-        let guard = rcl::MT_UNSAFE_FN.lock().unwrap();
+        let guard = rcl::MT_UNSAFE_FN.lock();
         guard
             .rcl_client_fini(&mut self.client, unsafe { self.node.as_ptr_mut() })
             .unwrap();
@@ -50,7 +50,7 @@ impl<T1, T2> Client<T1, T2> {
             allocator: rcl::MTSafeFn::rcutils_get_default_allocator(),
         };
 
-        let guard = rcl::MT_UNSAFE_FN.lock().unwrap();
+        let guard = rcl::MT_UNSAFE_FN.lock();
         guard.rcl_client_init(
             &mut client,
             node.as_ptr(),
@@ -193,7 +193,7 @@ fn rcl_take_response_with_info<T>(
 
     header.request_id.sequence_number = seq;
 
-    let guard = rcl::MT_UNSAFE_FN.lock().unwrap();
+    let guard = rcl::MT_UNSAFE_FN.lock();
     guard.rcl_take_response_with_info(
         client,
         &mut header,
@@ -234,7 +234,7 @@ impl<T1, T2> Future for AsyncReceiver<T1, T2> {
             ))),
             Err(RCLError::ClientTakeFailed) => {
                 let waker = cx.waker().clone();
-                let mut guard = SELECTOR.lock().unwrap();
+                let mut guard = SELECTOR.lock();
                 if let Err(e) = guard.send_command(
                     &client.data.node.context,
                     async_selector::Command::Client(
@@ -256,7 +256,7 @@ impl<T1, T2> Future for AsyncReceiver<T1, T2> {
 impl<T1, T2> Drop for AsyncReceiver<T1, T2> {
     fn drop(&mut self) {
         if self.is_waiting {
-            let mut guard = SELECTOR.lock().unwrap();
+            let mut guard = SELECTOR.lock();
             guard
                 .send_command(
                     &self.client.data.node.context,
