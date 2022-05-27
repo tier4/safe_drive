@@ -27,7 +27,7 @@ pids = {};
 The just once property can be tested as follows.
 
 ```tla+
-just_one == Cardinality(pids) <= 1
+just_once == Cardinality(pids) <= 1
 ```
 
 ## The initializer in Rust

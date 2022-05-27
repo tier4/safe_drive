@@ -27,4 +27,4 @@ See [specifications](./specifications/).
   - [ ] Callback based executer
   - [x] Basic scheduler
   - [ ] Prioritized scheduler
-  - [x] Initializer performed at most once
+  - [x] Initializer performed just once
