@@ -1,7 +1,7 @@
 # Initialize Once
 
 `struct InitOnce` provides a mechanisms for an initialization,
-and it is performed at most once.
+and it is performed just once.
 [init_once.tla](./init_once.tla) is the specification of the initializer.
 
 ## Variables
@@ -22,12 +22,12 @@ pids = {};
 
 - Deadlock freedom
 - Termination
-- Initialization is performed at most once
+- Initialization is performed just once
 
-The at most once property can be tested as follows.
+The just once property can be tested as follows.
 
 ```tla+
-at_most_one == Cardinality(pids) <= 1
+just_one == Cardinality(pids) <= 1
 ```
 
 ## The initializer in Rust

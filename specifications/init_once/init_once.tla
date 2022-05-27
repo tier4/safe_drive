@@ -11,7 +11,7 @@ variables
     pids = {};
 
 define
-    at_most_one == Cardinality(pids) <= 1
+    just_one == Cardinality(pids) <= 1
 end define
 
 \* initializer
@@ -37,11 +37,11 @@ begin
 end process;
 
 end algorithm; *)
-\* BEGIN TRANSLATION (chksum(pcal) = "1cea5859" /\ chksum(tla) = "b6d785cd")
+\* BEGIN TRANSLATION (chksum(pcal) = "65d14450" /\ chksum(tla) = "634938fb")
 VARIABLES lock, is_init, pids, pc
 
 (* define statement *)
-at_most_one == Cardinality(pids) <= 1
+just_one == Cardinality(pids) <= 1
 
 
 vars == << lock, is_init, pids, pc >>
