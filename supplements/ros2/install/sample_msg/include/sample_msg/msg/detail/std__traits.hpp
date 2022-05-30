@@ -510,6 +510,16 @@ inline void to_yaml(
     out << "vv:\n";
     to_yaml(msg.vv, out, indentation + 2);
   }
+
+  // member: ww
+  {
+    if (indentation > 0) {
+      out << std::string(indentation, ' ');
+    }
+    out << "ww: ";
+    value_to_yaml(msg.ww, out);
+    out << "\n";
+  }
 }  // NOLINT(readability/fn_size)
 
 inline std::string to_yaml(const sample_msg::msg::Std & msg)

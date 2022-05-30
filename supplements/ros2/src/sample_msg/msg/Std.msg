@@ -51,3 +51,6 @@ std_msgs/UInt64 ss
 std_msgs/UInt64MultiArray tt
 std_msgs/UInt8 uu
 std_msgs/UInt8MultiArray vv
+
+int32 XX=20 # constant
+int32 ww 40 # default

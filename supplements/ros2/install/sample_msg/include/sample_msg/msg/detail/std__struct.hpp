@@ -127,6 +127,26 @@ struct Std_
     vv(_init)
   {
     if (rosidl_runtime_cpp::MessageInitialization::ALL == _init ||
+      rosidl_runtime_cpp::MessageInitialization::DEFAULTS_ONLY == _init)
+    {
+      this->ww = 40l;
+    } else if (rosidl_runtime_cpp::MessageInitialization::ZERO == _init) {
+      this->a = false;
+      this->b = 0;
+      this->c = 0;
+      this->d = 0;
+      this->e = 0;
+      this->f = 0l;
+      this->g = 0ul;
+      this->h = 0ll;
+      this->i = 0ull;
+      this->j = 0.0f;
+      this->k = 0.0;
+      this->l = "";
+      std::fill<typename std::array<int32_t, 10>::iterator, int32_t>(this->p.begin(), this->p.end(), 0l);
+      this->ww = 0l;
+    }
+    if (rosidl_runtime_cpp::MessageInitialization::ALL == _init ||
       rosidl_runtime_cpp::MessageInitialization::ZERO == _init)
     {
       this->a = false;
@@ -179,6 +199,26 @@ struct Std_
     uu(_alloc, _init),
     vv(_alloc, _init)
   {
+    if (rosidl_runtime_cpp::MessageInitialization::ALL == _init ||
+      rosidl_runtime_cpp::MessageInitialization::DEFAULTS_ONLY == _init)
+    {
+      this->ww = 40l;
+    } else if (rosidl_runtime_cpp::MessageInitialization::ZERO == _init) {
+      this->a = false;
+      this->b = 0;
+      this->c = 0;
+      this->d = 0;
+      this->e = 0;
+      this->f = 0l;
+      this->g = 0ul;
+      this->h = 0ll;
+      this->i = 0ull;
+      this->j = 0.0f;
+      this->k = 0.0;
+      this->l = "";
+      std::fill<typename std::array<int32_t, 10>::iterator, int32_t>(this->p.begin(), this->p.end(), 0l);
+      this->ww = 0l;
+    }
     if (rosidl_runtime_cpp::MessageInitialization::ALL == _init ||
       rosidl_runtime_cpp::MessageInitialization::ZERO == _init)
     {
@@ -331,6 +371,9 @@ struct Std_
   using _vv_type =
     std_msgs::msg::UInt8MultiArray_<ContainerAllocator>;
   _vv_type vv;
+  using _ww_type =
+    int32_t;
+  _ww_type ww;
 
   // setters for named parameter idiom
   Type & set__a(
@@ -597,8 +640,16 @@ struct Std_
     this->vv = _arg;
     return *this;
   }
+  Type & set__ww(
+    const int32_t & _arg)
+  {
+    this->ww = _arg;
+    return *this;
+  }
 
   // constant declarations
+  static constexpr int32_t XX =
+    20;
 
   // pointer types
   using RawPtr =
@@ -772,6 +823,9 @@ struct Std_
     if (this->vv != other.vv) {
       return false;
     }
+    if (this->ww != other.ww) {
+      return false;
+    }
     return true;
   }
   bool operator!=(const Std_ & other) const
@@ -785,6 +839,8 @@ using Std =
   sample_msg::msg::Std_<std::allocator<void>>;
 
 // constant definitions
+template<typename ContainerAllocator>
+constexpr int32_t Std_<ContainerAllocator>::XX;
 
 }  // namespace msg
 

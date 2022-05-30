@@ -20,16 +20,32 @@ namespace msg
 namespace builder
 {
 
+class Init_Std_ww
+{
+public:
+  explicit Init_Std_ww(::sample_msg::msg::Std & msg)
+  : msg_(msg)
+  {}
+  ::sample_msg::msg::Std ww(::sample_msg::msg::Std::_ww_type arg)
+  {
+    msg_.ww = std::move(arg);
+    return std::move(msg_);
+  }
+
+private:
+  ::sample_msg::msg::Std msg_;
+};
+
 class Init_Std_vv
 {
 public:
   explicit Init_Std_vv(::sample_msg::msg::Std & msg)
   : msg_(msg)
   {}
-  ::sample_msg::msg::Std vv(::sample_msg::msg::Std::_vv_type arg)
+  Init_Std_ww vv(::sample_msg::msg::Std::_vv_type arg)
   {
     msg_.vv = std::move(arg);
-    return std::move(msg_);
+    return Init_Std_ww(msg_);
   }
 
 private:

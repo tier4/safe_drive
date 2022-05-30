@@ -253,6 +253,8 @@ sample_msg__msg__Std__init(sample_msg__msg__Std * msg)
     sample_msg__msg__Std__fini(msg);
     return false;
   }
+  // ww
+  msg->ww = 40l;
   return true;
 }
 
@@ -338,6 +340,7 @@ sample_msg__msg__Std__fini(sample_msg__msg__Std * msg)
   std_msgs__msg__UInt8__fini(&msg->uu);
   // vv
   std_msgs__msg__UInt8MultiArray__fini(&msg->vv);
+  // ww
 }
 
 bool
@@ -588,6 +591,10 @@ sample_msg__msg__Std__are_equal(const sample_msg__msg__Std * lhs, const sample_m
   {
     return false;
   }
+  // ww
+  if (lhs->ww != rhs->ww) {
+    return false;
+  }
   return true;
 }
 
@@ -817,6 +824,8 @@ sample_msg__msg__Std__copy(
   {
     return false;
   }
+  // ww
+  output->ww = input->ww;
   return true;
 }
 

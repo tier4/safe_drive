@@ -17,6 +17,12 @@ extern "C"
 
 // Constants defined in the message
 
+/// Constant 'XX'.
+enum
+{
+  sample_msg__msg__Std__XX = 20l
+};
+
 // Include directives for member types
 // Member 'l'
 #include "rosidl_runtime_c/string.h"
@@ -130,6 +136,7 @@ typedef struct sample_msg__msg__Std
   std_msgs__msg__UInt64MultiArray tt;
   std_msgs__msg__UInt8 uu;
   std_msgs__msg__UInt8MultiArray vv;
+  int32_t ww;
 } sample_msg__msg__Std;
 
 // Struct for a sequence of sample_msg__msg__Std.

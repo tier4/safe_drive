@@ -157,7 +157,7 @@ void Std__rosidl_typesupport_introspection_c__Std_fini_function(void * message_m
   sample_msg__msg__Std__fini(message_memory);
 }
 
-static rosidl_typesupport_introspection_c__MessageMember Std__rosidl_typesupport_introspection_c__Std_message_member_array[44] = {
+static rosidl_typesupport_introspection_c__MessageMember Std__rosidl_typesupport_introspection_c__Std_message_member_array[45] = {
   {
     "a",  // name
     rosidl_typesupport_introspection_c__ROS_TYPE_BOOLEAN,  // type
@@ -817,13 +817,28 @@ static rosidl_typesupport_introspection_c__MessageMember Std__rosidl_typesupport
     NULL,  // get_const(index) function pointer
     NULL,  // get(index) function pointer
     NULL  // resize(index) function pointer
+  },
+  {
+    "ww",  // name
+    rosidl_typesupport_introspection_c__ROS_TYPE_INT32,  // type
+    0,  // upper bound of string
+    NULL,  // members of sub message
+    false,  // is array
+    0,  // array size
+    false,  // is upper bound
+    offsetof(sample_msg__msg__Std, ww),  // bytes offset in struct
+    NULL,  // default value
+    NULL,  // size() function pointer
+    NULL,  // get_const(index) function pointer
+    NULL,  // get(index) function pointer
+    NULL  // resize(index) function pointer
   }
 };
 
 static const rosidl_typesupport_introspection_c__MessageMembers Std__rosidl_typesupport_introspection_c__Std_message_members = {
   "sample_msg__msg",  // message namespace
   "Std",  // message name
-  44,  // number of fields
+  45,  // number of fields
   sizeof(sample_msg__msg__Std),
   Std__rosidl_typesupport_introspection_c__Std_message_member_array,  // message members
   Std__rosidl_typesupport_introspection_c__Std_init_function,  // function to initialize message memory (memory has to be allocated)

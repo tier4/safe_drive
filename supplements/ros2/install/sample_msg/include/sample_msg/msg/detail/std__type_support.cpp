@@ -84,7 +84,7 @@ void * get_function__Std__p(void * untyped_member, size_t index)
   return &member[index];
 }
 
-static const ::rosidl_typesupport_introspection_cpp::MessageMember Std_message_member_array[44] = {
+static const ::rosidl_typesupport_introspection_cpp::MessageMember Std_message_member_array[45] = {
   {
     "a",  // name
     ::rosidl_typesupport_introspection_cpp::ROS_TYPE_BOOLEAN,  // type
@@ -744,13 +744,28 @@ static const ::rosidl_typesupport_introspection_cpp::MessageMember Std_message_m
     nullptr,  // get_const(index) function pointer
     nullptr,  // get(index) function pointer
     nullptr  // resize(index) function pointer
+  },
+  {
+    "ww",  // name
+    ::rosidl_typesupport_introspection_cpp::ROS_TYPE_INT32,  // type
+    0,  // upper bound of string
+    nullptr,  // members of sub message
+    false,  // is array
+    0,  // array size
+    false,  // is upper bound
+    offsetof(sample_msg::msg::Std, ww),  // bytes offset in struct
+    nullptr,  // default value
+    nullptr,  // size() function pointer
+    nullptr,  // get_const(index) function pointer
+    nullptr,  // get(index) function pointer
+    nullptr  // resize(index) function pointer
   }
 };
 
 static const ::rosidl_typesupport_introspection_cpp::MessageMembers Std_message_members = {
   "sample_msg::msg",  // message namespace
   "Std",  // message name
-  44,  // number of fields
+  45,  // number of fields
   sizeof(sample_msg::msg::Std),
   Std_message_member_array,  // message members
   Std_init_function,  // function to initialize message memory (memory has to be allocated)
