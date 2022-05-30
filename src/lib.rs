@@ -4,6 +4,7 @@ pub mod context;
 pub mod error;
 mod helper;
 pub mod logger;
+pub mod msgs;
 pub mod node;
 pub mod qos;
 pub mod rcl;

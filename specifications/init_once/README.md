@@ -27,8 +27,14 @@ pids = {};
 The just once property can be tested as follows.
 
 ```tla+
-just_once == Cardinality(pids) <= 1
+just_once == <>(Cardinality(pids) = 1) /\ [](Cardinality(pids) <= 1)
 ```
+
+This is equivalent to
+
+$$
+\lozenge (|pids| = 1) \land \square(|pids| \leq 1)
+$$
 
 ## The initializer in Rust
 
