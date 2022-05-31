@@ -516,16 +516,32 @@ private:
   ::sample_msg::msg::Std msg_;
 };
 
+class Init_Std_limited
+{
+public:
+  explicit Init_Std_limited(::sample_msg::msg::Std & msg)
+  : msg_(msg)
+  {}
+  Init_Std_q limited(::sample_msg::msg::Std::_limited_type arg)
+  {
+    msg_.limited = std::move(arg);
+    return Init_Std_q(msg_);
+  }
+
+private:
+  ::sample_msg::msg::Std msg_;
+};
+
 class Init_Std_p
 {
 public:
   explicit Init_Std_p(::sample_msg::msg::Std & msg)
   : msg_(msg)
   {}
-  Init_Std_q p(::sample_msg::msg::Std::_p_type arg)
+  Init_Std_limited p(::sample_msg::msg::Std::_p_type arg)
   {
     msg_.p = std::move(arg);
-    return Init_Std_q(msg_);
+    return Init_Std_limited(msg_);
   }
 
 private:

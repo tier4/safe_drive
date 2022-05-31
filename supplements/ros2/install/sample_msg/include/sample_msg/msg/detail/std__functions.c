@@ -13,6 +13,7 @@
 // Member `l`
 #include "rosidl_runtime_c/string_functions.h"
 // Member `o`
+// Member `limited`
 #include "rosidl_runtime_c/primitives_sequence_functions.h"
 // Member `q`
 #include "std_msgs/msg/detail/bool__functions.h"
@@ -103,6 +104,11 @@ sample_msg__msg__Std__init(sample_msg__msg__Std * msg)
     return false;
   }
   // p
+  // limited
+  if (!rosidl_runtime_c__int32__Sequence__init(&msg->limited, 0)) {
+    sample_msg__msg__Std__fini(msg);
+    return false;
+  }
   // q
   if (!std_msgs__msg__Bool__init(&msg->q)) {
     sample_msg__msg__Std__fini(msg);
@@ -280,6 +286,8 @@ sample_msg__msg__Std__fini(sample_msg__msg__Std * msg)
   // o
   rosidl_runtime_c__int32__Sequence__fini(&msg->o);
   // p
+  // limited
+  rosidl_runtime_c__int32__Sequence__fini(&msg->limited);
   // q
   std_msgs__msg__Bool__fini(&msg->q);
   // r
@@ -410,6 +418,12 @@ sample_msg__msg__Std__are_equal(const sample_msg__msg__Std * lhs, const sample_m
     if (lhs->p[i] != rhs->p[i]) {
       return false;
     }
+  }
+  // limited
+  if (!rosidl_runtime_c__int32__Sequence__are_equal(
+      &(lhs->limited), &(rhs->limited)))
+  {
+    return false;
   }
   // q
   if (!std_msgs__msg__Bool__are_equal(
@@ -643,6 +657,12 @@ sample_msg__msg__Std__copy(
   // p
   for (size_t i = 0; i < 10; ++i) {
     output->p[i] = input->p[i];
+  }
+  // limited
+  if (!rosidl_runtime_c__int32__Sequence__copy(
+      &(input->limited), &(output->limited)))
+  {
+    return false;
   }
   // q
   if (!std_msgs__msg__Bool__copy(

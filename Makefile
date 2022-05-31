@@ -1,36 +1,13 @@
-NUM_IN=supplements/ros2/src/sample_msg/msg/Num.msg
-NUM_C=supplements/ros2/install/sample_msg/include/sample_msg/msg/num.h
-NUM_RUST=tests/common/num.rs
-NUM_LIBDIR=supplements/ros2/install/sample_msg/lib
+SUBDIRS = tests/common supplements/bindgen
 
-AddThreeInts_IN=supplements/ros2/src/sample_msg/srv/AddThreeInts.srv
-AddThreeInts_C=supplements/ros2/install/sample_msg/include/sample_msg/srv/add_three_ints.h
-AddThreeInts_RUST=tests/common/add_three_ints.rs
+NUM_LIBDIR=supplements/ros2/install/sample_msg/lib
 AddThreeInts_LIBDIR=supplements/ros2/install/sample_msg/lib
 
-INCLUDE=-I./supplements/ros2/install/sample_msg/include -I/opt/ros/galactic/include/
-
-
-all: $(NUM_RUST) $(AddThreeInts_RUST)
+all: $(SUBDIRS)
 	cargo build
 
-$(NUM_C): $(NUM_IN)
-	cd supplements/ros2 && colcon build --packages-select sample_msg
-
-$(NUM_RUST): $(NUM_C)
-	bindgen $(NUM_C) -- $(INCLUDE) > $(NUM_RUST)
-	sed -i -e 's/pub struct rosidl_message_type_support_t/struct rosidl_message_type_support_t_/' $(NUM_RUST)
-	sed -i -e 's/pub struct rosidl_service_type_support_t/struct rosidl_service_type_support_t_/' $(NUM_RUST)
-	sed -i '1ipub use safe_drive::rcl::{rosidl_message_type_support_t, rosidl_service_type_support_t};' $(NUM_RUST)
-
-$(AddThreeInts_C): $(AddThreeInts_IN)
-	cd supplements/ros2 && colcon build --packages-select sample_msg
-
-$(AddThreeInts_RUST): $(AddThreeInts_C)
-	bindgen $(AddThreeInts_C) -- $(INCLUDE) > $(AddThreeInts_RUST)
-	sed -i -e 's/pub struct rosidl_message_type_support_t/struct rosidl_message_type_support_t_/' $(AddThreeInts_RUST)
-	sed -i -e 's/pub struct rosidl_service_type_support_t/struct rosidl_service_type_support_t_/' $(AddThreeInts_RUST)
-	sed -i '1ipub use safe_drive::rcl::{rosidl_message_type_support_t, rosidl_service_type_support_t};' $(AddThreeInts_RUST)
+$(SUBDIRS):
+	$(MAKE) -C $@
 
 test: all
 	export LD_LIBRARY_PATH=$(NUM_LIBDIR):$(AddThreeInts_LIBDIR):$(LD_LIBRARY_PATH) && cargo test -- --nocapture

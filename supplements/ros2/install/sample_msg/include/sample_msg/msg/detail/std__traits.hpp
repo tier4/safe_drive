@@ -241,6 +241,26 @@ inline void to_yaml(
     }
   }
 
+  // member: limited
+  {
+    if (indentation > 0) {
+      out << std::string(indentation, ' ');
+    }
+    if (msg.limited.size() == 0) {
+      out << "limited: []\n";
+    } else {
+      out << "limited:\n";
+      for (auto item : msg.limited) {
+        if (indentation > 0) {
+          out << std::string(indentation, ' ');
+        }
+        out << "- ";
+        value_to_yaml(item, out);
+        out << "\n";
+      }
+    }
+  }
+
   // member: q
   {
     if (indentation > 0) {

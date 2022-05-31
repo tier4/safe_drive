@@ -84,7 +84,34 @@ void * get_function__Std__p(void * untyped_member, size_t index)
   return &member[index];
 }
 
-static const ::rosidl_typesupport_introspection_cpp::MessageMember Std_message_member_array[45] = {
+size_t size_function__Std__limited(const void * untyped_member)
+{
+  const auto * member = reinterpret_cast<const std::vector<int32_t> *>(untyped_member);
+  return member->size();
+}
+
+const void * get_const_function__Std__limited(const void * untyped_member, size_t index)
+{
+  const auto & member =
+    *reinterpret_cast<const std::vector<int32_t> *>(untyped_member);
+  return &member[index];
+}
+
+void * get_function__Std__limited(void * untyped_member, size_t index)
+{
+  auto & member =
+    *reinterpret_cast<std::vector<int32_t> *>(untyped_member);
+  return &member[index];
+}
+
+void resize_function__Std__limited(void * untyped_member, size_t size)
+{
+  auto * member =
+    reinterpret_cast<std::vector<int32_t> *>(untyped_member);
+  member->resize(size);
+}
+
+static const ::rosidl_typesupport_introspection_cpp::MessageMember Std_message_member_array[46] = {
   {
     "a",  // name
     ::rosidl_typesupport_introspection_cpp::ROS_TYPE_BOOLEAN,  // type
@@ -294,6 +321,21 @@ static const ::rosidl_typesupport_introspection_cpp::MessageMember Std_message_m
     get_const_function__Std__p,  // get_const(index) function pointer
     get_function__Std__p,  // get(index) function pointer
     nullptr  // resize(index) function pointer
+  },
+  {
+    "limited",  // name
+    ::rosidl_typesupport_introspection_cpp::ROS_TYPE_INT32,  // type
+    0,  // upper bound of string
+    nullptr,  // members of sub message
+    true,  // is array
+    5,  // array size
+    true,  // is upper bound
+    offsetof(sample_msg::msg::Std, limited),  // bytes offset in struct
+    nullptr,  // default value
+    size_function__Std__limited,  // size() function pointer
+    get_const_function__Std__limited,  // get_const(index) function pointer
+    get_function__Std__limited,  // get(index) function pointer
+    resize_function__Std__limited  // resize(index) function pointer
   },
   {
     "q",  // name
@@ -765,7 +807,7 @@ static const ::rosidl_typesupport_introspection_cpp::MessageMember Std_message_m
 static const ::rosidl_typesupport_introspection_cpp::MessageMembers Std_message_members = {
   "sample_msg::msg",  // message namespace
   "Std",  // message name
-  45,  // number of fields
+  46,  // number of fields
   sizeof(sample_msg::msg::Std),
   Std_message_member_array,  // message members
   Std_init_function,  // function to initialize message memory (memory has to be allocated)

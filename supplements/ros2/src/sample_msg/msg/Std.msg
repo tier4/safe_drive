@@ -17,6 +17,7 @@ string l
 # array
 int32[] o
 int32[10] p
+int32[<=5] limited
 
 # http://wiki.ros.org/std_msgs
 std_msgs/Bool q

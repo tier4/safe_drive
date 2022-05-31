@@ -281,6 +281,9 @@ struct Std_
   using _p_type =
     std::array<int32_t, 10>;
   _p_type p;
+  using _limited_type =
+    rosidl_runtime_cpp::BoundedVector<int32_t, 5, typename std::allocator_traits<ContainerAllocator>::template rebind_alloc<int32_t>>;
+  _limited_type limited;
   using _q_type =
     std_msgs::msg::Bool_<ContainerAllocator>;
   _q_type q;
@@ -458,6 +461,12 @@ struct Std_
     const std::array<int32_t, 10> & _arg)
   {
     this->p = _arg;
+    return *this;
+  }
+  Type & set__limited(
+    const rosidl_runtime_cpp::BoundedVector<int32_t, 5, typename std::allocator_traits<ContainerAllocator>::template rebind_alloc<int32_t>> & _arg)
+  {
+    this->limited = _arg;
     return *this;
   }
   Type & set__q(
@@ -731,6 +740,9 @@ struct Std_
       return false;
     }
     if (this->p != other.p) {
+      return false;
+    }
+    if (this->limited != other.limited) {
       return false;
     }
     if (this->q != other.q) {

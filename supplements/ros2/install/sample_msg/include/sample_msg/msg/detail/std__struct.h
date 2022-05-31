@@ -27,6 +27,7 @@ enum
 // Member 'l'
 #include "rosidl_runtime_c/string.h"
 // Member 'o'
+// Member 'limited'
 #include "rosidl_runtime_c/primitives_sequence.h"
 // Member 'q'
 #include "std_msgs/msg/detail/bool__struct.h"
@@ -89,6 +90,13 @@ enum
 // Member 'vv'
 #include "std_msgs/msg/detail/u_int8_multi_array__struct.h"
 
+// constants for array fields with an upper bound
+// limited
+enum
+{
+  sample_msg__msg__Std__limited__MAX_SIZE = 5
+};
+
 // Struct defined in msg/Std in the package sample_msg.
 typedef struct sample_msg__msg__Std
 {
@@ -106,6 +114,7 @@ typedef struct sample_msg__msg__Std
   rosidl_runtime_c__String l;
   rosidl_runtime_c__int32__Sequence o;
   int32_t p[10];
+  rosidl_runtime_c__int32__Sequence limited;
   std_msgs__msg__Bool q;
   std_msgs__msg__Byte r;
   std_msgs__msg__ByteMultiArray s;
