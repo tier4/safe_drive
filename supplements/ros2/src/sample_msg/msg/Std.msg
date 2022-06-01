@@ -55,3 +55,7 @@ std_msgs/UInt8MultiArray vv
 
 int32 XX=20 # constant
 int32 ww 40 # default
+
+string INITIALIZING_VEHICLE=InitializingVehicle a"a
+string WAITING_FOR_ROUTE=WaitingForRoute
+string PLANNING="Planning"

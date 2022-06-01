@@ -659,6 +659,9 @@ struct Std_
   // constant declarations
   static constexpr int32_t XX =
     20;
+  static const std::basic_string<char, std::char_traits<char>, typename std::allocator_traits<ContainerAllocator>::template rebind_alloc<char>> INITIALIZING_VEHICLE;
+  static const std::basic_string<char, std::char_traits<char>, typename std::allocator_traits<ContainerAllocator>::template rebind_alloc<char>> WAITING_FOR_ROUTE;
+  static const std::basic_string<char, std::char_traits<char>, typename std::allocator_traits<ContainerAllocator>::template rebind_alloc<char>> PLANNING;
 
   // pointer types
   using RawPtr =
@@ -853,6 +856,15 @@ using Std =
 // constant definitions
 template<typename ContainerAllocator>
 constexpr int32_t Std_<ContainerAllocator>::XX;
+template<typename ContainerAllocator>
+const std::basic_string<char, std::char_traits<char>, typename std::allocator_traits<ContainerAllocator>::template rebind_alloc<char>>
+Std_<ContainerAllocator>::INITIALIZING_VEHICLE = "InitializingVehicle a\"a";
+template<typename ContainerAllocator>
+const std::basic_string<char, std::char_traits<char>, typename std::allocator_traits<ContainerAllocator>::template rebind_alloc<char>>
+Std_<ContainerAllocator>::WAITING_FOR_ROUTE = "WaitingForRoute";
+template<typename ContainerAllocator>
+const std::basic_string<char, std::char_traits<char>, typename std::allocator_traits<ContainerAllocator>::template rebind_alloc<char>>
+Std_<ContainerAllocator>::PLANNING = "Planning";
 
 }  // namespace msg
 

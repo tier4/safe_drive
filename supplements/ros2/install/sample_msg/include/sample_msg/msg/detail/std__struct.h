@@ -23,6 +23,15 @@ enum
   sample_msg__msg__Std__XX = 20l
 };
 
+/// Constant 'INITIALIZING_VEHICLE'.
+static const char * const sample_msg__msg__Std__INITIALIZING_VEHICLE = "InitializingVehicle a\"a";
+
+/// Constant 'WAITING_FOR_ROUTE'.
+static const char * const sample_msg__msg__Std__WAITING_FOR_ROUTE = "WaitingForRoute";
+
+/// Constant 'PLANNING'.
+static const char * const sample_msg__msg__Std__PLANNING = "Planning";
+
 // Include directives for member types
 // Member 'l'
 #include "rosidl_runtime_c/string.h"

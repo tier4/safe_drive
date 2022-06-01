@@ -5,7 +5,7 @@ use crate::{
     service::{client::ClientData, server::ServerData},
     topic::subscriber::RCLSubscription,
 };
-use crossbeam_channel::{Receiver, Sender};
+use flume::{self, Receiver, Sender};
 use once_cell::sync::Lazy;
 use parking_lot::Mutex;
 use std::{collections::BTreeMap, sync::Arc, thread};
@@ -58,7 +58,7 @@ impl AsyncSelector {
                 cond.trigger()?;
                 return Ok(());
             } else {
-                let (tx, rx) = crossbeam_channel::bounded(256);
+                let (tx, rx) = flume::bounded(256);
                 let guard = super::guard_condition::GuardCondition::new(context.clone())?;
                 self.contexts.insert(
                     context.id,

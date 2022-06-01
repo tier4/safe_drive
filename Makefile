@@ -4,6 +4,7 @@ NUM_LIBDIR=supplements/ros2/install/sample_msg/lib
 AddThreeInts_LIBDIR=supplements/ros2/install/sample_msg/lib
 
 all: $(SUBDIRS)
+	cd supplements/ros2 && colcon build
 	cargo build
 
 $(SUBDIRS):
