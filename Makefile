@@ -7,8 +7,10 @@ all: $(SUBDIRS)
 	cd supplements/ros2 && colcon build
 	cargo build
 
-$(SUBDIRS):
+$(SUBDIRS): FORCE
 	$(MAKE) -C $@
+
+FORCE:
 
 test: all
 	export LD_LIBRARY_PATH=$(NUM_LIBDIR):$(AddThreeInts_LIBDIR):$(LD_LIBRARY_PATH) && cargo test -- --nocapture
