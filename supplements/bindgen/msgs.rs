@@ -6597,42 +6597,27 @@ extern "C" {
 }
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
-pub struct std_msgs__msg__Int8MultiArray {
-    pub layout: std_msgs__msg__MultiArrayLayout,
-    pub data: rosidl_runtime_c__int8__Sequence,
+pub struct std_msgs__msg__Int16 {
+    pub data: i16,
 }
 #[test]
-fn bindgen_test_layout_std_msgs__msg__Int8MultiArray() {
+fn bindgen_test_layout_std_msgs__msg__Int16() {
     assert_eq!(
-        ::std::mem::size_of::<std_msgs__msg__Int8MultiArray>(),
-        56usize,
-        concat!("Size of: ", stringify!(std_msgs__msg__Int8MultiArray))
+        ::std::mem::size_of::<std_msgs__msg__Int16>(),
+        2usize,
+        concat!("Size of: ", stringify!(std_msgs__msg__Int16))
     );
     assert_eq!(
-        ::std::mem::align_of::<std_msgs__msg__Int8MultiArray>(),
-        8usize,
-        concat!("Alignment of ", stringify!(std_msgs__msg__Int8MultiArray))
+        ::std::mem::align_of::<std_msgs__msg__Int16>(),
+        2usize,
+        concat!("Alignment of ", stringify!(std_msgs__msg__Int16))
     );
     assert_eq!(
-        unsafe {
-            &(*(::std::ptr::null::<std_msgs__msg__Int8MultiArray>())).layout as *const _ as usize
-        },
+        unsafe { &(*(::std::ptr::null::<std_msgs__msg__Int16>())).data as *const _ as usize },
         0usize,
         concat!(
             "Offset of field: ",
-            stringify!(std_msgs__msg__Int8MultiArray),
-            "::",
-            stringify!(layout)
-        )
-    );
-    assert_eq!(
-        unsafe {
-            &(*(::std::ptr::null::<std_msgs__msg__Int8MultiArray>())).data as *const _ as usize
-        },
-        32usize,
-        concat!(
-            "Offset of field: ",
-            stringify!(std_msgs__msg__Int8MultiArray),
+            stringify!(std_msgs__msg__Int16),
             "::",
             stringify!(data)
         )
@@ -6640,129 +6625,120 @@ fn bindgen_test_layout_std_msgs__msg__Int8MultiArray() {
 }
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
-pub struct std_msgs__msg__Int8MultiArray__Sequence {
-    pub data: *mut std_msgs__msg__Int8MultiArray,
+pub struct std_msgs__msg__Int16__Sequence {
+    pub data: *mut std_msgs__msg__Int16,
     #[doc = " The number of valid items in data"]
     pub size: size_t,
     #[doc = " The number of allocated items in data"]
     pub capacity: size_t,
 }
 #[test]
-fn bindgen_test_layout_std_msgs__msg__Int8MultiArray__Sequence() {
+fn bindgen_test_layout_std_msgs__msg__Int16__Sequence() {
     assert_eq!(
-        ::std::mem::size_of::<std_msgs__msg__Int8MultiArray__Sequence>(),
+        ::std::mem::size_of::<std_msgs__msg__Int16__Sequence>(),
         24usize,
-        concat!(
-            "Size of: ",
-            stringify!(std_msgs__msg__Int8MultiArray__Sequence)
-        )
+        concat!("Size of: ", stringify!(std_msgs__msg__Int16__Sequence))
     );
     assert_eq!(
-        ::std::mem::align_of::<std_msgs__msg__Int8MultiArray__Sequence>(),
+        ::std::mem::align_of::<std_msgs__msg__Int16__Sequence>(),
         8usize,
-        concat!(
-            "Alignment of ",
-            stringify!(std_msgs__msg__Int8MultiArray__Sequence)
-        )
+        concat!("Alignment of ", stringify!(std_msgs__msg__Int16__Sequence))
     );
     assert_eq!(
         unsafe {
-            &(*(::std::ptr::null::<std_msgs__msg__Int8MultiArray__Sequence>())).data as *const _
-                as usize
+            &(*(::std::ptr::null::<std_msgs__msg__Int16__Sequence>())).data as *const _ as usize
         },
         0usize,
         concat!(
             "Offset of field: ",
-            stringify!(std_msgs__msg__Int8MultiArray__Sequence),
+            stringify!(std_msgs__msg__Int16__Sequence),
             "::",
             stringify!(data)
         )
     );
     assert_eq!(
         unsafe {
-            &(*(::std::ptr::null::<std_msgs__msg__Int8MultiArray__Sequence>())).size as *const _
-                as usize
+            &(*(::std::ptr::null::<std_msgs__msg__Int16__Sequence>())).size as *const _ as usize
         },
         8usize,
         concat!(
             "Offset of field: ",
-            stringify!(std_msgs__msg__Int8MultiArray__Sequence),
+            stringify!(std_msgs__msg__Int16__Sequence),
             "::",
             stringify!(size)
         )
     );
     assert_eq!(
         unsafe {
-            &(*(::std::ptr::null::<std_msgs__msg__Int8MultiArray__Sequence>())).capacity as *const _
-                as usize
+            &(*(::std::ptr::null::<std_msgs__msg__Int16__Sequence>())).capacity as *const _ as usize
         },
         16usize,
         concat!(
             "Offset of field: ",
-            stringify!(std_msgs__msg__Int8MultiArray__Sequence),
+            stringify!(std_msgs__msg__Int16__Sequence),
             "::",
             stringify!(capacity)
         )
     );
 }
 extern "C" {
-    #[doc = " Initialize msg/Int8MultiArray message."]
+    #[doc = " Initialize msg/Int16 message."]
     #[doc = "**"]
     #[doc = "* If the init function is called twice for the same message without"]
     #[doc = "* calling fini inbetween previously allocated memory will be leaked."]
     #[doc = "* \\param[in,out] msg The previously allocated message pointer."]
     #[doc = "* Fields without a default value will not be initialized by this function."]
     #[doc = "* You might want to call memset(msg, 0, sizeof("]
-    #[doc = "* std_msgs__msg__Int8MultiArray"]
+    #[doc = "* std_msgs__msg__Int16"]
     #[doc = "* )) before or use"]
-    #[doc = "* std_msgs__msg__Int8MultiArray__create()"]
+    #[doc = "* std_msgs__msg__Int16__create()"]
     #[doc = "* to allocate and initialize the message."]
     #[doc = "* \\return true if initialization was successful, otherwise false"]
     #[doc = "*/"]
-    pub fn std_msgs__msg__Int8MultiArray__init(msg: *mut std_msgs__msg__Int8MultiArray) -> bool;
+    pub fn std_msgs__msg__Int16__init(msg: *mut std_msgs__msg__Int16) -> bool;
 }
 extern "C" {
-    #[doc = " Finalize msg/Int8MultiArray message."]
+    #[doc = " Finalize msg/Int16 message."]
     #[doc = "**"]
     #[doc = "* \\param[in,out] msg The allocated message pointer."]
     #[doc = "*/"]
-    pub fn std_msgs__msg__Int8MultiArray__fini(msg: *mut std_msgs__msg__Int8MultiArray);
+    pub fn std_msgs__msg__Int16__fini(msg: *mut std_msgs__msg__Int16);
 }
 extern "C" {
-    #[doc = " Create msg/Int8MultiArray message."]
+    #[doc = " Create msg/Int16 message."]
     #[doc = "**"]
     #[doc = "* It allocates the memory for the message, sets the memory to zero, and"]
     #[doc = "* calls"]
-    #[doc = "* std_msgs__msg__Int8MultiArray__init()."]
+    #[doc = "* std_msgs__msg__Int16__init()."]
     #[doc = "* \\return The pointer to the initialized message if successful,"]
     #[doc = "* otherwise NULL"]
     #[doc = "*/"]
-    pub fn std_msgs__msg__Int8MultiArray__create() -> *mut std_msgs__msg__Int8MultiArray;
+    pub fn std_msgs__msg__Int16__create() -> *mut std_msgs__msg__Int16;
 }
 extern "C" {
-    #[doc = " Destroy msg/Int8MultiArray message."]
+    #[doc = " Destroy msg/Int16 message."]
     #[doc = "**"]
     #[doc = "* It calls"]
-    #[doc = "* std_msgs__msg__Int8MultiArray__fini()"]
+    #[doc = "* std_msgs__msg__Int16__fini()"]
     #[doc = "* and frees the memory of the message."]
     #[doc = "* \\param[in,out] msg The allocated message pointer."]
     #[doc = "*/"]
-    pub fn std_msgs__msg__Int8MultiArray__destroy(msg: *mut std_msgs__msg__Int8MultiArray);
+    pub fn std_msgs__msg__Int16__destroy(msg: *mut std_msgs__msg__Int16);
 }
 extern "C" {
-    #[doc = " Check for msg/Int8MultiArray message equality."]
+    #[doc = " Check for msg/Int16 message equality."]
     #[doc = "**"]
     #[doc = "* \\param[in] lhs The message on the left hand size of the equality operator."]
     #[doc = "* \\param[in] rhs The message on the right hand size of the equality operator."]
     #[doc = "* \\return true if messages are equal, otherwise false."]
     #[doc = "*/"]
-    pub fn std_msgs__msg__Int8MultiArray__are_equal(
-        lhs: *const std_msgs__msg__Int8MultiArray,
-        rhs: *const std_msgs__msg__Int8MultiArray,
+    pub fn std_msgs__msg__Int16__are_equal(
+        lhs: *const std_msgs__msg__Int16,
+        rhs: *const std_msgs__msg__Int16,
     ) -> bool;
 }
 extern "C" {
-    #[doc = " Copy a msg/Int8MultiArray message."]
+    #[doc = " Copy a msg/Int16 message."]
     #[doc = "**"]
     #[doc = "* This functions performs a deep copy, as opposed to the shallow copy that"]
     #[doc = "* plain assignment yields."]
@@ -6773,16 +6749,16 @@ extern "C" {
     #[doc = "* \\return true if successful, or false if either pointer is null"]
     #[doc = "*   or memory allocation fails."]
     #[doc = "*/"]
-    pub fn std_msgs__msg__Int8MultiArray__copy(
-        input: *const std_msgs__msg__Int8MultiArray,
-        output: *mut std_msgs__msg__Int8MultiArray,
+    pub fn std_msgs__msg__Int16__copy(
+        input: *const std_msgs__msg__Int16,
+        output: *mut std_msgs__msg__Int16,
     ) -> bool;
 }
 extern "C" {
-    #[doc = " Initialize array of msg/Int8MultiArray messages."]
+    #[doc = " Initialize array of msg/Int16 messages."]
     #[doc = "**"]
     #[doc = "* It allocates the memory for the number of elements and calls"]
-    #[doc = "* std_msgs__msg__Int8MultiArray__init()"]
+    #[doc = "* std_msgs__msg__Int16__init()"]
     #[doc = "* for each element of the array."]
     #[doc = "* \\param[in,out] array The allocated array pointer."]
     #[doc = "* \\param[in] size The size / capacity of the array."]
@@ -6790,63 +6766,59 @@ extern "C" {
     #[doc = "* If the array pointer is valid and the size is zero it is guaranteed"]
     #[doc = "# to return true."]
     #[doc = "*/"]
-    pub fn std_msgs__msg__Int8MultiArray__Sequence__init(
-        array: *mut std_msgs__msg__Int8MultiArray__Sequence,
+    pub fn std_msgs__msg__Int16__Sequence__init(
+        array: *mut std_msgs__msg__Int16__Sequence,
         size: size_t,
     ) -> bool;
 }
 extern "C" {
-    #[doc = " Finalize array of msg/Int8MultiArray messages."]
+    #[doc = " Finalize array of msg/Int16 messages."]
     #[doc = "**"]
     #[doc = "* It calls"]
-    #[doc = "* std_msgs__msg__Int8MultiArray__fini()"]
+    #[doc = "* std_msgs__msg__Int16__fini()"]
     #[doc = "* for each element of the array and frees the memory for the number of"]
     #[doc = "* elements."]
     #[doc = "* \\param[in,out] array The initialized array pointer."]
     #[doc = "*/"]
-    pub fn std_msgs__msg__Int8MultiArray__Sequence__fini(
-        array: *mut std_msgs__msg__Int8MultiArray__Sequence,
-    );
+    pub fn std_msgs__msg__Int16__Sequence__fini(array: *mut std_msgs__msg__Int16__Sequence);
 }
 extern "C" {
-    #[doc = " Create array of msg/Int8MultiArray messages."]
+    #[doc = " Create array of msg/Int16 messages."]
     #[doc = "**"]
     #[doc = "* It allocates the memory for the array and calls"]
-    #[doc = "* std_msgs__msg__Int8MultiArray__Sequence__init()."]
+    #[doc = "* std_msgs__msg__Int16__Sequence__init()."]
     #[doc = "* \\param[in] size The size / capacity of the array."]
     #[doc = "* \\return The pointer to the initialized array if successful, otherwise NULL"]
     #[doc = "*/"]
-    pub fn std_msgs__msg__Int8MultiArray__Sequence__create(
+    pub fn std_msgs__msg__Int16__Sequence__create(
         size: size_t,
-    ) -> *mut std_msgs__msg__Int8MultiArray__Sequence;
+    ) -> *mut std_msgs__msg__Int16__Sequence;
 }
 extern "C" {
-    #[doc = " Destroy array of msg/Int8MultiArray messages."]
+    #[doc = " Destroy array of msg/Int16 messages."]
     #[doc = "**"]
     #[doc = "* It calls"]
-    #[doc = "* std_msgs__msg__Int8MultiArray__Sequence__fini()"]
+    #[doc = "* std_msgs__msg__Int16__Sequence__fini()"]
     #[doc = "* on the array,"]
     #[doc = "* and frees the memory of the array."]
     #[doc = "* \\param[in,out] array The initialized array pointer."]
     #[doc = "*/"]
-    pub fn std_msgs__msg__Int8MultiArray__Sequence__destroy(
-        array: *mut std_msgs__msg__Int8MultiArray__Sequence,
-    );
+    pub fn std_msgs__msg__Int16__Sequence__destroy(array: *mut std_msgs__msg__Int16__Sequence);
 }
 extern "C" {
-    #[doc = " Check for msg/Int8MultiArray message array equality."]
+    #[doc = " Check for msg/Int16 message array equality."]
     #[doc = "**"]
     #[doc = "* \\param[in] lhs The message array on the left hand size of the equality operator."]
     #[doc = "* \\param[in] rhs The message array on the right hand size of the equality operator."]
     #[doc = "* \\return true if message arrays are equal in size and content, otherwise false."]
     #[doc = "*/"]
-    pub fn std_msgs__msg__Int8MultiArray__Sequence__are_equal(
-        lhs: *const std_msgs__msg__Int8MultiArray__Sequence,
-        rhs: *const std_msgs__msg__Int8MultiArray__Sequence,
+    pub fn std_msgs__msg__Int16__Sequence__are_equal(
+        lhs: *const std_msgs__msg__Int16__Sequence,
+        rhs: *const std_msgs__msg__Int16__Sequence,
     ) -> bool;
 }
 extern "C" {
-    #[doc = " Copy an array of msg/Int8MultiArray messages."]
+    #[doc = " Copy an array of msg/Int16 messages."]
     #[doc = "**"]
     #[doc = "* This functions performs a deep copy, as opposed to the shallow copy that"]
     #[doc = "* plain assignment yields."]
@@ -6857,13 +6829,13 @@ extern "C" {
     #[doc = "* \\return true if successful, or false if either pointer"]
     #[doc = "*   is null or memory allocation fails."]
     #[doc = "*/"]
-    pub fn std_msgs__msg__Int8MultiArray__Sequence__copy(
-        input: *const std_msgs__msg__Int8MultiArray__Sequence,
-        output: *mut std_msgs__msg__Int8MultiArray__Sequence,
+    pub fn std_msgs__msg__Int16__Sequence__copy(
+        input: *const std_msgs__msg__Int16__Sequence,
+        output: *mut std_msgs__msg__Int16__Sequence,
     ) -> bool;
 }
 extern "C" {
-    pub fn rosidl_typesupport_c__get_message_type_support_handle__std_msgs__msg__Int8MultiArray(
+    pub fn rosidl_typesupport_c__get_message_type_support_handle__std_msgs__msg__Int16(
     ) -> *const rosidl_message_type_support_t;
 }
 #[repr(C)]
@@ -7139,6 +7111,249 @@ extern "C" {
 }
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
+pub struct std_msgs__msg__Int32 {
+    pub data: i32,
+}
+#[test]
+fn bindgen_test_layout_std_msgs__msg__Int32() {
+    assert_eq!(
+        ::std::mem::size_of::<std_msgs__msg__Int32>(),
+        4usize,
+        concat!("Size of: ", stringify!(std_msgs__msg__Int32))
+    );
+    assert_eq!(
+        ::std::mem::align_of::<std_msgs__msg__Int32>(),
+        4usize,
+        concat!("Alignment of ", stringify!(std_msgs__msg__Int32))
+    );
+    assert_eq!(
+        unsafe { &(*(::std::ptr::null::<std_msgs__msg__Int32>())).data as *const _ as usize },
+        0usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(std_msgs__msg__Int32),
+            "::",
+            stringify!(data)
+        )
+    );
+}
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct std_msgs__msg__Int32__Sequence {
+    pub data: *mut std_msgs__msg__Int32,
+    #[doc = " The number of valid items in data"]
+    pub size: size_t,
+    #[doc = " The number of allocated items in data"]
+    pub capacity: size_t,
+}
+#[test]
+fn bindgen_test_layout_std_msgs__msg__Int32__Sequence() {
+    assert_eq!(
+        ::std::mem::size_of::<std_msgs__msg__Int32__Sequence>(),
+        24usize,
+        concat!("Size of: ", stringify!(std_msgs__msg__Int32__Sequence))
+    );
+    assert_eq!(
+        ::std::mem::align_of::<std_msgs__msg__Int32__Sequence>(),
+        8usize,
+        concat!("Alignment of ", stringify!(std_msgs__msg__Int32__Sequence))
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::std::ptr::null::<std_msgs__msg__Int32__Sequence>())).data as *const _ as usize
+        },
+        0usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(std_msgs__msg__Int32__Sequence),
+            "::",
+            stringify!(data)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::std::ptr::null::<std_msgs__msg__Int32__Sequence>())).size as *const _ as usize
+        },
+        8usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(std_msgs__msg__Int32__Sequence),
+            "::",
+            stringify!(size)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::std::ptr::null::<std_msgs__msg__Int32__Sequence>())).capacity as *const _ as usize
+        },
+        16usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(std_msgs__msg__Int32__Sequence),
+            "::",
+            stringify!(capacity)
+        )
+    );
+}
+extern "C" {
+    #[doc = " Initialize msg/Int32 message."]
+    #[doc = "**"]
+    #[doc = "* If the init function is called twice for the same message without"]
+    #[doc = "* calling fini inbetween previously allocated memory will be leaked."]
+    #[doc = "* \\param[in,out] msg The previously allocated message pointer."]
+    #[doc = "* Fields without a default value will not be initialized by this function."]
+    #[doc = "* You might want to call memset(msg, 0, sizeof("]
+    #[doc = "* std_msgs__msg__Int32"]
+    #[doc = "* )) before or use"]
+    #[doc = "* std_msgs__msg__Int32__create()"]
+    #[doc = "* to allocate and initialize the message."]
+    #[doc = "* \\return true if initialization was successful, otherwise false"]
+    #[doc = "*/"]
+    pub fn std_msgs__msg__Int32__init(msg: *mut std_msgs__msg__Int32) -> bool;
+}
+extern "C" {
+    #[doc = " Finalize msg/Int32 message."]
+    #[doc = "**"]
+    #[doc = "* \\param[in,out] msg The allocated message pointer."]
+    #[doc = "*/"]
+    pub fn std_msgs__msg__Int32__fini(msg: *mut std_msgs__msg__Int32);
+}
+extern "C" {
+    #[doc = " Create msg/Int32 message."]
+    #[doc = "**"]
+    #[doc = "* It allocates the memory for the message, sets the memory to zero, and"]
+    #[doc = "* calls"]
+    #[doc = "* std_msgs__msg__Int32__init()."]
+    #[doc = "* \\return The pointer to the initialized message if successful,"]
+    #[doc = "* otherwise NULL"]
+    #[doc = "*/"]
+    pub fn std_msgs__msg__Int32__create() -> *mut std_msgs__msg__Int32;
+}
+extern "C" {
+    #[doc = " Destroy msg/Int32 message."]
+    #[doc = "**"]
+    #[doc = "* It calls"]
+    #[doc = "* std_msgs__msg__Int32__fini()"]
+    #[doc = "* and frees the memory of the message."]
+    #[doc = "* \\param[in,out] msg The allocated message pointer."]
+    #[doc = "*/"]
+    pub fn std_msgs__msg__Int32__destroy(msg: *mut std_msgs__msg__Int32);
+}
+extern "C" {
+    #[doc = " Check for msg/Int32 message equality."]
+    #[doc = "**"]
+    #[doc = "* \\param[in] lhs The message on the left hand size of the equality operator."]
+    #[doc = "* \\param[in] rhs The message on the right hand size of the equality operator."]
+    #[doc = "* \\return true if messages are equal, otherwise false."]
+    #[doc = "*/"]
+    pub fn std_msgs__msg__Int32__are_equal(
+        lhs: *const std_msgs__msg__Int32,
+        rhs: *const std_msgs__msg__Int32,
+    ) -> bool;
+}
+extern "C" {
+    #[doc = " Copy a msg/Int32 message."]
+    #[doc = "**"]
+    #[doc = "* This functions performs a deep copy, as opposed to the shallow copy that"]
+    #[doc = "* plain assignment yields."]
+    #[doc = "*"]
+    #[doc = "* \\param[in] input The source message pointer."]
+    #[doc = "* \\param[out] output The target message pointer, which must"]
+    #[doc = "*   have been initialized before calling this function."]
+    #[doc = "* \\return true if successful, or false if either pointer is null"]
+    #[doc = "*   or memory allocation fails."]
+    #[doc = "*/"]
+    pub fn std_msgs__msg__Int32__copy(
+        input: *const std_msgs__msg__Int32,
+        output: *mut std_msgs__msg__Int32,
+    ) -> bool;
+}
+extern "C" {
+    #[doc = " Initialize array of msg/Int32 messages."]
+    #[doc = "**"]
+    #[doc = "* It allocates the memory for the number of elements and calls"]
+    #[doc = "* std_msgs__msg__Int32__init()"]
+    #[doc = "* for each element of the array."]
+    #[doc = "* \\param[in,out] array The allocated array pointer."]
+    #[doc = "* \\param[in] size The size / capacity of the array."]
+    #[doc = "* \\return true if initialization was successful, otherwise false"]
+    #[doc = "* If the array pointer is valid and the size is zero it is guaranteed"]
+    #[doc = "# to return true."]
+    #[doc = "*/"]
+    pub fn std_msgs__msg__Int32__Sequence__init(
+        array: *mut std_msgs__msg__Int32__Sequence,
+        size: size_t,
+    ) -> bool;
+}
+extern "C" {
+    #[doc = " Finalize array of msg/Int32 messages."]
+    #[doc = "**"]
+    #[doc = "* It calls"]
+    #[doc = "* std_msgs__msg__Int32__fini()"]
+    #[doc = "* for each element of the array and frees the memory for the number of"]
+    #[doc = "* elements."]
+    #[doc = "* \\param[in,out] array The initialized array pointer."]
+    #[doc = "*/"]
+    pub fn std_msgs__msg__Int32__Sequence__fini(array: *mut std_msgs__msg__Int32__Sequence);
+}
+extern "C" {
+    #[doc = " Create array of msg/Int32 messages."]
+    #[doc = "**"]
+    #[doc = "* It allocates the memory for the array and calls"]
+    #[doc = "* std_msgs__msg__Int32__Sequence__init()."]
+    #[doc = "* \\param[in] size The size / capacity of the array."]
+    #[doc = "* \\return The pointer to the initialized array if successful, otherwise NULL"]
+    #[doc = "*/"]
+    pub fn std_msgs__msg__Int32__Sequence__create(
+        size: size_t,
+    ) -> *mut std_msgs__msg__Int32__Sequence;
+}
+extern "C" {
+    #[doc = " Destroy array of msg/Int32 messages."]
+    #[doc = "**"]
+    #[doc = "* It calls"]
+    #[doc = "* std_msgs__msg__Int32__Sequence__fini()"]
+    #[doc = "* on the array,"]
+    #[doc = "* and frees the memory of the array."]
+    #[doc = "* \\param[in,out] array The initialized array pointer."]
+    #[doc = "*/"]
+    pub fn std_msgs__msg__Int32__Sequence__destroy(array: *mut std_msgs__msg__Int32__Sequence);
+}
+extern "C" {
+    #[doc = " Check for msg/Int32 message array equality."]
+    #[doc = "**"]
+    #[doc = "* \\param[in] lhs The message array on the left hand size of the equality operator."]
+    #[doc = "* \\param[in] rhs The message array on the right hand size of the equality operator."]
+    #[doc = "* \\return true if message arrays are equal in size and content, otherwise false."]
+    #[doc = "*/"]
+    pub fn std_msgs__msg__Int32__Sequence__are_equal(
+        lhs: *const std_msgs__msg__Int32__Sequence,
+        rhs: *const std_msgs__msg__Int32__Sequence,
+    ) -> bool;
+}
+extern "C" {
+    #[doc = " Copy an array of msg/Int32 messages."]
+    #[doc = "**"]
+    #[doc = "* This functions performs a deep copy, as opposed to the shallow copy that"]
+    #[doc = "* plain assignment yields."]
+    #[doc = "*"]
+    #[doc = "* \\param[in] input The source array pointer."]
+    #[doc = "* \\param[out] output The target array pointer, which must"]
+    #[doc = "*   have been initialized before calling this function."]
+    #[doc = "* \\return true if successful, or false if either pointer"]
+    #[doc = "*   is null or memory allocation fails."]
+    #[doc = "*/"]
+    pub fn std_msgs__msg__Int32__Sequence__copy(
+        input: *const std_msgs__msg__Int32__Sequence,
+        output: *mut std_msgs__msg__Int32__Sequence,
+    ) -> bool;
+}
+extern "C" {
+    pub fn rosidl_typesupport_c__get_message_type_support_handle__std_msgs__msg__Int32(
+    ) -> *const rosidl_message_type_support_t;
+}
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
 pub struct std_msgs__msg__Int32MultiArray {
     pub layout: std_msgs__msg__MultiArrayLayout,
     pub data: rosidl_runtime_c__int32__Sequence,
@@ -7406,6 +7621,249 @@ extern "C" {
 }
 extern "C" {
     pub fn rosidl_typesupport_c__get_message_type_support_handle__std_msgs__msg__Int32MultiArray(
+    ) -> *const rosidl_message_type_support_t;
+}
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct std_msgs__msg__Int64 {
+    pub data: i64,
+}
+#[test]
+fn bindgen_test_layout_std_msgs__msg__Int64() {
+    assert_eq!(
+        ::std::mem::size_of::<std_msgs__msg__Int64>(),
+        8usize,
+        concat!("Size of: ", stringify!(std_msgs__msg__Int64))
+    );
+    assert_eq!(
+        ::std::mem::align_of::<std_msgs__msg__Int64>(),
+        8usize,
+        concat!("Alignment of ", stringify!(std_msgs__msg__Int64))
+    );
+    assert_eq!(
+        unsafe { &(*(::std::ptr::null::<std_msgs__msg__Int64>())).data as *const _ as usize },
+        0usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(std_msgs__msg__Int64),
+            "::",
+            stringify!(data)
+        )
+    );
+}
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct std_msgs__msg__Int64__Sequence {
+    pub data: *mut std_msgs__msg__Int64,
+    #[doc = " The number of valid items in data"]
+    pub size: size_t,
+    #[doc = " The number of allocated items in data"]
+    pub capacity: size_t,
+}
+#[test]
+fn bindgen_test_layout_std_msgs__msg__Int64__Sequence() {
+    assert_eq!(
+        ::std::mem::size_of::<std_msgs__msg__Int64__Sequence>(),
+        24usize,
+        concat!("Size of: ", stringify!(std_msgs__msg__Int64__Sequence))
+    );
+    assert_eq!(
+        ::std::mem::align_of::<std_msgs__msg__Int64__Sequence>(),
+        8usize,
+        concat!("Alignment of ", stringify!(std_msgs__msg__Int64__Sequence))
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::std::ptr::null::<std_msgs__msg__Int64__Sequence>())).data as *const _ as usize
+        },
+        0usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(std_msgs__msg__Int64__Sequence),
+            "::",
+            stringify!(data)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::std::ptr::null::<std_msgs__msg__Int64__Sequence>())).size as *const _ as usize
+        },
+        8usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(std_msgs__msg__Int64__Sequence),
+            "::",
+            stringify!(size)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::std::ptr::null::<std_msgs__msg__Int64__Sequence>())).capacity as *const _ as usize
+        },
+        16usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(std_msgs__msg__Int64__Sequence),
+            "::",
+            stringify!(capacity)
+        )
+    );
+}
+extern "C" {
+    #[doc = " Initialize msg/Int64 message."]
+    #[doc = "**"]
+    #[doc = "* If the init function is called twice for the same message without"]
+    #[doc = "* calling fini inbetween previously allocated memory will be leaked."]
+    #[doc = "* \\param[in,out] msg The previously allocated message pointer."]
+    #[doc = "* Fields without a default value will not be initialized by this function."]
+    #[doc = "* You might want to call memset(msg, 0, sizeof("]
+    #[doc = "* std_msgs__msg__Int64"]
+    #[doc = "* )) before or use"]
+    #[doc = "* std_msgs__msg__Int64__create()"]
+    #[doc = "* to allocate and initialize the message."]
+    #[doc = "* \\return true if initialization was successful, otherwise false"]
+    #[doc = "*/"]
+    pub fn std_msgs__msg__Int64__init(msg: *mut std_msgs__msg__Int64) -> bool;
+}
+extern "C" {
+    #[doc = " Finalize msg/Int64 message."]
+    #[doc = "**"]
+    #[doc = "* \\param[in,out] msg The allocated message pointer."]
+    #[doc = "*/"]
+    pub fn std_msgs__msg__Int64__fini(msg: *mut std_msgs__msg__Int64);
+}
+extern "C" {
+    #[doc = " Create msg/Int64 message."]
+    #[doc = "**"]
+    #[doc = "* It allocates the memory for the message, sets the memory to zero, and"]
+    #[doc = "* calls"]
+    #[doc = "* std_msgs__msg__Int64__init()."]
+    #[doc = "* \\return The pointer to the initialized message if successful,"]
+    #[doc = "* otherwise NULL"]
+    #[doc = "*/"]
+    pub fn std_msgs__msg__Int64__create() -> *mut std_msgs__msg__Int64;
+}
+extern "C" {
+    #[doc = " Destroy msg/Int64 message."]
+    #[doc = "**"]
+    #[doc = "* It calls"]
+    #[doc = "* std_msgs__msg__Int64__fini()"]
+    #[doc = "* and frees the memory of the message."]
+    #[doc = "* \\param[in,out] msg The allocated message pointer."]
+    #[doc = "*/"]
+    pub fn std_msgs__msg__Int64__destroy(msg: *mut std_msgs__msg__Int64);
+}
+extern "C" {
+    #[doc = " Check for msg/Int64 message equality."]
+    #[doc = "**"]
+    #[doc = "* \\param[in] lhs The message on the left hand size of the equality operator."]
+    #[doc = "* \\param[in] rhs The message on the right hand size of the equality operator."]
+    #[doc = "* \\return true if messages are equal, otherwise false."]
+    #[doc = "*/"]
+    pub fn std_msgs__msg__Int64__are_equal(
+        lhs: *const std_msgs__msg__Int64,
+        rhs: *const std_msgs__msg__Int64,
+    ) -> bool;
+}
+extern "C" {
+    #[doc = " Copy a msg/Int64 message."]
+    #[doc = "**"]
+    #[doc = "* This functions performs a deep copy, as opposed to the shallow copy that"]
+    #[doc = "* plain assignment yields."]
+    #[doc = "*"]
+    #[doc = "* \\param[in] input The source message pointer."]
+    #[doc = "* \\param[out] output The target message pointer, which must"]
+    #[doc = "*   have been initialized before calling this function."]
+    #[doc = "* \\return true if successful, or false if either pointer is null"]
+    #[doc = "*   or memory allocation fails."]
+    #[doc = "*/"]
+    pub fn std_msgs__msg__Int64__copy(
+        input: *const std_msgs__msg__Int64,
+        output: *mut std_msgs__msg__Int64,
+    ) -> bool;
+}
+extern "C" {
+    #[doc = " Initialize array of msg/Int64 messages."]
+    #[doc = "**"]
+    #[doc = "* It allocates the memory for the number of elements and calls"]
+    #[doc = "* std_msgs__msg__Int64__init()"]
+    #[doc = "* for each element of the array."]
+    #[doc = "* \\param[in,out] array The allocated array pointer."]
+    #[doc = "* \\param[in] size The size / capacity of the array."]
+    #[doc = "* \\return true if initialization was successful, otherwise false"]
+    #[doc = "* If the array pointer is valid and the size is zero it is guaranteed"]
+    #[doc = "# to return true."]
+    #[doc = "*/"]
+    pub fn std_msgs__msg__Int64__Sequence__init(
+        array: *mut std_msgs__msg__Int64__Sequence,
+        size: size_t,
+    ) -> bool;
+}
+extern "C" {
+    #[doc = " Finalize array of msg/Int64 messages."]
+    #[doc = "**"]
+    #[doc = "* It calls"]
+    #[doc = "* std_msgs__msg__Int64__fini()"]
+    #[doc = "* for each element of the array and frees the memory for the number of"]
+    #[doc = "* elements."]
+    #[doc = "* \\param[in,out] array The initialized array pointer."]
+    #[doc = "*/"]
+    pub fn std_msgs__msg__Int64__Sequence__fini(array: *mut std_msgs__msg__Int64__Sequence);
+}
+extern "C" {
+    #[doc = " Create array of msg/Int64 messages."]
+    #[doc = "**"]
+    #[doc = "* It allocates the memory for the array and calls"]
+    #[doc = "* std_msgs__msg__Int64__Sequence__init()."]
+    #[doc = "* \\param[in] size The size / capacity of the array."]
+    #[doc = "* \\return The pointer to the initialized array if successful, otherwise NULL"]
+    #[doc = "*/"]
+    pub fn std_msgs__msg__Int64__Sequence__create(
+        size: size_t,
+    ) -> *mut std_msgs__msg__Int64__Sequence;
+}
+extern "C" {
+    #[doc = " Destroy array of msg/Int64 messages."]
+    #[doc = "**"]
+    #[doc = "* It calls"]
+    #[doc = "* std_msgs__msg__Int64__Sequence__fini()"]
+    #[doc = "* on the array,"]
+    #[doc = "* and frees the memory of the array."]
+    #[doc = "* \\param[in,out] array The initialized array pointer."]
+    #[doc = "*/"]
+    pub fn std_msgs__msg__Int64__Sequence__destroy(array: *mut std_msgs__msg__Int64__Sequence);
+}
+extern "C" {
+    #[doc = " Check for msg/Int64 message array equality."]
+    #[doc = "**"]
+    #[doc = "* \\param[in] lhs The message array on the left hand size of the equality operator."]
+    #[doc = "* \\param[in] rhs The message array on the right hand size of the equality operator."]
+    #[doc = "* \\return true if message arrays are equal in size and content, otherwise false."]
+    #[doc = "*/"]
+    pub fn std_msgs__msg__Int64__Sequence__are_equal(
+        lhs: *const std_msgs__msg__Int64__Sequence,
+        rhs: *const std_msgs__msg__Int64__Sequence,
+    ) -> bool;
+}
+extern "C" {
+    #[doc = " Copy an array of msg/Int64 messages."]
+    #[doc = "**"]
+    #[doc = "* This functions performs a deep copy, as opposed to the shallow copy that"]
+    #[doc = "* plain assignment yields."]
+    #[doc = "*"]
+    #[doc = "* \\param[in] input The source array pointer."]
+    #[doc = "* \\param[out] output The target array pointer, which must"]
+    #[doc = "*   have been initialized before calling this function."]
+    #[doc = "* \\return true if successful, or false if either pointer"]
+    #[doc = "*   is null or memory allocation fails."]
+    #[doc = "*/"]
+    pub fn std_msgs__msg__Int64__Sequence__copy(
+        input: *const std_msgs__msg__Int64__Sequence,
+        output: *mut std_msgs__msg__Int64__Sequence,
+    ) -> bool;
+}
+extern "C" {
+    pub fn rosidl_typesupport_c__get_message_type_support_handle__std_msgs__msg__Int64(
     ) -> *const rosidl_message_type_support_t;
 }
 #[repr(C)]
@@ -7681,42 +8139,27 @@ extern "C" {
 }
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
-pub struct std_msgs__msg__UInt8MultiArray {
-    pub layout: std_msgs__msg__MultiArrayLayout,
-    pub data: rosidl_runtime_c__uint8__Sequence,
+pub struct std_msgs__msg__Int8 {
+    pub data: i8,
 }
 #[test]
-fn bindgen_test_layout_std_msgs__msg__UInt8MultiArray() {
+fn bindgen_test_layout_std_msgs__msg__Int8() {
     assert_eq!(
-        ::std::mem::size_of::<std_msgs__msg__UInt8MultiArray>(),
-        56usize,
-        concat!("Size of: ", stringify!(std_msgs__msg__UInt8MultiArray))
+        ::std::mem::size_of::<std_msgs__msg__Int8>(),
+        1usize,
+        concat!("Size of: ", stringify!(std_msgs__msg__Int8))
     );
     assert_eq!(
-        ::std::mem::align_of::<std_msgs__msg__UInt8MultiArray>(),
-        8usize,
-        concat!("Alignment of ", stringify!(std_msgs__msg__UInt8MultiArray))
+        ::std::mem::align_of::<std_msgs__msg__Int8>(),
+        1usize,
+        concat!("Alignment of ", stringify!(std_msgs__msg__Int8))
     );
     assert_eq!(
-        unsafe {
-            &(*(::std::ptr::null::<std_msgs__msg__UInt8MultiArray>())).layout as *const _ as usize
-        },
+        unsafe { &(*(::std::ptr::null::<std_msgs__msg__Int8>())).data as *const _ as usize },
         0usize,
         concat!(
             "Offset of field: ",
-            stringify!(std_msgs__msg__UInt8MultiArray),
-            "::",
-            stringify!(layout)
-        )
-    );
-    assert_eq!(
-        unsafe {
-            &(*(::std::ptr::null::<std_msgs__msg__UInt8MultiArray>())).data as *const _ as usize
-        },
-        32usize,
-        concat!(
-            "Offset of field: ",
-            stringify!(std_msgs__msg__UInt8MultiArray),
+            stringify!(std_msgs__msg__Int8),
             "::",
             stringify!(data)
         )
@@ -7724,129 +8167,120 @@ fn bindgen_test_layout_std_msgs__msg__UInt8MultiArray() {
 }
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
-pub struct std_msgs__msg__UInt8MultiArray__Sequence {
-    pub data: *mut std_msgs__msg__UInt8MultiArray,
+pub struct std_msgs__msg__Int8__Sequence {
+    pub data: *mut std_msgs__msg__Int8,
     #[doc = " The number of valid items in data"]
     pub size: size_t,
     #[doc = " The number of allocated items in data"]
     pub capacity: size_t,
 }
 #[test]
-fn bindgen_test_layout_std_msgs__msg__UInt8MultiArray__Sequence() {
+fn bindgen_test_layout_std_msgs__msg__Int8__Sequence() {
     assert_eq!(
-        ::std::mem::size_of::<std_msgs__msg__UInt8MultiArray__Sequence>(),
+        ::std::mem::size_of::<std_msgs__msg__Int8__Sequence>(),
         24usize,
-        concat!(
-            "Size of: ",
-            stringify!(std_msgs__msg__UInt8MultiArray__Sequence)
-        )
+        concat!("Size of: ", stringify!(std_msgs__msg__Int8__Sequence))
     );
     assert_eq!(
-        ::std::mem::align_of::<std_msgs__msg__UInt8MultiArray__Sequence>(),
+        ::std::mem::align_of::<std_msgs__msg__Int8__Sequence>(),
         8usize,
-        concat!(
-            "Alignment of ",
-            stringify!(std_msgs__msg__UInt8MultiArray__Sequence)
-        )
+        concat!("Alignment of ", stringify!(std_msgs__msg__Int8__Sequence))
     );
     assert_eq!(
         unsafe {
-            &(*(::std::ptr::null::<std_msgs__msg__UInt8MultiArray__Sequence>())).data as *const _
-                as usize
+            &(*(::std::ptr::null::<std_msgs__msg__Int8__Sequence>())).data as *const _ as usize
         },
         0usize,
         concat!(
             "Offset of field: ",
-            stringify!(std_msgs__msg__UInt8MultiArray__Sequence),
+            stringify!(std_msgs__msg__Int8__Sequence),
             "::",
             stringify!(data)
         )
     );
     assert_eq!(
         unsafe {
-            &(*(::std::ptr::null::<std_msgs__msg__UInt8MultiArray__Sequence>())).size as *const _
-                as usize
+            &(*(::std::ptr::null::<std_msgs__msg__Int8__Sequence>())).size as *const _ as usize
         },
         8usize,
         concat!(
             "Offset of field: ",
-            stringify!(std_msgs__msg__UInt8MultiArray__Sequence),
+            stringify!(std_msgs__msg__Int8__Sequence),
             "::",
             stringify!(size)
         )
     );
     assert_eq!(
         unsafe {
-            &(*(::std::ptr::null::<std_msgs__msg__UInt8MultiArray__Sequence>())).capacity
-                as *const _ as usize
+            &(*(::std::ptr::null::<std_msgs__msg__Int8__Sequence>())).capacity as *const _ as usize
         },
         16usize,
         concat!(
             "Offset of field: ",
-            stringify!(std_msgs__msg__UInt8MultiArray__Sequence),
+            stringify!(std_msgs__msg__Int8__Sequence),
             "::",
             stringify!(capacity)
         )
     );
 }
 extern "C" {
-    #[doc = " Initialize msg/UInt8MultiArray message."]
+    #[doc = " Initialize msg/Int8 message."]
     #[doc = "**"]
     #[doc = "* If the init function is called twice for the same message without"]
     #[doc = "* calling fini inbetween previously allocated memory will be leaked."]
     #[doc = "* \\param[in,out] msg The previously allocated message pointer."]
     #[doc = "* Fields without a default value will not be initialized by this function."]
     #[doc = "* You might want to call memset(msg, 0, sizeof("]
-    #[doc = "* std_msgs__msg__UInt8MultiArray"]
+    #[doc = "* std_msgs__msg__Int8"]
     #[doc = "* )) before or use"]
-    #[doc = "* std_msgs__msg__UInt8MultiArray__create()"]
+    #[doc = "* std_msgs__msg__Int8__create()"]
     #[doc = "* to allocate and initialize the message."]
     #[doc = "* \\return true if initialization was successful, otherwise false"]
     #[doc = "*/"]
-    pub fn std_msgs__msg__UInt8MultiArray__init(msg: *mut std_msgs__msg__UInt8MultiArray) -> bool;
+    pub fn std_msgs__msg__Int8__init(msg: *mut std_msgs__msg__Int8) -> bool;
 }
 extern "C" {
-    #[doc = " Finalize msg/UInt8MultiArray message."]
+    #[doc = " Finalize msg/Int8 message."]
     #[doc = "**"]
     #[doc = "* \\param[in,out] msg The allocated message pointer."]
     #[doc = "*/"]
-    pub fn std_msgs__msg__UInt8MultiArray__fini(msg: *mut std_msgs__msg__UInt8MultiArray);
+    pub fn std_msgs__msg__Int8__fini(msg: *mut std_msgs__msg__Int8);
 }
 extern "C" {
-    #[doc = " Create msg/UInt8MultiArray message."]
+    #[doc = " Create msg/Int8 message."]
     #[doc = "**"]
     #[doc = "* It allocates the memory for the message, sets the memory to zero, and"]
     #[doc = "* calls"]
-    #[doc = "* std_msgs__msg__UInt8MultiArray__init()."]
+    #[doc = "* std_msgs__msg__Int8__init()."]
     #[doc = "* \\return The pointer to the initialized message if successful,"]
     #[doc = "* otherwise NULL"]
     #[doc = "*/"]
-    pub fn std_msgs__msg__UInt8MultiArray__create() -> *mut std_msgs__msg__UInt8MultiArray;
+    pub fn std_msgs__msg__Int8__create() -> *mut std_msgs__msg__Int8;
 }
 extern "C" {
-    #[doc = " Destroy msg/UInt8MultiArray message."]
+    #[doc = " Destroy msg/Int8 message."]
     #[doc = "**"]
     #[doc = "* It calls"]
-    #[doc = "* std_msgs__msg__UInt8MultiArray__fini()"]
+    #[doc = "* std_msgs__msg__Int8__fini()"]
     #[doc = "* and frees the memory of the message."]
     #[doc = "* \\param[in,out] msg The allocated message pointer."]
     #[doc = "*/"]
-    pub fn std_msgs__msg__UInt8MultiArray__destroy(msg: *mut std_msgs__msg__UInt8MultiArray);
+    pub fn std_msgs__msg__Int8__destroy(msg: *mut std_msgs__msg__Int8);
 }
 extern "C" {
-    #[doc = " Check for msg/UInt8MultiArray message equality."]
+    #[doc = " Check for msg/Int8 message equality."]
     #[doc = "**"]
     #[doc = "* \\param[in] lhs The message on the left hand size of the equality operator."]
     #[doc = "* \\param[in] rhs The message on the right hand size of the equality operator."]
     #[doc = "* \\return true if messages are equal, otherwise false."]
     #[doc = "*/"]
-    pub fn std_msgs__msg__UInt8MultiArray__are_equal(
-        lhs: *const std_msgs__msg__UInt8MultiArray,
-        rhs: *const std_msgs__msg__UInt8MultiArray,
+    pub fn std_msgs__msg__Int8__are_equal(
+        lhs: *const std_msgs__msg__Int8,
+        rhs: *const std_msgs__msg__Int8,
     ) -> bool;
 }
 extern "C" {
-    #[doc = " Copy a msg/UInt8MultiArray message."]
+    #[doc = " Copy a msg/Int8 message."]
     #[doc = "**"]
     #[doc = "* This functions performs a deep copy, as opposed to the shallow copy that"]
     #[doc = "* plain assignment yields."]
@@ -7857,16 +8291,16 @@ extern "C" {
     #[doc = "* \\return true if successful, or false if either pointer is null"]
     #[doc = "*   or memory allocation fails."]
     #[doc = "*/"]
-    pub fn std_msgs__msg__UInt8MultiArray__copy(
-        input: *const std_msgs__msg__UInt8MultiArray,
-        output: *mut std_msgs__msg__UInt8MultiArray,
+    pub fn std_msgs__msg__Int8__copy(
+        input: *const std_msgs__msg__Int8,
+        output: *mut std_msgs__msg__Int8,
     ) -> bool;
 }
 extern "C" {
-    #[doc = " Initialize array of msg/UInt8MultiArray messages."]
+    #[doc = " Initialize array of msg/Int8 messages."]
     #[doc = "**"]
     #[doc = "* It allocates the memory for the number of elements and calls"]
-    #[doc = "* std_msgs__msg__UInt8MultiArray__init()"]
+    #[doc = "* std_msgs__msg__Int8__init()"]
     #[doc = "* for each element of the array."]
     #[doc = "* \\param[in,out] array The allocated array pointer."]
     #[doc = "* \\param[in] size The size / capacity of the array."]
@@ -7874,63 +8308,59 @@ extern "C" {
     #[doc = "* If the array pointer is valid and the size is zero it is guaranteed"]
     #[doc = "# to return true."]
     #[doc = "*/"]
-    pub fn std_msgs__msg__UInt8MultiArray__Sequence__init(
-        array: *mut std_msgs__msg__UInt8MultiArray__Sequence,
+    pub fn std_msgs__msg__Int8__Sequence__init(
+        array: *mut std_msgs__msg__Int8__Sequence,
         size: size_t,
     ) -> bool;
 }
 extern "C" {
-    #[doc = " Finalize array of msg/UInt8MultiArray messages."]
+    #[doc = " Finalize array of msg/Int8 messages."]
     #[doc = "**"]
     #[doc = "* It calls"]
-    #[doc = "* std_msgs__msg__UInt8MultiArray__fini()"]
+    #[doc = "* std_msgs__msg__Int8__fini()"]
     #[doc = "* for each element of the array and frees the memory for the number of"]
     #[doc = "* elements."]
     #[doc = "* \\param[in,out] array The initialized array pointer."]
     #[doc = "*/"]
-    pub fn std_msgs__msg__UInt8MultiArray__Sequence__fini(
-        array: *mut std_msgs__msg__UInt8MultiArray__Sequence,
-    );
+    pub fn std_msgs__msg__Int8__Sequence__fini(array: *mut std_msgs__msg__Int8__Sequence);
 }
 extern "C" {
-    #[doc = " Create array of msg/UInt8MultiArray messages."]
+    #[doc = " Create array of msg/Int8 messages."]
     #[doc = "**"]
     #[doc = "* It allocates the memory for the array and calls"]
-    #[doc = "* std_msgs__msg__UInt8MultiArray__Sequence__init()."]
+    #[doc = "* std_msgs__msg__Int8__Sequence__init()."]
     #[doc = "* \\param[in] size The size / capacity of the array."]
     #[doc = "* \\return The pointer to the initialized array if successful, otherwise NULL"]
     #[doc = "*/"]
-    pub fn std_msgs__msg__UInt8MultiArray__Sequence__create(
+    pub fn std_msgs__msg__Int8__Sequence__create(
         size: size_t,
-    ) -> *mut std_msgs__msg__UInt8MultiArray__Sequence;
+    ) -> *mut std_msgs__msg__Int8__Sequence;
 }
 extern "C" {
-    #[doc = " Destroy array of msg/UInt8MultiArray messages."]
+    #[doc = " Destroy array of msg/Int8 messages."]
     #[doc = "**"]
     #[doc = "* It calls"]
-    #[doc = "* std_msgs__msg__UInt8MultiArray__Sequence__fini()"]
+    #[doc = "* std_msgs__msg__Int8__Sequence__fini()"]
     #[doc = "* on the array,"]
     #[doc = "* and frees the memory of the array."]
     #[doc = "* \\param[in,out] array The initialized array pointer."]
     #[doc = "*/"]
-    pub fn std_msgs__msg__UInt8MultiArray__Sequence__destroy(
-        array: *mut std_msgs__msg__UInt8MultiArray__Sequence,
-    );
+    pub fn std_msgs__msg__Int8__Sequence__destroy(array: *mut std_msgs__msg__Int8__Sequence);
 }
 extern "C" {
-    #[doc = " Check for msg/UInt8MultiArray message array equality."]
+    #[doc = " Check for msg/Int8 message array equality."]
     #[doc = "**"]
     #[doc = "* \\param[in] lhs The message array on the left hand size of the equality operator."]
     #[doc = "* \\param[in] rhs The message array on the right hand size of the equality operator."]
     #[doc = "* \\return true if message arrays are equal in size and content, otherwise false."]
     #[doc = "*/"]
-    pub fn std_msgs__msg__UInt8MultiArray__Sequence__are_equal(
-        lhs: *const std_msgs__msg__UInt8MultiArray__Sequence,
-        rhs: *const std_msgs__msg__UInt8MultiArray__Sequence,
+    pub fn std_msgs__msg__Int8__Sequence__are_equal(
+        lhs: *const std_msgs__msg__Int8__Sequence,
+        rhs: *const std_msgs__msg__Int8__Sequence,
     ) -> bool;
 }
 extern "C" {
-    #[doc = " Copy an array of msg/UInt8MultiArray messages."]
+    #[doc = " Copy an array of msg/Int8 messages."]
     #[doc = "**"]
     #[doc = "* This functions performs a deep copy, as opposed to the shallow copy that"]
     #[doc = "* plain assignment yields."]
@@ -7941,13 +8371,772 @@ extern "C" {
     #[doc = "* \\return true if successful, or false if either pointer"]
     #[doc = "*   is null or memory allocation fails."]
     #[doc = "*/"]
-    pub fn std_msgs__msg__UInt8MultiArray__Sequence__copy(
-        input: *const std_msgs__msg__UInt8MultiArray__Sequence,
-        output: *mut std_msgs__msg__UInt8MultiArray__Sequence,
+    pub fn std_msgs__msg__Int8__Sequence__copy(
+        input: *const std_msgs__msg__Int8__Sequence,
+        output: *mut std_msgs__msg__Int8__Sequence,
     ) -> bool;
 }
 extern "C" {
-    pub fn rosidl_typesupport_c__get_message_type_support_handle__std_msgs__msg__UInt8MultiArray(
+    pub fn rosidl_typesupport_c__get_message_type_support_handle__std_msgs__msg__Int8(
+    ) -> *const rosidl_message_type_support_t;
+}
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct std_msgs__msg__Int8MultiArray {
+    pub layout: std_msgs__msg__MultiArrayLayout,
+    pub data: rosidl_runtime_c__int8__Sequence,
+}
+#[test]
+fn bindgen_test_layout_std_msgs__msg__Int8MultiArray() {
+    assert_eq!(
+        ::std::mem::size_of::<std_msgs__msg__Int8MultiArray>(),
+        56usize,
+        concat!("Size of: ", stringify!(std_msgs__msg__Int8MultiArray))
+    );
+    assert_eq!(
+        ::std::mem::align_of::<std_msgs__msg__Int8MultiArray>(),
+        8usize,
+        concat!("Alignment of ", stringify!(std_msgs__msg__Int8MultiArray))
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::std::ptr::null::<std_msgs__msg__Int8MultiArray>())).layout as *const _ as usize
+        },
+        0usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(std_msgs__msg__Int8MultiArray),
+            "::",
+            stringify!(layout)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::std::ptr::null::<std_msgs__msg__Int8MultiArray>())).data as *const _ as usize
+        },
+        32usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(std_msgs__msg__Int8MultiArray),
+            "::",
+            stringify!(data)
+        )
+    );
+}
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct std_msgs__msg__Int8MultiArray__Sequence {
+    pub data: *mut std_msgs__msg__Int8MultiArray,
+    #[doc = " The number of valid items in data"]
+    pub size: size_t,
+    #[doc = " The number of allocated items in data"]
+    pub capacity: size_t,
+}
+#[test]
+fn bindgen_test_layout_std_msgs__msg__Int8MultiArray__Sequence() {
+    assert_eq!(
+        ::std::mem::size_of::<std_msgs__msg__Int8MultiArray__Sequence>(),
+        24usize,
+        concat!(
+            "Size of: ",
+            stringify!(std_msgs__msg__Int8MultiArray__Sequence)
+        )
+    );
+    assert_eq!(
+        ::std::mem::align_of::<std_msgs__msg__Int8MultiArray__Sequence>(),
+        8usize,
+        concat!(
+            "Alignment of ",
+            stringify!(std_msgs__msg__Int8MultiArray__Sequence)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::std::ptr::null::<std_msgs__msg__Int8MultiArray__Sequence>())).data as *const _
+                as usize
+        },
+        0usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(std_msgs__msg__Int8MultiArray__Sequence),
+            "::",
+            stringify!(data)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::std::ptr::null::<std_msgs__msg__Int8MultiArray__Sequence>())).size as *const _
+                as usize
+        },
+        8usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(std_msgs__msg__Int8MultiArray__Sequence),
+            "::",
+            stringify!(size)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::std::ptr::null::<std_msgs__msg__Int8MultiArray__Sequence>())).capacity as *const _
+                as usize
+        },
+        16usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(std_msgs__msg__Int8MultiArray__Sequence),
+            "::",
+            stringify!(capacity)
+        )
+    );
+}
+extern "C" {
+    #[doc = " Initialize msg/Int8MultiArray message."]
+    #[doc = "**"]
+    #[doc = "* If the init function is called twice for the same message without"]
+    #[doc = "* calling fini inbetween previously allocated memory will be leaked."]
+    #[doc = "* \\param[in,out] msg The previously allocated message pointer."]
+    #[doc = "* Fields without a default value will not be initialized by this function."]
+    #[doc = "* You might want to call memset(msg, 0, sizeof("]
+    #[doc = "* std_msgs__msg__Int8MultiArray"]
+    #[doc = "* )) before or use"]
+    #[doc = "* std_msgs__msg__Int8MultiArray__create()"]
+    #[doc = "* to allocate and initialize the message."]
+    #[doc = "* \\return true if initialization was successful, otherwise false"]
+    #[doc = "*/"]
+    pub fn std_msgs__msg__Int8MultiArray__init(msg: *mut std_msgs__msg__Int8MultiArray) -> bool;
+}
+extern "C" {
+    #[doc = " Finalize msg/Int8MultiArray message."]
+    #[doc = "**"]
+    #[doc = "* \\param[in,out] msg The allocated message pointer."]
+    #[doc = "*/"]
+    pub fn std_msgs__msg__Int8MultiArray__fini(msg: *mut std_msgs__msg__Int8MultiArray);
+}
+extern "C" {
+    #[doc = " Create msg/Int8MultiArray message."]
+    #[doc = "**"]
+    #[doc = "* It allocates the memory for the message, sets the memory to zero, and"]
+    #[doc = "* calls"]
+    #[doc = "* std_msgs__msg__Int8MultiArray__init()."]
+    #[doc = "* \\return The pointer to the initialized message if successful,"]
+    #[doc = "* otherwise NULL"]
+    #[doc = "*/"]
+    pub fn std_msgs__msg__Int8MultiArray__create() -> *mut std_msgs__msg__Int8MultiArray;
+}
+extern "C" {
+    #[doc = " Destroy msg/Int8MultiArray message."]
+    #[doc = "**"]
+    #[doc = "* It calls"]
+    #[doc = "* std_msgs__msg__Int8MultiArray__fini()"]
+    #[doc = "* and frees the memory of the message."]
+    #[doc = "* \\param[in,out] msg The allocated message pointer."]
+    #[doc = "*/"]
+    pub fn std_msgs__msg__Int8MultiArray__destroy(msg: *mut std_msgs__msg__Int8MultiArray);
+}
+extern "C" {
+    #[doc = " Check for msg/Int8MultiArray message equality."]
+    #[doc = "**"]
+    #[doc = "* \\param[in] lhs The message on the left hand size of the equality operator."]
+    #[doc = "* \\param[in] rhs The message on the right hand size of the equality operator."]
+    #[doc = "* \\return true if messages are equal, otherwise false."]
+    #[doc = "*/"]
+    pub fn std_msgs__msg__Int8MultiArray__are_equal(
+        lhs: *const std_msgs__msg__Int8MultiArray,
+        rhs: *const std_msgs__msg__Int8MultiArray,
+    ) -> bool;
+}
+extern "C" {
+    #[doc = " Copy a msg/Int8MultiArray message."]
+    #[doc = "**"]
+    #[doc = "* This functions performs a deep copy, as opposed to the shallow copy that"]
+    #[doc = "* plain assignment yields."]
+    #[doc = "*"]
+    #[doc = "* \\param[in] input The source message pointer."]
+    #[doc = "* \\param[out] output The target message pointer, which must"]
+    #[doc = "*   have been initialized before calling this function."]
+    #[doc = "* \\return true if successful, or false if either pointer is null"]
+    #[doc = "*   or memory allocation fails."]
+    #[doc = "*/"]
+    pub fn std_msgs__msg__Int8MultiArray__copy(
+        input: *const std_msgs__msg__Int8MultiArray,
+        output: *mut std_msgs__msg__Int8MultiArray,
+    ) -> bool;
+}
+extern "C" {
+    #[doc = " Initialize array of msg/Int8MultiArray messages."]
+    #[doc = "**"]
+    #[doc = "* It allocates the memory for the number of elements and calls"]
+    #[doc = "* std_msgs__msg__Int8MultiArray__init()"]
+    #[doc = "* for each element of the array."]
+    #[doc = "* \\param[in,out] array The allocated array pointer."]
+    #[doc = "* \\param[in] size The size / capacity of the array."]
+    #[doc = "* \\return true if initialization was successful, otherwise false"]
+    #[doc = "* If the array pointer is valid and the size is zero it is guaranteed"]
+    #[doc = "# to return true."]
+    #[doc = "*/"]
+    pub fn std_msgs__msg__Int8MultiArray__Sequence__init(
+        array: *mut std_msgs__msg__Int8MultiArray__Sequence,
+        size: size_t,
+    ) -> bool;
+}
+extern "C" {
+    #[doc = " Finalize array of msg/Int8MultiArray messages."]
+    #[doc = "**"]
+    #[doc = "* It calls"]
+    #[doc = "* std_msgs__msg__Int8MultiArray__fini()"]
+    #[doc = "* for each element of the array and frees the memory for the number of"]
+    #[doc = "* elements."]
+    #[doc = "* \\param[in,out] array The initialized array pointer."]
+    #[doc = "*/"]
+    pub fn std_msgs__msg__Int8MultiArray__Sequence__fini(
+        array: *mut std_msgs__msg__Int8MultiArray__Sequence,
+    );
+}
+extern "C" {
+    #[doc = " Create array of msg/Int8MultiArray messages."]
+    #[doc = "**"]
+    #[doc = "* It allocates the memory for the array and calls"]
+    #[doc = "* std_msgs__msg__Int8MultiArray__Sequence__init()."]
+    #[doc = "* \\param[in] size The size / capacity of the array."]
+    #[doc = "* \\return The pointer to the initialized array if successful, otherwise NULL"]
+    #[doc = "*/"]
+    pub fn std_msgs__msg__Int8MultiArray__Sequence__create(
+        size: size_t,
+    ) -> *mut std_msgs__msg__Int8MultiArray__Sequence;
+}
+extern "C" {
+    #[doc = " Destroy array of msg/Int8MultiArray messages."]
+    #[doc = "**"]
+    #[doc = "* It calls"]
+    #[doc = "* std_msgs__msg__Int8MultiArray__Sequence__fini()"]
+    #[doc = "* on the array,"]
+    #[doc = "* and frees the memory of the array."]
+    #[doc = "* \\param[in,out] array The initialized array pointer."]
+    #[doc = "*/"]
+    pub fn std_msgs__msg__Int8MultiArray__Sequence__destroy(
+        array: *mut std_msgs__msg__Int8MultiArray__Sequence,
+    );
+}
+extern "C" {
+    #[doc = " Check for msg/Int8MultiArray message array equality."]
+    #[doc = "**"]
+    #[doc = "* \\param[in] lhs The message array on the left hand size of the equality operator."]
+    #[doc = "* \\param[in] rhs The message array on the right hand size of the equality operator."]
+    #[doc = "* \\return true if message arrays are equal in size and content, otherwise false."]
+    #[doc = "*/"]
+    pub fn std_msgs__msg__Int8MultiArray__Sequence__are_equal(
+        lhs: *const std_msgs__msg__Int8MultiArray__Sequence,
+        rhs: *const std_msgs__msg__Int8MultiArray__Sequence,
+    ) -> bool;
+}
+extern "C" {
+    #[doc = " Copy an array of msg/Int8MultiArray messages."]
+    #[doc = "**"]
+    #[doc = "* This functions performs a deep copy, as opposed to the shallow copy that"]
+    #[doc = "* plain assignment yields."]
+    #[doc = "*"]
+    #[doc = "* \\param[in] input The source array pointer."]
+    #[doc = "* \\param[out] output The target array pointer, which must"]
+    #[doc = "*   have been initialized before calling this function."]
+    #[doc = "* \\return true if successful, or false if either pointer"]
+    #[doc = "*   is null or memory allocation fails."]
+    #[doc = "*/"]
+    pub fn std_msgs__msg__Int8MultiArray__Sequence__copy(
+        input: *const std_msgs__msg__Int8MultiArray__Sequence,
+        output: *mut std_msgs__msg__Int8MultiArray__Sequence,
+    ) -> bool;
+}
+extern "C" {
+    pub fn rosidl_typesupport_c__get_message_type_support_handle__std_msgs__msg__Int8MultiArray(
+    ) -> *const rosidl_message_type_support_t;
+}
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct std_msgs__msg__String {
+    pub data: rosidl_runtime_c__String,
+}
+#[test]
+fn bindgen_test_layout_std_msgs__msg__String() {
+    assert_eq!(
+        ::std::mem::size_of::<std_msgs__msg__String>(),
+        24usize,
+        concat!("Size of: ", stringify!(std_msgs__msg__String))
+    );
+    assert_eq!(
+        ::std::mem::align_of::<std_msgs__msg__String>(),
+        8usize,
+        concat!("Alignment of ", stringify!(std_msgs__msg__String))
+    );
+    assert_eq!(
+        unsafe { &(*(::std::ptr::null::<std_msgs__msg__String>())).data as *const _ as usize },
+        0usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(std_msgs__msg__String),
+            "::",
+            stringify!(data)
+        )
+    );
+}
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct std_msgs__msg__String__Sequence {
+    pub data: *mut std_msgs__msg__String,
+    #[doc = " The number of valid items in data"]
+    pub size: size_t,
+    #[doc = " The number of allocated items in data"]
+    pub capacity: size_t,
+}
+#[test]
+fn bindgen_test_layout_std_msgs__msg__String__Sequence() {
+    assert_eq!(
+        ::std::mem::size_of::<std_msgs__msg__String__Sequence>(),
+        24usize,
+        concat!("Size of: ", stringify!(std_msgs__msg__String__Sequence))
+    );
+    assert_eq!(
+        ::std::mem::align_of::<std_msgs__msg__String__Sequence>(),
+        8usize,
+        concat!("Alignment of ", stringify!(std_msgs__msg__String__Sequence))
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::std::ptr::null::<std_msgs__msg__String__Sequence>())).data as *const _ as usize
+        },
+        0usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(std_msgs__msg__String__Sequence),
+            "::",
+            stringify!(data)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::std::ptr::null::<std_msgs__msg__String__Sequence>())).size as *const _ as usize
+        },
+        8usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(std_msgs__msg__String__Sequence),
+            "::",
+            stringify!(size)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::std::ptr::null::<std_msgs__msg__String__Sequence>())).capacity as *const _
+                as usize
+        },
+        16usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(std_msgs__msg__String__Sequence),
+            "::",
+            stringify!(capacity)
+        )
+    );
+}
+extern "C" {
+    #[doc = " Initialize msg/String message."]
+    #[doc = "**"]
+    #[doc = "* If the init function is called twice for the same message without"]
+    #[doc = "* calling fini inbetween previously allocated memory will be leaked."]
+    #[doc = "* \\param[in,out] msg The previously allocated message pointer."]
+    #[doc = "* Fields without a default value will not be initialized by this function."]
+    #[doc = "* You might want to call memset(msg, 0, sizeof("]
+    #[doc = "* std_msgs__msg__String"]
+    #[doc = "* )) before or use"]
+    #[doc = "* std_msgs__msg__String__create()"]
+    #[doc = "* to allocate and initialize the message."]
+    #[doc = "* \\return true if initialization was successful, otherwise false"]
+    #[doc = "*/"]
+    pub fn std_msgs__msg__String__init(msg: *mut std_msgs__msg__String) -> bool;
+}
+extern "C" {
+    #[doc = " Finalize msg/String message."]
+    #[doc = "**"]
+    #[doc = "* \\param[in,out] msg The allocated message pointer."]
+    #[doc = "*/"]
+    pub fn std_msgs__msg__String__fini(msg: *mut std_msgs__msg__String);
+}
+extern "C" {
+    #[doc = " Create msg/String message."]
+    #[doc = "**"]
+    #[doc = "* It allocates the memory for the message, sets the memory to zero, and"]
+    #[doc = "* calls"]
+    #[doc = "* std_msgs__msg__String__init()."]
+    #[doc = "* \\return The pointer to the initialized message if successful,"]
+    #[doc = "* otherwise NULL"]
+    #[doc = "*/"]
+    pub fn std_msgs__msg__String__create() -> *mut std_msgs__msg__String;
+}
+extern "C" {
+    #[doc = " Destroy msg/String message."]
+    #[doc = "**"]
+    #[doc = "* It calls"]
+    #[doc = "* std_msgs__msg__String__fini()"]
+    #[doc = "* and frees the memory of the message."]
+    #[doc = "* \\param[in,out] msg The allocated message pointer."]
+    #[doc = "*/"]
+    pub fn std_msgs__msg__String__destroy(msg: *mut std_msgs__msg__String);
+}
+extern "C" {
+    #[doc = " Check for msg/String message equality."]
+    #[doc = "**"]
+    #[doc = "* \\param[in] lhs The message on the left hand size of the equality operator."]
+    #[doc = "* \\param[in] rhs The message on the right hand size of the equality operator."]
+    #[doc = "* \\return true if messages are equal, otherwise false."]
+    #[doc = "*/"]
+    pub fn std_msgs__msg__String__are_equal(
+        lhs: *const std_msgs__msg__String,
+        rhs: *const std_msgs__msg__String,
+    ) -> bool;
+}
+extern "C" {
+    #[doc = " Copy a msg/String message."]
+    #[doc = "**"]
+    #[doc = "* This functions performs a deep copy, as opposed to the shallow copy that"]
+    #[doc = "* plain assignment yields."]
+    #[doc = "*"]
+    #[doc = "* \\param[in] input The source message pointer."]
+    #[doc = "* \\param[out] output The target message pointer, which must"]
+    #[doc = "*   have been initialized before calling this function."]
+    #[doc = "* \\return true if successful, or false if either pointer is null"]
+    #[doc = "*   or memory allocation fails."]
+    #[doc = "*/"]
+    pub fn std_msgs__msg__String__copy(
+        input: *const std_msgs__msg__String,
+        output: *mut std_msgs__msg__String,
+    ) -> bool;
+}
+extern "C" {
+    #[doc = " Initialize array of msg/String messages."]
+    #[doc = "**"]
+    #[doc = "* It allocates the memory for the number of elements and calls"]
+    #[doc = "* std_msgs__msg__String__init()"]
+    #[doc = "* for each element of the array."]
+    #[doc = "* \\param[in,out] array The allocated array pointer."]
+    #[doc = "* \\param[in] size The size / capacity of the array."]
+    #[doc = "* \\return true if initialization was successful, otherwise false"]
+    #[doc = "* If the array pointer is valid and the size is zero it is guaranteed"]
+    #[doc = "# to return true."]
+    #[doc = "*/"]
+    pub fn std_msgs__msg__String__Sequence__init(
+        array: *mut std_msgs__msg__String__Sequence,
+        size: size_t,
+    ) -> bool;
+}
+extern "C" {
+    #[doc = " Finalize array of msg/String messages."]
+    #[doc = "**"]
+    #[doc = "* It calls"]
+    #[doc = "* std_msgs__msg__String__fini()"]
+    #[doc = "* for each element of the array and frees the memory for the number of"]
+    #[doc = "* elements."]
+    #[doc = "* \\param[in,out] array The initialized array pointer."]
+    #[doc = "*/"]
+    pub fn std_msgs__msg__String__Sequence__fini(array: *mut std_msgs__msg__String__Sequence);
+}
+extern "C" {
+    #[doc = " Create array of msg/String messages."]
+    #[doc = "**"]
+    #[doc = "* It allocates the memory for the array and calls"]
+    #[doc = "* std_msgs__msg__String__Sequence__init()."]
+    #[doc = "* \\param[in] size The size / capacity of the array."]
+    #[doc = "* \\return The pointer to the initialized array if successful, otherwise NULL"]
+    #[doc = "*/"]
+    pub fn std_msgs__msg__String__Sequence__create(
+        size: size_t,
+    ) -> *mut std_msgs__msg__String__Sequence;
+}
+extern "C" {
+    #[doc = " Destroy array of msg/String messages."]
+    #[doc = "**"]
+    #[doc = "* It calls"]
+    #[doc = "* std_msgs__msg__String__Sequence__fini()"]
+    #[doc = "* on the array,"]
+    #[doc = "* and frees the memory of the array."]
+    #[doc = "* \\param[in,out] array The initialized array pointer."]
+    #[doc = "*/"]
+    pub fn std_msgs__msg__String__Sequence__destroy(array: *mut std_msgs__msg__String__Sequence);
+}
+extern "C" {
+    #[doc = " Check for msg/String message array equality."]
+    #[doc = "**"]
+    #[doc = "* \\param[in] lhs The message array on the left hand size of the equality operator."]
+    #[doc = "* \\param[in] rhs The message array on the right hand size of the equality operator."]
+    #[doc = "* \\return true if message arrays are equal in size and content, otherwise false."]
+    #[doc = "*/"]
+    pub fn std_msgs__msg__String__Sequence__are_equal(
+        lhs: *const std_msgs__msg__String__Sequence,
+        rhs: *const std_msgs__msg__String__Sequence,
+    ) -> bool;
+}
+extern "C" {
+    #[doc = " Copy an array of msg/String messages."]
+    #[doc = "**"]
+    #[doc = "* This functions performs a deep copy, as opposed to the shallow copy that"]
+    #[doc = "* plain assignment yields."]
+    #[doc = "*"]
+    #[doc = "* \\param[in] input The source array pointer."]
+    #[doc = "* \\param[out] output The target array pointer, which must"]
+    #[doc = "*   have been initialized before calling this function."]
+    #[doc = "* \\return true if successful, or false if either pointer"]
+    #[doc = "*   is null or memory allocation fails."]
+    #[doc = "*/"]
+    pub fn std_msgs__msg__String__Sequence__copy(
+        input: *const std_msgs__msg__String__Sequence,
+        output: *mut std_msgs__msg__String__Sequence,
+    ) -> bool;
+}
+extern "C" {
+    pub fn rosidl_typesupport_c__get_message_type_support_handle__std_msgs__msg__String(
+    ) -> *const rosidl_message_type_support_t;
+}
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct std_msgs__msg__UInt16 {
+    pub data: u16,
+}
+#[test]
+fn bindgen_test_layout_std_msgs__msg__UInt16() {
+    assert_eq!(
+        ::std::mem::size_of::<std_msgs__msg__UInt16>(),
+        2usize,
+        concat!("Size of: ", stringify!(std_msgs__msg__UInt16))
+    );
+    assert_eq!(
+        ::std::mem::align_of::<std_msgs__msg__UInt16>(),
+        2usize,
+        concat!("Alignment of ", stringify!(std_msgs__msg__UInt16))
+    );
+    assert_eq!(
+        unsafe { &(*(::std::ptr::null::<std_msgs__msg__UInt16>())).data as *const _ as usize },
+        0usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(std_msgs__msg__UInt16),
+            "::",
+            stringify!(data)
+        )
+    );
+}
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct std_msgs__msg__UInt16__Sequence {
+    pub data: *mut std_msgs__msg__UInt16,
+    #[doc = " The number of valid items in data"]
+    pub size: size_t,
+    #[doc = " The number of allocated items in data"]
+    pub capacity: size_t,
+}
+#[test]
+fn bindgen_test_layout_std_msgs__msg__UInt16__Sequence() {
+    assert_eq!(
+        ::std::mem::size_of::<std_msgs__msg__UInt16__Sequence>(),
+        24usize,
+        concat!("Size of: ", stringify!(std_msgs__msg__UInt16__Sequence))
+    );
+    assert_eq!(
+        ::std::mem::align_of::<std_msgs__msg__UInt16__Sequence>(),
+        8usize,
+        concat!("Alignment of ", stringify!(std_msgs__msg__UInt16__Sequence))
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::std::ptr::null::<std_msgs__msg__UInt16__Sequence>())).data as *const _ as usize
+        },
+        0usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(std_msgs__msg__UInt16__Sequence),
+            "::",
+            stringify!(data)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::std::ptr::null::<std_msgs__msg__UInt16__Sequence>())).size as *const _ as usize
+        },
+        8usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(std_msgs__msg__UInt16__Sequence),
+            "::",
+            stringify!(size)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::std::ptr::null::<std_msgs__msg__UInt16__Sequence>())).capacity as *const _
+                as usize
+        },
+        16usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(std_msgs__msg__UInt16__Sequence),
+            "::",
+            stringify!(capacity)
+        )
+    );
+}
+extern "C" {
+    #[doc = " Initialize msg/UInt16 message."]
+    #[doc = "**"]
+    #[doc = "* If the init function is called twice for the same message without"]
+    #[doc = "* calling fini inbetween previously allocated memory will be leaked."]
+    #[doc = "* \\param[in,out] msg The previously allocated message pointer."]
+    #[doc = "* Fields without a default value will not be initialized by this function."]
+    #[doc = "* You might want to call memset(msg, 0, sizeof("]
+    #[doc = "* std_msgs__msg__UInt16"]
+    #[doc = "* )) before or use"]
+    #[doc = "* std_msgs__msg__UInt16__create()"]
+    #[doc = "* to allocate and initialize the message."]
+    #[doc = "* \\return true if initialization was successful, otherwise false"]
+    #[doc = "*/"]
+    pub fn std_msgs__msg__UInt16__init(msg: *mut std_msgs__msg__UInt16) -> bool;
+}
+extern "C" {
+    #[doc = " Finalize msg/UInt16 message."]
+    #[doc = "**"]
+    #[doc = "* \\param[in,out] msg The allocated message pointer."]
+    #[doc = "*/"]
+    pub fn std_msgs__msg__UInt16__fini(msg: *mut std_msgs__msg__UInt16);
+}
+extern "C" {
+    #[doc = " Create msg/UInt16 message."]
+    #[doc = "**"]
+    #[doc = "* It allocates the memory for the message, sets the memory to zero, and"]
+    #[doc = "* calls"]
+    #[doc = "* std_msgs__msg__UInt16__init()."]
+    #[doc = "* \\return The pointer to the initialized message if successful,"]
+    #[doc = "* otherwise NULL"]
+    #[doc = "*/"]
+    pub fn std_msgs__msg__UInt16__create() -> *mut std_msgs__msg__UInt16;
+}
+extern "C" {
+    #[doc = " Destroy msg/UInt16 message."]
+    #[doc = "**"]
+    #[doc = "* It calls"]
+    #[doc = "* std_msgs__msg__UInt16__fini()"]
+    #[doc = "* and frees the memory of the message."]
+    #[doc = "* \\param[in,out] msg The allocated message pointer."]
+    #[doc = "*/"]
+    pub fn std_msgs__msg__UInt16__destroy(msg: *mut std_msgs__msg__UInt16);
+}
+extern "C" {
+    #[doc = " Check for msg/UInt16 message equality."]
+    #[doc = "**"]
+    #[doc = "* \\param[in] lhs The message on the left hand size of the equality operator."]
+    #[doc = "* \\param[in] rhs The message on the right hand size of the equality operator."]
+    #[doc = "* \\return true if messages are equal, otherwise false."]
+    #[doc = "*/"]
+    pub fn std_msgs__msg__UInt16__are_equal(
+        lhs: *const std_msgs__msg__UInt16,
+        rhs: *const std_msgs__msg__UInt16,
+    ) -> bool;
+}
+extern "C" {
+    #[doc = " Copy a msg/UInt16 message."]
+    #[doc = "**"]
+    #[doc = "* This functions performs a deep copy, as opposed to the shallow copy that"]
+    #[doc = "* plain assignment yields."]
+    #[doc = "*"]
+    #[doc = "* \\param[in] input The source message pointer."]
+    #[doc = "* \\param[out] output The target message pointer, which must"]
+    #[doc = "*   have been initialized before calling this function."]
+    #[doc = "* \\return true if successful, or false if either pointer is null"]
+    #[doc = "*   or memory allocation fails."]
+    #[doc = "*/"]
+    pub fn std_msgs__msg__UInt16__copy(
+        input: *const std_msgs__msg__UInt16,
+        output: *mut std_msgs__msg__UInt16,
+    ) -> bool;
+}
+extern "C" {
+    #[doc = " Initialize array of msg/UInt16 messages."]
+    #[doc = "**"]
+    #[doc = "* It allocates the memory for the number of elements and calls"]
+    #[doc = "* std_msgs__msg__UInt16__init()"]
+    #[doc = "* for each element of the array."]
+    #[doc = "* \\param[in,out] array The allocated array pointer."]
+    #[doc = "* \\param[in] size The size / capacity of the array."]
+    #[doc = "* \\return true if initialization was successful, otherwise false"]
+    #[doc = "* If the array pointer is valid and the size is zero it is guaranteed"]
+    #[doc = "# to return true."]
+    #[doc = "*/"]
+    pub fn std_msgs__msg__UInt16__Sequence__init(
+        array: *mut std_msgs__msg__UInt16__Sequence,
+        size: size_t,
+    ) -> bool;
+}
+extern "C" {
+    #[doc = " Finalize array of msg/UInt16 messages."]
+    #[doc = "**"]
+    #[doc = "* It calls"]
+    #[doc = "* std_msgs__msg__UInt16__fini()"]
+    #[doc = "* for each element of the array and frees the memory for the number of"]
+    #[doc = "* elements."]
+    #[doc = "* \\param[in,out] array The initialized array pointer."]
+    #[doc = "*/"]
+    pub fn std_msgs__msg__UInt16__Sequence__fini(array: *mut std_msgs__msg__UInt16__Sequence);
+}
+extern "C" {
+    #[doc = " Create array of msg/UInt16 messages."]
+    #[doc = "**"]
+    #[doc = "* It allocates the memory for the array and calls"]
+    #[doc = "* std_msgs__msg__UInt16__Sequence__init()."]
+    #[doc = "* \\param[in] size The size / capacity of the array."]
+    #[doc = "* \\return The pointer to the initialized array if successful, otherwise NULL"]
+    #[doc = "*/"]
+    pub fn std_msgs__msg__UInt16__Sequence__create(
+        size: size_t,
+    ) -> *mut std_msgs__msg__UInt16__Sequence;
+}
+extern "C" {
+    #[doc = " Destroy array of msg/UInt16 messages."]
+    #[doc = "**"]
+    #[doc = "* It calls"]
+    #[doc = "* std_msgs__msg__UInt16__Sequence__fini()"]
+    #[doc = "* on the array,"]
+    #[doc = "* and frees the memory of the array."]
+    #[doc = "* \\param[in,out] array The initialized array pointer."]
+    #[doc = "*/"]
+    pub fn std_msgs__msg__UInt16__Sequence__destroy(array: *mut std_msgs__msg__UInt16__Sequence);
+}
+extern "C" {
+    #[doc = " Check for msg/UInt16 message array equality."]
+    #[doc = "**"]
+    #[doc = "* \\param[in] lhs The message array on the left hand size of the equality operator."]
+    #[doc = "* \\param[in] rhs The message array on the right hand size of the equality operator."]
+    #[doc = "* \\return true if message arrays are equal in size and content, otherwise false."]
+    #[doc = "*/"]
+    pub fn std_msgs__msg__UInt16__Sequence__are_equal(
+        lhs: *const std_msgs__msg__UInt16__Sequence,
+        rhs: *const std_msgs__msg__UInt16__Sequence,
+    ) -> bool;
+}
+extern "C" {
+    #[doc = " Copy an array of msg/UInt16 messages."]
+    #[doc = "**"]
+    #[doc = "* This functions performs a deep copy, as opposed to the shallow copy that"]
+    #[doc = "* plain assignment yields."]
+    #[doc = "*"]
+    #[doc = "* \\param[in] input The source array pointer."]
+    #[doc = "* \\param[out] output The target array pointer, which must"]
+    #[doc = "*   have been initialized before calling this function."]
+    #[doc = "* \\return true if successful, or false if either pointer"]
+    #[doc = "*   is null or memory allocation fails."]
+    #[doc = "*/"]
+    pub fn std_msgs__msg__UInt16__Sequence__copy(
+        input: *const std_msgs__msg__UInt16__Sequence,
+        output: *mut std_msgs__msg__UInt16__Sequence,
+    ) -> bool;
+}
+extern "C" {
+    pub fn rosidl_typesupport_c__get_message_type_support_handle__std_msgs__msg__UInt16(
     ) -> *const rosidl_message_type_support_t;
 }
 #[repr(C)]
@@ -8224,6 +9413,250 @@ extern "C" {
 }
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
+pub struct std_msgs__msg__UInt32 {
+    pub data: u32,
+}
+#[test]
+fn bindgen_test_layout_std_msgs__msg__UInt32() {
+    assert_eq!(
+        ::std::mem::size_of::<std_msgs__msg__UInt32>(),
+        4usize,
+        concat!("Size of: ", stringify!(std_msgs__msg__UInt32))
+    );
+    assert_eq!(
+        ::std::mem::align_of::<std_msgs__msg__UInt32>(),
+        4usize,
+        concat!("Alignment of ", stringify!(std_msgs__msg__UInt32))
+    );
+    assert_eq!(
+        unsafe { &(*(::std::ptr::null::<std_msgs__msg__UInt32>())).data as *const _ as usize },
+        0usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(std_msgs__msg__UInt32),
+            "::",
+            stringify!(data)
+        )
+    );
+}
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct std_msgs__msg__UInt32__Sequence {
+    pub data: *mut std_msgs__msg__UInt32,
+    #[doc = " The number of valid items in data"]
+    pub size: size_t,
+    #[doc = " The number of allocated items in data"]
+    pub capacity: size_t,
+}
+#[test]
+fn bindgen_test_layout_std_msgs__msg__UInt32__Sequence() {
+    assert_eq!(
+        ::std::mem::size_of::<std_msgs__msg__UInt32__Sequence>(),
+        24usize,
+        concat!("Size of: ", stringify!(std_msgs__msg__UInt32__Sequence))
+    );
+    assert_eq!(
+        ::std::mem::align_of::<std_msgs__msg__UInt32__Sequence>(),
+        8usize,
+        concat!("Alignment of ", stringify!(std_msgs__msg__UInt32__Sequence))
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::std::ptr::null::<std_msgs__msg__UInt32__Sequence>())).data as *const _ as usize
+        },
+        0usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(std_msgs__msg__UInt32__Sequence),
+            "::",
+            stringify!(data)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::std::ptr::null::<std_msgs__msg__UInt32__Sequence>())).size as *const _ as usize
+        },
+        8usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(std_msgs__msg__UInt32__Sequence),
+            "::",
+            stringify!(size)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::std::ptr::null::<std_msgs__msg__UInt32__Sequence>())).capacity as *const _
+                as usize
+        },
+        16usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(std_msgs__msg__UInt32__Sequence),
+            "::",
+            stringify!(capacity)
+        )
+    );
+}
+extern "C" {
+    #[doc = " Initialize msg/UInt32 message."]
+    #[doc = "**"]
+    #[doc = "* If the init function is called twice for the same message without"]
+    #[doc = "* calling fini inbetween previously allocated memory will be leaked."]
+    #[doc = "* \\param[in,out] msg The previously allocated message pointer."]
+    #[doc = "* Fields without a default value will not be initialized by this function."]
+    #[doc = "* You might want to call memset(msg, 0, sizeof("]
+    #[doc = "* std_msgs__msg__UInt32"]
+    #[doc = "* )) before or use"]
+    #[doc = "* std_msgs__msg__UInt32__create()"]
+    #[doc = "* to allocate and initialize the message."]
+    #[doc = "* \\return true if initialization was successful, otherwise false"]
+    #[doc = "*/"]
+    pub fn std_msgs__msg__UInt32__init(msg: *mut std_msgs__msg__UInt32) -> bool;
+}
+extern "C" {
+    #[doc = " Finalize msg/UInt32 message."]
+    #[doc = "**"]
+    #[doc = "* \\param[in,out] msg The allocated message pointer."]
+    #[doc = "*/"]
+    pub fn std_msgs__msg__UInt32__fini(msg: *mut std_msgs__msg__UInt32);
+}
+extern "C" {
+    #[doc = " Create msg/UInt32 message."]
+    #[doc = "**"]
+    #[doc = "* It allocates the memory for the message, sets the memory to zero, and"]
+    #[doc = "* calls"]
+    #[doc = "* std_msgs__msg__UInt32__init()."]
+    #[doc = "* \\return The pointer to the initialized message if successful,"]
+    #[doc = "* otherwise NULL"]
+    #[doc = "*/"]
+    pub fn std_msgs__msg__UInt32__create() -> *mut std_msgs__msg__UInt32;
+}
+extern "C" {
+    #[doc = " Destroy msg/UInt32 message."]
+    #[doc = "**"]
+    #[doc = "* It calls"]
+    #[doc = "* std_msgs__msg__UInt32__fini()"]
+    #[doc = "* and frees the memory of the message."]
+    #[doc = "* \\param[in,out] msg The allocated message pointer."]
+    #[doc = "*/"]
+    pub fn std_msgs__msg__UInt32__destroy(msg: *mut std_msgs__msg__UInt32);
+}
+extern "C" {
+    #[doc = " Check for msg/UInt32 message equality."]
+    #[doc = "**"]
+    #[doc = "* \\param[in] lhs The message on the left hand size of the equality operator."]
+    #[doc = "* \\param[in] rhs The message on the right hand size of the equality operator."]
+    #[doc = "* \\return true if messages are equal, otherwise false."]
+    #[doc = "*/"]
+    pub fn std_msgs__msg__UInt32__are_equal(
+        lhs: *const std_msgs__msg__UInt32,
+        rhs: *const std_msgs__msg__UInt32,
+    ) -> bool;
+}
+extern "C" {
+    #[doc = " Copy a msg/UInt32 message."]
+    #[doc = "**"]
+    #[doc = "* This functions performs a deep copy, as opposed to the shallow copy that"]
+    #[doc = "* plain assignment yields."]
+    #[doc = "*"]
+    #[doc = "* \\param[in] input The source message pointer."]
+    #[doc = "* \\param[out] output The target message pointer, which must"]
+    #[doc = "*   have been initialized before calling this function."]
+    #[doc = "* \\return true if successful, or false if either pointer is null"]
+    #[doc = "*   or memory allocation fails."]
+    #[doc = "*/"]
+    pub fn std_msgs__msg__UInt32__copy(
+        input: *const std_msgs__msg__UInt32,
+        output: *mut std_msgs__msg__UInt32,
+    ) -> bool;
+}
+extern "C" {
+    #[doc = " Initialize array of msg/UInt32 messages."]
+    #[doc = "**"]
+    #[doc = "* It allocates the memory for the number of elements and calls"]
+    #[doc = "* std_msgs__msg__UInt32__init()"]
+    #[doc = "* for each element of the array."]
+    #[doc = "* \\param[in,out] array The allocated array pointer."]
+    #[doc = "* \\param[in] size The size / capacity of the array."]
+    #[doc = "* \\return true if initialization was successful, otherwise false"]
+    #[doc = "* If the array pointer is valid and the size is zero it is guaranteed"]
+    #[doc = "# to return true."]
+    #[doc = "*/"]
+    pub fn std_msgs__msg__UInt32__Sequence__init(
+        array: *mut std_msgs__msg__UInt32__Sequence,
+        size: size_t,
+    ) -> bool;
+}
+extern "C" {
+    #[doc = " Finalize array of msg/UInt32 messages."]
+    #[doc = "**"]
+    #[doc = "* It calls"]
+    #[doc = "* std_msgs__msg__UInt32__fini()"]
+    #[doc = "* for each element of the array and frees the memory for the number of"]
+    #[doc = "* elements."]
+    #[doc = "* \\param[in,out] array The initialized array pointer."]
+    #[doc = "*/"]
+    pub fn std_msgs__msg__UInt32__Sequence__fini(array: *mut std_msgs__msg__UInt32__Sequence);
+}
+extern "C" {
+    #[doc = " Create array of msg/UInt32 messages."]
+    #[doc = "**"]
+    #[doc = "* It allocates the memory for the array and calls"]
+    #[doc = "* std_msgs__msg__UInt32__Sequence__init()."]
+    #[doc = "* \\param[in] size The size / capacity of the array."]
+    #[doc = "* \\return The pointer to the initialized array if successful, otherwise NULL"]
+    #[doc = "*/"]
+    pub fn std_msgs__msg__UInt32__Sequence__create(
+        size: size_t,
+    ) -> *mut std_msgs__msg__UInt32__Sequence;
+}
+extern "C" {
+    #[doc = " Destroy array of msg/UInt32 messages."]
+    #[doc = "**"]
+    #[doc = "* It calls"]
+    #[doc = "* std_msgs__msg__UInt32__Sequence__fini()"]
+    #[doc = "* on the array,"]
+    #[doc = "* and frees the memory of the array."]
+    #[doc = "* \\param[in,out] array The initialized array pointer."]
+    #[doc = "*/"]
+    pub fn std_msgs__msg__UInt32__Sequence__destroy(array: *mut std_msgs__msg__UInt32__Sequence);
+}
+extern "C" {
+    #[doc = " Check for msg/UInt32 message array equality."]
+    #[doc = "**"]
+    #[doc = "* \\param[in] lhs The message array on the left hand size of the equality operator."]
+    #[doc = "* \\param[in] rhs The message array on the right hand size of the equality operator."]
+    #[doc = "* \\return true if message arrays are equal in size and content, otherwise false."]
+    #[doc = "*/"]
+    pub fn std_msgs__msg__UInt32__Sequence__are_equal(
+        lhs: *const std_msgs__msg__UInt32__Sequence,
+        rhs: *const std_msgs__msg__UInt32__Sequence,
+    ) -> bool;
+}
+extern "C" {
+    #[doc = " Copy an array of msg/UInt32 messages."]
+    #[doc = "**"]
+    #[doc = "* This functions performs a deep copy, as opposed to the shallow copy that"]
+    #[doc = "* plain assignment yields."]
+    #[doc = "*"]
+    #[doc = "* \\param[in] input The source array pointer."]
+    #[doc = "* \\param[out] output The target array pointer, which must"]
+    #[doc = "*   have been initialized before calling this function."]
+    #[doc = "* \\return true if successful, or false if either pointer"]
+    #[doc = "*   is null or memory allocation fails."]
+    #[doc = "*/"]
+    pub fn std_msgs__msg__UInt32__Sequence__copy(
+        input: *const std_msgs__msg__UInt32__Sequence,
+        output: *mut std_msgs__msg__UInt32__Sequence,
+    ) -> bool;
+}
+extern "C" {
+    pub fn rosidl_typesupport_c__get_message_type_support_handle__std_msgs__msg__UInt32(
+    ) -> *const rosidl_message_type_support_t;
+}
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
 pub struct std_msgs__msg__UInt32MultiArray {
     pub layout: std_msgs__msg__MultiArrayLayout,
     pub data: rosidl_runtime_c__uint32__Sequence,
@@ -8492,6 +9925,250 @@ extern "C" {
 }
 extern "C" {
     pub fn rosidl_typesupport_c__get_message_type_support_handle__std_msgs__msg__UInt32MultiArray(
+    ) -> *const rosidl_message_type_support_t;
+}
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct std_msgs__msg__UInt64 {
+    pub data: u64,
+}
+#[test]
+fn bindgen_test_layout_std_msgs__msg__UInt64() {
+    assert_eq!(
+        ::std::mem::size_of::<std_msgs__msg__UInt64>(),
+        8usize,
+        concat!("Size of: ", stringify!(std_msgs__msg__UInt64))
+    );
+    assert_eq!(
+        ::std::mem::align_of::<std_msgs__msg__UInt64>(),
+        8usize,
+        concat!("Alignment of ", stringify!(std_msgs__msg__UInt64))
+    );
+    assert_eq!(
+        unsafe { &(*(::std::ptr::null::<std_msgs__msg__UInt64>())).data as *const _ as usize },
+        0usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(std_msgs__msg__UInt64),
+            "::",
+            stringify!(data)
+        )
+    );
+}
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct std_msgs__msg__UInt64__Sequence {
+    pub data: *mut std_msgs__msg__UInt64,
+    #[doc = " The number of valid items in data"]
+    pub size: size_t,
+    #[doc = " The number of allocated items in data"]
+    pub capacity: size_t,
+}
+#[test]
+fn bindgen_test_layout_std_msgs__msg__UInt64__Sequence() {
+    assert_eq!(
+        ::std::mem::size_of::<std_msgs__msg__UInt64__Sequence>(),
+        24usize,
+        concat!("Size of: ", stringify!(std_msgs__msg__UInt64__Sequence))
+    );
+    assert_eq!(
+        ::std::mem::align_of::<std_msgs__msg__UInt64__Sequence>(),
+        8usize,
+        concat!("Alignment of ", stringify!(std_msgs__msg__UInt64__Sequence))
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::std::ptr::null::<std_msgs__msg__UInt64__Sequence>())).data as *const _ as usize
+        },
+        0usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(std_msgs__msg__UInt64__Sequence),
+            "::",
+            stringify!(data)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::std::ptr::null::<std_msgs__msg__UInt64__Sequence>())).size as *const _ as usize
+        },
+        8usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(std_msgs__msg__UInt64__Sequence),
+            "::",
+            stringify!(size)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::std::ptr::null::<std_msgs__msg__UInt64__Sequence>())).capacity as *const _
+                as usize
+        },
+        16usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(std_msgs__msg__UInt64__Sequence),
+            "::",
+            stringify!(capacity)
+        )
+    );
+}
+extern "C" {
+    #[doc = " Initialize msg/UInt64 message."]
+    #[doc = "**"]
+    #[doc = "* If the init function is called twice for the same message without"]
+    #[doc = "* calling fini inbetween previously allocated memory will be leaked."]
+    #[doc = "* \\param[in,out] msg The previously allocated message pointer."]
+    #[doc = "* Fields without a default value will not be initialized by this function."]
+    #[doc = "* You might want to call memset(msg, 0, sizeof("]
+    #[doc = "* std_msgs__msg__UInt64"]
+    #[doc = "* )) before or use"]
+    #[doc = "* std_msgs__msg__UInt64__create()"]
+    #[doc = "* to allocate and initialize the message."]
+    #[doc = "* \\return true if initialization was successful, otherwise false"]
+    #[doc = "*/"]
+    pub fn std_msgs__msg__UInt64__init(msg: *mut std_msgs__msg__UInt64) -> bool;
+}
+extern "C" {
+    #[doc = " Finalize msg/UInt64 message."]
+    #[doc = "**"]
+    #[doc = "* \\param[in,out] msg The allocated message pointer."]
+    #[doc = "*/"]
+    pub fn std_msgs__msg__UInt64__fini(msg: *mut std_msgs__msg__UInt64);
+}
+extern "C" {
+    #[doc = " Create msg/UInt64 message."]
+    #[doc = "**"]
+    #[doc = "* It allocates the memory for the message, sets the memory to zero, and"]
+    #[doc = "* calls"]
+    #[doc = "* std_msgs__msg__UInt64__init()."]
+    #[doc = "* \\return The pointer to the initialized message if successful,"]
+    #[doc = "* otherwise NULL"]
+    #[doc = "*/"]
+    pub fn std_msgs__msg__UInt64__create() -> *mut std_msgs__msg__UInt64;
+}
+extern "C" {
+    #[doc = " Destroy msg/UInt64 message."]
+    #[doc = "**"]
+    #[doc = "* It calls"]
+    #[doc = "* std_msgs__msg__UInt64__fini()"]
+    #[doc = "* and frees the memory of the message."]
+    #[doc = "* \\param[in,out] msg The allocated message pointer."]
+    #[doc = "*/"]
+    pub fn std_msgs__msg__UInt64__destroy(msg: *mut std_msgs__msg__UInt64);
+}
+extern "C" {
+    #[doc = " Check for msg/UInt64 message equality."]
+    #[doc = "**"]
+    #[doc = "* \\param[in] lhs The message on the left hand size of the equality operator."]
+    #[doc = "* \\param[in] rhs The message on the right hand size of the equality operator."]
+    #[doc = "* \\return true if messages are equal, otherwise false."]
+    #[doc = "*/"]
+    pub fn std_msgs__msg__UInt64__are_equal(
+        lhs: *const std_msgs__msg__UInt64,
+        rhs: *const std_msgs__msg__UInt64,
+    ) -> bool;
+}
+extern "C" {
+    #[doc = " Copy a msg/UInt64 message."]
+    #[doc = "**"]
+    #[doc = "* This functions performs a deep copy, as opposed to the shallow copy that"]
+    #[doc = "* plain assignment yields."]
+    #[doc = "*"]
+    #[doc = "* \\param[in] input The source message pointer."]
+    #[doc = "* \\param[out] output The target message pointer, which must"]
+    #[doc = "*   have been initialized before calling this function."]
+    #[doc = "* \\return true if successful, or false if either pointer is null"]
+    #[doc = "*   or memory allocation fails."]
+    #[doc = "*/"]
+    pub fn std_msgs__msg__UInt64__copy(
+        input: *const std_msgs__msg__UInt64,
+        output: *mut std_msgs__msg__UInt64,
+    ) -> bool;
+}
+extern "C" {
+    #[doc = " Initialize array of msg/UInt64 messages."]
+    #[doc = "**"]
+    #[doc = "* It allocates the memory for the number of elements and calls"]
+    #[doc = "* std_msgs__msg__UInt64__init()"]
+    #[doc = "* for each element of the array."]
+    #[doc = "* \\param[in,out] array The allocated array pointer."]
+    #[doc = "* \\param[in] size The size / capacity of the array."]
+    #[doc = "* \\return true if initialization was successful, otherwise false"]
+    #[doc = "* If the array pointer is valid and the size is zero it is guaranteed"]
+    #[doc = "# to return true."]
+    #[doc = "*/"]
+    pub fn std_msgs__msg__UInt64__Sequence__init(
+        array: *mut std_msgs__msg__UInt64__Sequence,
+        size: size_t,
+    ) -> bool;
+}
+extern "C" {
+    #[doc = " Finalize array of msg/UInt64 messages."]
+    #[doc = "**"]
+    #[doc = "* It calls"]
+    #[doc = "* std_msgs__msg__UInt64__fini()"]
+    #[doc = "* for each element of the array and frees the memory for the number of"]
+    #[doc = "* elements."]
+    #[doc = "* \\param[in,out] array The initialized array pointer."]
+    #[doc = "*/"]
+    pub fn std_msgs__msg__UInt64__Sequence__fini(array: *mut std_msgs__msg__UInt64__Sequence);
+}
+extern "C" {
+    #[doc = " Create array of msg/UInt64 messages."]
+    #[doc = "**"]
+    #[doc = "* It allocates the memory for the array and calls"]
+    #[doc = "* std_msgs__msg__UInt64__Sequence__init()."]
+    #[doc = "* \\param[in] size The size / capacity of the array."]
+    #[doc = "* \\return The pointer to the initialized array if successful, otherwise NULL"]
+    #[doc = "*/"]
+    pub fn std_msgs__msg__UInt64__Sequence__create(
+        size: size_t,
+    ) -> *mut std_msgs__msg__UInt64__Sequence;
+}
+extern "C" {
+    #[doc = " Destroy array of msg/UInt64 messages."]
+    #[doc = "**"]
+    #[doc = "* It calls"]
+    #[doc = "* std_msgs__msg__UInt64__Sequence__fini()"]
+    #[doc = "* on the array,"]
+    #[doc = "* and frees the memory of the array."]
+    #[doc = "* \\param[in,out] array The initialized array pointer."]
+    #[doc = "*/"]
+    pub fn std_msgs__msg__UInt64__Sequence__destroy(array: *mut std_msgs__msg__UInt64__Sequence);
+}
+extern "C" {
+    #[doc = " Check for msg/UInt64 message array equality."]
+    #[doc = "**"]
+    #[doc = "* \\param[in] lhs The message array on the left hand size of the equality operator."]
+    #[doc = "* \\param[in] rhs The message array on the right hand size of the equality operator."]
+    #[doc = "* \\return true if message arrays are equal in size and content, otherwise false."]
+    #[doc = "*/"]
+    pub fn std_msgs__msg__UInt64__Sequence__are_equal(
+        lhs: *const std_msgs__msg__UInt64__Sequence,
+        rhs: *const std_msgs__msg__UInt64__Sequence,
+    ) -> bool;
+}
+extern "C" {
+    #[doc = " Copy an array of msg/UInt64 messages."]
+    #[doc = "**"]
+    #[doc = "* This functions performs a deep copy, as opposed to the shallow copy that"]
+    #[doc = "* plain assignment yields."]
+    #[doc = "*"]
+    #[doc = "* \\param[in] input The source array pointer."]
+    #[doc = "* \\param[out] output The target array pointer, which must"]
+    #[doc = "*   have been initialized before calling this function."]
+    #[doc = "* \\return true if successful, or false if either pointer"]
+    #[doc = "*   is null or memory allocation fails."]
+    #[doc = "*/"]
+    pub fn std_msgs__msg__UInt64__Sequence__copy(
+        input: *const std_msgs__msg__UInt64__Sequence,
+        output: *mut std_msgs__msg__UInt64__Sequence,
+    ) -> bool;
+}
+extern "C" {
+    pub fn rosidl_typesupport_c__get_message_type_support_handle__std_msgs__msg__UInt64(
     ) -> *const rosidl_message_type_support_t;
 }
 #[repr(C)]
@@ -8768,27 +10445,27 @@ extern "C" {
 }
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
-pub struct std_msgs__msg__String {
-    pub data: rosidl_runtime_c__String,
+pub struct std_msgs__msg__UInt8 {
+    pub data: u8,
 }
 #[test]
-fn bindgen_test_layout_std_msgs__msg__String() {
+fn bindgen_test_layout_std_msgs__msg__UInt8() {
     assert_eq!(
-        ::std::mem::size_of::<std_msgs__msg__String>(),
-        24usize,
-        concat!("Size of: ", stringify!(std_msgs__msg__String))
+        ::std::mem::size_of::<std_msgs__msg__UInt8>(),
+        1usize,
+        concat!("Size of: ", stringify!(std_msgs__msg__UInt8))
     );
     assert_eq!(
-        ::std::mem::align_of::<std_msgs__msg__String>(),
-        8usize,
-        concat!("Alignment of ", stringify!(std_msgs__msg__String))
+        ::std::mem::align_of::<std_msgs__msg__UInt8>(),
+        1usize,
+        concat!("Alignment of ", stringify!(std_msgs__msg__UInt8))
     );
     assert_eq!(
-        unsafe { &(*(::std::ptr::null::<std_msgs__msg__String>())).data as *const _ as usize },
+        unsafe { &(*(::std::ptr::null::<std_msgs__msg__UInt8>())).data as *const _ as usize },
         0usize,
         concat!(
             "Offset of field: ",
-            stringify!(std_msgs__msg__String),
+            stringify!(std_msgs__msg__UInt8),
             "::",
             stringify!(data)
         )
@@ -8796,121 +10473,120 @@ fn bindgen_test_layout_std_msgs__msg__String() {
 }
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
-pub struct std_msgs__msg__String__Sequence {
-    pub data: *mut std_msgs__msg__String,
+pub struct std_msgs__msg__UInt8__Sequence {
+    pub data: *mut std_msgs__msg__UInt8,
     #[doc = " The number of valid items in data"]
     pub size: size_t,
     #[doc = " The number of allocated items in data"]
     pub capacity: size_t,
 }
 #[test]
-fn bindgen_test_layout_std_msgs__msg__String__Sequence() {
+fn bindgen_test_layout_std_msgs__msg__UInt8__Sequence() {
     assert_eq!(
-        ::std::mem::size_of::<std_msgs__msg__String__Sequence>(),
+        ::std::mem::size_of::<std_msgs__msg__UInt8__Sequence>(),
         24usize,
-        concat!("Size of: ", stringify!(std_msgs__msg__String__Sequence))
+        concat!("Size of: ", stringify!(std_msgs__msg__UInt8__Sequence))
     );
     assert_eq!(
-        ::std::mem::align_of::<std_msgs__msg__String__Sequence>(),
+        ::std::mem::align_of::<std_msgs__msg__UInt8__Sequence>(),
         8usize,
-        concat!("Alignment of ", stringify!(std_msgs__msg__String__Sequence))
+        concat!("Alignment of ", stringify!(std_msgs__msg__UInt8__Sequence))
     );
     assert_eq!(
         unsafe {
-            &(*(::std::ptr::null::<std_msgs__msg__String__Sequence>())).data as *const _ as usize
+            &(*(::std::ptr::null::<std_msgs__msg__UInt8__Sequence>())).data as *const _ as usize
         },
         0usize,
         concat!(
             "Offset of field: ",
-            stringify!(std_msgs__msg__String__Sequence),
+            stringify!(std_msgs__msg__UInt8__Sequence),
             "::",
             stringify!(data)
         )
     );
     assert_eq!(
         unsafe {
-            &(*(::std::ptr::null::<std_msgs__msg__String__Sequence>())).size as *const _ as usize
+            &(*(::std::ptr::null::<std_msgs__msg__UInt8__Sequence>())).size as *const _ as usize
         },
         8usize,
         concat!(
             "Offset of field: ",
-            stringify!(std_msgs__msg__String__Sequence),
+            stringify!(std_msgs__msg__UInt8__Sequence),
             "::",
             stringify!(size)
         )
     );
     assert_eq!(
         unsafe {
-            &(*(::std::ptr::null::<std_msgs__msg__String__Sequence>())).capacity as *const _
-                as usize
+            &(*(::std::ptr::null::<std_msgs__msg__UInt8__Sequence>())).capacity as *const _ as usize
         },
         16usize,
         concat!(
             "Offset of field: ",
-            stringify!(std_msgs__msg__String__Sequence),
+            stringify!(std_msgs__msg__UInt8__Sequence),
             "::",
             stringify!(capacity)
         )
     );
 }
 extern "C" {
-    #[doc = " Initialize msg/String message."]
+    #[doc = " Initialize msg/UInt8 message."]
     #[doc = "**"]
     #[doc = "* If the init function is called twice for the same message without"]
     #[doc = "* calling fini inbetween previously allocated memory will be leaked."]
     #[doc = "* \\param[in,out] msg The previously allocated message pointer."]
     #[doc = "* Fields without a default value will not be initialized by this function."]
     #[doc = "* You might want to call memset(msg, 0, sizeof("]
-    #[doc = "* std_msgs__msg__String"]
+    #[doc = "* std_msgs__msg__UInt8"]
     #[doc = "* )) before or use"]
-    #[doc = "* std_msgs__msg__String__create()"]
+    #[doc = "* std_msgs__msg__UInt8__create()"]
     #[doc = "* to allocate and initialize the message."]
     #[doc = "* \\return true if initialization was successful, otherwise false"]
     #[doc = "*/"]
-    pub fn std_msgs__msg__String__init(msg: *mut std_msgs__msg__String) -> bool;
+    pub fn std_msgs__msg__UInt8__init(msg: *mut std_msgs__msg__UInt8) -> bool;
 }
 extern "C" {
-    #[doc = " Finalize msg/String message."]
+    #[doc = " Finalize msg/UInt8 message."]
     #[doc = "**"]
     #[doc = "* \\param[in,out] msg The allocated message pointer."]
     #[doc = "*/"]
-    pub fn std_msgs__msg__String__fini(msg: *mut std_msgs__msg__String);
+    pub fn std_msgs__msg__UInt8__fini(msg: *mut std_msgs__msg__UInt8);
 }
 extern "C" {
-    #[doc = " Create msg/String message."]
+    #[doc = " Create msg/UInt8 message."]
     #[doc = "**"]
     #[doc = "* It allocates the memory for the message, sets the memory to zero, and"]
     #[doc = "* calls"]
-    #[doc = "* std_msgs__msg__String__init()."]
+    #[doc = "* std_msgs__msg__UInt8__init()."]
     #[doc = "* \\return The pointer to the initialized message if successful,"]
     #[doc = "* otherwise NULL"]
     #[doc = "*/"]
-    pub fn std_msgs__msg__String__create() -> *mut std_msgs__msg__String;
+    pub fn std_msgs__msg__UInt8__create() -> *mut std_msgs__msg__UInt8;
 }
 extern "C" {
-    #[doc = " Destroy msg/String message."]
+    #[doc = " Destroy msg/UInt8 message."]
     #[doc = "**"]
     #[doc = "* It calls"]
-    #[doc = "* std_msgs__msg__String__fini()"]
+    #[doc = "* std_msgs__msg__UInt8__fini()"]
     #[doc = "* and frees the memory of the message."]
     #[doc = "* \\param[in,out] msg The allocated message pointer."]
     #[doc = "*/"]
-    pub fn std_msgs__msg__String__destroy(msg: *mut std_msgs__msg__String);
+    pub fn std_msgs__msg__UInt8__destroy(msg: *mut std_msgs__msg__UInt8);
 }
 extern "C" {
-    #[doc = " Check for msg/String message equality."]
+    #[doc = " Check for msg/UInt8 message equality."]
     #[doc = "**"]
     #[doc = "* \\param[in] lhs The message on the left hand size of the equality operator."]
     #[doc = "* \\param[in] rhs The message on the right hand size of the equality operator."]
     #[doc = "* \\return true if messages are equal, otherwise false."]
     #[doc = "*/"]
-    pub fn std_msgs__msg__String__are_equal(
-        lhs: *const std_msgs__msg__String,
-        rhs: *const std_msgs__msg__String,
+    pub fn std_msgs__msg__UInt8__are_equal(
+        lhs: *const std_msgs__msg__UInt8,
+        rhs: *const std_msgs__msg__UInt8,
     ) -> bool;
 }
 extern "C" {
-    #[doc = " Copy a msg/String message."]
+    #[doc = " Copy a msg/UInt8 message."]
     #[doc = "**"]
     #[doc = "* This functions performs a deep copy, as opposed to the shallow copy that"]
     #[doc = "* plain assignment yields."]
@@ -8921,16 +10597,16 @@ extern "C" {
     #[doc = "* \\return true if successful, or false if either pointer is null"]
     #[doc = "*   or memory allocation fails."]
     #[doc = "*/"]
-    pub fn std_msgs__msg__String__copy(
-        input: *const std_msgs__msg__String,
-        output: *mut std_msgs__msg__String,
+    pub fn std_msgs__msg__UInt8__copy(
+        input: *const std_msgs__msg__UInt8,
+        output: *mut std_msgs__msg__UInt8,
     ) -> bool;
 }
 extern "C" {
-    #[doc = " Initialize array of msg/String messages."]
+    #[doc = " Initialize array of msg/UInt8 messages."]
     #[doc = "**"]
     #[doc = "* It allocates the memory for the number of elements and calls"]
-    #[doc = "* std_msgs__msg__String__init()"]
+    #[doc = "* std_msgs__msg__UInt8__init()"]
     #[doc = "* for each element of the array."]
     #[doc = "* \\param[in,out] array The allocated array pointer."]
     #[doc = "* \\param[in] size The size / capacity of the array."]
@@ -8938,59 +10614,59 @@ extern "C" {
     #[doc = "* If the array pointer is valid and the size is zero it is guaranteed"]
     #[doc = "# to return true."]
     #[doc = "*/"]
-    pub fn std_msgs__msg__String__Sequence__init(
-        array: *mut std_msgs__msg__String__Sequence,
+    pub fn std_msgs__msg__UInt8__Sequence__init(
+        array: *mut std_msgs__msg__UInt8__Sequence,
         size: size_t,
     ) -> bool;
 }
 extern "C" {
-    #[doc = " Finalize array of msg/String messages."]
+    #[doc = " Finalize array of msg/UInt8 messages."]
     #[doc = "**"]
     #[doc = "* It calls"]
-    #[doc = "* std_msgs__msg__String__fini()"]
+    #[doc = "* std_msgs__msg__UInt8__fini()"]
     #[doc = "* for each element of the array and frees the memory for the number of"]
     #[doc = "* elements."]
     #[doc = "* \\param[in,out] array The initialized array pointer."]
     #[doc = "*/"]
-    pub fn std_msgs__msg__String__Sequence__fini(array: *mut std_msgs__msg__String__Sequence);
+    pub fn std_msgs__msg__UInt8__Sequence__fini(array: *mut std_msgs__msg__UInt8__Sequence);
 }
 extern "C" {
-    #[doc = " Create array of msg/String messages."]
+    #[doc = " Create array of msg/UInt8 messages."]
     #[doc = "**"]
     #[doc = "* It allocates the memory for the array and calls"]
-    #[doc = "* std_msgs__msg__String__Sequence__init()."]
+    #[doc = "* std_msgs__msg__UInt8__Sequence__init()."]
     #[doc = "* \\param[in] size The size / capacity of the array."]
     #[doc = "* \\return The pointer to the initialized array if successful, otherwise NULL"]
     #[doc = "*/"]
-    pub fn std_msgs__msg__String__Sequence__create(
+    pub fn std_msgs__msg__UInt8__Sequence__create(
         size: size_t,
-    ) -> *mut std_msgs__msg__String__Sequence;
+    ) -> *mut std_msgs__msg__UInt8__Sequence;
 }
 extern "C" {
-    #[doc = " Destroy array of msg/String messages."]
+    #[doc = " Destroy array of msg/UInt8 messages."]
     #[doc = "**"]
     #[doc = "* It calls"]
-    #[doc = "* std_msgs__msg__String__Sequence__fini()"]
+    #[doc = "* std_msgs__msg__UInt8__Sequence__fini()"]
     #[doc = "* on the array,"]
     #[doc = "* and frees the memory of the array."]
     #[doc = "* \\param[in,out] array The initialized array pointer."]
     #[doc = "*/"]
-    pub fn std_msgs__msg__String__Sequence__destroy(array: *mut std_msgs__msg__String__Sequence);
+    pub fn std_msgs__msg__UInt8__Sequence__destroy(array: *mut std_msgs__msg__UInt8__Sequence);
 }
 extern "C" {
-    #[doc = " Check for msg/String message array equality."]
+    #[doc = " Check for msg/UInt8 message array equality."]
     #[doc = "**"]
     #[doc = "* \\param[in] lhs The message array on the left hand size of the equality operator."]
     #[doc = "* \\param[in] rhs The message array on the right hand size of the equality operator."]
     #[doc = "* \\return true if message arrays are equal in size and content, otherwise false."]
     #[doc = "*/"]
-    pub fn std_msgs__msg__String__Sequence__are_equal(
-        lhs: *const std_msgs__msg__String__Sequence,
-        rhs: *const std_msgs__msg__String__Sequence,
+    pub fn std_msgs__msg__UInt8__Sequence__are_equal(
+        lhs: *const std_msgs__msg__UInt8__Sequence,
+        rhs: *const std_msgs__msg__UInt8__Sequence,
     ) -> bool;
 }
 extern "C" {
-    #[doc = " Copy an array of msg/String messages."]
+    #[doc = " Copy an array of msg/UInt8 messages."]
     #[doc = "**"]
     #[doc = "* This functions performs a deep copy, as opposed to the shallow copy that"]
     #[doc = "* plain assignment yields."]
@@ -9001,13 +10677,284 @@ extern "C" {
     #[doc = "* \\return true if successful, or false if either pointer"]
     #[doc = "*   is null or memory allocation fails."]
     #[doc = "*/"]
-    pub fn std_msgs__msg__String__Sequence__copy(
-        input: *const std_msgs__msg__String__Sequence,
-        output: *mut std_msgs__msg__String__Sequence,
+    pub fn std_msgs__msg__UInt8__Sequence__copy(
+        input: *const std_msgs__msg__UInt8__Sequence,
+        output: *mut std_msgs__msg__UInt8__Sequence,
     ) -> bool;
 }
 extern "C" {
-    pub fn rosidl_typesupport_c__get_message_type_support_handle__std_msgs__msg__String(
+    pub fn rosidl_typesupport_c__get_message_type_support_handle__std_msgs__msg__UInt8(
+    ) -> *const rosidl_message_type_support_t;
+}
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct std_msgs__msg__UInt8MultiArray {
+    pub layout: std_msgs__msg__MultiArrayLayout,
+    pub data: rosidl_runtime_c__uint8__Sequence,
+}
+#[test]
+fn bindgen_test_layout_std_msgs__msg__UInt8MultiArray() {
+    assert_eq!(
+        ::std::mem::size_of::<std_msgs__msg__UInt8MultiArray>(),
+        56usize,
+        concat!("Size of: ", stringify!(std_msgs__msg__UInt8MultiArray))
+    );
+    assert_eq!(
+        ::std::mem::align_of::<std_msgs__msg__UInt8MultiArray>(),
+        8usize,
+        concat!("Alignment of ", stringify!(std_msgs__msg__UInt8MultiArray))
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::std::ptr::null::<std_msgs__msg__UInt8MultiArray>())).layout as *const _ as usize
+        },
+        0usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(std_msgs__msg__UInt8MultiArray),
+            "::",
+            stringify!(layout)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::std::ptr::null::<std_msgs__msg__UInt8MultiArray>())).data as *const _ as usize
+        },
+        32usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(std_msgs__msg__UInt8MultiArray),
+            "::",
+            stringify!(data)
+        )
+    );
+}
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct std_msgs__msg__UInt8MultiArray__Sequence {
+    pub data: *mut std_msgs__msg__UInt8MultiArray,
+    #[doc = " The number of valid items in data"]
+    pub size: size_t,
+    #[doc = " The number of allocated items in data"]
+    pub capacity: size_t,
+}
+#[test]
+fn bindgen_test_layout_std_msgs__msg__UInt8MultiArray__Sequence() {
+    assert_eq!(
+        ::std::mem::size_of::<std_msgs__msg__UInt8MultiArray__Sequence>(),
+        24usize,
+        concat!(
+            "Size of: ",
+            stringify!(std_msgs__msg__UInt8MultiArray__Sequence)
+        )
+    );
+    assert_eq!(
+        ::std::mem::align_of::<std_msgs__msg__UInt8MultiArray__Sequence>(),
+        8usize,
+        concat!(
+            "Alignment of ",
+            stringify!(std_msgs__msg__UInt8MultiArray__Sequence)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::std::ptr::null::<std_msgs__msg__UInt8MultiArray__Sequence>())).data as *const _
+                as usize
+        },
+        0usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(std_msgs__msg__UInt8MultiArray__Sequence),
+            "::",
+            stringify!(data)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::std::ptr::null::<std_msgs__msg__UInt8MultiArray__Sequence>())).size as *const _
+                as usize
+        },
+        8usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(std_msgs__msg__UInt8MultiArray__Sequence),
+            "::",
+            stringify!(size)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::std::ptr::null::<std_msgs__msg__UInt8MultiArray__Sequence>())).capacity
+                as *const _ as usize
+        },
+        16usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(std_msgs__msg__UInt8MultiArray__Sequence),
+            "::",
+            stringify!(capacity)
+        )
+    );
+}
+extern "C" {
+    #[doc = " Initialize msg/UInt8MultiArray message."]
+    #[doc = "**"]
+    #[doc = "* If the init function is called twice for the same message without"]
+    #[doc = "* calling fini inbetween previously allocated memory will be leaked."]
+    #[doc = "* \\param[in,out] msg The previously allocated message pointer."]
+    #[doc = "* Fields without a default value will not be initialized by this function."]
+    #[doc = "* You might want to call memset(msg, 0, sizeof("]
+    #[doc = "* std_msgs__msg__UInt8MultiArray"]
+    #[doc = "* )) before or use"]
+    #[doc = "* std_msgs__msg__UInt8MultiArray__create()"]
+    #[doc = "* to allocate and initialize the message."]
+    #[doc = "* \\return true if initialization was successful, otherwise false"]
+    #[doc = "*/"]
+    pub fn std_msgs__msg__UInt8MultiArray__init(msg: *mut std_msgs__msg__UInt8MultiArray) -> bool;
+}
+extern "C" {
+    #[doc = " Finalize msg/UInt8MultiArray message."]
+    #[doc = "**"]
+    #[doc = "* \\param[in,out] msg The allocated message pointer."]
+    #[doc = "*/"]
+    pub fn std_msgs__msg__UInt8MultiArray__fini(msg: *mut std_msgs__msg__UInt8MultiArray);
+}
+extern "C" {
+    #[doc = " Create msg/UInt8MultiArray message."]
+    #[doc = "**"]
+    #[doc = "* It allocates the memory for the message, sets the memory to zero, and"]
+    #[doc = "* calls"]
+    #[doc = "* std_msgs__msg__UInt8MultiArray__init()."]
+    #[doc = "* \\return The pointer to the initialized message if successful,"]
+    #[doc = "* otherwise NULL"]
+    #[doc = "*/"]
+    pub fn std_msgs__msg__UInt8MultiArray__create() -> *mut std_msgs__msg__UInt8MultiArray;
+}
+extern "C" {
+    #[doc = " Destroy msg/UInt8MultiArray message."]
+    #[doc = "**"]
+    #[doc = "* It calls"]
+    #[doc = "* std_msgs__msg__UInt8MultiArray__fini()"]
+    #[doc = "* and frees the memory of the message."]
+    #[doc = "* \\param[in,out] msg The allocated message pointer."]
+    #[doc = "*/"]
+    pub fn std_msgs__msg__UInt8MultiArray__destroy(msg: *mut std_msgs__msg__UInt8MultiArray);
+}
+extern "C" {
+    #[doc = " Check for msg/UInt8MultiArray message equality."]
+    #[doc = "**"]
+    #[doc = "* \\param[in] lhs The message on the left hand size of the equality operator."]
+    #[doc = "* \\param[in] rhs The message on the right hand size of the equality operator."]
+    #[doc = "* \\return true if messages are equal, otherwise false."]
+    #[doc = "*/"]
+    pub fn std_msgs__msg__UInt8MultiArray__are_equal(
+        lhs: *const std_msgs__msg__UInt8MultiArray,
+        rhs: *const std_msgs__msg__UInt8MultiArray,
+    ) -> bool;
+}
+extern "C" {
+    #[doc = " Copy a msg/UInt8MultiArray message."]
+    #[doc = "**"]
+    #[doc = "* This functions performs a deep copy, as opposed to the shallow copy that"]
+    #[doc = "* plain assignment yields."]
+    #[doc = "*"]
+    #[doc = "* \\param[in] input The source message pointer."]
+    #[doc = "* \\param[out] output The target message pointer, which must"]
+    #[doc = "*   have been initialized before calling this function."]
+    #[doc = "* \\return true if successful, or false if either pointer is null"]
+    #[doc = "*   or memory allocation fails."]
+    #[doc = "*/"]
+    pub fn std_msgs__msg__UInt8MultiArray__copy(
+        input: *const std_msgs__msg__UInt8MultiArray,
+        output: *mut std_msgs__msg__UInt8MultiArray,
+    ) -> bool;
+}
+extern "C" {
+    #[doc = " Initialize array of msg/UInt8MultiArray messages."]
+    #[doc = "**"]
+    #[doc = "* It allocates the memory for the number of elements and calls"]
+    #[doc = "* std_msgs__msg__UInt8MultiArray__init()"]
+    #[doc = "* for each element of the array."]
+    #[doc = "* \\param[in,out] array The allocated array pointer."]
+    #[doc = "* \\param[in] size The size / capacity of the array."]
+    #[doc = "* \\return true if initialization was successful, otherwise false"]
+    #[doc = "* If the array pointer is valid and the size is zero it is guaranteed"]
+    #[doc = "# to return true."]
+    #[doc = "*/"]
+    pub fn std_msgs__msg__UInt8MultiArray__Sequence__init(
+        array: *mut std_msgs__msg__UInt8MultiArray__Sequence,
+        size: size_t,
+    ) -> bool;
+}
+extern "C" {
+    #[doc = " Finalize array of msg/UInt8MultiArray messages."]
+    #[doc = "**"]
+    #[doc = "* It calls"]
+    #[doc = "* std_msgs__msg__UInt8MultiArray__fini()"]
+    #[doc = "* for each element of the array and frees the memory for the number of"]
+    #[doc = "* elements."]
+    #[doc = "* \\param[in,out] array The initialized array pointer."]
+    #[doc = "*/"]
+    pub fn std_msgs__msg__UInt8MultiArray__Sequence__fini(
+        array: *mut std_msgs__msg__UInt8MultiArray__Sequence,
+    );
+}
+extern "C" {
+    #[doc = " Create array of msg/UInt8MultiArray messages."]
+    #[doc = "**"]
+    #[doc = "* It allocates the memory for the array and calls"]
+    #[doc = "* std_msgs__msg__UInt8MultiArray__Sequence__init()."]
+    #[doc = "* \\param[in] size The size / capacity of the array."]
+    #[doc = "* \\return The pointer to the initialized array if successful, otherwise NULL"]
+    #[doc = "*/"]
+    pub fn std_msgs__msg__UInt8MultiArray__Sequence__create(
+        size: size_t,
+    ) -> *mut std_msgs__msg__UInt8MultiArray__Sequence;
+}
+extern "C" {
+    #[doc = " Destroy array of msg/UInt8MultiArray messages."]
+    #[doc = "**"]
+    #[doc = "* It calls"]
+    #[doc = "* std_msgs__msg__UInt8MultiArray__Sequence__fini()"]
+    #[doc = "* on the array,"]
+    #[doc = "* and frees the memory of the array."]
+    #[doc = "* \\param[in,out] array The initialized array pointer."]
+    #[doc = "*/"]
+    pub fn std_msgs__msg__UInt8MultiArray__Sequence__destroy(
+        array: *mut std_msgs__msg__UInt8MultiArray__Sequence,
+    );
+}
+extern "C" {
+    #[doc = " Check for msg/UInt8MultiArray message array equality."]
+    #[doc = "**"]
+    #[doc = "* \\param[in] lhs The message array on the left hand size of the equality operator."]
+    #[doc = "* \\param[in] rhs The message array on the right hand size of the equality operator."]
+    #[doc = "* \\return true if message arrays are equal in size and content, otherwise false."]
+    #[doc = "*/"]
+    pub fn std_msgs__msg__UInt8MultiArray__Sequence__are_equal(
+        lhs: *const std_msgs__msg__UInt8MultiArray__Sequence,
+        rhs: *const std_msgs__msg__UInt8MultiArray__Sequence,
+    ) -> bool;
+}
+extern "C" {
+    #[doc = " Copy an array of msg/UInt8MultiArray messages."]
+    #[doc = "**"]
+    #[doc = "* This functions performs a deep copy, as opposed to the shallow copy that"]
+    #[doc = "* plain assignment yields."]
+    #[doc = "*"]
+    #[doc = "* \\param[in] input The source array pointer."]
+    #[doc = "* \\param[out] output The target array pointer, which must"]
+    #[doc = "*   have been initialized before calling this function."]
+    #[doc = "* \\return true if successful, or false if either pointer"]
+    #[doc = "*   is null or memory allocation fails."]
+    #[doc = "*/"]
+    pub fn std_msgs__msg__UInt8MultiArray__Sequence__copy(
+        input: *const std_msgs__msg__UInt8MultiArray__Sequence,
+        output: *mut std_msgs__msg__UInt8MultiArray__Sequence,
+    ) -> bool;
+}
+extern "C" {
+    pub fn rosidl_typesupport_c__get_message_type_support_handle__std_msgs__msg__UInt8MultiArray(
     ) -> *const rosidl_message_type_support_t;
 }
 extern "C" {
@@ -28758,4 +30705,593 @@ extern "C" {
 extern "C" {
     pub fn rosidl_typesupport_c__get_message_type_support_handle__diagnostic_msgs__msg__KeyValue(
     ) -> *const rosidl_message_type_support_t;
+}
+extern "C" {
+    pub fn rosidl_runtime_c__float__Sequence__init(
+        sequence: *mut rosidl_runtime_c__float__Sequence,
+        size: size_t,
+    ) -> bool;
+}
+extern "C" {
+    pub fn rosidl_runtime_c__float__Sequence__fini(
+        sequence: *mut rosidl_runtime_c__float__Sequence,
+    );
+}
+extern "C" {
+    pub fn rosidl_runtime_c__float__Sequence__are_equal(
+        lhs: *const rosidl_runtime_c__float__Sequence,
+        rhs: *const rosidl_runtime_c__float__Sequence,
+    ) -> bool;
+}
+extern "C" {
+    pub fn rosidl_runtime_c__float__Sequence__copy(
+        input: *const rosidl_runtime_c__float__Sequence,
+        output: *mut rosidl_runtime_c__float__Sequence,
+    ) -> bool;
+}
+extern "C" {
+    pub fn rosidl_runtime_c__double__Sequence__init(
+        sequence: *mut rosidl_runtime_c__double__Sequence,
+        size: size_t,
+    ) -> bool;
+}
+extern "C" {
+    pub fn rosidl_runtime_c__double__Sequence__fini(
+        sequence: *mut rosidl_runtime_c__double__Sequence,
+    );
+}
+extern "C" {
+    pub fn rosidl_runtime_c__double__Sequence__are_equal(
+        lhs: *const rosidl_runtime_c__double__Sequence,
+        rhs: *const rosidl_runtime_c__double__Sequence,
+    ) -> bool;
+}
+extern "C" {
+    pub fn rosidl_runtime_c__double__Sequence__copy(
+        input: *const rosidl_runtime_c__double__Sequence,
+        output: *mut rosidl_runtime_c__double__Sequence,
+    ) -> bool;
+}
+extern "C" {
+    pub fn rosidl_runtime_c__long_double__Sequence__init(
+        sequence: *mut rosidl_runtime_c__long_double__Sequence,
+        size: size_t,
+    ) -> bool;
+}
+extern "C" {
+    pub fn rosidl_runtime_c__long_double__Sequence__fini(
+        sequence: *mut rosidl_runtime_c__long_double__Sequence,
+    );
+}
+extern "C" {
+    pub fn rosidl_runtime_c__long_double__Sequence__are_equal(
+        lhs: *const rosidl_runtime_c__long_double__Sequence,
+        rhs: *const rosidl_runtime_c__long_double__Sequence,
+    ) -> bool;
+}
+extern "C" {
+    pub fn rosidl_runtime_c__long_double__Sequence__copy(
+        input: *const rosidl_runtime_c__long_double__Sequence,
+        output: *mut rosidl_runtime_c__long_double__Sequence,
+    ) -> bool;
+}
+extern "C" {
+    pub fn rosidl_runtime_c__char__Sequence__init(
+        sequence: *mut rosidl_runtime_c__char__Sequence,
+        size: size_t,
+    ) -> bool;
+}
+extern "C" {
+    pub fn rosidl_runtime_c__char__Sequence__fini(sequence: *mut rosidl_runtime_c__char__Sequence);
+}
+extern "C" {
+    pub fn rosidl_runtime_c__char__Sequence__are_equal(
+        lhs: *const rosidl_runtime_c__char__Sequence,
+        rhs: *const rosidl_runtime_c__char__Sequence,
+    ) -> bool;
+}
+extern "C" {
+    pub fn rosidl_runtime_c__char__Sequence__copy(
+        input: *const rosidl_runtime_c__char__Sequence,
+        output: *mut rosidl_runtime_c__char__Sequence,
+    ) -> bool;
+}
+extern "C" {
+    pub fn rosidl_runtime_c__wchar__Sequence__init(
+        sequence: *mut rosidl_runtime_c__wchar__Sequence,
+        size: size_t,
+    ) -> bool;
+}
+extern "C" {
+    pub fn rosidl_runtime_c__wchar__Sequence__fini(
+        sequence: *mut rosidl_runtime_c__wchar__Sequence,
+    );
+}
+extern "C" {
+    pub fn rosidl_runtime_c__wchar__Sequence__are_equal(
+        lhs: *const rosidl_runtime_c__wchar__Sequence,
+        rhs: *const rosidl_runtime_c__wchar__Sequence,
+    ) -> bool;
+}
+extern "C" {
+    pub fn rosidl_runtime_c__wchar__Sequence__copy(
+        input: *const rosidl_runtime_c__wchar__Sequence,
+        output: *mut rosidl_runtime_c__wchar__Sequence,
+    ) -> bool;
+}
+extern "C" {
+    pub fn rosidl_runtime_c__boolean__Sequence__init(
+        sequence: *mut rosidl_runtime_c__boolean__Sequence,
+        size: size_t,
+    ) -> bool;
+}
+extern "C" {
+    pub fn rosidl_runtime_c__boolean__Sequence__fini(
+        sequence: *mut rosidl_runtime_c__boolean__Sequence,
+    );
+}
+extern "C" {
+    pub fn rosidl_runtime_c__boolean__Sequence__are_equal(
+        lhs: *const rosidl_runtime_c__boolean__Sequence,
+        rhs: *const rosidl_runtime_c__boolean__Sequence,
+    ) -> bool;
+}
+extern "C" {
+    pub fn rosidl_runtime_c__boolean__Sequence__copy(
+        input: *const rosidl_runtime_c__boolean__Sequence,
+        output: *mut rosidl_runtime_c__boolean__Sequence,
+    ) -> bool;
+}
+extern "C" {
+    pub fn rosidl_runtime_c__octet__Sequence__init(
+        sequence: *mut rosidl_runtime_c__octet__Sequence,
+        size: size_t,
+    ) -> bool;
+}
+extern "C" {
+    pub fn rosidl_runtime_c__octet__Sequence__fini(
+        sequence: *mut rosidl_runtime_c__octet__Sequence,
+    );
+}
+extern "C" {
+    pub fn rosidl_runtime_c__octet__Sequence__are_equal(
+        lhs: *const rosidl_runtime_c__octet__Sequence,
+        rhs: *const rosidl_runtime_c__octet__Sequence,
+    ) -> bool;
+}
+extern "C" {
+    pub fn rosidl_runtime_c__octet__Sequence__copy(
+        input: *const rosidl_runtime_c__octet__Sequence,
+        output: *mut rosidl_runtime_c__octet__Sequence,
+    ) -> bool;
+}
+extern "C" {
+    pub fn rosidl_runtime_c__uint8__Sequence__init(
+        sequence: *mut rosidl_runtime_c__uint8__Sequence,
+        size: size_t,
+    ) -> bool;
+}
+extern "C" {
+    pub fn rosidl_runtime_c__uint8__Sequence__fini(
+        sequence: *mut rosidl_runtime_c__uint8__Sequence,
+    );
+}
+extern "C" {
+    pub fn rosidl_runtime_c__uint8__Sequence__are_equal(
+        lhs: *const rosidl_runtime_c__uint8__Sequence,
+        rhs: *const rosidl_runtime_c__uint8__Sequence,
+    ) -> bool;
+}
+extern "C" {
+    pub fn rosidl_runtime_c__uint8__Sequence__copy(
+        input: *const rosidl_runtime_c__uint8__Sequence,
+        output: *mut rosidl_runtime_c__uint8__Sequence,
+    ) -> bool;
+}
+extern "C" {
+    pub fn rosidl_runtime_c__int8__Sequence__init(
+        sequence: *mut rosidl_runtime_c__int8__Sequence,
+        size: size_t,
+    ) -> bool;
+}
+extern "C" {
+    pub fn rosidl_runtime_c__int8__Sequence__fini(sequence: *mut rosidl_runtime_c__int8__Sequence);
+}
+extern "C" {
+    pub fn rosidl_runtime_c__int8__Sequence__are_equal(
+        lhs: *const rosidl_runtime_c__int8__Sequence,
+        rhs: *const rosidl_runtime_c__int8__Sequence,
+    ) -> bool;
+}
+extern "C" {
+    pub fn rosidl_runtime_c__int8__Sequence__copy(
+        input: *const rosidl_runtime_c__int8__Sequence,
+        output: *mut rosidl_runtime_c__int8__Sequence,
+    ) -> bool;
+}
+extern "C" {
+    pub fn rosidl_runtime_c__uint16__Sequence__init(
+        sequence: *mut rosidl_runtime_c__uint16__Sequence,
+        size: size_t,
+    ) -> bool;
+}
+extern "C" {
+    pub fn rosidl_runtime_c__uint16__Sequence__fini(
+        sequence: *mut rosidl_runtime_c__uint16__Sequence,
+    );
+}
+extern "C" {
+    pub fn rosidl_runtime_c__uint16__Sequence__are_equal(
+        lhs: *const rosidl_runtime_c__uint16__Sequence,
+        rhs: *const rosidl_runtime_c__uint16__Sequence,
+    ) -> bool;
+}
+extern "C" {
+    pub fn rosidl_runtime_c__uint16__Sequence__copy(
+        input: *const rosidl_runtime_c__uint16__Sequence,
+        output: *mut rosidl_runtime_c__uint16__Sequence,
+    ) -> bool;
+}
+extern "C" {
+    pub fn rosidl_runtime_c__int16__Sequence__init(
+        sequence: *mut rosidl_runtime_c__int16__Sequence,
+        size: size_t,
+    ) -> bool;
+}
+extern "C" {
+    pub fn rosidl_runtime_c__int16__Sequence__fini(
+        sequence: *mut rosidl_runtime_c__int16__Sequence,
+    );
+}
+extern "C" {
+    pub fn rosidl_runtime_c__int16__Sequence__are_equal(
+        lhs: *const rosidl_runtime_c__int16__Sequence,
+        rhs: *const rosidl_runtime_c__int16__Sequence,
+    ) -> bool;
+}
+extern "C" {
+    pub fn rosidl_runtime_c__int16__Sequence__copy(
+        input: *const rosidl_runtime_c__int16__Sequence,
+        output: *mut rosidl_runtime_c__int16__Sequence,
+    ) -> bool;
+}
+extern "C" {
+    pub fn rosidl_runtime_c__uint32__Sequence__init(
+        sequence: *mut rosidl_runtime_c__uint32__Sequence,
+        size: size_t,
+    ) -> bool;
+}
+extern "C" {
+    pub fn rosidl_runtime_c__uint32__Sequence__fini(
+        sequence: *mut rosidl_runtime_c__uint32__Sequence,
+    );
+}
+extern "C" {
+    pub fn rosidl_runtime_c__uint32__Sequence__are_equal(
+        lhs: *const rosidl_runtime_c__uint32__Sequence,
+        rhs: *const rosidl_runtime_c__uint32__Sequence,
+    ) -> bool;
+}
+extern "C" {
+    pub fn rosidl_runtime_c__uint32__Sequence__copy(
+        input: *const rosidl_runtime_c__uint32__Sequence,
+        output: *mut rosidl_runtime_c__uint32__Sequence,
+    ) -> bool;
+}
+extern "C" {
+    pub fn rosidl_runtime_c__int32__Sequence__init(
+        sequence: *mut rosidl_runtime_c__int32__Sequence,
+        size: size_t,
+    ) -> bool;
+}
+extern "C" {
+    pub fn rosidl_runtime_c__int32__Sequence__fini(
+        sequence: *mut rosidl_runtime_c__int32__Sequence,
+    );
+}
+extern "C" {
+    pub fn rosidl_runtime_c__int32__Sequence__are_equal(
+        lhs: *const rosidl_runtime_c__int32__Sequence,
+        rhs: *const rosidl_runtime_c__int32__Sequence,
+    ) -> bool;
+}
+extern "C" {
+    pub fn rosidl_runtime_c__int32__Sequence__copy(
+        input: *const rosidl_runtime_c__int32__Sequence,
+        output: *mut rosidl_runtime_c__int32__Sequence,
+    ) -> bool;
+}
+extern "C" {
+    pub fn rosidl_runtime_c__uint64__Sequence__init(
+        sequence: *mut rosidl_runtime_c__uint64__Sequence,
+        size: size_t,
+    ) -> bool;
+}
+extern "C" {
+    pub fn rosidl_runtime_c__uint64__Sequence__fini(
+        sequence: *mut rosidl_runtime_c__uint64__Sequence,
+    );
+}
+extern "C" {
+    pub fn rosidl_runtime_c__uint64__Sequence__are_equal(
+        lhs: *const rosidl_runtime_c__uint64__Sequence,
+        rhs: *const rosidl_runtime_c__uint64__Sequence,
+    ) -> bool;
+}
+extern "C" {
+    pub fn rosidl_runtime_c__uint64__Sequence__copy(
+        input: *const rosidl_runtime_c__uint64__Sequence,
+        output: *mut rosidl_runtime_c__uint64__Sequence,
+    ) -> bool;
+}
+extern "C" {
+    pub fn rosidl_runtime_c__int64__Sequence__init(
+        sequence: *mut rosidl_runtime_c__int64__Sequence,
+        size: size_t,
+    ) -> bool;
+}
+extern "C" {
+    pub fn rosidl_runtime_c__int64__Sequence__fini(
+        sequence: *mut rosidl_runtime_c__int64__Sequence,
+    );
+}
+extern "C" {
+    pub fn rosidl_runtime_c__int64__Sequence__are_equal(
+        lhs: *const rosidl_runtime_c__int64__Sequence,
+        rhs: *const rosidl_runtime_c__int64__Sequence,
+    ) -> bool;
+}
+extern "C" {
+    pub fn rosidl_runtime_c__int64__Sequence__copy(
+        input: *const rosidl_runtime_c__int64__Sequence,
+        output: *mut rosidl_runtime_c__int64__Sequence,
+    ) -> bool;
+}
+extern "C" {
+    #[doc = " \\defgroup primitives_sequence_functions__legacy Sequence functions for legacy types for backward compatibility."]
+    pub fn rosidl_runtime_c__bool__Sequence__init(
+        sequence: *mut rosidl_runtime_c__boolean__Sequence,
+        size: size_t,
+    ) -> bool;
+}
+extern "C" {
+    #[doc = " See #ROSIDL_RUNTIME_C__DECLARE_PRIMITIVE_SEQUENCE_FINI(bool)"]
+    pub fn rosidl_runtime_c__bool__Sequence__fini(
+        sequence: *mut rosidl_runtime_c__boolean__Sequence,
+    );
+}
+extern "C" {
+    #[doc = " See #ROSIDL_RUNTIME_C__DECLARE_PRIMITIVE_SEQUENCE_EQ(bool)"]
+    pub fn rosidl_runtime_c__bool__Sequence__are_equal(
+        lhs: *const rosidl_runtime_c__boolean__Sequence,
+        rhs: *const rosidl_runtime_c__boolean__Sequence,
+    ) -> bool;
+}
+extern "C" {
+    #[doc = " See #ROSIDL_RUNTIME_C__DECLARE_PRIMITIVE_SEQUENCE_COPY(bool)"]
+    pub fn rosidl_runtime_c__bool__Sequence__copy(
+        input: *const rosidl_runtime_c__boolean__Sequence,
+        output: *mut rosidl_runtime_c__boolean__Sequence,
+    ) -> bool;
+}
+extern "C" {
+    #[doc = " See #ROSIDL_RUNTIME_C__DECLARE_PRIMITIVE_SEQUENCE_INIT(byte)"]
+    pub fn rosidl_runtime_c__byte__Sequence__init(
+        sequence: *mut rosidl_runtime_c__octet__Sequence,
+        size: size_t,
+    ) -> bool;
+}
+extern "C" {
+    #[doc = " See #ROSIDL_RUNTIME_C__DECLARE_PRIMITIVE_SEQUENCE_FINI(byte)"]
+    pub fn rosidl_runtime_c__byte__Sequence__fini(sequence: *mut rosidl_runtime_c__octet__Sequence);
+}
+extern "C" {
+    #[doc = " See #ROSIDL_RUNTIME_C__DECLARE_PRIMITIVE_SEQUENCE_EQ(byte)"]
+    pub fn rosidl_runtime_c__byte__Sequence__are_equal(
+        lhs: *const rosidl_runtime_c__octet__Sequence,
+        rhs: *const rosidl_runtime_c__octet__Sequence,
+    ) -> bool;
+}
+extern "C" {
+    #[doc = " See #ROSIDL_RUNTIME_C__DECLARE_PRIMITIVE_SEQUENCE_COPY(byte)"]
+    pub fn rosidl_runtime_c__byte__Sequence__copy(
+        input: *const rosidl_runtime_c__octet__Sequence,
+        output: *mut rosidl_runtime_c__octet__Sequence,
+    ) -> bool;
+}
+extern "C" {
+    #[doc = " See #ROSIDL_RUNTIME_C__DECLARE_PRIMITIVE_SEQUENCE_INIT(float32)"]
+    pub fn rosidl_runtime_c__float32__Sequence__init(
+        sequence: *mut rosidl_runtime_c__float__Sequence,
+        size: size_t,
+    ) -> bool;
+}
+extern "C" {
+    #[doc = " See #ROSIDL_RUNTIME_C__DECLARE_PRIMITIVE_SEQUENCE_FINI(float32)"]
+    pub fn rosidl_runtime_c__float32__Sequence__fini(
+        sequence: *mut rosidl_runtime_c__float__Sequence,
+    );
+}
+extern "C" {
+    #[doc = " See #ROSIDL_RUNTIME_C__DECLARE_PRIMITIVE_SEQUENCE_EQ(float32)"]
+    pub fn rosidl_runtime_c__float32__Sequence__are_equal(
+        lhs: *const rosidl_runtime_c__float__Sequence,
+        rhs: *const rosidl_runtime_c__float__Sequence,
+    ) -> bool;
+}
+extern "C" {
+    #[doc = " See #ROSIDL_RUNTIME_C__DECLARE_PRIMITIVE_SEQUENCE_COPY(float32)"]
+    pub fn rosidl_runtime_c__float32__Sequence__copy(
+        input: *const rosidl_runtime_c__float__Sequence,
+        output: *mut rosidl_runtime_c__float__Sequence,
+    ) -> bool;
+}
+extern "C" {
+    #[doc = " See #ROSIDL_RUNTIME_C__DECLARE_PRIMITIVE_SEQUENCE_INIT(float64)"]
+    pub fn rosidl_runtime_c__float64__Sequence__init(
+        sequence: *mut rosidl_runtime_c__double__Sequence,
+        size: size_t,
+    ) -> bool;
+}
+extern "C" {
+    #[doc = " See #ROSIDL_RUNTIME_C__DECLARE_PRIMITIVE_SEQUENCE_FINI(float64)"]
+    pub fn rosidl_runtime_c__float64__Sequence__fini(
+        sequence: *mut rosidl_runtime_c__double__Sequence,
+    );
+}
+extern "C" {
+    #[doc = " See #ROSIDL_RUNTIME_C__DECLARE_PRIMITIVE_SEQUENCE_EQ(float64)"]
+    pub fn rosidl_runtime_c__float64__Sequence__are_equal(
+        lhs: *const rosidl_runtime_c__double__Sequence,
+        rhs: *const rosidl_runtime_c__double__Sequence,
+    ) -> bool;
+}
+extern "C" {
+    #[doc = " See #ROSIDL_RUNTIME_C__DECLARE_PRIMITIVE_SEQUENCE_COPY(float64)"]
+    pub fn rosidl_runtime_c__float64__Sequence__copy(
+        input: *const rosidl_runtime_c__double__Sequence,
+        output: *mut rosidl_runtime_c__double__Sequence,
+    ) -> bool;
+}
+#[doc = " Upper boundary for #rosidl_runtime_c__String or #rosidl_runtime_c__U16String."]
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct rosidl_runtime_c__String__bound {
+    #[doc = " The number of characters in the string (excluding the null character)."]
+    pub bound: size_t,
+}
+#[test]
+fn bindgen_test_layout_rosidl_runtime_c__String__bound() {
+    assert_eq!(
+        ::std::mem::size_of::<rosidl_runtime_c__String__bound>(),
+        8usize,
+        concat!("Size of: ", stringify!(rosidl_runtime_c__String__bound))
+    );
+    assert_eq!(
+        ::std::mem::align_of::<rosidl_runtime_c__String__bound>(),
+        8usize,
+        concat!("Alignment of ", stringify!(rosidl_runtime_c__String__bound))
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::std::ptr::null::<rosidl_runtime_c__String__bound>())).bound as *const _ as usize
+        },
+        0usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(rosidl_runtime_c__String__bound),
+            "::",
+            stringify!(bound)
+        )
+    );
+}
+extern "C" {
+    #[doc = " Initialize a rosidl_runtime_c__String structure."]
+    pub fn rosidl_runtime_c__String__init(str_: *mut rosidl_runtime_c__String) -> bool;
+}
+extern "C" {
+    #[doc = " Deallocate the memory of the rosidl_runtime_c__String structure."]
+    pub fn rosidl_runtime_c__String__fini(str_: *mut rosidl_runtime_c__String);
+}
+extern "C" {
+    #[doc = " Copy rosidl_runtime_c__String structure content."]
+    #[doc = "**"]
+    #[doc = "* This functions performs a deep copy, as opposed to the shallow copy that"]
+    #[doc = "* plain assignment yields."]
+    #[doc = "*"]
+    #[doc = "* \\param[in] input a pointer to a rosidl_runtime_c__String structure"]
+    #[doc = "*   to copy from."]
+    #[doc = "* \\param[out] output a pointer to an initialized rosidl_runtime_c__String"]
+    #[doc = "*   structure to copy into."]
+    #[doc = "* \\return true if successful, false if either pointer is null or memory"]
+    #[doc = "*   allocation fails."]
+    #[doc = "*/"]
+    pub fn rosidl_runtime_c__String__copy(
+        input: *const rosidl_runtime_c__String,
+        output: *mut rosidl_runtime_c__String,
+    ) -> bool;
+}
+extern "C" {
+    #[doc = " Check for rosidl_runtime_c__String structure equality."]
+    #[doc = "**"]
+    #[doc = "* \\param[in] lhs a pointer to the left hand side of the equality operator."]
+    #[doc = "* \\param[in] lhs a pointer to the right hand side of the equality operator."]
+    #[doc = "* \\return true if rosidl_runtime_c__String structures are equal in size and content,"]
+    #[doc = "*   otherwise false."]
+    #[doc = "*/"]
+    pub fn rosidl_runtime_c__String__are_equal(
+        lhs: *const rosidl_runtime_c__String,
+        rhs: *const rosidl_runtime_c__String,
+    ) -> bool;
+}
+extern "C" {
+    #[doc = " Assign the c string pointer of n characters to the rosidl_runtime_c__String structure."]
+    pub fn rosidl_runtime_c__String__assignn(
+        str_: *mut rosidl_runtime_c__String,
+        value: *const ::std::os::raw::c_char,
+        n: size_t,
+    ) -> bool;
+}
+extern "C" {
+    #[doc = " Assign the c string pointer to the rosidl_runtime_c__String structure."]
+    pub fn rosidl_runtime_c__String__assign(
+        str_: *mut rosidl_runtime_c__String,
+        value: *const ::std::os::raw::c_char,
+    ) -> bool;
+}
+extern "C" {
+    #[doc = " Initialize a rosidl_runtime_c__String__Sequence__init structure."]
+    pub fn rosidl_runtime_c__String__Sequence__init(
+        sequence: *mut rosidl_runtime_c__String__Sequence,
+        size: size_t,
+    ) -> bool;
+}
+extern "C" {
+    #[doc = " Deallocate the memory of the string sequence structure."]
+    pub fn rosidl_runtime_c__String__Sequence__fini(
+        sequence: *mut rosidl_runtime_c__String__Sequence,
+    );
+}
+extern "C" {
+    #[doc = " Check for rosidl_runtime_c__String__Sequence structure equality."]
+    #[doc = "**"]
+    #[doc = "* \\param[in] lhs a pointer to the left hand side of the equality operator."]
+    #[doc = "* \\param[in] lhs a pointer to the right hand side of the equality operator."]
+    #[doc = "* \\return true if rosidl_runtime_c__String__Sequence structures are equal"]
+    #[doc = "*   in size and content, otherwise false."]
+    #[doc = "*/"]
+    pub fn rosidl_runtime_c__String__Sequence__are_equal(
+        lhs: *const rosidl_runtime_c__String__Sequence,
+        rhs: *const rosidl_runtime_c__String__Sequence,
+    ) -> bool;
+}
+extern "C" {
+    #[doc = " Copy rosidl_runtime_c__String__Sequence structure content."]
+    #[doc = "**"]
+    #[doc = "* This functions performs a deep copy, as opposed to the shallow copy"]
+    #[doc = "* that plain assignment yields."]
+    #[doc = "*"]
+    #[doc = "* \\param[in] input a pointer to a rosidl_runtime_c__String__Sequence"]
+    #[doc = "*   structure to copy from."]
+    #[doc = "* \\param[out] output a pointer to an initialized rosidl_runtime_c__String__Sequence"]
+    #[doc = "*   structure to copy into."]
+    #[doc = "* \\return true if successful, false if either pointer is null or memory"]
+    #[doc = "*   allocation fails."]
+    #[doc = "*/"]
+    pub fn rosidl_runtime_c__String__Sequence__copy(
+        input: *const rosidl_runtime_c__String__Sequence,
+        output: *mut rosidl_runtime_c__String__Sequence,
+    ) -> bool;
+}
+extern "C" {
+    #[doc = " Create a rosidl_runtime_c__String__Sequence structure with a specific size."]
+    pub fn rosidl_runtime_c__String__Sequence__create(
+        size: size_t,
+    ) -> *mut rosidl_runtime_c__String__Sequence;
+}
+extern "C" {
+    #[doc = " Destroy a rosidl_runtime_c__String__Sequence structure."]
+    pub fn rosidl_runtime_c__String__Sequence__destroy(
+        sequence: *mut rosidl_runtime_c__String__Sequence,
+    );
 }

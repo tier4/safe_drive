@@ -9,15 +9,23 @@
 #include <std_msgs/msg/float64.h>
 #include <std_msgs/msg/float64_multi_array.h>
 #include <std_msgs/msg/header.h>
-#include <std_msgs/msg/int8_multi_array.h>
+#include <std_msgs/msg/int16.h>
 #include <std_msgs/msg/int16_multi_array.h>
+#include <std_msgs/msg/int32.h>
 #include <std_msgs/msg/int32_multi_array.h>
+#include <std_msgs/msg/int64.h>
 #include <std_msgs/msg/int64_multi_array.h>
-#include <std_msgs/msg/u_int8_multi_array.h>
-#include <std_msgs/msg/u_int16_multi_array.h>
-#include <std_msgs/msg/u_int32_multi_array.h>
-#include <std_msgs/msg/u_int64_multi_array.h>
+#include <std_msgs/msg/int8.h>
+#include <std_msgs/msg/int8_multi_array.h>
 #include <std_msgs/msg/string.h>
+#include <std_msgs/msg/u_int16.h>
+#include <std_msgs/msg/u_int16_multi_array.h>
+#include <std_msgs/msg/u_int32.h>
+#include <std_msgs/msg/u_int32_multi_array.h>
+#include <std_msgs/msg/u_int64.h>
+#include <std_msgs/msg/u_int64_multi_array.h>
+#include <std_msgs/msg/u_int8.h>
+#include <std_msgs/msg/u_int8_multi_array.h>
 
 #include <builtin_interfaces/msg/time.h>
 #include <builtin_interfaces/msg/duration.h>
@@ -99,3 +107,8 @@
 #include <diagnostic_msgs/msg/diagnostic_array.h>
 #include <diagnostic_msgs/msg/diagnostic_status.h>
 #include <diagnostic_msgs/msg/key_value.h>
+
+#include <rosidl_runtime_c/primitives_sequence.h>
+#include <rosidl_runtime_c/primitives_sequence_functions.h>
+#include <rosidl_runtime_c/string_bound.h>
+#include <rosidl_runtime_c/string_functions.h>
