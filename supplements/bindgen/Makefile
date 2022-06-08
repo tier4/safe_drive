@@ -3,7 +3,7 @@ all: msg.rs builtin_interfaces.rs
 .SUFFIXES: .rs .c
 
 all: msg.rs
-	cp msg.rs ../../src/msg/galactic.rs
+	cp msg.rs ../../src/msg/galactic/runtime_c.rs
 
 .c.rs:
 	bindgen $< -o $@ -- -I/opt/ros/galactic/include

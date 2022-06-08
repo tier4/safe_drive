@@ -8,12 +8,10 @@
 #![allow(clippy::upper_case_acronyms)]
 #![allow(clippy::too_many_arguments)]
 
-pub mod common_interfaces;
 mod galactic;
+pub use galactic::*;
 
 use std::{ffi::CString, fmt::Display, intrinsics::transmute};
-
-pub use galactic::*;
 
 #[repr(C)]
 #[derive(Debug)]
