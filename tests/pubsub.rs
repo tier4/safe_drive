@@ -22,7 +22,7 @@ fn test_pubsub() -> Result<(), Box<dyn Error>> {
 
     // publish a message
     let n = 100;
-    let msg = common::num::sample_msg__msg__Num { num: n };
+    let msg = common::num::example_msg__msg__Num { num: n };
     publisher.send(msg)?; // send message
 
     // wait messages

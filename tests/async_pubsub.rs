@@ -38,11 +38,11 @@ fn test_async() -> Result<(), Box<dyn Error>> {
 }
 
 /// The publisher
-async fn run_publisher(p: Publisher<common::num::sample_msg__msg__Num>) {
+async fn run_publisher(p: Publisher<common::num::example_msg__msg__Num>) {
     let dur = Duration::from_millis(100);
     for n in 0..3 {
         // publish a message periodically
-        let msg = common::num::sample_msg__msg__Num { num: n };
+        let msg = common::num::example_msg__msg__Num { num: n };
         p.send(msg).unwrap();
 
         // sleep 100[ms]
@@ -52,7 +52,7 @@ async fn run_publisher(p: Publisher<common::num::sample_msg__msg__Num>) {
 }
 
 /// The subscriber
-async fn run_subscriber(mut s: Subscriber<common::num::sample_msg__msg__Num>) {
+async fn run_subscriber(mut s: Subscriber<common::num::example_msg__msg__Num>) {
     let dur = Duration::from_millis(500);
     for n in 0.. {
         // receive a message specifying timeout of 500ms

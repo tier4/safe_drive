@@ -1,7 +1,7 @@
 SUBDIRS = tests/common supplements/bindgen
 
-NUM_LIBDIR=supplements/ros2/install/sample_msg/lib
-AddThreeInts_LIBDIR=supplements/ros2/install/sample_msg/lib
+NUM_LIBDIR=supplements/ros2/install/example_msg/lib
+AddThreeInts_LIBDIR=supplements/ros2/install/example_msg/lib
 
 all: $(SUBDIRS)
 	cd supplements/ros2 && colcon build

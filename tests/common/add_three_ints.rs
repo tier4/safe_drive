@@ -327,61 +327,64 @@ pub type intmax_t = __intmax_t;
 pub type uintmax_t = __uintmax_t;
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
-pub struct sample_msg__srv__AddThreeInts_Request {
+pub struct example_msg__srv__AddThreeInts_Request {
     pub a: i64,
     pub b: i64,
     pub c: i64,
 }
 #[test]
-fn bindgen_test_layout_sample_msg__srv__AddThreeInts_Request() {
+fn bindgen_test_layout_example_msg__srv__AddThreeInts_Request() {
     assert_eq!(
-        ::std::mem::size_of::<sample_msg__srv__AddThreeInts_Request>(),
+        ::std::mem::size_of::<example_msg__srv__AddThreeInts_Request>(),
         24usize,
         concat!(
             "Size of: ",
-            stringify!(sample_msg__srv__AddThreeInts_Request)
+            stringify!(example_msg__srv__AddThreeInts_Request)
         )
     );
     assert_eq!(
-        ::std::mem::align_of::<sample_msg__srv__AddThreeInts_Request>(),
+        ::std::mem::align_of::<example_msg__srv__AddThreeInts_Request>(),
         8usize,
         concat!(
             "Alignment of ",
-            stringify!(sample_msg__srv__AddThreeInts_Request)
+            stringify!(example_msg__srv__AddThreeInts_Request)
         )
     );
     assert_eq!(
         unsafe {
-            &(*(::std::ptr::null::<sample_msg__srv__AddThreeInts_Request>())).a as *const _ as usize
+            &(*(::std::ptr::null::<example_msg__srv__AddThreeInts_Request>())).a as *const _
+                as usize
         },
         0usize,
         concat!(
             "Offset of field: ",
-            stringify!(sample_msg__srv__AddThreeInts_Request),
+            stringify!(example_msg__srv__AddThreeInts_Request),
             "::",
             stringify!(a)
         )
     );
     assert_eq!(
         unsafe {
-            &(*(::std::ptr::null::<sample_msg__srv__AddThreeInts_Request>())).b as *const _ as usize
+            &(*(::std::ptr::null::<example_msg__srv__AddThreeInts_Request>())).b as *const _
+                as usize
         },
         8usize,
         concat!(
             "Offset of field: ",
-            stringify!(sample_msg__srv__AddThreeInts_Request),
+            stringify!(example_msg__srv__AddThreeInts_Request),
             "::",
             stringify!(b)
         )
     );
     assert_eq!(
         unsafe {
-            &(*(::std::ptr::null::<sample_msg__srv__AddThreeInts_Request>())).c as *const _ as usize
+            &(*(::std::ptr::null::<example_msg__srv__AddThreeInts_Request>())).c as *const _
+                as usize
         },
         16usize,
         concat!(
             "Offset of field: ",
-            stringify!(sample_msg__srv__AddThreeInts_Request),
+            stringify!(example_msg__srv__AddThreeInts_Request),
             "::",
             stringify!(c)
         )
@@ -389,66 +392,66 @@ fn bindgen_test_layout_sample_msg__srv__AddThreeInts_Request() {
 }
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
-pub struct sample_msg__srv__AddThreeInts_Request__Sequence {
-    pub data: *mut sample_msg__srv__AddThreeInts_Request,
+pub struct example_msg__srv__AddThreeInts_Request__Sequence {
+    pub data: *mut example_msg__srv__AddThreeInts_Request,
     #[doc = " The number of valid items in data"]
     pub size: size_t,
     #[doc = " The number of allocated items in data"]
     pub capacity: size_t,
 }
 #[test]
-fn bindgen_test_layout_sample_msg__srv__AddThreeInts_Request__Sequence() {
+fn bindgen_test_layout_example_msg__srv__AddThreeInts_Request__Sequence() {
     assert_eq!(
-        ::std::mem::size_of::<sample_msg__srv__AddThreeInts_Request__Sequence>(),
+        ::std::mem::size_of::<example_msg__srv__AddThreeInts_Request__Sequence>(),
         24usize,
         concat!(
             "Size of: ",
-            stringify!(sample_msg__srv__AddThreeInts_Request__Sequence)
+            stringify!(example_msg__srv__AddThreeInts_Request__Sequence)
         )
     );
     assert_eq!(
-        ::std::mem::align_of::<sample_msg__srv__AddThreeInts_Request__Sequence>(),
+        ::std::mem::align_of::<example_msg__srv__AddThreeInts_Request__Sequence>(),
         8usize,
         concat!(
             "Alignment of ",
-            stringify!(sample_msg__srv__AddThreeInts_Request__Sequence)
+            stringify!(example_msg__srv__AddThreeInts_Request__Sequence)
         )
     );
     assert_eq!(
         unsafe {
-            &(*(::std::ptr::null::<sample_msg__srv__AddThreeInts_Request__Sequence>())).data
+            &(*(::std::ptr::null::<example_msg__srv__AddThreeInts_Request__Sequence>())).data
                 as *const _ as usize
         },
         0usize,
         concat!(
             "Offset of field: ",
-            stringify!(sample_msg__srv__AddThreeInts_Request__Sequence),
+            stringify!(example_msg__srv__AddThreeInts_Request__Sequence),
             "::",
             stringify!(data)
         )
     );
     assert_eq!(
         unsafe {
-            &(*(::std::ptr::null::<sample_msg__srv__AddThreeInts_Request__Sequence>())).size
+            &(*(::std::ptr::null::<example_msg__srv__AddThreeInts_Request__Sequence>())).size
                 as *const _ as usize
         },
         8usize,
         concat!(
             "Offset of field: ",
-            stringify!(sample_msg__srv__AddThreeInts_Request__Sequence),
+            stringify!(example_msg__srv__AddThreeInts_Request__Sequence),
             "::",
             stringify!(size)
         )
     );
     assert_eq!(
         unsafe {
-            &(*(::std::ptr::null::<sample_msg__srv__AddThreeInts_Request__Sequence>())).capacity
+            &(*(::std::ptr::null::<example_msg__srv__AddThreeInts_Request__Sequence>())).capacity
                 as *const _ as usize
         },
         16usize,
         concat!(
             "Offset of field: ",
-            stringify!(sample_msg__srv__AddThreeInts_Request__Sequence),
+            stringify!(example_msg__srv__AddThreeInts_Request__Sequence),
             "::",
             stringify!(capacity)
         )
@@ -456,36 +459,36 @@ fn bindgen_test_layout_sample_msg__srv__AddThreeInts_Request__Sequence() {
 }
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
-pub struct sample_msg__srv__AddThreeInts_Response {
+pub struct example_msg__srv__AddThreeInts_Response {
     pub sum: i64,
 }
 #[test]
-fn bindgen_test_layout_sample_msg__srv__AddThreeInts_Response() {
+fn bindgen_test_layout_example_msg__srv__AddThreeInts_Response() {
     assert_eq!(
-        ::std::mem::size_of::<sample_msg__srv__AddThreeInts_Response>(),
+        ::std::mem::size_of::<example_msg__srv__AddThreeInts_Response>(),
         8usize,
         concat!(
             "Size of: ",
-            stringify!(sample_msg__srv__AddThreeInts_Response)
+            stringify!(example_msg__srv__AddThreeInts_Response)
         )
     );
     assert_eq!(
-        ::std::mem::align_of::<sample_msg__srv__AddThreeInts_Response>(),
+        ::std::mem::align_of::<example_msg__srv__AddThreeInts_Response>(),
         8usize,
         concat!(
             "Alignment of ",
-            stringify!(sample_msg__srv__AddThreeInts_Response)
+            stringify!(example_msg__srv__AddThreeInts_Response)
         )
     );
     assert_eq!(
         unsafe {
-            &(*(::std::ptr::null::<sample_msg__srv__AddThreeInts_Response>())).sum as *const _
+            &(*(::std::ptr::null::<example_msg__srv__AddThreeInts_Response>())).sum as *const _
                 as usize
         },
         0usize,
         concat!(
             "Offset of field: ",
-            stringify!(sample_msg__srv__AddThreeInts_Response),
+            stringify!(example_msg__srv__AddThreeInts_Response),
             "::",
             stringify!(sum)
         )
@@ -493,66 +496,66 @@ fn bindgen_test_layout_sample_msg__srv__AddThreeInts_Response() {
 }
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
-pub struct sample_msg__srv__AddThreeInts_Response__Sequence {
-    pub data: *mut sample_msg__srv__AddThreeInts_Response,
+pub struct example_msg__srv__AddThreeInts_Response__Sequence {
+    pub data: *mut example_msg__srv__AddThreeInts_Response,
     #[doc = " The number of valid items in data"]
     pub size: size_t,
     #[doc = " The number of allocated items in data"]
     pub capacity: size_t,
 }
 #[test]
-fn bindgen_test_layout_sample_msg__srv__AddThreeInts_Response__Sequence() {
+fn bindgen_test_layout_example_msg__srv__AddThreeInts_Response__Sequence() {
     assert_eq!(
-        ::std::mem::size_of::<sample_msg__srv__AddThreeInts_Response__Sequence>(),
+        ::std::mem::size_of::<example_msg__srv__AddThreeInts_Response__Sequence>(),
         24usize,
         concat!(
             "Size of: ",
-            stringify!(sample_msg__srv__AddThreeInts_Response__Sequence)
+            stringify!(example_msg__srv__AddThreeInts_Response__Sequence)
         )
     );
     assert_eq!(
-        ::std::mem::align_of::<sample_msg__srv__AddThreeInts_Response__Sequence>(),
+        ::std::mem::align_of::<example_msg__srv__AddThreeInts_Response__Sequence>(),
         8usize,
         concat!(
             "Alignment of ",
-            stringify!(sample_msg__srv__AddThreeInts_Response__Sequence)
+            stringify!(example_msg__srv__AddThreeInts_Response__Sequence)
         )
     );
     assert_eq!(
         unsafe {
-            &(*(::std::ptr::null::<sample_msg__srv__AddThreeInts_Response__Sequence>())).data
+            &(*(::std::ptr::null::<example_msg__srv__AddThreeInts_Response__Sequence>())).data
                 as *const _ as usize
         },
         0usize,
         concat!(
             "Offset of field: ",
-            stringify!(sample_msg__srv__AddThreeInts_Response__Sequence),
+            stringify!(example_msg__srv__AddThreeInts_Response__Sequence),
             "::",
             stringify!(data)
         )
     );
     assert_eq!(
         unsafe {
-            &(*(::std::ptr::null::<sample_msg__srv__AddThreeInts_Response__Sequence>())).size
+            &(*(::std::ptr::null::<example_msg__srv__AddThreeInts_Response__Sequence>())).size
                 as *const _ as usize
         },
         8usize,
         concat!(
             "Offset of field: ",
-            stringify!(sample_msg__srv__AddThreeInts_Response__Sequence),
+            stringify!(example_msg__srv__AddThreeInts_Response__Sequence),
             "::",
             stringify!(size)
         )
     );
     assert_eq!(
         unsafe {
-            &(*(::std::ptr::null::<sample_msg__srv__AddThreeInts_Response__Sequence>())).capacity
+            &(*(::std::ptr::null::<example_msg__srv__AddThreeInts_Response__Sequence>())).capacity
                 as *const _ as usize
         },
         16usize,
         concat!(
             "Offset of field: ",
-            stringify!(sample_msg__srv__AddThreeInts_Response__Sequence),
+            stringify!(example_msg__srv__AddThreeInts_Response__Sequence),
             "::",
             stringify!(capacity)
         )
@@ -2536,14 +2539,14 @@ extern "C" {
     #[doc = "* \\param[in,out] msg The previously allocated message pointer."]
     #[doc = "* Fields without a default value will not be initialized by this function."]
     #[doc = "* You might want to call memset(msg, 0, sizeof("]
-    #[doc = "* sample_msg__srv__AddThreeInts_Request"]
+    #[doc = "* example_msg__srv__AddThreeInts_Request"]
     #[doc = "* )) before or use"]
-    #[doc = "* sample_msg__srv__AddThreeInts_Request__create()"]
+    #[doc = "* example_msg__srv__AddThreeInts_Request__create()"]
     #[doc = "* to allocate and initialize the message."]
     #[doc = "* \\return true if initialization was successful, otherwise false"]
     #[doc = "*/"]
-    pub fn sample_msg__srv__AddThreeInts_Request__init(
-        msg: *mut sample_msg__srv__AddThreeInts_Request,
+    pub fn example_msg__srv__AddThreeInts_Request__init(
+        msg: *mut example_msg__srv__AddThreeInts_Request,
     ) -> bool;
 }
 extern "C" {
@@ -2551,8 +2554,8 @@ extern "C" {
     #[doc = "**"]
     #[doc = "* \\param[in,out] msg The allocated message pointer."]
     #[doc = "*/"]
-    pub fn sample_msg__srv__AddThreeInts_Request__fini(
-        msg: *mut sample_msg__srv__AddThreeInts_Request,
+    pub fn example_msg__srv__AddThreeInts_Request__fini(
+        msg: *mut example_msg__srv__AddThreeInts_Request,
     );
 }
 extern "C" {
@@ -2560,23 +2563,23 @@ extern "C" {
     #[doc = "**"]
     #[doc = "* It allocates the memory for the message, sets the memory to zero, and"]
     #[doc = "* calls"]
-    #[doc = "* sample_msg__srv__AddThreeInts_Request__init()."]
+    #[doc = "* example_msg__srv__AddThreeInts_Request__init()."]
     #[doc = "* \\return The pointer to the initialized message if successful,"]
     #[doc = "* otherwise NULL"]
     #[doc = "*/"]
-    pub fn sample_msg__srv__AddThreeInts_Request__create(
-    ) -> *mut sample_msg__srv__AddThreeInts_Request;
+    pub fn example_msg__srv__AddThreeInts_Request__create(
+    ) -> *mut example_msg__srv__AddThreeInts_Request;
 }
 extern "C" {
     #[doc = " Destroy srv/AddThreeInts message."]
     #[doc = "**"]
     #[doc = "* It calls"]
-    #[doc = "* sample_msg__srv__AddThreeInts_Request__fini()"]
+    #[doc = "* example_msg__srv__AddThreeInts_Request__fini()"]
     #[doc = "* and frees the memory of the message."]
     #[doc = "* \\param[in,out] msg The allocated message pointer."]
     #[doc = "*/"]
-    pub fn sample_msg__srv__AddThreeInts_Request__destroy(
-        msg: *mut sample_msg__srv__AddThreeInts_Request,
+    pub fn example_msg__srv__AddThreeInts_Request__destroy(
+        msg: *mut example_msg__srv__AddThreeInts_Request,
     );
 }
 extern "C" {
@@ -2586,9 +2589,9 @@ extern "C" {
     #[doc = "* \\param[in] rhs The message on the right hand size of the equality operator."]
     #[doc = "* \\return true if messages are equal, otherwise false."]
     #[doc = "*/"]
-    pub fn sample_msg__srv__AddThreeInts_Request__are_equal(
-        lhs: *const sample_msg__srv__AddThreeInts_Request,
-        rhs: *const sample_msg__srv__AddThreeInts_Request,
+    pub fn example_msg__srv__AddThreeInts_Request__are_equal(
+        lhs: *const example_msg__srv__AddThreeInts_Request,
+        rhs: *const example_msg__srv__AddThreeInts_Request,
     ) -> bool;
 }
 extern "C" {
@@ -2603,16 +2606,16 @@ extern "C" {
     #[doc = "* \\return true if successful, or false if either pointer is null"]
     #[doc = "*   or memory allocation fails."]
     #[doc = "*/"]
-    pub fn sample_msg__srv__AddThreeInts_Request__copy(
-        input: *const sample_msg__srv__AddThreeInts_Request,
-        output: *mut sample_msg__srv__AddThreeInts_Request,
+    pub fn example_msg__srv__AddThreeInts_Request__copy(
+        input: *const example_msg__srv__AddThreeInts_Request,
+        output: *mut example_msg__srv__AddThreeInts_Request,
     ) -> bool;
 }
 extern "C" {
     #[doc = " Initialize array of srv/AddThreeInts messages."]
     #[doc = "**"]
     #[doc = "* It allocates the memory for the number of elements and calls"]
-    #[doc = "* sample_msg__srv__AddThreeInts_Request__init()"]
+    #[doc = "* example_msg__srv__AddThreeInts_Request__init()"]
     #[doc = "* for each element of the array."]
     #[doc = "* \\param[in,out] array The allocated array pointer."]
     #[doc = "* \\param[in] size The size / capacity of the array."]
@@ -2620,8 +2623,8 @@ extern "C" {
     #[doc = "* If the array pointer is valid and the size is zero it is guaranteed"]
     #[doc = "# to return true."]
     #[doc = "*/"]
-    pub fn sample_msg__srv__AddThreeInts_Request__Sequence__init(
-        array: *mut sample_msg__srv__AddThreeInts_Request__Sequence,
+    pub fn example_msg__srv__AddThreeInts_Request__Sequence__init(
+        array: *mut example_msg__srv__AddThreeInts_Request__Sequence,
         size: size_t,
     ) -> bool;
 }
@@ -2629,38 +2632,38 @@ extern "C" {
     #[doc = " Finalize array of srv/AddThreeInts messages."]
     #[doc = "**"]
     #[doc = "* It calls"]
-    #[doc = "* sample_msg__srv__AddThreeInts_Request__fini()"]
+    #[doc = "* example_msg__srv__AddThreeInts_Request__fini()"]
     #[doc = "* for each element of the array and frees the memory for the number of"]
     #[doc = "* elements."]
     #[doc = "* \\param[in,out] array The initialized array pointer."]
     #[doc = "*/"]
-    pub fn sample_msg__srv__AddThreeInts_Request__Sequence__fini(
-        array: *mut sample_msg__srv__AddThreeInts_Request__Sequence,
+    pub fn example_msg__srv__AddThreeInts_Request__Sequence__fini(
+        array: *mut example_msg__srv__AddThreeInts_Request__Sequence,
     );
 }
 extern "C" {
     #[doc = " Create array of srv/AddThreeInts messages."]
     #[doc = "**"]
     #[doc = "* It allocates the memory for the array and calls"]
-    #[doc = "* sample_msg__srv__AddThreeInts_Request__Sequence__init()."]
+    #[doc = "* example_msg__srv__AddThreeInts_Request__Sequence__init()."]
     #[doc = "* \\param[in] size The size / capacity of the array."]
     #[doc = "* \\return The pointer to the initialized array if successful, otherwise NULL"]
     #[doc = "*/"]
-    pub fn sample_msg__srv__AddThreeInts_Request__Sequence__create(
+    pub fn example_msg__srv__AddThreeInts_Request__Sequence__create(
         size: size_t,
-    ) -> *mut sample_msg__srv__AddThreeInts_Request__Sequence;
+    ) -> *mut example_msg__srv__AddThreeInts_Request__Sequence;
 }
 extern "C" {
     #[doc = " Destroy array of srv/AddThreeInts messages."]
     #[doc = "**"]
     #[doc = "* It calls"]
-    #[doc = "* sample_msg__srv__AddThreeInts_Request__Sequence__fini()"]
+    #[doc = "* example_msg__srv__AddThreeInts_Request__Sequence__fini()"]
     #[doc = "* on the array,"]
     #[doc = "* and frees the memory of the array."]
     #[doc = "* \\param[in,out] array The initialized array pointer."]
     #[doc = "*/"]
-    pub fn sample_msg__srv__AddThreeInts_Request__Sequence__destroy(
-        array: *mut sample_msg__srv__AddThreeInts_Request__Sequence,
+    pub fn example_msg__srv__AddThreeInts_Request__Sequence__destroy(
+        array: *mut example_msg__srv__AddThreeInts_Request__Sequence,
     );
 }
 extern "C" {
@@ -2670,9 +2673,9 @@ extern "C" {
     #[doc = "* \\param[in] rhs The message array on the right hand size of the equality operator."]
     #[doc = "* \\return true if message arrays are equal in size and content, otherwise false."]
     #[doc = "*/"]
-    pub fn sample_msg__srv__AddThreeInts_Request__Sequence__are_equal(
-        lhs: *const sample_msg__srv__AddThreeInts_Request__Sequence,
-        rhs: *const sample_msg__srv__AddThreeInts_Request__Sequence,
+    pub fn example_msg__srv__AddThreeInts_Request__Sequence__are_equal(
+        lhs: *const example_msg__srv__AddThreeInts_Request__Sequence,
+        rhs: *const example_msg__srv__AddThreeInts_Request__Sequence,
     ) -> bool;
 }
 extern "C" {
@@ -2687,9 +2690,9 @@ extern "C" {
     #[doc = "* \\return true if successful, or false if either pointer"]
     #[doc = "*   is null or memory allocation fails."]
     #[doc = "*/"]
-    pub fn sample_msg__srv__AddThreeInts_Request__Sequence__copy(
-        input: *const sample_msg__srv__AddThreeInts_Request__Sequence,
-        output: *mut sample_msg__srv__AddThreeInts_Request__Sequence,
+    pub fn example_msg__srv__AddThreeInts_Request__Sequence__copy(
+        input: *const example_msg__srv__AddThreeInts_Request__Sequence,
+        output: *mut example_msg__srv__AddThreeInts_Request__Sequence,
     ) -> bool;
 }
 extern "C" {
@@ -2700,14 +2703,14 @@ extern "C" {
     #[doc = "* \\param[in,out] msg The previously allocated message pointer."]
     #[doc = "* Fields without a default value will not be initialized by this function."]
     #[doc = "* You might want to call memset(msg, 0, sizeof("]
-    #[doc = "* sample_msg__srv__AddThreeInts_Response"]
+    #[doc = "* example_msg__srv__AddThreeInts_Response"]
     #[doc = "* )) before or use"]
-    #[doc = "* sample_msg__srv__AddThreeInts_Response__create()"]
+    #[doc = "* example_msg__srv__AddThreeInts_Response__create()"]
     #[doc = "* to allocate and initialize the message."]
     #[doc = "* \\return true if initialization was successful, otherwise false"]
     #[doc = "*/"]
-    pub fn sample_msg__srv__AddThreeInts_Response__init(
-        msg: *mut sample_msg__srv__AddThreeInts_Response,
+    pub fn example_msg__srv__AddThreeInts_Response__init(
+        msg: *mut example_msg__srv__AddThreeInts_Response,
     ) -> bool;
 }
 extern "C" {
@@ -2715,8 +2718,8 @@ extern "C" {
     #[doc = "**"]
     #[doc = "* \\param[in,out] msg The allocated message pointer."]
     #[doc = "*/"]
-    pub fn sample_msg__srv__AddThreeInts_Response__fini(
-        msg: *mut sample_msg__srv__AddThreeInts_Response,
+    pub fn example_msg__srv__AddThreeInts_Response__fini(
+        msg: *mut example_msg__srv__AddThreeInts_Response,
     );
 }
 extern "C" {
@@ -2724,23 +2727,23 @@ extern "C" {
     #[doc = "**"]
     #[doc = "* It allocates the memory for the message, sets the memory to zero, and"]
     #[doc = "* calls"]
-    #[doc = "* sample_msg__srv__AddThreeInts_Response__init()."]
+    #[doc = "* example_msg__srv__AddThreeInts_Response__init()."]
     #[doc = "* \\return The pointer to the initialized message if successful,"]
     #[doc = "* otherwise NULL"]
     #[doc = "*/"]
-    pub fn sample_msg__srv__AddThreeInts_Response__create(
-    ) -> *mut sample_msg__srv__AddThreeInts_Response;
+    pub fn example_msg__srv__AddThreeInts_Response__create(
+    ) -> *mut example_msg__srv__AddThreeInts_Response;
 }
 extern "C" {
     #[doc = " Destroy srv/AddThreeInts message."]
     #[doc = "**"]
     #[doc = "* It calls"]
-    #[doc = "* sample_msg__srv__AddThreeInts_Response__fini()"]
+    #[doc = "* example_msg__srv__AddThreeInts_Response__fini()"]
     #[doc = "* and frees the memory of the message."]
     #[doc = "* \\param[in,out] msg The allocated message pointer."]
     #[doc = "*/"]
-    pub fn sample_msg__srv__AddThreeInts_Response__destroy(
-        msg: *mut sample_msg__srv__AddThreeInts_Response,
+    pub fn example_msg__srv__AddThreeInts_Response__destroy(
+        msg: *mut example_msg__srv__AddThreeInts_Response,
     );
 }
 extern "C" {
@@ -2750,9 +2753,9 @@ extern "C" {
     #[doc = "* \\param[in] rhs The message on the right hand size of the equality operator."]
     #[doc = "* \\return true if messages are equal, otherwise false."]
     #[doc = "*/"]
-    pub fn sample_msg__srv__AddThreeInts_Response__are_equal(
-        lhs: *const sample_msg__srv__AddThreeInts_Response,
-        rhs: *const sample_msg__srv__AddThreeInts_Response,
+    pub fn example_msg__srv__AddThreeInts_Response__are_equal(
+        lhs: *const example_msg__srv__AddThreeInts_Response,
+        rhs: *const example_msg__srv__AddThreeInts_Response,
     ) -> bool;
 }
 extern "C" {
@@ -2767,16 +2770,16 @@ extern "C" {
     #[doc = "* \\return true if successful, or false if either pointer is null"]
     #[doc = "*   or memory allocation fails."]
     #[doc = "*/"]
-    pub fn sample_msg__srv__AddThreeInts_Response__copy(
-        input: *const sample_msg__srv__AddThreeInts_Response,
-        output: *mut sample_msg__srv__AddThreeInts_Response,
+    pub fn example_msg__srv__AddThreeInts_Response__copy(
+        input: *const example_msg__srv__AddThreeInts_Response,
+        output: *mut example_msg__srv__AddThreeInts_Response,
     ) -> bool;
 }
 extern "C" {
     #[doc = " Initialize array of srv/AddThreeInts messages."]
     #[doc = "**"]
     #[doc = "* It allocates the memory for the number of elements and calls"]
-    #[doc = "* sample_msg__srv__AddThreeInts_Response__init()"]
+    #[doc = "* example_msg__srv__AddThreeInts_Response__init()"]
     #[doc = "* for each element of the array."]
     #[doc = "* \\param[in,out] array The allocated array pointer."]
     #[doc = "* \\param[in] size The size / capacity of the array."]
@@ -2784,8 +2787,8 @@ extern "C" {
     #[doc = "* If the array pointer is valid and the size is zero it is guaranteed"]
     #[doc = "# to return true."]
     #[doc = "*/"]
-    pub fn sample_msg__srv__AddThreeInts_Response__Sequence__init(
-        array: *mut sample_msg__srv__AddThreeInts_Response__Sequence,
+    pub fn example_msg__srv__AddThreeInts_Response__Sequence__init(
+        array: *mut example_msg__srv__AddThreeInts_Response__Sequence,
         size: size_t,
     ) -> bool;
 }
@@ -2793,38 +2796,38 @@ extern "C" {
     #[doc = " Finalize array of srv/AddThreeInts messages."]
     #[doc = "**"]
     #[doc = "* It calls"]
-    #[doc = "* sample_msg__srv__AddThreeInts_Response__fini()"]
+    #[doc = "* example_msg__srv__AddThreeInts_Response__fini()"]
     #[doc = "* for each element of the array and frees the memory for the number of"]
     #[doc = "* elements."]
     #[doc = "* \\param[in,out] array The initialized array pointer."]
     #[doc = "*/"]
-    pub fn sample_msg__srv__AddThreeInts_Response__Sequence__fini(
-        array: *mut sample_msg__srv__AddThreeInts_Response__Sequence,
+    pub fn example_msg__srv__AddThreeInts_Response__Sequence__fini(
+        array: *mut example_msg__srv__AddThreeInts_Response__Sequence,
     );
 }
 extern "C" {
     #[doc = " Create array of srv/AddThreeInts messages."]
     #[doc = "**"]
     #[doc = "* It allocates the memory for the array and calls"]
-    #[doc = "* sample_msg__srv__AddThreeInts_Response__Sequence__init()."]
+    #[doc = "* example_msg__srv__AddThreeInts_Response__Sequence__init()."]
     #[doc = "* \\param[in] size The size / capacity of the array."]
     #[doc = "* \\return The pointer to the initialized array if successful, otherwise NULL"]
     #[doc = "*/"]
-    pub fn sample_msg__srv__AddThreeInts_Response__Sequence__create(
+    pub fn example_msg__srv__AddThreeInts_Response__Sequence__create(
         size: size_t,
-    ) -> *mut sample_msg__srv__AddThreeInts_Response__Sequence;
+    ) -> *mut example_msg__srv__AddThreeInts_Response__Sequence;
 }
 extern "C" {
     #[doc = " Destroy array of srv/AddThreeInts messages."]
     #[doc = "**"]
     #[doc = "* It calls"]
-    #[doc = "* sample_msg__srv__AddThreeInts_Response__Sequence__fini()"]
+    #[doc = "* example_msg__srv__AddThreeInts_Response__Sequence__fini()"]
     #[doc = "* on the array,"]
     #[doc = "* and frees the memory of the array."]
     #[doc = "* \\param[in,out] array The initialized array pointer."]
     #[doc = "*/"]
-    pub fn sample_msg__srv__AddThreeInts_Response__Sequence__destroy(
-        array: *mut sample_msg__srv__AddThreeInts_Response__Sequence,
+    pub fn example_msg__srv__AddThreeInts_Response__Sequence__destroy(
+        array: *mut example_msg__srv__AddThreeInts_Response__Sequence,
     );
 }
 extern "C" {
@@ -2834,9 +2837,9 @@ extern "C" {
     #[doc = "* \\param[in] rhs The message array on the right hand size of the equality operator."]
     #[doc = "* \\return true if message arrays are equal in size and content, otherwise false."]
     #[doc = "*/"]
-    pub fn sample_msg__srv__AddThreeInts_Response__Sequence__are_equal(
-        lhs: *const sample_msg__srv__AddThreeInts_Response__Sequence,
-        rhs: *const sample_msg__srv__AddThreeInts_Response__Sequence,
+    pub fn example_msg__srv__AddThreeInts_Response__Sequence__are_equal(
+        lhs: *const example_msg__srv__AddThreeInts_Response__Sequence,
+        rhs: *const example_msg__srv__AddThreeInts_Response__Sequence,
     ) -> bool;
 }
 extern "C" {
@@ -2851,9 +2854,9 @@ extern "C" {
     #[doc = "* \\return true if successful, or false if either pointer"]
     #[doc = "*   is null or memory allocation fails."]
     #[doc = "*/"]
-    pub fn sample_msg__srv__AddThreeInts_Response__Sequence__copy(
-        input: *const sample_msg__srv__AddThreeInts_Response__Sequence,
-        output: *mut sample_msg__srv__AddThreeInts_Response__Sequence,
+    pub fn example_msg__srv__AddThreeInts_Response__Sequence__copy(
+        input: *const example_msg__srv__AddThreeInts_Response__Sequence,
+        output: *mut example_msg__srv__AddThreeInts_Response__Sequence,
     ) -> bool;
 }
 pub type rosidl_message_typesupport_handle_function = ::std::option::Option<
@@ -2952,11 +2955,11 @@ extern "C" {
     ) -> *const rosidl_message_type_support_t;
 }
 extern "C" {
-    pub fn rosidl_typesupport_c__get_message_type_support_handle__sample_msg__srv__AddThreeInts_Request(
+    pub fn rosidl_typesupport_c__get_message_type_support_handle__example_msg__srv__AddThreeInts_Request(
     ) -> *const rosidl_message_type_support_t;
 }
 extern "C" {
-    pub fn rosidl_typesupport_c__get_message_type_support_handle__sample_msg__srv__AddThreeInts_Response(
+    pub fn rosidl_typesupport_c__get_message_type_support_handle__example_msg__srv__AddThreeInts_Response(
     ) -> *const rosidl_message_type_support_t;
 }
 pub type rosidl_service_typesupport_handle_function = ::std::option::Option<
@@ -3058,6 +3061,6 @@ extern "C" {
     ) -> *const rosidl_service_type_support_t;
 }
 extern "C" {
-    pub fn rosidl_typesupport_c__get_service_type_support_handle__sample_msg__srv__AddThreeInts(
+    pub fn rosidl_typesupport_c__get_service_type_support_handle__example_msg__srv__AddThreeInts(
     ) -> *const rosidl_service_type_support_t;
 }

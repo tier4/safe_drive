@@ -9,7 +9,7 @@ fn test_subscription() -> Result<(), Box<dyn Error>> {
     let node = ctx
         .create_node("test_subscription_node", None, Default::default())
         .unwrap();
-    let subscription = node.create_subscriber::<common::num::sample_msg__msg__Num>(
+    let subscription = node.create_subscriber::<common::num::example_msg__msg__Num>(
         "test_subscription",
         Default::default(),
     )?;

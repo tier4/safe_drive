@@ -327,27 +327,27 @@ pub type intmax_t = __intmax_t;
 pub type uintmax_t = __uintmax_t;
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
-pub struct sample_msg__msg__Num {
+pub struct example_msg__msg__Num {
     pub num: i64,
 }
 #[test]
-fn bindgen_test_layout_sample_msg__msg__Num() {
+fn bindgen_test_layout_example_msg__msg__Num() {
     assert_eq!(
-        ::std::mem::size_of::<sample_msg__msg__Num>(),
+        ::std::mem::size_of::<example_msg__msg__Num>(),
         8usize,
-        concat!("Size of: ", stringify!(sample_msg__msg__Num))
+        concat!("Size of: ", stringify!(example_msg__msg__Num))
     );
     assert_eq!(
-        ::std::mem::align_of::<sample_msg__msg__Num>(),
+        ::std::mem::align_of::<example_msg__msg__Num>(),
         8usize,
-        concat!("Alignment of ", stringify!(sample_msg__msg__Num))
+        concat!("Alignment of ", stringify!(example_msg__msg__Num))
     );
     assert_eq!(
-        unsafe { &(*(::std::ptr::null::<sample_msg__msg__Num>())).num as *const _ as usize },
+        unsafe { &(*(::std::ptr::null::<example_msg__msg__Num>())).num as *const _ as usize },
         0usize,
         concat!(
             "Offset of field: ",
-            stringify!(sample_msg__msg__Num),
+            stringify!(example_msg__msg__Num),
             "::",
             stringify!(num)
         )
@@ -355,57 +355,58 @@ fn bindgen_test_layout_sample_msg__msg__Num() {
 }
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
-pub struct sample_msg__msg__Num__Sequence {
-    pub data: *mut sample_msg__msg__Num,
+pub struct example_msg__msg__Num__Sequence {
+    pub data: *mut example_msg__msg__Num,
     #[doc = " The number of valid items in data"]
     pub size: size_t,
     #[doc = " The number of allocated items in data"]
     pub capacity: size_t,
 }
 #[test]
-fn bindgen_test_layout_sample_msg__msg__Num__Sequence() {
+fn bindgen_test_layout_example_msg__msg__Num__Sequence() {
     assert_eq!(
-        ::std::mem::size_of::<sample_msg__msg__Num__Sequence>(),
+        ::std::mem::size_of::<example_msg__msg__Num__Sequence>(),
         24usize,
-        concat!("Size of: ", stringify!(sample_msg__msg__Num__Sequence))
+        concat!("Size of: ", stringify!(example_msg__msg__Num__Sequence))
     );
     assert_eq!(
-        ::std::mem::align_of::<sample_msg__msg__Num__Sequence>(),
+        ::std::mem::align_of::<example_msg__msg__Num__Sequence>(),
         8usize,
-        concat!("Alignment of ", stringify!(sample_msg__msg__Num__Sequence))
+        concat!("Alignment of ", stringify!(example_msg__msg__Num__Sequence))
     );
     assert_eq!(
         unsafe {
-            &(*(::std::ptr::null::<sample_msg__msg__Num__Sequence>())).data as *const _ as usize
+            &(*(::std::ptr::null::<example_msg__msg__Num__Sequence>())).data as *const _ as usize
         },
         0usize,
         concat!(
             "Offset of field: ",
-            stringify!(sample_msg__msg__Num__Sequence),
+            stringify!(example_msg__msg__Num__Sequence),
             "::",
             stringify!(data)
         )
     );
     assert_eq!(
         unsafe {
-            &(*(::std::ptr::null::<sample_msg__msg__Num__Sequence>())).size as *const _ as usize
+            &(*(::std::ptr::null::<example_msg__msg__Num__Sequence>())).size as *const _ as usize
         },
         8usize,
         concat!(
             "Offset of field: ",
-            stringify!(sample_msg__msg__Num__Sequence),
+            stringify!(example_msg__msg__Num__Sequence),
             "::",
             stringify!(size)
         )
     );
     assert_eq!(
         unsafe {
-            &(*(::std::ptr::null::<sample_msg__msg__Num__Sequence>())).capacity as *const _ as usize
+            &(*(::std::ptr::null::<example_msg__msg__Num__Sequence>())).capacity as *const _
+                as usize
         },
         16usize,
         concat!(
             "Offset of field: ",
-            stringify!(sample_msg__msg__Num__Sequence),
+            stringify!(example_msg__msg__Num__Sequence),
             "::",
             stringify!(capacity)
         )
@@ -2389,41 +2390,41 @@ extern "C" {
     #[doc = "* \\param[in,out] msg The previously allocated message pointer."]
     #[doc = "* Fields without a default value will not be initialized by this function."]
     #[doc = "* You might want to call memset(msg, 0, sizeof("]
-    #[doc = "* sample_msg__msg__Num"]
+    #[doc = "* example_msg__msg__Num"]
     #[doc = "* )) before or use"]
-    #[doc = "* sample_msg__msg__Num__create()"]
+    #[doc = "* example_msg__msg__Num__create()"]
     #[doc = "* to allocate and initialize the message."]
     #[doc = "* \\return true if initialization was successful, otherwise false"]
     #[doc = "*/"]
-    pub fn sample_msg__msg__Num__init(msg: *mut sample_msg__msg__Num) -> bool;
+    pub fn example_msg__msg__Num__init(msg: *mut example_msg__msg__Num) -> bool;
 }
 extern "C" {
     #[doc = " Finalize msg/Num message."]
     #[doc = "**"]
     #[doc = "* \\param[in,out] msg The allocated message pointer."]
     #[doc = "*/"]
-    pub fn sample_msg__msg__Num__fini(msg: *mut sample_msg__msg__Num);
+    pub fn example_msg__msg__Num__fini(msg: *mut example_msg__msg__Num);
 }
 extern "C" {
     #[doc = " Create msg/Num message."]
     #[doc = "**"]
     #[doc = "* It allocates the memory for the message, sets the memory to zero, and"]
     #[doc = "* calls"]
-    #[doc = "* sample_msg__msg__Num__init()."]
+    #[doc = "* example_msg__msg__Num__init()."]
     #[doc = "* \\return The pointer to the initialized message if successful,"]
     #[doc = "* otherwise NULL"]
     #[doc = "*/"]
-    pub fn sample_msg__msg__Num__create() -> *mut sample_msg__msg__Num;
+    pub fn example_msg__msg__Num__create() -> *mut example_msg__msg__Num;
 }
 extern "C" {
     #[doc = " Destroy msg/Num message."]
     #[doc = "**"]
     #[doc = "* It calls"]
-    #[doc = "* sample_msg__msg__Num__fini()"]
+    #[doc = "* example_msg__msg__Num__fini()"]
     #[doc = "* and frees the memory of the message."]
     #[doc = "* \\param[in,out] msg The allocated message pointer."]
     #[doc = "*/"]
-    pub fn sample_msg__msg__Num__destroy(msg: *mut sample_msg__msg__Num);
+    pub fn example_msg__msg__Num__destroy(msg: *mut example_msg__msg__Num);
 }
 extern "C" {
     #[doc = " Check for msg/Num message equality."]
@@ -2432,9 +2433,9 @@ extern "C" {
     #[doc = "* \\param[in] rhs The message on the right hand size of the equality operator."]
     #[doc = "* \\return true if messages are equal, otherwise false."]
     #[doc = "*/"]
-    pub fn sample_msg__msg__Num__are_equal(
-        lhs: *const sample_msg__msg__Num,
-        rhs: *const sample_msg__msg__Num,
+    pub fn example_msg__msg__Num__are_equal(
+        lhs: *const example_msg__msg__Num,
+        rhs: *const example_msg__msg__Num,
     ) -> bool;
 }
 extern "C" {
@@ -2449,16 +2450,16 @@ extern "C" {
     #[doc = "* \\return true if successful, or false if either pointer is null"]
     #[doc = "*   or memory allocation fails."]
     #[doc = "*/"]
-    pub fn sample_msg__msg__Num__copy(
-        input: *const sample_msg__msg__Num,
-        output: *mut sample_msg__msg__Num,
+    pub fn example_msg__msg__Num__copy(
+        input: *const example_msg__msg__Num,
+        output: *mut example_msg__msg__Num,
     ) -> bool;
 }
 extern "C" {
     #[doc = " Initialize array of msg/Num messages."]
     #[doc = "**"]
     #[doc = "* It allocates the memory for the number of elements and calls"]
-    #[doc = "* sample_msg__msg__Num__init()"]
+    #[doc = "* example_msg__msg__Num__init()"]
     #[doc = "* for each element of the array."]
     #[doc = "* \\param[in,out] array The allocated array pointer."]
     #[doc = "* \\param[in] size The size / capacity of the array."]
@@ -2466,8 +2467,8 @@ extern "C" {
     #[doc = "* If the array pointer is valid and the size is zero it is guaranteed"]
     #[doc = "# to return true."]
     #[doc = "*/"]
-    pub fn sample_msg__msg__Num__Sequence__init(
-        array: *mut sample_msg__msg__Num__Sequence,
+    pub fn example_msg__msg__Num__Sequence__init(
+        array: *mut example_msg__msg__Num__Sequence,
         size: size_t,
     ) -> bool;
 }
@@ -2475,35 +2476,35 @@ extern "C" {
     #[doc = " Finalize array of msg/Num messages."]
     #[doc = "**"]
     #[doc = "* It calls"]
-    #[doc = "* sample_msg__msg__Num__fini()"]
+    #[doc = "* example_msg__msg__Num__fini()"]
     #[doc = "* for each element of the array and frees the memory for the number of"]
     #[doc = "* elements."]
     #[doc = "* \\param[in,out] array The initialized array pointer."]
     #[doc = "*/"]
-    pub fn sample_msg__msg__Num__Sequence__fini(array: *mut sample_msg__msg__Num__Sequence);
+    pub fn example_msg__msg__Num__Sequence__fini(array: *mut example_msg__msg__Num__Sequence);
 }
 extern "C" {
     #[doc = " Create array of msg/Num messages."]
     #[doc = "**"]
     #[doc = "* It allocates the memory for the array and calls"]
-    #[doc = "* sample_msg__msg__Num__Sequence__init()."]
+    #[doc = "* example_msg__msg__Num__Sequence__init()."]
     #[doc = "* \\param[in] size The size / capacity of the array."]
     #[doc = "* \\return The pointer to the initialized array if successful, otherwise NULL"]
     #[doc = "*/"]
-    pub fn sample_msg__msg__Num__Sequence__create(
+    pub fn example_msg__msg__Num__Sequence__create(
         size: size_t,
-    ) -> *mut sample_msg__msg__Num__Sequence;
+    ) -> *mut example_msg__msg__Num__Sequence;
 }
 extern "C" {
     #[doc = " Destroy array of msg/Num messages."]
     #[doc = "**"]
     #[doc = "* It calls"]
-    #[doc = "* sample_msg__msg__Num__Sequence__fini()"]
+    #[doc = "* example_msg__msg__Num__Sequence__fini()"]
     #[doc = "* on the array,"]
     #[doc = "* and frees the memory of the array."]
     #[doc = "* \\param[in,out] array The initialized array pointer."]
     #[doc = "*/"]
-    pub fn sample_msg__msg__Num__Sequence__destroy(array: *mut sample_msg__msg__Num__Sequence);
+    pub fn example_msg__msg__Num__Sequence__destroy(array: *mut example_msg__msg__Num__Sequence);
 }
 extern "C" {
     #[doc = " Check for msg/Num message array equality."]
@@ -2512,9 +2513,9 @@ extern "C" {
     #[doc = "* \\param[in] rhs The message array on the right hand size of the equality operator."]
     #[doc = "* \\return true if message arrays are equal in size and content, otherwise false."]
     #[doc = "*/"]
-    pub fn sample_msg__msg__Num__Sequence__are_equal(
-        lhs: *const sample_msg__msg__Num__Sequence,
-        rhs: *const sample_msg__msg__Num__Sequence,
+    pub fn example_msg__msg__Num__Sequence__are_equal(
+        lhs: *const example_msg__msg__Num__Sequence,
+        rhs: *const example_msg__msg__Num__Sequence,
     ) -> bool;
 }
 extern "C" {
@@ -2529,9 +2530,9 @@ extern "C" {
     #[doc = "* \\return true if successful, or false if either pointer"]
     #[doc = "*   is null or memory allocation fails."]
     #[doc = "*/"]
-    pub fn sample_msg__msg__Num__Sequence__copy(
-        input: *const sample_msg__msg__Num__Sequence,
-        output: *mut sample_msg__msg__Num__Sequence,
+    pub fn example_msg__msg__Num__Sequence__copy(
+        input: *const example_msg__msg__Num__Sequence,
+        output: *mut example_msg__msg__Num__Sequence,
     ) -> bool;
 }
 pub type rosidl_message_typesupport_handle_function = ::std::option::Option<
@@ -2630,6 +2631,6 @@ extern "C" {
     ) -> *const rosidl_message_type_support_t;
 }
 extern "C" {
-    pub fn rosidl_typesupport_c__get_message_type_support_handle__sample_msg__msg__Num(
+    pub fn rosidl_typesupport_c__get_message_type_support_handle__example_msg__msg__Num(
     ) -> *const rosidl_message_type_support_t;
 }
