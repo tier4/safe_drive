@@ -2,12 +2,14 @@
 use super::*;
 use super::super::super::*;
 use crate::msg::*;
+use crate::rcl;
 
 extern "C" {
     fn sensor_msgs__msg__MultiEchoLaserScan__init(msg: *mut MultiEchoLaserScan) -> bool;
     fn sensor_msgs__msg__MultiEchoLaserScan__fini(msg: *mut MultiEchoLaserScan);
     fn sensor_msgs__msg__MultiEchoLaserScan__Sequence__init(msg: *mut MultiEchoLaserScanSequence, size: usize) -> bool;
     fn sensor_msgs__msg__MultiEchoLaserScan__Sequence__fini(msg: *mut MultiEchoLaserScanSequence);
+    fn rosidl_typesupport_c__get_message_type_support_handle__sensor_msgs__msg__MultiEchoLaserScan() -> *const rcl::rosidl_message_type_support_t;
 }
 
 
@@ -40,6 +42,14 @@ impl MultiEchoLaserScan {
 impl Drop for MultiEchoLaserScan {
     fn drop(&mut self) {
         unsafe { sensor_msgs__msg__MultiEchoLaserScan__fini(self) };
+    }
+}
+
+impl TopicMsg for MultiEchoLaserScan {
+    fn type_support() -> *const rcl::rosidl_message_type_support_t {
+        unsafe {
+            rosidl_typesupport_c__get_message_type_support_handle__sensor_msgs__msg__MultiEchoLaserScan()
+        }
     }
 }
 

@@ -2,6 +2,7 @@
 use super::*;
 use super::super::super::*;
 use crate::msg::*;
+use crate::rcl;
 pub const INHERIT: u8 = 0;
 pub const FIXED: u8 = 1;
 pub const VIEW_FACING: u8 = 2;
@@ -18,6 +19,7 @@ extern "C" {
     fn visualization_msgs__msg__InteractiveMarkerControl__fini(msg: *mut InteractiveMarkerControl);
     fn visualization_msgs__msg__InteractiveMarkerControl__Sequence__init(msg: *mut InteractiveMarkerControlSequence, size: usize) -> bool;
     fn visualization_msgs__msg__InteractiveMarkerControl__Sequence__fini(msg: *mut InteractiveMarkerControlSequence);
+    fn rosidl_typesupport_c__get_message_type_support_handle__visualization_msgs__msg__InteractiveMarkerControl() -> *const rcl::rosidl_message_type_support_t;
 }
 
 
@@ -51,6 +53,14 @@ impl InteractiveMarkerControl {
 impl Drop for InteractiveMarkerControl {
     fn drop(&mut self) {
         unsafe { visualization_msgs__msg__InteractiveMarkerControl__fini(self) };
+    }
+}
+
+impl TopicMsg for InteractiveMarkerControl {
+    fn type_support() -> *const rcl::rosidl_message_type_support_t {
+        unsafe {
+            rosidl_typesupport_c__get_message_type_support_handle__visualization_msgs__msg__InteractiveMarkerControl()
+        }
     }
 }
 

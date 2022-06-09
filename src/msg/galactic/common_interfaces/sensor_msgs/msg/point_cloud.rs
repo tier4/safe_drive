@@ -2,12 +2,14 @@
 use super::*;
 use super::super::super::*;
 use crate::msg::*;
+use crate::rcl;
 
 extern "C" {
     fn sensor_msgs__msg__PointCloud__init(msg: *mut PointCloud) -> bool;
     fn sensor_msgs__msg__PointCloud__fini(msg: *mut PointCloud);
     fn sensor_msgs__msg__PointCloud__Sequence__init(msg: *mut PointCloudSequence, size: usize) -> bool;
     fn sensor_msgs__msg__PointCloud__Sequence__fini(msg: *mut PointCloudSequence);
+    fn rosidl_typesupport_c__get_message_type_support_handle__sensor_msgs__msg__PointCloud() -> *const rcl::rosidl_message_type_support_t;
 }
 
 
@@ -33,6 +35,14 @@ impl PointCloud {
 impl Drop for PointCloud {
     fn drop(&mut self) {
         unsafe { sensor_msgs__msg__PointCloud__fini(self) };
+    }
+}
+
+impl TopicMsg for PointCloud {
+    fn type_support() -> *const rcl::rosidl_message_type_support_t {
+        unsafe {
+            rosidl_typesupport_c__get_message_type_support_handle__sensor_msgs__msg__PointCloud()
+        }
     }
 }
 

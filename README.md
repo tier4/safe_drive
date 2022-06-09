@@ -23,7 +23,7 @@ See [specifications](./specifications/).
 - [ ] Timer
 - [ ] Action (service + topic)
 - [ ] Rust code generation from .msg and .srv files
-- Formal Specification
+- [ ] Formal Specification
   - [ ] Callback based executer
   - [x] Basic scheduler
   - [ ] Prioritized scheduler

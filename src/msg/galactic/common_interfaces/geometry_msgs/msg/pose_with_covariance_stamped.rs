@@ -2,12 +2,14 @@
 use super::*;
 use super::super::super::*;
 use crate::msg::*;
+use crate::rcl;
 
 extern "C" {
     fn geometry_msgs__msg__PoseWithCovarianceStamped__init(msg: *mut PoseWithCovarianceStamped) -> bool;
     fn geometry_msgs__msg__PoseWithCovarianceStamped__fini(msg: *mut PoseWithCovarianceStamped);
     fn geometry_msgs__msg__PoseWithCovarianceStamped__Sequence__init(msg: *mut PoseWithCovarianceStampedSequence, size: usize) -> bool;
     fn geometry_msgs__msg__PoseWithCovarianceStamped__Sequence__fini(msg: *mut PoseWithCovarianceStampedSequence);
+    fn rosidl_typesupport_c__get_message_type_support_handle__geometry_msgs__msg__PoseWithCovarianceStamped() -> *const rcl::rosidl_message_type_support_t;
 }
 
 
@@ -32,6 +34,14 @@ impl PoseWithCovarianceStamped {
 impl Drop for PoseWithCovarianceStamped {
     fn drop(&mut self) {
         unsafe { geometry_msgs__msg__PoseWithCovarianceStamped__fini(self) };
+    }
+}
+
+impl TopicMsg for PoseWithCovarianceStamped {
+    fn type_support() -> *const rcl::rosidl_message_type_support_t {
+        unsafe {
+            rosidl_typesupport_c__get_message_type_support_handle__geometry_msgs__msg__PoseWithCovarianceStamped()
+        }
     }
 }
 

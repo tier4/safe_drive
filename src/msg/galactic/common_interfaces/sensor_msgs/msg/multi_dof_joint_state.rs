@@ -2,12 +2,14 @@
 use super::*;
 use super::super::super::*;
 use crate::msg::*;
+use crate::rcl;
 
 extern "C" {
     fn sensor_msgs__msg__MultiDOFJointState__init(msg: *mut MultiDOFJointState) -> bool;
     fn sensor_msgs__msg__MultiDOFJointState__fini(msg: *mut MultiDOFJointState);
     fn sensor_msgs__msg__MultiDOFJointState__Sequence__init(msg: *mut MultiDOFJointStateSequence, size: usize) -> bool;
     fn sensor_msgs__msg__MultiDOFJointState__Sequence__fini(msg: *mut MultiDOFJointStateSequence);
+    fn rosidl_typesupport_c__get_message_type_support_handle__sensor_msgs__msg__MultiDOFJointState() -> *const rcl::rosidl_message_type_support_t;
 }
 
 
@@ -35,6 +37,14 @@ impl MultiDOFJointState {
 impl Drop for MultiDOFJointState {
     fn drop(&mut self) {
         unsafe { sensor_msgs__msg__MultiDOFJointState__fini(self) };
+    }
+}
+
+impl TopicMsg for MultiDOFJointState {
+    fn type_support() -> *const rcl::rosidl_message_type_support_t {
+        unsafe {
+            rosidl_typesupport_c__get_message_type_support_handle__sensor_msgs__msg__MultiDOFJointState()
+        }
     }
 }
 

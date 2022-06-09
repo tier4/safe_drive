@@ -2,12 +2,14 @@
 use super::*;
 use super::super::super::*;
 use crate::msg::*;
+use crate::rcl;
 
 extern "C" {
     fn std_msgs__msg__ColorRGBA__init(msg: *mut ColorRGBA) -> bool;
     fn std_msgs__msg__ColorRGBA__fini(msg: *mut ColorRGBA);
     fn std_msgs__msg__ColorRGBA__Sequence__init(msg: *mut ColorRGBASequence, size: usize) -> bool;
     fn std_msgs__msg__ColorRGBA__Sequence__fini(msg: *mut ColorRGBASequence);
+    fn rosidl_typesupport_c__get_message_type_support_handle__std_msgs__msg__ColorRGBA() -> *const rcl::rosidl_message_type_support_t;
 }
 
 
@@ -34,6 +36,14 @@ impl ColorRGBA {
 impl Drop for ColorRGBA {
     fn drop(&mut self) {
         unsafe { std_msgs__msg__ColorRGBA__fini(self) };
+    }
+}
+
+impl TopicMsg for ColorRGBA {
+    fn type_support() -> *const rcl::rosidl_message_type_support_t {
+        unsafe {
+            rosidl_typesupport_c__get_message_type_support_handle__std_msgs__msg__ColorRGBA()
+        }
     }
 }
 

@@ -2,12 +2,14 @@
 use super::*;
 use super::super::super::*;
 use crate::msg::*;
+use crate::rcl;
 
 extern "C" {
     fn sensor_msgs__msg__Image__init(msg: *mut Image) -> bool;
     fn sensor_msgs__msg__Image__fini(msg: *mut Image);
     fn sensor_msgs__msg__Image__Sequence__init(msg: *mut ImageSequence, size: usize) -> bool;
     fn sensor_msgs__msg__Image__Sequence__fini(msg: *mut ImageSequence);
+    fn rosidl_typesupport_c__get_message_type_support_handle__sensor_msgs__msg__Image() -> *const rcl::rosidl_message_type_support_t;
 }
 
 
@@ -37,6 +39,14 @@ impl Image {
 impl Drop for Image {
     fn drop(&mut self) {
         unsafe { sensor_msgs__msg__Image__fini(self) };
+    }
+}
+
+impl TopicMsg for Image {
+    fn type_support() -> *const rcl::rosidl_message_type_support_t {
+        unsafe {
+            rosidl_typesupport_c__get_message_type_support_handle__sensor_msgs__msg__Image()
+        }
     }
 }
 

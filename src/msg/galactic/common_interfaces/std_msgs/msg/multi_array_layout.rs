@@ -2,12 +2,14 @@
 use super::*;
 use super::super::super::*;
 use crate::msg::*;
+use crate::rcl;
 
 extern "C" {
     fn std_msgs__msg__MultiArrayLayout__init(msg: *mut MultiArrayLayout) -> bool;
     fn std_msgs__msg__MultiArrayLayout__fini(msg: *mut MultiArrayLayout);
     fn std_msgs__msg__MultiArrayLayout__Sequence__init(msg: *mut MultiArrayLayoutSequence, size: usize) -> bool;
     fn std_msgs__msg__MultiArrayLayout__Sequence__fini(msg: *mut MultiArrayLayoutSequence);
+    fn rosidl_typesupport_c__get_message_type_support_handle__std_msgs__msg__MultiArrayLayout() -> *const rcl::rosidl_message_type_support_t;
 }
 
 
@@ -32,6 +34,14 @@ impl MultiArrayLayout {
 impl Drop for MultiArrayLayout {
     fn drop(&mut self) {
         unsafe { std_msgs__msg__MultiArrayLayout__fini(self) };
+    }
+}
+
+impl TopicMsg for MultiArrayLayout {
+    fn type_support() -> *const rcl::rosidl_message_type_support_t {
+        unsafe {
+            rosidl_typesupport_c__get_message_type_support_handle__std_msgs__msg__MultiArrayLayout()
+        }
     }
 }
 

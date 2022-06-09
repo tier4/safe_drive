@@ -2,12 +2,14 @@
 use super::*;
 use super::super::super::*;
 use crate::msg::*;
+use crate::rcl;
 
 extern "C" {
     fn geometry_msgs__msg__Pose2D__init(msg: *mut Pose2D) -> bool;
     fn geometry_msgs__msg__Pose2D__fini(msg: *mut Pose2D);
     fn geometry_msgs__msg__Pose2D__Sequence__init(msg: *mut Pose2DSequence, size: usize) -> bool;
     fn geometry_msgs__msg__Pose2D__Sequence__fini(msg: *mut Pose2DSequence);
+    fn rosidl_typesupport_c__get_message_type_support_handle__geometry_msgs__msg__Pose2D() -> *const rcl::rosidl_message_type_support_t;
 }
 
 
@@ -33,6 +35,14 @@ impl Pose2D {
 impl Drop for Pose2D {
     fn drop(&mut self) {
         unsafe { geometry_msgs__msg__Pose2D__fini(self) };
+    }
+}
+
+impl TopicMsg for Pose2D {
+    fn type_support() -> *const rcl::rosidl_message_type_support_t {
+        unsafe {
+            rosidl_typesupport_c__get_message_type_support_handle__geometry_msgs__msg__Pose2D()
+        }
     }
 }
 

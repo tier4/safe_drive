@@ -2,6 +2,7 @@
 use super::*;
 use super::super::super::*;
 use crate::msg::*;
+use crate::rcl;
 pub const OK: u8 = 0;
 pub const WARN: u8 = 1;
 pub const ERROR: u8 = 2;
@@ -12,6 +13,7 @@ extern "C" {
     fn diagnostic_msgs__msg__DiagnosticStatus__fini(msg: *mut DiagnosticStatus);
     fn diagnostic_msgs__msg__DiagnosticStatus__Sequence__init(msg: *mut DiagnosticStatusSequence, size: usize) -> bool;
     fn diagnostic_msgs__msg__DiagnosticStatus__Sequence__fini(msg: *mut DiagnosticStatusSequence);
+    fn rosidl_typesupport_c__get_message_type_support_handle__diagnostic_msgs__msg__DiagnosticStatus() -> *const rcl::rosidl_message_type_support_t;
 }
 
 
@@ -39,6 +41,14 @@ impl DiagnosticStatus {
 impl Drop for DiagnosticStatus {
     fn drop(&mut self) {
         unsafe { diagnostic_msgs__msg__DiagnosticStatus__fini(self) };
+    }
+}
+
+impl TopicMsg for DiagnosticStatus {
+    fn type_support() -> *const rcl::rosidl_message_type_support_t {
+        unsafe {
+            rosidl_typesupport_c__get_message_type_support_handle__diagnostic_msgs__msg__DiagnosticStatus()
+        }
     }
 }
 

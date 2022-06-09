@@ -2,12 +2,14 @@
 use super::*;
 use super::super::super::*;
 use crate::msg::*;
+use crate::rcl;
 
 extern "C" {
     fn actionlib_msgs__msg__GoalID__init(msg: *mut GoalID) -> bool;
     fn actionlib_msgs__msg__GoalID__fini(msg: *mut GoalID);
     fn actionlib_msgs__msg__GoalID__Sequence__init(msg: *mut GoalIDSequence, size: usize) -> bool;
     fn actionlib_msgs__msg__GoalID__Sequence__fini(msg: *mut GoalIDSequence);
+    fn rosidl_typesupport_c__get_message_type_support_handle__actionlib_msgs__msg__GoalID() -> *const rcl::rosidl_message_type_support_t;
 }
 
 
@@ -32,6 +34,14 @@ impl GoalID {
 impl Drop for GoalID {
     fn drop(&mut self) {
         unsafe { actionlib_msgs__msg__GoalID__fini(self) };
+    }
+}
+
+impl TopicMsg for GoalID {
+    fn type_support() -> *const rcl::rosidl_message_type_support_t {
+        unsafe {
+            rosidl_typesupport_c__get_message_type_support_handle__actionlib_msgs__msg__GoalID()
+        }
     }
 }
 

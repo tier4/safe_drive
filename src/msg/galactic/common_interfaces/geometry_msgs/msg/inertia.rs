@@ -2,12 +2,14 @@
 use super::*;
 use super::super::super::*;
 use crate::msg::*;
+use crate::rcl;
 
 extern "C" {
     fn geometry_msgs__msg__Inertia__init(msg: *mut Inertia) -> bool;
     fn geometry_msgs__msg__Inertia__fini(msg: *mut Inertia);
     fn geometry_msgs__msg__Inertia__Sequence__init(msg: *mut InertiaSequence, size: usize) -> bool;
     fn geometry_msgs__msg__Inertia__Sequence__fini(msg: *mut InertiaSequence);
+    fn rosidl_typesupport_c__get_message_type_support_handle__geometry_msgs__msg__Inertia() -> *const rcl::rosidl_message_type_support_t;
 }
 
 
@@ -38,6 +40,14 @@ impl Inertia {
 impl Drop for Inertia {
     fn drop(&mut self) {
         unsafe { geometry_msgs__msg__Inertia__fini(self) };
+    }
+}
+
+impl TopicMsg for Inertia {
+    fn type_support() -> *const rcl::rosidl_message_type_support_t {
+        unsafe {
+            rosidl_typesupport_c__get_message_type_support_handle__geometry_msgs__msg__Inertia()
+        }
     }
 }
 

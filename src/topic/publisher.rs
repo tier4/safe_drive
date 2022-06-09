@@ -1,9 +1,4 @@
-use crate::{
-    error::RCLResult,
-    node::Node,
-    qos,
-    rcl::{self, rosidl_message_type_support_t},
-};
+use crate::{error::RCLResult, msg::TopicMsg, node::Node, qos, rcl};
 use std::{ffi::CString, marker::PhantomData, ptr::null_mut, sync::Arc};
 
 pub struct Publisher<T> {
@@ -12,13 +7,8 @@ pub struct Publisher<T> {
     _phantom: PhantomData<T>,
 }
 
-impl<T> Publisher<T> {
-    pub fn new(
-        node: Arc<Node>,
-        topic_name: &str,
-        type_support: *const rosidl_message_type_support_t,
-        qos: Option<qos::Profile>,
-    ) -> RCLResult<Self> {
+impl<T: TopicMsg> Publisher<T> {
+    pub fn new(node: Arc<Node>, topic_name: &str, qos: Option<qos::Profile>) -> RCLResult<Self> {
         let mut publisher = rcl::MTSafeFn::rcl_get_zero_initialized_publisher();
 
         let topic_name = CString::new(topic_name).unwrap_or_default();
@@ -29,7 +19,7 @@ impl<T> Publisher<T> {
             guard.rcl_publisher_init(
                 &mut publisher,
                 node.as_ptr(),
-                type_support as _,
+                T::type_support(),
                 topic_name.as_ptr(),
                 options.as_ptr(),
             )?;

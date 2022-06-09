@@ -2,12 +2,14 @@
 use super::*;
 use super::super::super::*;
 use crate::msg::*;
+use crate::rcl;
 
 extern "C" {
     fn std_msgs__msg__UInt8__init(msg: *mut UInt8) -> bool;
     fn std_msgs__msg__UInt8__fini(msg: *mut UInt8);
     fn std_msgs__msg__UInt8__Sequence__init(msg: *mut UInt8Sequence, size: usize) -> bool;
     fn std_msgs__msg__UInt8__Sequence__fini(msg: *mut UInt8Sequence);
+    fn rosidl_typesupport_c__get_message_type_support_handle__std_msgs__msg__UInt8() -> *const rcl::rosidl_message_type_support_t;
 }
 
 
@@ -31,6 +33,14 @@ impl UInt8 {
 impl Drop for UInt8 {
     fn drop(&mut self) {
         unsafe { std_msgs__msg__UInt8__fini(self) };
+    }
+}
+
+impl TopicMsg for UInt8 {
+    fn type_support() -> *const rcl::rosidl_message_type_support_t {
+        unsafe {
+            rosidl_typesupport_c__get_message_type_support_handle__std_msgs__msg__UInt8()
+        }
     }
 }
 

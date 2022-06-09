@@ -2,12 +2,14 @@
 use super::*;
 use super::super::super::*;
 use crate::msg::*;
+use crate::rcl;
 
 extern "C" {
     fn geometry_msgs__msg__PolygonStamped__init(msg: *mut PolygonStamped) -> bool;
     fn geometry_msgs__msg__PolygonStamped__fini(msg: *mut PolygonStamped);
     fn geometry_msgs__msg__PolygonStamped__Sequence__init(msg: *mut PolygonStampedSequence, size: usize) -> bool;
     fn geometry_msgs__msg__PolygonStamped__Sequence__fini(msg: *mut PolygonStampedSequence);
+    fn rosidl_typesupport_c__get_message_type_support_handle__geometry_msgs__msg__PolygonStamped() -> *const rcl::rosidl_message_type_support_t;
 }
 
 
@@ -32,6 +34,14 @@ impl PolygonStamped {
 impl Drop for PolygonStamped {
     fn drop(&mut self) {
         unsafe { geometry_msgs__msg__PolygonStamped__fini(self) };
+    }
+}
+
+impl TopicMsg for PolygonStamped {
+    fn type_support() -> *const rcl::rosidl_message_type_support_t {
+        unsafe {
+            rosidl_typesupport_c__get_message_type_support_handle__geometry_msgs__msg__PolygonStamped()
+        }
     }
 }
 

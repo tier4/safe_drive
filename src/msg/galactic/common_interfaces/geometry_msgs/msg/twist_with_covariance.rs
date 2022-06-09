@@ -2,12 +2,14 @@
 use super::*;
 use super::super::super::*;
 use crate::msg::*;
+use crate::rcl;
 
 extern "C" {
     fn geometry_msgs__msg__TwistWithCovariance__init(msg: *mut TwistWithCovariance) -> bool;
     fn geometry_msgs__msg__TwistWithCovariance__fini(msg: *mut TwistWithCovariance);
     fn geometry_msgs__msg__TwistWithCovariance__Sequence__init(msg: *mut TwistWithCovarianceSequence, size: usize) -> bool;
     fn geometry_msgs__msg__TwistWithCovariance__Sequence__fini(msg: *mut TwistWithCovarianceSequence);
+    fn rosidl_typesupport_c__get_message_type_support_handle__geometry_msgs__msg__TwistWithCovariance() -> *const rcl::rosidl_message_type_support_t;
 }
 
 
@@ -32,6 +34,14 @@ impl TwistWithCovariance {
 impl Drop for TwistWithCovariance {
     fn drop(&mut self) {
         unsafe { geometry_msgs__msg__TwistWithCovariance__fini(self) };
+    }
+}
+
+impl TopicMsg for TwistWithCovariance {
+    fn type_support() -> *const rcl::rosidl_message_type_support_t {
+        unsafe {
+            rosidl_typesupport_c__get_message_type_support_handle__geometry_msgs__msg__TwistWithCovariance()
+        }
     }
 }
 

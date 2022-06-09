@@ -2,12 +2,14 @@
 use super::*;
 use super::super::super::*;
 use crate::msg::*;
+use crate::rcl;
 
 extern "C" {
     fn diagnostic_msgs__msg__DiagnosticArray__init(msg: *mut DiagnosticArray) -> bool;
     fn diagnostic_msgs__msg__DiagnosticArray__fini(msg: *mut DiagnosticArray);
     fn diagnostic_msgs__msg__DiagnosticArray__Sequence__init(msg: *mut DiagnosticArraySequence, size: usize) -> bool;
     fn diagnostic_msgs__msg__DiagnosticArray__Sequence__fini(msg: *mut DiagnosticArraySequence);
+    fn rosidl_typesupport_c__get_message_type_support_handle__diagnostic_msgs__msg__DiagnosticArray() -> *const rcl::rosidl_message_type_support_t;
 }
 
 
@@ -32,6 +34,14 @@ impl DiagnosticArray {
 impl Drop for DiagnosticArray {
     fn drop(&mut self) {
         unsafe { diagnostic_msgs__msg__DiagnosticArray__fini(self) };
+    }
+}
+
+impl TopicMsg for DiagnosticArray {
+    fn type_support() -> *const rcl::rosidl_message_type_support_t {
+        unsafe {
+            rosidl_typesupport_c__get_message_type_support_handle__diagnostic_msgs__msg__DiagnosticArray()
+        }
     }
 }
 

@@ -2,12 +2,14 @@
 use super::*;
 use super::super::super::*;
 use crate::msg::*;
+use crate::rcl;
 
 extern "C" {
     fn sensor_msgs__msg__Joy__init(msg: *mut Joy) -> bool;
     fn sensor_msgs__msg__Joy__fini(msg: *mut Joy);
     fn sensor_msgs__msg__Joy__Sequence__init(msg: *mut JoySequence, size: usize) -> bool;
     fn sensor_msgs__msg__Joy__Sequence__fini(msg: *mut JoySequence);
+    fn rosidl_typesupport_c__get_message_type_support_handle__sensor_msgs__msg__Joy() -> *const rcl::rosidl_message_type_support_t;
 }
 
 
@@ -33,6 +35,14 @@ impl Joy {
 impl Drop for Joy {
     fn drop(&mut self) {
         unsafe { sensor_msgs__msg__Joy__fini(self) };
+    }
+}
+
+impl TopicMsg for Joy {
+    fn type_support() -> *const rcl::rosidl_message_type_support_t {
+        unsafe {
+            rosidl_typesupport_c__get_message_type_support_handle__sensor_msgs__msg__Joy()
+        }
     }
 }
 

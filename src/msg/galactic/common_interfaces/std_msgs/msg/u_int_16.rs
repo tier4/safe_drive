@@ -2,12 +2,14 @@
 use super::*;
 use super::super::super::*;
 use crate::msg::*;
+use crate::rcl;
 
 extern "C" {
     fn std_msgs__msg__UInt16__init(msg: *mut UInt16) -> bool;
     fn std_msgs__msg__UInt16__fini(msg: *mut UInt16);
     fn std_msgs__msg__UInt16__Sequence__init(msg: *mut UInt16Sequence, size: usize) -> bool;
     fn std_msgs__msg__UInt16__Sequence__fini(msg: *mut UInt16Sequence);
+    fn rosidl_typesupport_c__get_message_type_support_handle__std_msgs__msg__UInt16() -> *const rcl::rosidl_message_type_support_t;
 }
 
 
@@ -31,6 +33,14 @@ impl UInt16 {
 impl Drop for UInt16 {
     fn drop(&mut self) {
         unsafe { std_msgs__msg__UInt16__fini(self) };
+    }
+}
+
+impl TopicMsg for UInt16 {
+    fn type_support() -> *const rcl::rosidl_message_type_support_t {
+        unsafe {
+            rosidl_typesupport_c__get_message_type_support_handle__std_msgs__msg__UInt16()
+        }
     }
 }
 

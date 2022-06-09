@@ -2,12 +2,14 @@
 use super::*;
 use super::super::super::*;
 use crate::msg::*;
+use crate::rcl;
 
 extern "C" {
     fn geometry_msgs__msg__Vector3Stamped__init(msg: *mut Vector3Stamped) -> bool;
     fn geometry_msgs__msg__Vector3Stamped__fini(msg: *mut Vector3Stamped);
     fn geometry_msgs__msg__Vector3Stamped__Sequence__init(msg: *mut Vector3StampedSequence, size: usize) -> bool;
     fn geometry_msgs__msg__Vector3Stamped__Sequence__fini(msg: *mut Vector3StampedSequence);
+    fn rosidl_typesupport_c__get_message_type_support_handle__geometry_msgs__msg__Vector3Stamped() -> *const rcl::rosidl_message_type_support_t;
 }
 
 
@@ -32,6 +34,14 @@ impl Vector3Stamped {
 impl Drop for Vector3Stamped {
     fn drop(&mut self) {
         unsafe { geometry_msgs__msg__Vector3Stamped__fini(self) };
+    }
+}
+
+impl TopicMsg for Vector3Stamped {
+    fn type_support() -> *const rcl::rosidl_message_type_support_t {
+        unsafe {
+            rosidl_typesupport_c__get_message_type_support_handle__geometry_msgs__msg__Vector3Stamped()
+        }
     }
 }
 

@@ -2,6 +2,7 @@
 use super::*;
 use super::super::super::*;
 use crate::msg::*;
+use crate::rcl;
 pub const TYPE_LED: u8 = 0;
 pub const TYPE_RUMBLE: u8 = 1;
 pub const TYPE_BUZZER: u8 = 2;
@@ -11,6 +12,7 @@ extern "C" {
     fn sensor_msgs__msg__JoyFeedback__fini(msg: *mut JoyFeedback);
     fn sensor_msgs__msg__JoyFeedback__Sequence__init(msg: *mut JoyFeedbackSequence, size: usize) -> bool;
     fn sensor_msgs__msg__JoyFeedback__Sequence__fini(msg: *mut JoyFeedbackSequence);
+    fn rosidl_typesupport_c__get_message_type_support_handle__sensor_msgs__msg__JoyFeedback() -> *const rcl::rosidl_message_type_support_t;
 }
 
 
@@ -36,6 +38,14 @@ impl JoyFeedback {
 impl Drop for JoyFeedback {
     fn drop(&mut self) {
         unsafe { sensor_msgs__msg__JoyFeedback__fini(self) };
+    }
+}
+
+impl TopicMsg for JoyFeedback {
+    fn type_support() -> *const rcl::rosidl_message_type_support_t {
+        unsafe {
+            rosidl_typesupport_c__get_message_type_support_handle__sensor_msgs__msg__JoyFeedback()
+        }
     }
 }
 

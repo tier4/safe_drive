@@ -12,9 +12,6 @@ fn test_publish() -> Result<(), Box<dyn Error>> {
 
     let publisher = node.create_publisher::<common::num::sample_msg__msg__Num>(
         "test_publish",
-        unsafe {
-            common::num::rosidl_typesupport_c__get_message_type_support_handle__sample_msg__msg__Num()
-        },
         Default::default(),
     )?;
 

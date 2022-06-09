@@ -2,12 +2,14 @@
 use super::*;
 use super::super::super::*;
 use crate::msg::*;
+use crate::rcl;
 
 extern "C" {
     fn sensor_msgs__msg__RelativeHumidity__init(msg: *mut RelativeHumidity) -> bool;
     fn sensor_msgs__msg__RelativeHumidity__fini(msg: *mut RelativeHumidity);
     fn sensor_msgs__msg__RelativeHumidity__Sequence__init(msg: *mut RelativeHumiditySequence, size: usize) -> bool;
     fn sensor_msgs__msg__RelativeHumidity__Sequence__fini(msg: *mut RelativeHumiditySequence);
+    fn rosidl_typesupport_c__get_message_type_support_handle__sensor_msgs__msg__RelativeHumidity() -> *const rcl::rosidl_message_type_support_t;
 }
 
 
@@ -33,6 +35,14 @@ impl RelativeHumidity {
 impl Drop for RelativeHumidity {
     fn drop(&mut self) {
         unsafe { sensor_msgs__msg__RelativeHumidity__fini(self) };
+    }
+}
+
+impl TopicMsg for RelativeHumidity {
+    fn type_support() -> *const rcl::rosidl_message_type_support_t {
+        unsafe {
+            rosidl_typesupport_c__get_message_type_support_handle__sensor_msgs__msg__RelativeHumidity()
+        }
     }
 }
 

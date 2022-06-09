@@ -2,12 +2,14 @@
 use super::*;
 use super::super::super::*;
 use crate::msg::*;
+use crate::rcl;
 
 extern "C" {
     fn std_msgs__msg__Byte__init(msg: *mut Byte) -> bool;
     fn std_msgs__msg__Byte__fini(msg: *mut Byte);
     fn std_msgs__msg__Byte__Sequence__init(msg: *mut ByteSequence, size: usize) -> bool;
     fn std_msgs__msg__Byte__Sequence__fini(msg: *mut ByteSequence);
+    fn rosidl_typesupport_c__get_message_type_support_handle__std_msgs__msg__Byte() -> *const rcl::rosidl_message_type_support_t;
 }
 
 
@@ -31,6 +33,14 @@ impl Byte {
 impl Drop for Byte {
     fn drop(&mut self) {
         unsafe { std_msgs__msg__Byte__fini(self) };
+    }
+}
+
+impl TopicMsg for Byte {
+    fn type_support() -> *const rcl::rosidl_message_type_support_t {
+        unsafe {
+            rosidl_typesupport_c__get_message_type_support_handle__std_msgs__msg__Byte()
+        }
     }
 }
 

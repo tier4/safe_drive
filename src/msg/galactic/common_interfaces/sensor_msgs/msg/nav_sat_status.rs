@@ -2,6 +2,7 @@
 use super::*;
 use super::super::super::*;
 use crate::msg::*;
+use crate::rcl;
 pub const STATUS_NO_FIX: i8 = -1; // unable to fix position
 pub const STATUS_FIX: i8 = 0; // unaugmented fix
 pub const STATUS_SBAS_FIX: i8 = 1; // with satellite-based augmentation
@@ -16,6 +17,7 @@ extern "C" {
     fn sensor_msgs__msg__NavSatStatus__fini(msg: *mut NavSatStatus);
     fn sensor_msgs__msg__NavSatStatus__Sequence__init(msg: *mut NavSatStatusSequence, size: usize) -> bool;
     fn sensor_msgs__msg__NavSatStatus__Sequence__fini(msg: *mut NavSatStatusSequence);
+    fn rosidl_typesupport_c__get_message_type_support_handle__sensor_msgs__msg__NavSatStatus() -> *const rcl::rosidl_message_type_support_t;
 }
 
 
@@ -40,6 +42,14 @@ impl NavSatStatus {
 impl Drop for NavSatStatus {
     fn drop(&mut self) {
         unsafe { sensor_msgs__msg__NavSatStatus__fini(self) };
+    }
+}
+
+impl TopicMsg for NavSatStatus {
+    fn type_support() -> *const rcl::rosidl_message_type_support_t {
+        unsafe {
+            rosidl_typesupport_c__get_message_type_support_handle__sensor_msgs__msg__NavSatStatus()
+        }
     }
 }
 

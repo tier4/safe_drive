@@ -2,12 +2,14 @@
 use super::*;
 use super::super::super::*;
 use crate::msg::*;
+use crate::rcl;
 
 extern "C" {
     fn std_msgs__msg__Float64__init(msg: *mut Float64) -> bool;
     fn std_msgs__msg__Float64__fini(msg: *mut Float64);
     fn std_msgs__msg__Float64__Sequence__init(msg: *mut Float64Sequence, size: usize) -> bool;
     fn std_msgs__msg__Float64__Sequence__fini(msg: *mut Float64Sequence);
+    fn rosidl_typesupport_c__get_message_type_support_handle__std_msgs__msg__Float64() -> *const rcl::rosidl_message_type_support_t;
 }
 
 
@@ -31,6 +33,14 @@ impl Float64 {
 impl Drop for Float64 {
     fn drop(&mut self) {
         unsafe { std_msgs__msg__Float64__fini(self) };
+    }
+}
+
+impl TopicMsg for Float64 {
+    fn type_support() -> *const rcl::rosidl_message_type_support_t {
+        unsafe {
+            rosidl_typesupport_c__get_message_type_support_handle__std_msgs__msg__Float64()
+        }
     }
 }
 

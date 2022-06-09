@@ -2,6 +2,7 @@
 use super::*;
 use super::super::super::*;
 use crate::msg::*;
+use crate::rcl;
 pub const ULTRASOUND: u8 = 0;
 pub const INFRARED: u8 = 1;
 
@@ -10,6 +11,7 @@ extern "C" {
     fn sensor_msgs__msg__Range__fini(msg: *mut Range);
     fn sensor_msgs__msg__Range__Sequence__init(msg: *mut RangeSequence, size: usize) -> bool;
     fn sensor_msgs__msg__Range__Sequence__fini(msg: *mut RangeSequence);
+    fn rosidl_typesupport_c__get_message_type_support_handle__sensor_msgs__msg__Range() -> *const rcl::rosidl_message_type_support_t;
 }
 
 
@@ -38,6 +40,14 @@ impl Range {
 impl Drop for Range {
     fn drop(&mut self) {
         unsafe { sensor_msgs__msg__Range__fini(self) };
+    }
+}
+
+impl TopicMsg for Range {
+    fn type_support() -> *const rcl::rosidl_message_type_support_t {
+        unsafe {
+            rosidl_typesupport_c__get_message_type_support_handle__sensor_msgs__msg__Range()
+        }
     }
 }
 

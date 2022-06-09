@@ -2,12 +2,14 @@
 use super::*;
 use super::super::super::*;
 use crate::msg::*;
+use crate::rcl;
 
 extern "C" {
     fn unique_identifier_msgs__msg__UUID__init(msg: *mut UUID) -> bool;
     fn unique_identifier_msgs__msg__UUID__fini(msg: *mut UUID);
     fn unique_identifier_msgs__msg__UUID__Sequence__init(msg: *mut UUIDSequence, size: usize) -> bool;
     fn unique_identifier_msgs__msg__UUID__Sequence__fini(msg: *mut UUIDSequence);
+    fn rosidl_typesupport_c__get_message_type_support_handle__unique_identifier_msgs__msg__UUID() -> *const rcl::rosidl_message_type_support_t;
 }
 
 
@@ -31,6 +33,14 @@ impl UUID {
 impl Drop for UUID {
     fn drop(&mut self) {
         unsafe { unique_identifier_msgs__msg__UUID__fini(self) };
+    }
+}
+
+impl TopicMsg for UUID {
+    fn type_support() -> *const rcl::rosidl_message_type_support_t {
+        unsafe {
+            rosidl_typesupport_c__get_message_type_support_handle__unique_identifier_msgs__msg__UUID()
+        }
     }
 }
 

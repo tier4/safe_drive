@@ -2,12 +2,14 @@
 use super::*;
 use super::super::super::*;
 use crate::msg::*;
+use crate::rcl;
 
 extern "C" {
     fn std_msgs__msg__String__init(msg: *mut String) -> bool;
     fn std_msgs__msg__String__fini(msg: *mut String);
     fn std_msgs__msg__String__Sequence__init(msg: *mut StringSequence, size: usize) -> bool;
     fn std_msgs__msg__String__Sequence__fini(msg: *mut StringSequence);
+    fn rosidl_typesupport_c__get_message_type_support_handle__std_msgs__msg__String() -> *const rcl::rosidl_message_type_support_t;
 }
 
 
@@ -31,6 +33,14 @@ impl String {
 impl Drop for String {
     fn drop(&mut self) {
         unsafe { std_msgs__msg__String__fini(self) };
+    }
+}
+
+impl TopicMsg for String {
+    fn type_support() -> *const rcl::rosidl_message_type_support_t {
+        unsafe {
+            rosidl_typesupport_c__get_message_type_support_handle__std_msgs__msg__String()
+        }
     }
 }
 

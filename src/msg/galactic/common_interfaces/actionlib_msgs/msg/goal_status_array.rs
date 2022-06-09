@@ -2,12 +2,14 @@
 use super::*;
 use super::super::super::*;
 use crate::msg::*;
+use crate::rcl;
 
 extern "C" {
     fn actionlib_msgs__msg__GoalStatusArray__init(msg: *mut GoalStatusArray) -> bool;
     fn actionlib_msgs__msg__GoalStatusArray__fini(msg: *mut GoalStatusArray);
     fn actionlib_msgs__msg__GoalStatusArray__Sequence__init(msg: *mut GoalStatusArraySequence, size: usize) -> bool;
     fn actionlib_msgs__msg__GoalStatusArray__Sequence__fini(msg: *mut GoalStatusArraySequence);
+    fn rosidl_typesupport_c__get_message_type_support_handle__actionlib_msgs__msg__GoalStatusArray() -> *const rcl::rosidl_message_type_support_t;
 }
 
 
@@ -32,6 +34,14 @@ impl GoalStatusArray {
 impl Drop for GoalStatusArray {
     fn drop(&mut self) {
         unsafe { actionlib_msgs__msg__GoalStatusArray__fini(self) };
+    }
+}
+
+impl TopicMsg for GoalStatusArray {
+    fn type_support() -> *const rcl::rosidl_message_type_support_t {
+        unsafe {
+            rosidl_typesupport_c__get_message_type_support_handle__actionlib_msgs__msg__GoalStatusArray()
+        }
     }
 }
 

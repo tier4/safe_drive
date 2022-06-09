@@ -2,12 +2,14 @@
 use super::*;
 use super::super::super::*;
 use crate::msg::*;
+use crate::rcl;
 
 extern "C" {
     fn geometry_msgs__msg__Polygon__init(msg: *mut Polygon) -> bool;
     fn geometry_msgs__msg__Polygon__fini(msg: *mut Polygon);
     fn geometry_msgs__msg__Polygon__Sequence__init(msg: *mut PolygonSequence, size: usize) -> bool;
     fn geometry_msgs__msg__Polygon__Sequence__fini(msg: *mut PolygonSequence);
+    fn rosidl_typesupport_c__get_message_type_support_handle__geometry_msgs__msg__Polygon() -> *const rcl::rosidl_message_type_support_t;
 }
 
 
@@ -31,6 +33,14 @@ impl Polygon {
 impl Drop for Polygon {
     fn drop(&mut self) {
         unsafe { geometry_msgs__msg__Polygon__fini(self) };
+    }
+}
+
+impl TopicMsg for Polygon {
+    fn type_support() -> *const rcl::rosidl_message_type_support_t {
+        unsafe {
+            rosidl_typesupport_c__get_message_type_support_handle__geometry_msgs__msg__Polygon()
+        }
     }
 }
 

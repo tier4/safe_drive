@@ -2,6 +2,7 @@
 use super::*;
 use super::super::super::*;
 use crate::msg::*;
+use crate::rcl;
 pub const KEEP_ALIVE: u8 = 0;
 pub const POSE_UPDATE: u8 = 1;
 pub const MENU_SELECT: u8 = 2;
@@ -14,6 +15,7 @@ extern "C" {
     fn visualization_msgs__msg__InteractiveMarkerFeedback__fini(msg: *mut InteractiveMarkerFeedback);
     fn visualization_msgs__msg__InteractiveMarkerFeedback__Sequence__init(msg: *mut InteractiveMarkerFeedbackSequence, size: usize) -> bool;
     fn visualization_msgs__msg__InteractiveMarkerFeedback__Sequence__fini(msg: *mut InteractiveMarkerFeedbackSequence);
+    fn rosidl_typesupport_c__get_message_type_support_handle__visualization_msgs__msg__InteractiveMarkerFeedback() -> *const rcl::rosidl_message_type_support_t;
 }
 
 
@@ -45,6 +47,14 @@ impl InteractiveMarkerFeedback {
 impl Drop for InteractiveMarkerFeedback {
     fn drop(&mut self) {
         unsafe { visualization_msgs__msg__InteractiveMarkerFeedback__fini(self) };
+    }
+}
+
+impl TopicMsg for InteractiveMarkerFeedback {
+    fn type_support() -> *const rcl::rosidl_message_type_support_t {
+        unsafe {
+            rosidl_typesupport_c__get_message_type_support_handle__visualization_msgs__msg__InteractiveMarkerFeedback()
+        }
     }
 }
 

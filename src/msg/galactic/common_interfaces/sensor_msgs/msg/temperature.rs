@@ -2,12 +2,14 @@
 use super::*;
 use super::super::super::*;
 use crate::msg::*;
+use crate::rcl;
 
 extern "C" {
     fn sensor_msgs__msg__Temperature__init(msg: *mut Temperature) -> bool;
     fn sensor_msgs__msg__Temperature__fini(msg: *mut Temperature);
     fn sensor_msgs__msg__Temperature__Sequence__init(msg: *mut TemperatureSequence, size: usize) -> bool;
     fn sensor_msgs__msg__Temperature__Sequence__fini(msg: *mut TemperatureSequence);
+    fn rosidl_typesupport_c__get_message_type_support_handle__sensor_msgs__msg__Temperature() -> *const rcl::rosidl_message_type_support_t;
 }
 
 
@@ -33,6 +35,14 @@ impl Temperature {
 impl Drop for Temperature {
     fn drop(&mut self) {
         unsafe { sensor_msgs__msg__Temperature__fini(self) };
+    }
+}
+
+impl TopicMsg for Temperature {
+    fn type_support() -> *const rcl::rosidl_message_type_support_t {
+        unsafe {
+            rosidl_typesupport_c__get_message_type_support_handle__sensor_msgs__msg__Temperature()
+        }
     }
 }
 

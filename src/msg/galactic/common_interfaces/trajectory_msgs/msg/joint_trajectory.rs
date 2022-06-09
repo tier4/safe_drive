@@ -2,12 +2,14 @@
 use super::*;
 use super::super::super::*;
 use crate::msg::*;
+use crate::rcl;
 
 extern "C" {
     fn trajectory_msgs__msg__JointTrajectory__init(msg: *mut JointTrajectory) -> bool;
     fn trajectory_msgs__msg__JointTrajectory__fini(msg: *mut JointTrajectory);
     fn trajectory_msgs__msg__JointTrajectory__Sequence__init(msg: *mut JointTrajectorySequence, size: usize) -> bool;
     fn trajectory_msgs__msg__JointTrajectory__Sequence__fini(msg: *mut JointTrajectorySequence);
+    fn rosidl_typesupport_c__get_message_type_support_handle__trajectory_msgs__msg__JointTrajectory() -> *const rcl::rosidl_message_type_support_t;
 }
 
 
@@ -33,6 +35,14 @@ impl JointTrajectory {
 impl Drop for JointTrajectory {
     fn drop(&mut self) {
         unsafe { trajectory_msgs__msg__JointTrajectory__fini(self) };
+    }
+}
+
+impl TopicMsg for JointTrajectory {
+    fn type_support() -> *const rcl::rosidl_message_type_support_t {
+        unsafe {
+            rosidl_typesupport_c__get_message_type_support_handle__trajectory_msgs__msg__JointTrajectory()
+        }
     }
 }
 

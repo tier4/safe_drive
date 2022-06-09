@@ -2,12 +2,14 @@
 use super::*;
 use super::super::super::*;
 use crate::msg::*;
+use crate::rcl;
 
 extern "C" {
     fn sensor_msgs__msg__CompressedImage__init(msg: *mut CompressedImage) -> bool;
     fn sensor_msgs__msg__CompressedImage__fini(msg: *mut CompressedImage);
     fn sensor_msgs__msg__CompressedImage__Sequence__init(msg: *mut CompressedImageSequence, size: usize) -> bool;
     fn sensor_msgs__msg__CompressedImage__Sequence__fini(msg: *mut CompressedImageSequence);
+    fn rosidl_typesupport_c__get_message_type_support_handle__sensor_msgs__msg__CompressedImage() -> *const rcl::rosidl_message_type_support_t;
 }
 
 
@@ -33,6 +35,14 @@ impl CompressedImage {
 impl Drop for CompressedImage {
     fn drop(&mut self) {
         unsafe { sensor_msgs__msg__CompressedImage__fini(self) };
+    }
+}
+
+impl TopicMsg for CompressedImage {
+    fn type_support() -> *const rcl::rosidl_message_type_support_t {
+        unsafe {
+            rosidl_typesupport_c__get_message_type_support_handle__sensor_msgs__msg__CompressedImage()
+        }
     }
 }
 

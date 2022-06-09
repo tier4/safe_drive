@@ -2,6 +2,7 @@
 use super::*;
 use super::super::super::*;
 use crate::msg::*;
+use crate::rcl;
 pub const FEEDBACK: u8 = 0;
 pub const ROSRUN: u8 = 1;
 pub const ROSLAUNCH: u8 = 2;
@@ -11,6 +12,7 @@ extern "C" {
     fn visualization_msgs__msg__MenuEntry__fini(msg: *mut MenuEntry);
     fn visualization_msgs__msg__MenuEntry__Sequence__init(msg: *mut MenuEntrySequence, size: usize) -> bool;
     fn visualization_msgs__msg__MenuEntry__Sequence__fini(msg: *mut MenuEntrySequence);
+    fn rosidl_typesupport_c__get_message_type_support_handle__visualization_msgs__msg__MenuEntry() -> *const rcl::rosidl_message_type_support_t;
 }
 
 
@@ -38,6 +40,14 @@ impl MenuEntry {
 impl Drop for MenuEntry {
     fn drop(&mut self) {
         unsafe { visualization_msgs__msg__MenuEntry__fini(self) };
+    }
+}
+
+impl TopicMsg for MenuEntry {
+    fn type_support() -> *const rcl::rosidl_message_type_support_t {
+        unsafe {
+            rosidl_typesupport_c__get_message_type_support_handle__visualization_msgs__msg__MenuEntry()
+        }
     }
 }
 

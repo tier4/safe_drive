@@ -6,7 +6,7 @@
 //!
 //! ```text
 //! $ git clone https://github.com/ros2/common_interfaces.git -b galactic
-//! $ ros2msg_to_rs --disable-common-interfaces -s crate -i common_interfaces -o {safe_drive}/src/msg/galactic/common-interfaces
+//! $ ros2msg_to_rs --disable-common-interfaces -s crate -i common_interfaces -o {safe_drive}/src/msg/galactic/common_interfaces
 //!
 //! $ mkdir ros2msg && cd ros2msg
 //! $ git clone https://github.com/ros2/unique_identifier_msgs.git -b galactic

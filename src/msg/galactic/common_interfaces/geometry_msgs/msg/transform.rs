@@ -2,12 +2,14 @@
 use super::*;
 use super::super::super::*;
 use crate::msg::*;
+use crate::rcl;
 
 extern "C" {
     fn geometry_msgs__msg__Transform__init(msg: *mut Transform) -> bool;
     fn geometry_msgs__msg__Transform__fini(msg: *mut Transform);
     fn geometry_msgs__msg__Transform__Sequence__init(msg: *mut TransformSequence, size: usize) -> bool;
     fn geometry_msgs__msg__Transform__Sequence__fini(msg: *mut TransformSequence);
+    fn rosidl_typesupport_c__get_message_type_support_handle__geometry_msgs__msg__Transform() -> *const rcl::rosidl_message_type_support_t;
 }
 
 
@@ -32,6 +34,14 @@ impl Transform {
 impl Drop for Transform {
     fn drop(&mut self) {
         unsafe { geometry_msgs__msg__Transform__fini(self) };
+    }
+}
+
+impl TopicMsg for Transform {
+    fn type_support() -> *const rcl::rosidl_message_type_support_t {
+        unsafe {
+            rosidl_typesupport_c__get_message_type_support_handle__geometry_msgs__msg__Transform()
+        }
     }
 }
 

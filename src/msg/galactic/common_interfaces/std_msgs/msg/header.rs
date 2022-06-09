@@ -2,12 +2,14 @@
 use super::*;
 use super::super::super::*;
 use crate::msg::*;
+use crate::rcl;
 
 extern "C" {
     fn std_msgs__msg__Header__init(msg: *mut Header) -> bool;
     fn std_msgs__msg__Header__fini(msg: *mut Header);
     fn std_msgs__msg__Header__Sequence__init(msg: *mut HeaderSequence, size: usize) -> bool;
     fn std_msgs__msg__Header__Sequence__fini(msg: *mut HeaderSequence);
+    fn rosidl_typesupport_c__get_message_type_support_handle__std_msgs__msg__Header() -> *const rcl::rosidl_message_type_support_t;
 }
 
 
@@ -32,6 +34,14 @@ impl Header {
 impl Drop for Header {
     fn drop(&mut self) {
         unsafe { std_msgs__msg__Header__fini(self) };
+    }
+}
+
+impl TopicMsg for Header {
+    fn type_support() -> *const rcl::rosidl_message_type_support_t {
+        unsafe {
+            rosidl_typesupport_c__get_message_type_support_handle__std_msgs__msg__Header()
+        }
     }
 }
 

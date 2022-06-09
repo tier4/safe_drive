@@ -2,12 +2,14 @@
 use super::*;
 use super::super::super::*;
 use crate::msg::*;
+use crate::rcl;
 
 extern "C" {
     fn geometry_msgs__msg__AccelWithCovariance__init(msg: *mut AccelWithCovariance) -> bool;
     fn geometry_msgs__msg__AccelWithCovariance__fini(msg: *mut AccelWithCovariance);
     fn geometry_msgs__msg__AccelWithCovariance__Sequence__init(msg: *mut AccelWithCovarianceSequence, size: usize) -> bool;
     fn geometry_msgs__msg__AccelWithCovariance__Sequence__fini(msg: *mut AccelWithCovarianceSequence);
+    fn rosidl_typesupport_c__get_message_type_support_handle__geometry_msgs__msg__AccelWithCovariance() -> *const rcl::rosidl_message_type_support_t;
 }
 
 
@@ -32,6 +34,14 @@ impl AccelWithCovariance {
 impl Drop for AccelWithCovariance {
     fn drop(&mut self) {
         unsafe { geometry_msgs__msg__AccelWithCovariance__fini(self) };
+    }
+}
+
+impl TopicMsg for AccelWithCovariance {
+    fn type_support() -> *const rcl::rosidl_message_type_support_t {
+        unsafe {
+            rosidl_typesupport_c__get_message_type_support_handle__geometry_msgs__msg__AccelWithCovariance()
+        }
     }
 }
 

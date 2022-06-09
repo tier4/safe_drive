@@ -2,6 +2,7 @@
 use super::*;
 use super::super::super::*;
 use crate::msg::*;
+use crate::rcl;
 pub const COVARIANCE_TYPE_UNKNOWN: u8 = 0;
 pub const COVARIANCE_TYPE_APPROXIMATED: u8 = 1;
 pub const COVARIANCE_TYPE_DIAGONAL_KNOWN: u8 = 2;
@@ -12,6 +13,7 @@ extern "C" {
     fn sensor_msgs__msg__NavSatFix__fini(msg: *mut NavSatFix);
     fn sensor_msgs__msg__NavSatFix__Sequence__init(msg: *mut NavSatFixSequence, size: usize) -> bool;
     fn sensor_msgs__msg__NavSatFix__Sequence__fini(msg: *mut NavSatFixSequence);
+    fn rosidl_typesupport_c__get_message_type_support_handle__sensor_msgs__msg__NavSatFix() -> *const rcl::rosidl_message_type_support_t;
 }
 
 
@@ -41,6 +43,14 @@ impl NavSatFix {
 impl Drop for NavSatFix {
     fn drop(&mut self) {
         unsafe { sensor_msgs__msg__NavSatFix__fini(self) };
+    }
+}
+
+impl TopicMsg for NavSatFix {
+    fn type_support() -> *const rcl::rosidl_message_type_support_t {
+        unsafe {
+            rosidl_typesupport_c__get_message_type_support_handle__sensor_msgs__msg__NavSatFix()
+        }
     }
 }
 

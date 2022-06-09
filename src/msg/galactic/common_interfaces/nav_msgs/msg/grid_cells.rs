@@ -2,12 +2,14 @@
 use super::*;
 use super::super::super::*;
 use crate::msg::*;
+use crate::rcl;
 
 extern "C" {
     fn nav_msgs__msg__GridCells__init(msg: *mut GridCells) -> bool;
     fn nav_msgs__msg__GridCells__fini(msg: *mut GridCells);
     fn nav_msgs__msg__GridCells__Sequence__init(msg: *mut GridCellsSequence, size: usize) -> bool;
     fn nav_msgs__msg__GridCells__Sequence__fini(msg: *mut GridCellsSequence);
+    fn rosidl_typesupport_c__get_message_type_support_handle__nav_msgs__msg__GridCells() -> *const rcl::rosidl_message_type_support_t;
 }
 
 
@@ -34,6 +36,14 @@ impl GridCells {
 impl Drop for GridCells {
     fn drop(&mut self) {
         unsafe { nav_msgs__msg__GridCells__fini(self) };
+    }
+}
+
+impl TopicMsg for GridCells {
+    fn type_support() -> *const rcl::rosidl_message_type_support_t {
+        unsafe {
+            rosidl_typesupport_c__get_message_type_support_handle__nav_msgs__msg__GridCells()
+        }
     }
 }
 

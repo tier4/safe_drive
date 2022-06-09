@@ -2,12 +2,14 @@
 use super::*;
 use super::super::super::*;
 use crate::msg::*;
+use crate::rcl;
 
 extern "C" {
     fn nav_msgs__msg__MapMetaData__init(msg: *mut MapMetaData) -> bool;
     fn nav_msgs__msg__MapMetaData__fini(msg: *mut MapMetaData);
     fn nav_msgs__msg__MapMetaData__Sequence__init(msg: *mut MapMetaDataSequence, size: usize) -> bool;
     fn nav_msgs__msg__MapMetaData__Sequence__fini(msg: *mut MapMetaDataSequence);
+    fn rosidl_typesupport_c__get_message_type_support_handle__nav_msgs__msg__MapMetaData() -> *const rcl::rosidl_message_type_support_t;
 }
 
 
@@ -35,6 +37,14 @@ impl MapMetaData {
 impl Drop for MapMetaData {
     fn drop(&mut self) {
         unsafe { nav_msgs__msg__MapMetaData__fini(self) };
+    }
+}
+
+impl TopicMsg for MapMetaData {
+    fn type_support() -> *const rcl::rosidl_message_type_support_t {
+        unsafe {
+            rosidl_typesupport_c__get_message_type_support_handle__nav_msgs__msg__MapMetaData()
+        }
     }
 }
 

@@ -2,12 +2,14 @@
 use super::*;
 use super::super::super::*;
 use crate::msg::*;
+use crate::rcl;
 
 extern "C" {
     fn nav_msgs__msg__OccupancyGrid__init(msg: *mut OccupancyGrid) -> bool;
     fn nav_msgs__msg__OccupancyGrid__fini(msg: *mut OccupancyGrid);
     fn nav_msgs__msg__OccupancyGrid__Sequence__init(msg: *mut OccupancyGridSequence, size: usize) -> bool;
     fn nav_msgs__msg__OccupancyGrid__Sequence__fini(msg: *mut OccupancyGridSequence);
+    fn rosidl_typesupport_c__get_message_type_support_handle__nav_msgs__msg__OccupancyGrid() -> *const rcl::rosidl_message_type_support_t;
 }
 
 
@@ -33,6 +35,14 @@ impl OccupancyGrid {
 impl Drop for OccupancyGrid {
     fn drop(&mut self) {
         unsafe { nav_msgs__msg__OccupancyGrid__fini(self) };
+    }
+}
+
+impl TopicMsg for OccupancyGrid {
+    fn type_support() -> *const rcl::rosidl_message_type_support_t {
+        unsafe {
+            rosidl_typesupport_c__get_message_type_support_handle__nav_msgs__msg__OccupancyGrid()
+        }
     }
 }
 

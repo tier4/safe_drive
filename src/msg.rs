@@ -11,7 +11,18 @@
 mod galactic;
 pub use galactic::*;
 
+use crate::rcl;
 use std::{ffi::CString, fmt::Display, intrinsics::transmute};
+
+pub trait TopicMsg {
+    fn type_support() -> *const rcl::rosidl_message_type_support_t;
+}
+
+pub trait ServiceMsg {
+    fn type_support() -> *const rcl::rosidl_service_type_support_t;
+}
+
+// Definition of Sequence -------------------------------------------------------------------------
 
 #[repr(C)]
 #[derive(Debug)]
@@ -183,6 +194,8 @@ def_sequence!(
     rosidl_runtime_c__int64__Sequence__fini
 );
 
+// Definition of String ---------------------------------------------------------------------------
+
 /// String.
 /// `N` represents the maximum number of characters excluding `\0`.
 /// If `N` is `0`, the string is unlimited.
@@ -323,6 +336,47 @@ impl<const STRLEN: usize, const SEQLEN: usize> Drop for RosStringSeq<STRLEN, SEQ
     }
 }
 
+// Definition of builtin_interfaces ---------------------------------------------------------------
+
+pub mod builtin_interfaces {
+    use super::*;
+
+    impl TopicMsg for builtin_interfaces__msg__Duration {
+        fn type_support() -> *const rcl::rosidl_message_type_support_t {
+            unsafe {
+                rosidl_typesupport_c__get_message_type_support_handle__builtin_interfaces__msg__Duration()
+            }
+        }
+    }
+
+    def_sequence!(
+        DurationSeq,
+        builtin_interfaces__msg__Duration,
+        builtin_interfaces__msg__Duration__Sequence,
+        builtin_interfaces__msg__Duration__Sequence__init,
+        builtin_interfaces__msg__Duration__Sequence__fini
+    );
+
+    impl TopicMsg for builtin_interfaces__msg__Time {
+        fn type_support() -> *const rcl::rosidl_message_type_support_t {
+            unsafe {
+                rosidl_typesupport_c__get_message_type_support_handle__builtin_interfaces__msg__Time(
+                )
+            }
+        }
+    }
+
+    def_sequence!(
+        TimeSeq,
+        builtin_interfaces__msg__Time,
+        builtin_interfaces__msg__Time__Sequence,
+        builtin_interfaces__msg__Time__Sequence__init,
+        builtin_interfaces__msg__Time__Sequence__fini
+    );
+}
+
+// Tests ------------------------------------------------------------------------------------------
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -358,24 +412,4 @@ mod tests {
             assert_eq!(msg, m);
         }
     }
-}
-
-pub mod builtin_interfaces {
-    use super::*;
-
-    def_sequence!(
-        DurationSeq,
-        builtin_interfaces__msg__Duration,
-        builtin_interfaces__msg__Duration__Sequence,
-        builtin_interfaces__msg__Duration__Sequence__init,
-        builtin_interfaces__msg__Duration__Sequence__fini
-    );
-
-    def_sequence!(
-        TimeSeq,
-        builtin_interfaces__msg__Time,
-        builtin_interfaces__msg__Time__Sequence,
-        builtin_interfaces__msg__Time__Sequence__init,
-        builtin_interfaces__msg__Time__Sequence__fini
-    );
 }

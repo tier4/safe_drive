@@ -2,6 +2,7 @@
 use super::*;
 use super::super::super::*;
 use crate::msg::*;
+use crate::rcl;
 pub const BOX: u8 = 1;
 pub const SPHERE: u8 = 2;
 pub const CYLINDER: u8 = 3;
@@ -20,6 +21,7 @@ extern "C" {
     fn shape_msgs__msg__SolidPrimitive__fini(msg: *mut SolidPrimitive);
     fn shape_msgs__msg__SolidPrimitive__Sequence__init(msg: *mut SolidPrimitiveSequence, size: usize) -> bool;
     fn shape_msgs__msg__SolidPrimitive__Sequence__fini(msg: *mut SolidPrimitiveSequence);
+    fn rosidl_typesupport_c__get_message_type_support_handle__shape_msgs__msg__SolidPrimitive() -> *const rcl::rosidl_message_type_support_t;
 }
 
 
@@ -44,6 +46,14 @@ impl SolidPrimitive {
 impl Drop for SolidPrimitive {
     fn drop(&mut self) {
         unsafe { shape_msgs__msg__SolidPrimitive__fini(self) };
+    }
+}
+
+impl TopicMsg for SolidPrimitive {
+    fn type_support() -> *const rcl::rosidl_message_type_support_t {
+        unsafe {
+            rosidl_typesupport_c__get_message_type_support_handle__shape_msgs__msg__SolidPrimitive()
+        }
     }
 }
 

@@ -2,12 +2,14 @@
 use super::*;
 use super::super::super::*;
 use crate::msg::*;
+use crate::rcl;
 
 extern "C" {
     fn shape_msgs__msg__MeshTriangle__init(msg: *mut MeshTriangle) -> bool;
     fn shape_msgs__msg__MeshTriangle__fini(msg: *mut MeshTriangle);
     fn shape_msgs__msg__MeshTriangle__Sequence__init(msg: *mut MeshTriangleSequence, size: usize) -> bool;
     fn shape_msgs__msg__MeshTriangle__Sequence__fini(msg: *mut MeshTriangleSequence);
+    fn rosidl_typesupport_c__get_message_type_support_handle__shape_msgs__msg__MeshTriangle() -> *const rcl::rosidl_message_type_support_t;
 }
 
 
@@ -31,6 +33,14 @@ impl MeshTriangle {
 impl Drop for MeshTriangle {
     fn drop(&mut self) {
         unsafe { shape_msgs__msg__MeshTriangle__fini(self) };
+    }
+}
+
+impl TopicMsg for MeshTriangle {
+    fn type_support() -> *const rcl::rosidl_message_type_support_t {
+        unsafe {
+            rosidl_typesupport_c__get_message_type_support_handle__shape_msgs__msg__MeshTriangle()
+        }
     }
 }
 

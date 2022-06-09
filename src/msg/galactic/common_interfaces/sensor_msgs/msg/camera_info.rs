@@ -2,12 +2,14 @@
 use super::*;
 use super::super::super::*;
 use crate::msg::*;
+use crate::rcl;
 
 extern "C" {
     fn sensor_msgs__msg__CameraInfo__init(msg: *mut CameraInfo) -> bool;
     fn sensor_msgs__msg__CameraInfo__fini(msg: *mut CameraInfo);
     fn sensor_msgs__msg__CameraInfo__Sequence__init(msg: *mut CameraInfoSequence, size: usize) -> bool;
     fn sensor_msgs__msg__CameraInfo__Sequence__fini(msg: *mut CameraInfoSequence);
+    fn rosidl_typesupport_c__get_message_type_support_handle__sensor_msgs__msg__CameraInfo() -> *const rcl::rosidl_message_type_support_t;
 }
 
 
@@ -41,6 +43,14 @@ impl CameraInfo {
 impl Drop for CameraInfo {
     fn drop(&mut self) {
         unsafe { sensor_msgs__msg__CameraInfo__fini(self) };
+    }
+}
+
+impl TopicMsg for CameraInfo {
+    fn type_support() -> *const rcl::rosidl_message_type_support_t {
+        unsafe {
+            rosidl_typesupport_c__get_message_type_support_handle__sensor_msgs__msg__CameraInfo()
+        }
     }
 }
 

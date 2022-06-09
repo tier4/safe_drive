@@ -2,12 +2,14 @@
 use super::*;
 use super::super::super::*;
 use crate::msg::*;
+use crate::rcl;
 
 extern "C" {
     fn stereo_msgs__msg__DisparityImage__init(msg: *mut DisparityImage) -> bool;
     fn stereo_msgs__msg__DisparityImage__fini(msg: *mut DisparityImage);
     fn stereo_msgs__msg__DisparityImage__Sequence__init(msg: *mut DisparityImageSequence, size: usize) -> bool;
     fn stereo_msgs__msg__DisparityImage__Sequence__fini(msg: *mut DisparityImageSequence);
+    fn rosidl_typesupport_c__get_message_type_support_handle__stereo_msgs__msg__DisparityImage() -> *const rcl::rosidl_message_type_support_t;
 }
 
 
@@ -38,6 +40,14 @@ impl DisparityImage {
 impl Drop for DisparityImage {
     fn drop(&mut self) {
         unsafe { stereo_msgs__msg__DisparityImage__fini(self) };
+    }
+}
+
+impl TopicMsg for DisparityImage {
+    fn type_support() -> *const rcl::rosidl_message_type_support_t {
+        unsafe {
+            rosidl_typesupport_c__get_message_type_support_handle__stereo_msgs__msg__DisparityImage()
+        }
     }
 }
 

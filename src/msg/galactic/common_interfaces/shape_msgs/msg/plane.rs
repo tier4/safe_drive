@@ -2,12 +2,14 @@
 use super::*;
 use super::super::super::*;
 use crate::msg::*;
+use crate::rcl;
 
 extern "C" {
     fn shape_msgs__msg__Plane__init(msg: *mut Plane) -> bool;
     fn shape_msgs__msg__Plane__fini(msg: *mut Plane);
     fn shape_msgs__msg__Plane__Sequence__init(msg: *mut PlaneSequence, size: usize) -> bool;
     fn shape_msgs__msg__Plane__Sequence__fini(msg: *mut PlaneSequence);
+    fn rosidl_typesupport_c__get_message_type_support_handle__shape_msgs__msg__Plane() -> *const rcl::rosidl_message_type_support_t;
 }
 
 
@@ -31,6 +33,14 @@ impl Plane {
 impl Drop for Plane {
     fn drop(&mut self) {
         unsafe { shape_msgs__msg__Plane__fini(self) };
+    }
+}
+
+impl TopicMsg for Plane {
+    fn type_support() -> *const rcl::rosidl_message_type_support_t {
+        unsafe {
+            rosidl_typesupport_c__get_message_type_support_handle__shape_msgs__msg__Plane()
+        }
     }
 }
 

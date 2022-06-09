@@ -2,12 +2,14 @@
 use super::*;
 use super::super::super::*;
 use crate::msg::*;
+use crate::rcl;
 
 extern "C" {
     fn trajectory_msgs__msg__MultiDOFJointTrajectoryPoint__init(msg: *mut MultiDOFJointTrajectoryPoint) -> bool;
     fn trajectory_msgs__msg__MultiDOFJointTrajectoryPoint__fini(msg: *mut MultiDOFJointTrajectoryPoint);
     fn trajectory_msgs__msg__MultiDOFJointTrajectoryPoint__Sequence__init(msg: *mut MultiDOFJointTrajectoryPointSequence, size: usize) -> bool;
     fn trajectory_msgs__msg__MultiDOFJointTrajectoryPoint__Sequence__fini(msg: *mut MultiDOFJointTrajectoryPointSequence);
+    fn rosidl_typesupport_c__get_message_type_support_handle__trajectory_msgs__msg__MultiDOFJointTrajectoryPoint() -> *const rcl::rosidl_message_type_support_t;
 }
 
 
@@ -34,6 +36,14 @@ impl MultiDOFJointTrajectoryPoint {
 impl Drop for MultiDOFJointTrajectoryPoint {
     fn drop(&mut self) {
         unsafe { trajectory_msgs__msg__MultiDOFJointTrajectoryPoint__fini(self) };
+    }
+}
+
+impl TopicMsg for MultiDOFJointTrajectoryPoint {
+    fn type_support() -> *const rcl::rosidl_message_type_support_t {
+        unsafe {
+            rosidl_typesupport_c__get_message_type_support_handle__trajectory_msgs__msg__MultiDOFJointTrajectoryPoint()
+        }
     }
 }
 

@@ -2,12 +2,14 @@
 use super::*;
 use super::super::super::*;
 use crate::msg::*;
+use crate::rcl;
 
 extern "C" {
     fn geometry_msgs__msg__InertiaStamped__init(msg: *mut InertiaStamped) -> bool;
     fn geometry_msgs__msg__InertiaStamped__fini(msg: *mut InertiaStamped);
     fn geometry_msgs__msg__InertiaStamped__Sequence__init(msg: *mut InertiaStampedSequence, size: usize) -> bool;
     fn geometry_msgs__msg__InertiaStamped__Sequence__fini(msg: *mut InertiaStampedSequence);
+    fn rosidl_typesupport_c__get_message_type_support_handle__geometry_msgs__msg__InertiaStamped() -> *const rcl::rosidl_message_type_support_t;
 }
 
 
@@ -32,6 +34,14 @@ impl InertiaStamped {
 impl Drop for InertiaStamped {
     fn drop(&mut self) {
         unsafe { geometry_msgs__msg__InertiaStamped__fini(self) };
+    }
+}
+
+impl TopicMsg for InertiaStamped {
+    fn type_support() -> *const rcl::rosidl_message_type_support_t {
+        unsafe {
+            rosidl_typesupport_c__get_message_type_support_handle__geometry_msgs__msg__InertiaStamped()
+        }
     }
 }
 

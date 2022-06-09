@@ -2,12 +2,14 @@
 use super::*;
 use super::super::super::*;
 use crate::msg::*;
+use crate::rcl;
 
 extern "C" {
     fn nav_msgs__msg__Odometry__init(msg: *mut Odometry) -> bool;
     fn nav_msgs__msg__Odometry__fini(msg: *mut Odometry);
     fn nav_msgs__msg__Odometry__Sequence__init(msg: *mut OdometrySequence, size: usize) -> bool;
     fn nav_msgs__msg__Odometry__Sequence__fini(msg: *mut OdometrySequence);
+    fn rosidl_typesupport_c__get_message_type_support_handle__nav_msgs__msg__Odometry() -> *const rcl::rosidl_message_type_support_t;
 }
 
 
@@ -34,6 +36,14 @@ impl Odometry {
 impl Drop for Odometry {
     fn drop(&mut self) {
         unsafe { nav_msgs__msg__Odometry__fini(self) };
+    }
+}
+
+impl TopicMsg for Odometry {
+    fn type_support() -> *const rcl::rosidl_message_type_support_t {
+        unsafe {
+            rosidl_typesupport_c__get_message_type_support_handle__nav_msgs__msg__Odometry()
+        }
     }
 }
 

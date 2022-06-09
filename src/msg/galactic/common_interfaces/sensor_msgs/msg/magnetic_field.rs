@@ -2,12 +2,14 @@
 use super::*;
 use super::super::super::*;
 use crate::msg::*;
+use crate::rcl;
 
 extern "C" {
     fn sensor_msgs__msg__MagneticField__init(msg: *mut MagneticField) -> bool;
     fn sensor_msgs__msg__MagneticField__fini(msg: *mut MagneticField);
     fn sensor_msgs__msg__MagneticField__Sequence__init(msg: *mut MagneticFieldSequence, size: usize) -> bool;
     fn sensor_msgs__msg__MagneticField__Sequence__fini(msg: *mut MagneticFieldSequence);
+    fn rosidl_typesupport_c__get_message_type_support_handle__sensor_msgs__msg__MagneticField() -> *const rcl::rosidl_message_type_support_t;
 }
 
 
@@ -33,6 +35,14 @@ impl MagneticField {
 impl Drop for MagneticField {
     fn drop(&mut self) {
         unsafe { sensor_msgs__msg__MagneticField__fini(self) };
+    }
+}
+
+impl TopicMsg for MagneticField {
+    fn type_support() -> *const rcl::rosidl_message_type_support_t {
+        unsafe {
+            rosidl_typesupport_c__get_message_type_support_handle__sensor_msgs__msg__MagneticField()
+        }
     }
 }
 

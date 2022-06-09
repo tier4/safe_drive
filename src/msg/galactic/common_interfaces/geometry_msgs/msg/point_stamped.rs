@@ -2,12 +2,14 @@
 use super::*;
 use super::super::super::*;
 use crate::msg::*;
+use crate::rcl;
 
 extern "C" {
     fn geometry_msgs__msg__PointStamped__init(msg: *mut PointStamped) -> bool;
     fn geometry_msgs__msg__PointStamped__fini(msg: *mut PointStamped);
     fn geometry_msgs__msg__PointStamped__Sequence__init(msg: *mut PointStampedSequence, size: usize) -> bool;
     fn geometry_msgs__msg__PointStamped__Sequence__fini(msg: *mut PointStampedSequence);
+    fn rosidl_typesupport_c__get_message_type_support_handle__geometry_msgs__msg__PointStamped() -> *const rcl::rosidl_message_type_support_t;
 }
 
 
@@ -32,6 +34,14 @@ impl PointStamped {
 impl Drop for PointStamped {
     fn drop(&mut self) {
         unsafe { geometry_msgs__msg__PointStamped__fini(self) };
+    }
+}
+
+impl TopicMsg for PointStamped {
+    fn type_support() -> *const rcl::rosidl_message_type_support_t {
+        unsafe {
+            rosidl_typesupport_c__get_message_type_support_handle__geometry_msgs__msg__PointStamped()
+        }
     }
 }
 

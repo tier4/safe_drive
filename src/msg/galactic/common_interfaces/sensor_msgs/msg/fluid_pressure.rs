@@ -2,12 +2,14 @@
 use super::*;
 use super::super::super::*;
 use crate::msg::*;
+use crate::rcl;
 
 extern "C" {
     fn sensor_msgs__msg__FluidPressure__init(msg: *mut FluidPressure) -> bool;
     fn sensor_msgs__msg__FluidPressure__fini(msg: *mut FluidPressure);
     fn sensor_msgs__msg__FluidPressure__Sequence__init(msg: *mut FluidPressureSequence, size: usize) -> bool;
     fn sensor_msgs__msg__FluidPressure__Sequence__fini(msg: *mut FluidPressureSequence);
+    fn rosidl_typesupport_c__get_message_type_support_handle__sensor_msgs__msg__FluidPressure() -> *const rcl::rosidl_message_type_support_t;
 }
 
 
@@ -33,6 +35,14 @@ impl FluidPressure {
 impl Drop for FluidPressure {
     fn drop(&mut self) {
         unsafe { sensor_msgs__msg__FluidPressure__fini(self) };
+    }
+}
+
+impl TopicMsg for FluidPressure {
+    fn type_support() -> *const rcl::rosidl_message_type_support_t {
+        unsafe {
+            rosidl_typesupport_c__get_message_type_support_handle__sensor_msgs__msg__FluidPressure()
+        }
     }
 }
 

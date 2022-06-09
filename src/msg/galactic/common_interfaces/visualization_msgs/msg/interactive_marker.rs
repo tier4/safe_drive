@@ -2,12 +2,14 @@
 use super::*;
 use super::super::super::*;
 use crate::msg::*;
+use crate::rcl;
 
 extern "C" {
     fn visualization_msgs__msg__InteractiveMarker__init(msg: *mut InteractiveMarker) -> bool;
     fn visualization_msgs__msg__InteractiveMarker__fini(msg: *mut InteractiveMarker);
     fn visualization_msgs__msg__InteractiveMarker__Sequence__init(msg: *mut InteractiveMarkerSequence, size: usize) -> bool;
     fn visualization_msgs__msg__InteractiveMarker__Sequence__fini(msg: *mut InteractiveMarkerSequence);
+    fn rosidl_typesupport_c__get_message_type_support_handle__visualization_msgs__msg__InteractiveMarker() -> *const rcl::rosidl_message_type_support_t;
 }
 
 
@@ -37,6 +39,14 @@ impl InteractiveMarker {
 impl Drop for InteractiveMarker {
     fn drop(&mut self) {
         unsafe { visualization_msgs__msg__InteractiveMarker__fini(self) };
+    }
+}
+
+impl TopicMsg for InteractiveMarker {
+    fn type_support() -> *const rcl::rosidl_message_type_support_t {
+        unsafe {
+            rosidl_typesupport_c__get_message_type_support_handle__visualization_msgs__msg__InteractiveMarker()
+        }
     }
 }
 

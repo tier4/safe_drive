@@ -2,12 +2,14 @@
 use super::*;
 use super::super::super::*;
 use crate::msg::*;
+use crate::rcl;
 
 extern "C" {
     fn shape_msgs__msg__Mesh__init(msg: *mut Mesh) -> bool;
     fn shape_msgs__msg__Mesh__fini(msg: *mut Mesh);
     fn shape_msgs__msg__Mesh__Sequence__init(msg: *mut MeshSequence, size: usize) -> bool;
     fn shape_msgs__msg__Mesh__Sequence__fini(msg: *mut MeshSequence);
+    fn rosidl_typesupport_c__get_message_type_support_handle__shape_msgs__msg__Mesh() -> *const rcl::rosidl_message_type_support_t;
 }
 
 
@@ -32,6 +34,14 @@ impl Mesh {
 impl Drop for Mesh {
     fn drop(&mut self) {
         unsafe { shape_msgs__msg__Mesh__fini(self) };
+    }
+}
+
+impl TopicMsg for Mesh {
+    fn type_support() -> *const rcl::rosidl_message_type_support_t {
+        unsafe {
+            rosidl_typesupport_c__get_message_type_support_handle__shape_msgs__msg__Mesh()
+        }
     }
 }
 

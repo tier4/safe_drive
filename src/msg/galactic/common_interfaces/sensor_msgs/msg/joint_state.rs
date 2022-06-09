@@ -2,12 +2,14 @@
 use super::*;
 use super::super::super::*;
 use crate::msg::*;
+use crate::rcl;
 
 extern "C" {
     fn sensor_msgs__msg__JointState__init(msg: *mut JointState) -> bool;
     fn sensor_msgs__msg__JointState__fini(msg: *mut JointState);
     fn sensor_msgs__msg__JointState__Sequence__init(msg: *mut JointStateSequence, size: usize) -> bool;
     fn sensor_msgs__msg__JointState__Sequence__fini(msg: *mut JointStateSequence);
+    fn rosidl_typesupport_c__get_message_type_support_handle__sensor_msgs__msg__JointState() -> *const rcl::rosidl_message_type_support_t;
 }
 
 
@@ -35,6 +37,14 @@ impl JointState {
 impl Drop for JointState {
     fn drop(&mut self) {
         unsafe { sensor_msgs__msg__JointState__fini(self) };
+    }
+}
+
+impl TopicMsg for JointState {
+    fn type_support() -> *const rcl::rosidl_message_type_support_t {
+        unsafe {
+            rosidl_typesupport_c__get_message_type_support_handle__sensor_msgs__msg__JointState()
+        }
     }
 }
 

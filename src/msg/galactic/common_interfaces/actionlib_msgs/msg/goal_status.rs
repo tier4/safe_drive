@@ -2,6 +2,7 @@
 use super::*;
 use super::super::super::*;
 use crate::msg::*;
+use crate::rcl;
 pub const PENDING: u8 = 0; // The goal has yet to be processed by the action server.
 pub const ACTIVE: u8 = 1; // The goal is currently being processed by the action server.
 pub const PREEMPTED: u8 = 2; // The goal received a cancel request after it started executing
@@ -18,6 +19,7 @@ extern "C" {
     fn actionlib_msgs__msg__GoalStatus__fini(msg: *mut GoalStatus);
     fn actionlib_msgs__msg__GoalStatus__Sequence__init(msg: *mut GoalStatusSequence, size: usize) -> bool;
     fn actionlib_msgs__msg__GoalStatus__Sequence__fini(msg: *mut GoalStatusSequence);
+    fn rosidl_typesupport_c__get_message_type_support_handle__actionlib_msgs__msg__GoalStatus() -> *const rcl::rosidl_message_type_support_t;
 }
 
 
@@ -43,6 +45,14 @@ impl GoalStatus {
 impl Drop for GoalStatus {
     fn drop(&mut self) {
         unsafe { actionlib_msgs__msg__GoalStatus__fini(self) };
+    }
+}
+
+impl TopicMsg for GoalStatus {
+    fn type_support() -> *const rcl::rosidl_message_type_support_t {
+        unsafe {
+            rosidl_typesupport_c__get_message_type_support_handle__actionlib_msgs__msg__GoalStatus()
+        }
     }
 }
 

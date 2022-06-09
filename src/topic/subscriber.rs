@@ -1,8 +1,8 @@
 use crate::{
     error::{DynError, RCLError, RCLResult},
+    msg::TopicMsg,
     node::Node,
-    qos,
-    rcl::{self, rosidl_message_type_support_t},
+    qos, rcl,
     selector::async_selector::{self, SELECTOR},
     PhantomUnsync,
 };
@@ -43,11 +43,10 @@ pub struct Subscriber<T> {
     _unsync: PhantomUnsync,
 }
 
-impl<T> Subscriber<T> {
+impl<T: TopicMsg> Subscriber<T> {
     pub(crate) fn new(
         node: Arc<Node>,
         topic_name: &str,
-        type_support: *const rosidl_message_type_support_t,
         qos: Option<qos::Profile>,
     ) -> RCLResult<Self> {
         let mut subscription = Box::new(rcl::MTSafeFn::rcl_get_zero_initialized_subscription());
@@ -61,7 +60,7 @@ impl<T> Subscriber<T> {
             guard.rcl_subscription_init(
                 subscription.as_mut(),
                 node.as_ptr(),
-                type_support as _,
+                T::type_support(),
                 topic_name.as_ptr(),
                 options.as_ptr(),
             )?;

@@ -2,12 +2,14 @@
 use super::*;
 use super::super::super::*;
 use crate::msg::*;
+use crate::rcl;
 
 extern "C" {
     fn sensor_msgs__msg__PointField__init(msg: *mut PointField) -> bool;
     fn sensor_msgs__msg__PointField__fini(msg: *mut PointField);
     fn sensor_msgs__msg__PointField__Sequence__init(msg: *mut PointFieldSequence, size: usize) -> bool;
     fn sensor_msgs__msg__PointField__Sequence__fini(msg: *mut PointFieldSequence);
+    fn rosidl_typesupport_c__get_message_type_support_handle__sensor_msgs__msg__PointField() -> *const rcl::rosidl_message_type_support_t;
 }
 
 
@@ -42,6 +44,14 @@ impl PointField {
 impl Drop for PointField {
     fn drop(&mut self) {
         unsafe { sensor_msgs__msg__PointField__fini(self) };
+    }
+}
+
+impl TopicMsg for PointField {
+    fn type_support() -> *const rcl::rosidl_message_type_support_t {
+        unsafe {
+            rosidl_typesupport_c__get_message_type_support_handle__sensor_msgs__msg__PointField()
+        }
     }
 }
 

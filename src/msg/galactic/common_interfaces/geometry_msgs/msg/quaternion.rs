@@ -2,12 +2,14 @@
 use super::*;
 use super::super::super::*;
 use crate::msg::*;
+use crate::rcl;
 
 extern "C" {
     fn geometry_msgs__msg__Quaternion__init(msg: *mut Quaternion) -> bool;
     fn geometry_msgs__msg__Quaternion__fini(msg: *mut Quaternion);
     fn geometry_msgs__msg__Quaternion__Sequence__init(msg: *mut QuaternionSequence, size: usize) -> bool;
     fn geometry_msgs__msg__Quaternion__Sequence__fini(msg: *mut QuaternionSequence);
+    fn rosidl_typesupport_c__get_message_type_support_handle__geometry_msgs__msg__Quaternion() -> *const rcl::rosidl_message_type_support_t;
 }
 
 
@@ -34,6 +36,14 @@ impl Quaternion {
 impl Drop for Quaternion {
     fn drop(&mut self) {
         unsafe { geometry_msgs__msg__Quaternion__fini(self) };
+    }
+}
+
+impl TopicMsg for Quaternion {
+    fn type_support() -> *const rcl::rosidl_message_type_support_t {
+        unsafe {
+            rosidl_typesupport_c__get_message_type_support_handle__geometry_msgs__msg__Quaternion()
+        }
     }
 }
 

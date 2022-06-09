@@ -2,12 +2,14 @@
 use super::*;
 use super::super::super::*;
 use crate::msg::*;
+use crate::rcl;
 
 extern "C" {
     fn visualization_msgs__msg__MarkerArray__init(msg: *mut MarkerArray) -> bool;
     fn visualization_msgs__msg__MarkerArray__fini(msg: *mut MarkerArray);
     fn visualization_msgs__msg__MarkerArray__Sequence__init(msg: *mut MarkerArraySequence, size: usize) -> bool;
     fn visualization_msgs__msg__MarkerArray__Sequence__fini(msg: *mut MarkerArraySequence);
+    fn rosidl_typesupport_c__get_message_type_support_handle__visualization_msgs__msg__MarkerArray() -> *const rcl::rosidl_message_type_support_t;
 }
 
 
@@ -31,6 +33,14 @@ impl MarkerArray {
 impl Drop for MarkerArray {
     fn drop(&mut self) {
         unsafe { visualization_msgs__msg__MarkerArray__fini(self) };
+    }
+}
+
+impl TopicMsg for MarkerArray {
+    fn type_support() -> *const rcl::rosidl_message_type_support_t {
+        unsafe {
+            rosidl_typesupport_c__get_message_type_support_handle__visualization_msgs__msg__MarkerArray()
+        }
     }
 }
 
