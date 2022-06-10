@@ -1,6 +1,7 @@
 use super::Header;
 use crate::{
     error::{DynError, RCLError, RCLResult},
+    msg::ServiceMsg,
     node::Node,
     qos::Profile,
     rcl,
@@ -29,17 +30,16 @@ impl Drop for ClientData {
 unsafe impl Sync for ClientData {}
 unsafe impl Send for ClientData {}
 
-pub struct Client<T1, T2> {
+pub struct Client<T> {
     data: Arc<ClientData>,
-    _phantom: PhantomData<(T1, T2)>,
+    _phantom: PhantomData<T>,
     _unsync: PhantomUnsync,
 }
 
-impl<T1, T2> Client<T1, T2> {
+impl<T: ServiceMsg> Client<T> {
     pub(crate) fn new(
         node: Arc<Node>,
         service_name: &str,
-        type_support: *const (),
         qos: Option<Profile>,
     ) -> RCLResult<Self> {
         let mut client = rcl::MTSafeFn::rcl_get_zero_initialized_client();
@@ -54,7 +54,7 @@ impl<T1, T2> Client<T1, T2> {
         guard.rcl_client_init(
             &mut client,
             node.as_ptr(),
-            type_support as _,
+            <T as ServiceMsg>::type_support(),
             service_name.as_ptr(),
             &options,
         )?;
@@ -71,14 +71,17 @@ impl<T1, T2> Client<T1, T2> {
     /// - `RCLError::InvalidArgument` if any arguments are invalid, or
     /// - `RCLError::ClientInvalid` if the client is invalid, or
     /// - `RCLError::Error` if an unspecified error occurs.
-    pub fn send(self, data: T1) -> RCLResult<ClientRecv<T1, T2>> {
+    pub fn send(self, data: <T as ServiceMsg>::Request) -> RCLResult<ClientRecv<T>> {
         let (s, _) = self.send_with_seq(data)?;
         Ok(s)
     }
 
     /// `send_with_seq` is equivalent to `send`, but this returns
     /// the sequence number together.
-    pub fn send_with_seq(self, data: T1) -> RCLResult<(ClientRecv<T1, T2>, i64)> {
+    pub fn send_with_seq(
+        self,
+        data: <T as ServiceMsg>::Request,
+    ) -> RCLResult<(ClientRecv<T>, i64)> {
         let mut seq: i64 = 0;
         if let Err(e) = rcl::MTSafeFn::rcl_send_request(
             &self.data.client,
@@ -101,14 +104,14 @@ impl<T1, T2> Client<T1, T2> {
 }
 
 #[derive(Clone)]
-pub struct ClientRecv<T1, T2> {
+pub struct ClientRecv<T> {
     pub(crate) data: Arc<ClientData>,
     seq: i64,
-    _phantom: PhantomData<(T1, T2)>,
+    _phantom: PhantomData<T>,
     _unsync: PhantomUnsync,
 }
 
-impl<T1, T2> ClientRecv<T1, T2> {
+impl<T: ServiceMsg> ClientRecv<T> {
     /// Receive a message.
     /// `try_recv` is a non-blocking function, and this
     /// returns `Err(RCLError::ClientTakeFailed)`.
@@ -120,7 +123,7 @@ impl<T1, T2> ClientRecv<T1, T2> {
     /// - `RCLError::ClientInvalid` if the client is invalid, or
     /// - `RCLError::ClientTakeFailed` if take failed but no error occurred in the middleware, or
     /// - `RCLError::Error` if an unspecified error occurs.
-    pub fn try_recv(self) -> RCLResult<(Client<T1, T2>, T2)> {
+    pub fn try_recv(self) -> RCLResult<(Client<T>, <T as ServiceMsg>::Response)> {
         let (s, d, _) = self.try_recv_with_header()?;
         Ok((s, d))
     }
@@ -136,12 +139,16 @@ impl<T1, T2> ClientRecv<T1, T2> {
     /// - `RCLError::ClientInvalid` if the client is invalid, or
     /// - `RCLError::ClientTakeFailed` if take failed but no error occurred in the middleware, or
     /// - `RCLError::Error` if an unspecified error occurs.
-    pub fn try_recv_with_header(self) -> RCLResult<(Client<T1, T2>, T2, Header)> {
-        let (response, header) =
-            match rcl_take_response_with_info::<T2>(&self.data.client, self.seq) {
-                Ok(data) => data,
-                Err(e) => return Err(e),
-            };
+    pub fn try_recv_with_header(
+        self,
+    ) -> RCLResult<(Client<T>, <T as ServiceMsg>::Response, Header)> {
+        let (response, header) = match rcl_take_response_with_info::<<T as ServiceMsg>::Response>(
+            &self.data.client,
+            self.seq,
+        ) {
+            Ok(data) => data,
+            Err(e) => return Err(e),
+        };
 
         Ok((
             Client {
@@ -162,11 +169,12 @@ impl<T1, T2> ClientRecv<T1, T2> {
     /// - `RCLError::InvalidArgument` if any arguments are invalid, or
     /// - `RCLError::ClientInvalid` if the client is invalid, or
     /// - `RCLError::Error` if an unspecified error occurs.
-    pub async fn recv_with_header(self) -> Result<(Client<T1, T2>, T2, Header), DynError> {
+    pub async fn recv_with_header(
+        self,
+    ) -> Result<(Client<T>, <T as ServiceMsg>::Response, Header), DynError> {
         AsyncReceiver {
             client: self,
             is_waiting: false,
-            _phantom: Default::default(),
         }
         .await
     }
@@ -178,7 +186,7 @@ impl<T1, T2> ClientRecv<T1, T2> {
     /// - `RCLError::InvalidArgument` if any arguments are invalid, or
     /// - `RCLError::ClientInvalid` if the client is invalid, or
     /// - `RCLError::Error` if an unspecified error occurs.
-    pub async fn recv(self) -> Result<(Client<T1, T2>, T2), DynError> {
+    pub async fn recv(self) -> Result<(Client<T>, <T as ServiceMsg>::Response), DynError> {
         let (client, val, _) = self.recv_with_header().await?;
         Ok((client, val))
     }
@@ -203,14 +211,13 @@ fn rcl_take_response_with_info<T>(
     Ok((ros_response, header))
 }
 
-pub struct AsyncReceiver<T1, T2> {
-    client: ClientRecv<T1, T2>,
+pub struct AsyncReceiver<T> {
+    client: ClientRecv<T>,
     is_waiting: bool,
-    _phantom: PhantomData<(T1, T2)>,
 }
 
-impl<T1, T2> Future for AsyncReceiver<T1, T2> {
-    type Output = Result<(Client<T1, T2>, T2, Header), DynError>;
+impl<T: ServiceMsg> Future for AsyncReceiver<T> {
+    type Output = Result<(Client<T>, <T as ServiceMsg>::Response, Header), DynError>;
 
     fn poll(
         self: std::pin::Pin<&mut Self>,
@@ -253,7 +260,7 @@ impl<T1, T2> Future for AsyncReceiver<T1, T2> {
     }
 }
 
-impl<T1, T2> Drop for AsyncReceiver<T1, T2> {
+impl<T> Drop for AsyncReceiver<T> {
     fn drop(&mut self) {
         if self.is_waiting {
             let mut guard = SELECTOR.lock();

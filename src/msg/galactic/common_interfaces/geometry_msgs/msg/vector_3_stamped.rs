@@ -37,14 +37,6 @@ impl Drop for Vector3Stamped {
     }
 }
 
-impl TopicMsg for Vector3Stamped {
-    fn type_support() -> *const rcl::rosidl_message_type_support_t {
-        unsafe {
-            rosidl_typesupport_c__get_message_type_support_handle__geometry_msgs__msg__Vector3Stamped()
-        }
-    }
-}
-
 #[repr(C)]
 #[derive(Debug)]
 pub struct Vector3StampedSequence {
@@ -88,3 +80,10 @@ impl Drop for Vector3StampedSequence {
     }
 }
 
+impl TopicMsg for Vector3Stamped {
+    fn type_support() -> *const rcl::rosidl_message_type_support_t {
+        unsafe {
+            rosidl_typesupport_c__get_message_type_support_handle__geometry_msgs__msg__Vector3Stamped()
+        }
+    }
+}

@@ -37,14 +37,6 @@ impl Drop for UInt16MultiArray {
     }
 }
 
-impl TopicMsg for UInt16MultiArray {
-    fn type_support() -> *const rcl::rosidl_message_type_support_t {
-        unsafe {
-            rosidl_typesupport_c__get_message_type_support_handle__std_msgs__msg__UInt16MultiArray()
-        }
-    }
-}
-
 #[repr(C)]
 #[derive(Debug)]
 pub struct UInt16MultiArraySequence {
@@ -88,3 +80,10 @@ impl Drop for UInt16MultiArraySequence {
     }
 }
 
+impl TopicMsg for UInt16MultiArray {
+    fn type_support() -> *const rcl::rosidl_message_type_support_t {
+        unsafe {
+            rosidl_typesupport_c__get_message_type_support_handle__std_msgs__msg__UInt16MultiArray()
+        }
+    }
+}

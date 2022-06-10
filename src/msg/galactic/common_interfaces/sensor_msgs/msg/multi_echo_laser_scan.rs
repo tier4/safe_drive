@@ -45,14 +45,6 @@ impl Drop for MultiEchoLaserScan {
     }
 }
 
-impl TopicMsg for MultiEchoLaserScan {
-    fn type_support() -> *const rcl::rosidl_message_type_support_t {
-        unsafe {
-            rosidl_typesupport_c__get_message_type_support_handle__sensor_msgs__msg__MultiEchoLaserScan()
-        }
-    }
-}
-
 #[repr(C)]
 #[derive(Debug)]
 pub struct MultiEchoLaserScanSequence {
@@ -96,3 +88,10 @@ impl Drop for MultiEchoLaserScanSequence {
     }
 }
 
+impl TopicMsg for MultiEchoLaserScan {
+    fn type_support() -> *const rcl::rosidl_message_type_support_t {
+        unsafe {
+            rosidl_typesupport_c__get_message_type_support_handle__sensor_msgs__msg__MultiEchoLaserScan()
+        }
+    }
+}

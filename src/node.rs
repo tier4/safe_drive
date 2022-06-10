@@ -1,7 +1,7 @@
 use crate::{
     context::Context,
     error::RCLResult,
-    msg::TopicMsg,
+    msg::{ServiceMsg, TopicMsg},
     qos, rcl,
     service::{client::Client, server::Server},
     topic::publisher::Publisher,
@@ -64,22 +64,20 @@ impl Node {
         Subscriber::new(self.clone(), topic_name, qos)
     }
 
-    pub fn create_server<T1, T2>(
+    pub fn create_server<T: ServiceMsg>(
         self: &Arc<Self>,
         service_name: &str,
-        type_support: *const (),
         qos: Option<qos::Profile>,
-    ) -> RCLResult<Server<T1, T2>> {
-        Server::new(self.clone(), service_name, type_support, qos)
+    ) -> RCLResult<Server<T>> {
+        Server::new(self.clone(), service_name, qos)
     }
 
-    pub fn create_client<T1, T2>(
+    pub fn create_client<T: ServiceMsg>(
         self: &Arc<Self>,
         service_name: &str,
-        type_support: *const (),
         qos: Option<qos::Profile>,
-    ) -> RCLResult<Client<T1, T2>> {
-        Client::new(self.clone(), service_name, type_support, qos)
+    ) -> RCLResult<Client<T>> {
+        Client::new(self.clone(), service_name, qos)
     }
 }
 

@@ -38,14 +38,6 @@ impl Drop for PointCloud {
     }
 }
 
-impl TopicMsg for PointCloud {
-    fn type_support() -> *const rcl::rosidl_message_type_support_t {
-        unsafe {
-            rosidl_typesupport_c__get_message_type_support_handle__sensor_msgs__msg__PointCloud()
-        }
-    }
-}
-
 #[repr(C)]
 #[derive(Debug)]
 pub struct PointCloudSequence {
@@ -89,3 +81,10 @@ impl Drop for PointCloudSequence {
     }
 }
 
+impl TopicMsg for PointCloud {
+    fn type_support() -> *const rcl::rosidl_message_type_support_t {
+        unsafe {
+            rosidl_typesupport_c__get_message_type_support_handle__sensor_msgs__msg__PointCloud()
+        }
+    }
+}

@@ -36,14 +36,6 @@ impl Drop for Int8 {
     }
 }
 
-impl TopicMsg for Int8 {
-    fn type_support() -> *const rcl::rosidl_message_type_support_t {
-        unsafe {
-            rosidl_typesupport_c__get_message_type_support_handle__std_msgs__msg__Int8()
-        }
-    }
-}
-
 #[repr(C)]
 #[derive(Debug)]
 pub struct Int8Sequence {
@@ -87,3 +79,10 @@ impl Drop for Int8Sequence {
     }
 }
 
+impl TopicMsg for Int8 {
+    fn type_support() -> *const rcl::rosidl_message_type_support_t {
+        unsafe {
+            rosidl_typesupport_c__get_message_type_support_handle__std_msgs__msg__Int8()
+        }
+    }
+}

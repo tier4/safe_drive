@@ -36,14 +36,6 @@ impl Drop for Bool {
     }
 }
 
-impl TopicMsg for Bool {
-    fn type_support() -> *const rcl::rosidl_message_type_support_t {
-        unsafe {
-            rosidl_typesupport_c__get_message_type_support_handle__std_msgs__msg__Bool()
-        }
-    }
-}
-
 #[repr(C)]
 #[derive(Debug)]
 pub struct BoolSequence {
@@ -87,3 +79,10 @@ impl Drop for BoolSequence {
     }
 }
 
+impl TopicMsg for Bool {
+    fn type_support() -> *const rcl::rosidl_message_type_support_t {
+        unsafe {
+            rosidl_typesupport_c__get_message_type_support_handle__std_msgs__msg__Bool()
+        }
+    }
+}

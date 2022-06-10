@@ -37,14 +37,6 @@ impl Drop for Header {
     }
 }
 
-impl TopicMsg for Header {
-    fn type_support() -> *const rcl::rosidl_message_type_support_t {
-        unsafe {
-            rosidl_typesupport_c__get_message_type_support_handle__std_msgs__msg__Header()
-        }
-    }
-}
-
 #[repr(C)]
 #[derive(Debug)]
 pub struct HeaderSequence {
@@ -88,3 +80,10 @@ impl Drop for HeaderSequence {
     }
 }
 
+impl TopicMsg for Header {
+    fn type_support() -> *const rcl::rosidl_message_type_support_t {
+        unsafe {
+            rosidl_typesupport_c__get_message_type_support_handle__std_msgs__msg__Header()
+        }
+    }
+}

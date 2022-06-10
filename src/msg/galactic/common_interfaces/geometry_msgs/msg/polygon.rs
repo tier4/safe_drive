@@ -36,14 +36,6 @@ impl Drop for Polygon {
     }
 }
 
-impl TopicMsg for Polygon {
-    fn type_support() -> *const rcl::rosidl_message_type_support_t {
-        unsafe {
-            rosidl_typesupport_c__get_message_type_support_handle__geometry_msgs__msg__Polygon()
-        }
-    }
-}
-
 #[repr(C)]
 #[derive(Debug)]
 pub struct PolygonSequence {
@@ -87,3 +79,10 @@ impl Drop for PolygonSequence {
     }
 }
 
+impl TopicMsg for Polygon {
+    fn type_support() -> *const rcl::rosidl_message_type_support_t {
+        unsafe {
+            rosidl_typesupport_c__get_message_type_support_handle__geometry_msgs__msg__Polygon()
+        }
+    }
+}

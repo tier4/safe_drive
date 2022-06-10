@@ -36,14 +36,6 @@ impl Drop for UUID {
     }
 }
 
-impl TopicMsg for UUID {
-    fn type_support() -> *const rcl::rosidl_message_type_support_t {
-        unsafe {
-            rosidl_typesupport_c__get_message_type_support_handle__unique_identifier_msgs__msg__UUID()
-        }
-    }
-}
-
 #[repr(C)]
 #[derive(Debug)]
 pub struct UUIDSequence {
@@ -87,3 +79,10 @@ impl Drop for UUIDSequence {
     }
 }
 
+impl TopicMsg for UUID {
+    fn type_support() -> *const rcl::rosidl_message_type_support_t {
+        unsafe {
+            rosidl_typesupport_c__get_message_type_support_handle__unique_identifier_msgs__msg__UUID()
+        }
+    }
+}

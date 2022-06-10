@@ -49,14 +49,6 @@ impl Drop for SolidPrimitive {
     }
 }
 
-impl TopicMsg for SolidPrimitive {
-    fn type_support() -> *const rcl::rosidl_message_type_support_t {
-        unsafe {
-            rosidl_typesupport_c__get_message_type_support_handle__shape_msgs__msg__SolidPrimitive()
-        }
-    }
-}
-
 #[repr(C)]
 #[derive(Debug)]
 pub struct SolidPrimitiveSequence {
@@ -100,3 +92,10 @@ impl Drop for SolidPrimitiveSequence {
     }
 }
 
+impl TopicMsg for SolidPrimitive {
+    fn type_support() -> *const rcl::rosidl_message_type_support_t {
+        unsafe {
+            rosidl_typesupport_c__get_message_type_support_handle__shape_msgs__msg__SolidPrimitive()
+        }
+    }
+}

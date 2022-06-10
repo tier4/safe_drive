@@ -88,9 +88,9 @@ impl Selector {
         );
     }
 
-    pub fn add_server<T1, T2>(
+    pub fn add_server<T>(
         &mut self,
-        server: &Server<T1, T2>,
+        server: &Server<T>,
         handler: Option<Box<dyn Fn()>>,
         is_once: bool,
     ) -> bool {
@@ -120,9 +120,9 @@ impl Selector {
         }
     }
 
-    pub fn add_client<T1, T2>(
+    pub fn add_client<T>(
         &mut self,
-        client: &ClientRecv<T1, T2>,
+        client: &ClientRecv<T>,
         handler: Option<Box<dyn Fn()>>,
         is_once: bool,
     ) -> bool {

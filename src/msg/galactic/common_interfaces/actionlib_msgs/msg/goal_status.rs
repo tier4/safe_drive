@@ -48,14 +48,6 @@ impl Drop for GoalStatus {
     }
 }
 
-impl TopicMsg for GoalStatus {
-    fn type_support() -> *const rcl::rosidl_message_type_support_t {
-        unsafe {
-            rosidl_typesupport_c__get_message_type_support_handle__actionlib_msgs__msg__GoalStatus()
-        }
-    }
-}
-
 #[repr(C)]
 #[derive(Debug)]
 pub struct GoalStatusSequence {
@@ -99,3 +91,10 @@ impl Drop for GoalStatusSequence {
     }
 }
 
+impl TopicMsg for GoalStatus {
+    fn type_support() -> *const rcl::rosidl_message_type_support_t {
+        unsafe {
+            rosidl_typesupport_c__get_message_type_support_handle__actionlib_msgs__msg__GoalStatus()
+        }
+    }
+}

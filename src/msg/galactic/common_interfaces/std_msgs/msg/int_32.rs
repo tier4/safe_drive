@@ -36,14 +36,6 @@ impl Drop for Int32 {
     }
 }
 
-impl TopicMsg for Int32 {
-    fn type_support() -> *const rcl::rosidl_message_type_support_t {
-        unsafe {
-            rosidl_typesupport_c__get_message_type_support_handle__std_msgs__msg__Int32()
-        }
-    }
-}
-
 #[repr(C)]
 #[derive(Debug)]
 pub struct Int32Sequence {
@@ -87,3 +79,10 @@ impl Drop for Int32Sequence {
     }
 }
 
+impl TopicMsg for Int32 {
+    fn type_support() -> *const rcl::rosidl_message_type_support_t {
+        unsafe {
+            rosidl_typesupport_c__get_message_type_support_handle__std_msgs__msg__Int32()
+        }
+    }
+}

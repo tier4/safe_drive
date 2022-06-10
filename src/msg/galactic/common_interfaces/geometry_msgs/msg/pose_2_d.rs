@@ -38,14 +38,6 @@ impl Drop for Pose2D {
     }
 }
 
-impl TopicMsg for Pose2D {
-    fn type_support() -> *const rcl::rosidl_message_type_support_t {
-        unsafe {
-            rosidl_typesupport_c__get_message_type_support_handle__geometry_msgs__msg__Pose2D()
-        }
-    }
-}
-
 #[repr(C)]
 #[derive(Debug)]
 pub struct Pose2DSequence {
@@ -89,3 +81,10 @@ impl Drop for Pose2DSequence {
     }
 }
 
+impl TopicMsg for Pose2D {
+    fn type_support() -> *const rcl::rosidl_message_type_support_t {
+        unsafe {
+            rosidl_typesupport_c__get_message_type_support_handle__geometry_msgs__msg__Pose2D()
+        }
+    }
+}

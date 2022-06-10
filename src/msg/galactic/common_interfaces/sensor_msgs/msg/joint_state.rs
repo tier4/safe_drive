@@ -40,14 +40,6 @@ impl Drop for JointState {
     }
 }
 
-impl TopicMsg for JointState {
-    fn type_support() -> *const rcl::rosidl_message_type_support_t {
-        unsafe {
-            rosidl_typesupport_c__get_message_type_support_handle__sensor_msgs__msg__JointState()
-        }
-    }
-}
-
 #[repr(C)]
 #[derive(Debug)]
 pub struct JointStateSequence {
@@ -91,3 +83,10 @@ impl Drop for JointStateSequence {
     }
 }
 
+impl TopicMsg for JointState {
+    fn type_support() -> *const rcl::rosidl_message_type_support_t {
+        unsafe {
+            rosidl_typesupport_c__get_message_type_support_handle__sensor_msgs__msg__JointState()
+        }
+    }
+}

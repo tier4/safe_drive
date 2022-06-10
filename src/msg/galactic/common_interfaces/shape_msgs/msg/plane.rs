@@ -36,14 +36,6 @@ impl Drop for Plane {
     }
 }
 
-impl TopicMsg for Plane {
-    fn type_support() -> *const rcl::rosidl_message_type_support_t {
-        unsafe {
-            rosidl_typesupport_c__get_message_type_support_handle__shape_msgs__msg__Plane()
-        }
-    }
-}
-
 #[repr(C)]
 #[derive(Debug)]
 pub struct PlaneSequence {
@@ -87,3 +79,10 @@ impl Drop for PlaneSequence {
     }
 }
 
+impl TopicMsg for Plane {
+    fn type_support() -> *const rcl::rosidl_message_type_support_t {
+        unsafe {
+            rosidl_typesupport_c__get_message_type_support_handle__shape_msgs__msg__Plane()
+        }
+    }
+}

@@ -38,14 +38,6 @@ impl Drop for TransformStamped {
     }
 }
 
-impl TopicMsg for TransformStamped {
-    fn type_support() -> *const rcl::rosidl_message_type_support_t {
-        unsafe {
-            rosidl_typesupport_c__get_message_type_support_handle__geometry_msgs__msg__TransformStamped()
-        }
-    }
-}
-
 #[repr(C)]
 #[derive(Debug)]
 pub struct TransformStampedSequence {
@@ -89,3 +81,10 @@ impl Drop for TransformStampedSequence {
     }
 }
 
+impl TopicMsg for TransformStamped {
+    fn type_support() -> *const rcl::rosidl_message_type_support_t {
+        unsafe {
+            rosidl_typesupport_c__get_message_type_support_handle__geometry_msgs__msg__TransformStamped()
+        }
+    }
+}

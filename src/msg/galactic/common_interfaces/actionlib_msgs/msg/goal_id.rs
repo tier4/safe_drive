@@ -37,14 +37,6 @@ impl Drop for GoalID {
     }
 }
 
-impl TopicMsg for GoalID {
-    fn type_support() -> *const rcl::rosidl_message_type_support_t {
-        unsafe {
-            rosidl_typesupport_c__get_message_type_support_handle__actionlib_msgs__msg__GoalID()
-        }
-    }
-}
-
 #[repr(C)]
 #[derive(Debug)]
 pub struct GoalIDSequence {
@@ -88,3 +80,10 @@ impl Drop for GoalIDSequence {
     }
 }
 
+impl TopicMsg for GoalID {
+    fn type_support() -> *const rcl::rosidl_message_type_support_t {
+        unsafe {
+            rosidl_typesupport_c__get_message_type_support_handle__actionlib_msgs__msg__GoalID()
+        }
+    }
+}

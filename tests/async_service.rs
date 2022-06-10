@@ -2,7 +2,12 @@ pub mod common;
 
 #[allow(unused_imports)]
 use async_std::{future, prelude::*};
-use safe_drive::{self, context::Context, error::DynError};
+use safe_drive::{
+    self,
+    context::Context,
+    error::DynError,
+    service::{client::Client, server::Server},
+};
 use std::{error::Error, time::Duration};
 
 const SERVICE_NAME: &str = "test_async_service";
@@ -34,7 +39,7 @@ fn test_async() -> Result<(), Box<dyn Error>> {
 }
 
 /// The server
-async fn run_server(mut server: common::ServerType) -> Result<(), DynError> {
+async fn run_server(mut server: Server<common::ServiceType>) -> Result<(), DynError> {
     for _ in 0..3 {
         // receive a request
         let (sender, request) = server.recv().await?;
@@ -54,7 +59,7 @@ async fn run_server(mut server: common::ServerType) -> Result<(), DynError> {
 }
 
 /// The client
-async fn run_client(mut client: common::ClientType) -> Result<(), DynError> {
+async fn run_client(mut client: Client<common::ServiceType>) -> Result<(), DynError> {
     let dur = Duration::from_millis(500);
     for n in 0..3 {
         let data = common::Request {

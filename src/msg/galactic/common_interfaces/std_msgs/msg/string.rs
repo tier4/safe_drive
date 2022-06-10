@@ -36,14 +36,6 @@ impl Drop for String {
     }
 }
 
-impl TopicMsg for String {
-    fn type_support() -> *const rcl::rosidl_message_type_support_t {
-        unsafe {
-            rosidl_typesupport_c__get_message_type_support_handle__std_msgs__msg__String()
-        }
-    }
-}
-
 #[repr(C)]
 #[derive(Debug)]
 pub struct StringSequence {
@@ -87,3 +79,10 @@ impl Drop for StringSequence {
     }
 }
 
+impl TopicMsg for String {
+    fn type_support() -> *const rcl::rosidl_message_type_support_t {
+        unsafe {
+            rosidl_typesupport_c__get_message_type_support_handle__std_msgs__msg__String()
+        }
+    }
+}

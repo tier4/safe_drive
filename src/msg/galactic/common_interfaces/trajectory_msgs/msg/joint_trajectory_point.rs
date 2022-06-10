@@ -40,14 +40,6 @@ impl Drop for JointTrajectoryPoint {
     }
 }
 
-impl TopicMsg for JointTrajectoryPoint {
-    fn type_support() -> *const rcl::rosidl_message_type_support_t {
-        unsafe {
-            rosidl_typesupport_c__get_message_type_support_handle__trajectory_msgs__msg__JointTrajectoryPoint()
-        }
-    }
-}
-
 #[repr(C)]
 #[derive(Debug)]
 pub struct JointTrajectoryPointSequence {
@@ -91,3 +83,10 @@ impl Drop for JointTrajectoryPointSequence {
     }
 }
 
+impl TopicMsg for JointTrajectoryPoint {
+    fn type_support() -> *const rcl::rosidl_message_type_support_t {
+        unsafe {
+            rosidl_typesupport_c__get_message_type_support_handle__trajectory_msgs__msg__JointTrajectoryPoint()
+        }
+    }
+}

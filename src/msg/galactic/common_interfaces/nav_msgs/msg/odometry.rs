@@ -39,14 +39,6 @@ impl Drop for Odometry {
     }
 }
 
-impl TopicMsg for Odometry {
-    fn type_support() -> *const rcl::rosidl_message_type_support_t {
-        unsafe {
-            rosidl_typesupport_c__get_message_type_support_handle__nav_msgs__msg__Odometry()
-        }
-    }
-}
-
 #[repr(C)]
 #[derive(Debug)]
 pub struct OdometrySequence {
@@ -90,3 +82,10 @@ impl Drop for OdometrySequence {
     }
 }
 
+impl TopicMsg for Odometry {
+    fn type_support() -> *const rcl::rosidl_message_type_support_t {
+        unsafe {
+            rosidl_typesupport_c__get_message_type_support_handle__nav_msgs__msg__Odometry()
+        }
+    }
+}

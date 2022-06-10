@@ -42,14 +42,6 @@ impl Drop for InteractiveMarker {
     }
 }
 
-impl TopicMsg for InteractiveMarker {
-    fn type_support() -> *const rcl::rosidl_message_type_support_t {
-        unsafe {
-            rosidl_typesupport_c__get_message_type_support_handle__visualization_msgs__msg__InteractiveMarker()
-        }
-    }
-}
-
 #[repr(C)]
 #[derive(Debug)]
 pub struct InteractiveMarkerSequence {
@@ -93,3 +85,10 @@ impl Drop for InteractiveMarkerSequence {
     }
 }
 
+impl TopicMsg for InteractiveMarker {
+    fn type_support() -> *const rcl::rosidl_message_type_support_t {
+        unsafe {
+            rosidl_typesupport_c__get_message_type_support_handle__visualization_msgs__msg__InteractiveMarker()
+        }
+    }
+}

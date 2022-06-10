@@ -38,14 +38,6 @@ impl Drop for Joy {
     }
 }
 
-impl TopicMsg for Joy {
-    fn type_support() -> *const rcl::rosidl_message_type_support_t {
-        unsafe {
-            rosidl_typesupport_c__get_message_type_support_handle__sensor_msgs__msg__Joy()
-        }
-    }
-}
-
 #[repr(C)]
 #[derive(Debug)]
 pub struct JoySequence {
@@ -89,3 +81,10 @@ impl Drop for JoySequence {
     }
 }
 
+impl TopicMsg for Joy {
+    fn type_support() -> *const rcl::rosidl_message_type_support_t {
+        unsafe {
+            rosidl_typesupport_c__get_message_type_support_handle__sensor_msgs__msg__Joy()
+        }
+    }
+}

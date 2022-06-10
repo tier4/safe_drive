@@ -38,14 +38,6 @@ impl Drop for Illuminance {
     }
 }
 
-impl TopicMsg for Illuminance {
-    fn type_support() -> *const rcl::rosidl_message_type_support_t {
-        unsafe {
-            rosidl_typesupport_c__get_message_type_support_handle__sensor_msgs__msg__Illuminance()
-        }
-    }
-}
-
 #[repr(C)]
 #[derive(Debug)]
 pub struct IlluminanceSequence {
@@ -89,3 +81,10 @@ impl Drop for IlluminanceSequence {
     }
 }
 
+impl TopicMsg for Illuminance {
+    fn type_support() -> *const rcl::rosidl_message_type_support_t {
+        unsafe {
+            rosidl_typesupport_c__get_message_type_support_handle__sensor_msgs__msg__Illuminance()
+        }
+    }
+}

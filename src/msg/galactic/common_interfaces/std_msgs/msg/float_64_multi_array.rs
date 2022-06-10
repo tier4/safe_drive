@@ -37,14 +37,6 @@ impl Drop for Float64MultiArray {
     }
 }
 
-impl TopicMsg for Float64MultiArray {
-    fn type_support() -> *const rcl::rosidl_message_type_support_t {
-        unsafe {
-            rosidl_typesupport_c__get_message_type_support_handle__std_msgs__msg__Float64MultiArray()
-        }
-    }
-}
-
 #[repr(C)]
 #[derive(Debug)]
 pub struct Float64MultiArraySequence {
@@ -88,3 +80,10 @@ impl Drop for Float64MultiArraySequence {
     }
 }
 
+impl TopicMsg for Float64MultiArray {
+    fn type_support() -> *const rcl::rosidl_message_type_support_t {
+        unsafe {
+            rosidl_typesupport_c__get_message_type_support_handle__std_msgs__msg__Float64MultiArray()
+        }
+    }
+}

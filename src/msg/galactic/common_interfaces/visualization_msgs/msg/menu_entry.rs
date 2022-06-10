@@ -43,14 +43,6 @@ impl Drop for MenuEntry {
     }
 }
 
-impl TopicMsg for MenuEntry {
-    fn type_support() -> *const rcl::rosidl_message_type_support_t {
-        unsafe {
-            rosidl_typesupport_c__get_message_type_support_handle__visualization_msgs__msg__MenuEntry()
-        }
-    }
-}
-
 #[repr(C)]
 #[derive(Debug)]
 pub struct MenuEntrySequence {
@@ -94,3 +86,10 @@ impl Drop for MenuEntrySequence {
     }
 }
 
+impl TopicMsg for MenuEntry {
+    fn type_support() -> *const rcl::rosidl_message_type_support_t {
+        unsafe {
+            rosidl_typesupport_c__get_message_type_support_handle__visualization_msgs__msg__MenuEntry()
+        }
+    }
+}

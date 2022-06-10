@@ -45,14 +45,6 @@ impl Drop for NavSatStatus {
     }
 }
 
-impl TopicMsg for NavSatStatus {
-    fn type_support() -> *const rcl::rosidl_message_type_support_t {
-        unsafe {
-            rosidl_typesupport_c__get_message_type_support_handle__sensor_msgs__msg__NavSatStatus()
-        }
-    }
-}
-
 #[repr(C)]
 #[derive(Debug)]
 pub struct NavSatStatusSequence {
@@ -96,3 +88,10 @@ impl Drop for NavSatStatusSequence {
     }
 }
 
+impl TopicMsg for NavSatStatus {
+    fn type_support() -> *const rcl::rosidl_message_type_support_t {
+        unsafe {
+            rosidl_typesupport_c__get_message_type_support_handle__sensor_msgs__msg__NavSatStatus()
+        }
+    }
+}

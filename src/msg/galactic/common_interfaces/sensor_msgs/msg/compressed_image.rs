@@ -38,14 +38,6 @@ impl Drop for CompressedImage {
     }
 }
 
-impl TopicMsg for CompressedImage {
-    fn type_support() -> *const rcl::rosidl_message_type_support_t {
-        unsafe {
-            rosidl_typesupport_c__get_message_type_support_handle__sensor_msgs__msg__CompressedImage()
-        }
-    }
-}
-
 #[repr(C)]
 #[derive(Debug)]
 pub struct CompressedImageSequence {
@@ -89,3 +81,10 @@ impl Drop for CompressedImageSequence {
     }
 }
 
+impl TopicMsg for CompressedImage {
+    fn type_support() -> *const rcl::rosidl_message_type_support_t {
+        unsafe {
+            rosidl_typesupport_c__get_message_type_support_handle__sensor_msgs__msg__CompressedImage()
+        }
+    }
+}

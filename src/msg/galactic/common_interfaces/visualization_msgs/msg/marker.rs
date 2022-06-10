@@ -66,14 +66,6 @@ impl Drop for Marker {
     }
 }
 
-impl TopicMsg for Marker {
-    fn type_support() -> *const rcl::rosidl_message_type_support_t {
-        unsafe {
-            rosidl_typesupport_c__get_message_type_support_handle__visualization_msgs__msg__Marker()
-        }
-    }
-}
-
 #[repr(C)]
 #[derive(Debug)]
 pub struct MarkerSequence {
@@ -117,3 +109,10 @@ impl Drop for MarkerSequence {
     }
 }
 
+impl TopicMsg for Marker {
+    fn type_support() -> *const rcl::rosidl_message_type_support_t {
+        unsafe {
+            rosidl_typesupport_c__get_message_type_support_handle__visualization_msgs__msg__Marker()
+        }
+    }
+}

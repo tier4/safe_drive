@@ -38,14 +38,6 @@ impl Drop for TimeReference {
     }
 }
 
-impl TopicMsg for TimeReference {
-    fn type_support() -> *const rcl::rosidl_message_type_support_t {
-        unsafe {
-            rosidl_typesupport_c__get_message_type_support_handle__sensor_msgs__msg__TimeReference()
-        }
-    }
-}
-
 #[repr(C)]
 #[derive(Debug)]
 pub struct TimeReferenceSequence {
@@ -89,3 +81,10 @@ impl Drop for TimeReferenceSequence {
     }
 }
 
+impl TopicMsg for TimeReference {
+    fn type_support() -> *const rcl::rosidl_message_type_support_t {
+        unsafe {
+            rosidl_typesupport_c__get_message_type_support_handle__sensor_msgs__msg__TimeReference()
+        }
+    }
+}

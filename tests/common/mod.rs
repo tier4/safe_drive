@@ -12,7 +12,7 @@ pub mod num;
 
 use safe_drive::{
     self,
-    msg::TopicMsg,
+    msg::{ServiceMsg, TopicMsg},
     node::Node,
     rcl,
     service::{client::Client, server::Server},
@@ -51,25 +51,29 @@ pub fn create_subscriber(
 pub type Request = add_three_ints::example_msg__srv__AddThreeInts_Request;
 pub type Response = add_three_ints::example_msg__srv__AddThreeInts_Response;
 
-pub type ServerType = Server<Request, Response>;
-pub type ClientType = Client<Request, Response>;
+pub struct ServiceType;
 
-pub fn create_server(node: Arc<Node>, service_name: &str) -> Result<ServerType, Box<dyn Error>> {
-    let server = node.create_server(
-        service_name,
-        unsafe { add_three_ints::rosidl_typesupport_c__get_service_type_support_handle__example_msg__srv__AddThreeInts() as *const()},
-        None,
-    )?;
+impl ServiceMsg for ServiceType {
+    type Request = Request;
+    type Response = Response;
 
-    Ok(server)
+    fn type_support() -> *const rcl::rosidl_service_type_support_t {
+        unsafe {
+            add_three_ints::rosidl_typesupport_c__get_service_type_support_handle__example_msg__srv__AddThreeInts()
+        }
+    }
 }
 
-pub fn create_client(node: Arc<Node>, service_name: &str) -> Result<ClientType, Box<dyn Error>> {
-    let client = node.create_client(
-        service_name,
-        unsafe { add_three_ints::rosidl_typesupport_c__get_service_type_support_handle__example_msg__srv__AddThreeInts() as *const()},
-        None,
-    )?;
+pub fn create_server(
+    node: Arc<Node>,
+    service_name: &str,
+) -> Result<Server<ServiceType>, Box<dyn Error>> {
+    Ok(node.create_server(service_name, None)?)
+}
 
-    Ok(client)
+pub fn create_client(
+    node: Arc<Node>,
+    service_name: &str,
+) -> Result<Client<ServiceType>, Box<dyn Error>> {
+    Ok(node.create_client(service_name, None)?)
 }

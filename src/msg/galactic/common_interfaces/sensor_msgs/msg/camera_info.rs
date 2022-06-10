@@ -46,14 +46,6 @@ impl Drop for CameraInfo {
     }
 }
 
-impl TopicMsg for CameraInfo {
-    fn type_support() -> *const rcl::rosidl_message_type_support_t {
-        unsafe {
-            rosidl_typesupport_c__get_message_type_support_handle__sensor_msgs__msg__CameraInfo()
-        }
-    }
-}
-
 #[repr(C)]
 #[derive(Debug)]
 pub struct CameraInfoSequence {
@@ -97,3 +89,10 @@ impl Drop for CameraInfoSequence {
     }
 }
 
+impl TopicMsg for CameraInfo {
+    fn type_support() -> *const rcl::rosidl_message_type_support_t {
+        unsafe {
+            rosidl_typesupport_c__get_message_type_support_handle__sensor_msgs__msg__CameraInfo()
+        }
+    }
+}

@@ -37,14 +37,6 @@ impl Drop for KeyValue {
     }
 }
 
-impl TopicMsg for KeyValue {
-    fn type_support() -> *const rcl::rosidl_message_type_support_t {
-        unsafe {
-            rosidl_typesupport_c__get_message_type_support_handle__diagnostic_msgs__msg__KeyValue()
-        }
-    }
-}
-
 #[repr(C)]
 #[derive(Debug)]
 pub struct KeyValueSequence {
@@ -88,3 +80,10 @@ impl Drop for KeyValueSequence {
     }
 }
 
+impl TopicMsg for KeyValue {
+    fn type_support() -> *const rcl::rosidl_message_type_support_t {
+        unsafe {
+            rosidl_typesupport_c__get_message_type_support_handle__diagnostic_msgs__msg__KeyValue()
+        }
+    }
+}

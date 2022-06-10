@@ -37,14 +37,6 @@ impl Drop for PoseWithCovarianceStamped {
     }
 }
 
-impl TopicMsg for PoseWithCovarianceStamped {
-    fn type_support() -> *const rcl::rosidl_message_type_support_t {
-        unsafe {
-            rosidl_typesupport_c__get_message_type_support_handle__geometry_msgs__msg__PoseWithCovarianceStamped()
-        }
-    }
-}
-
 #[repr(C)]
 #[derive(Debug)]
 pub struct PoseWithCovarianceStampedSequence {
@@ -88,3 +80,10 @@ impl Drop for PoseWithCovarianceStampedSequence {
     }
 }
 
+impl TopicMsg for PoseWithCovarianceStamped {
+    fn type_support() -> *const rcl::rosidl_message_type_support_t {
+        unsafe {
+            rosidl_typesupport_c__get_message_type_support_handle__geometry_msgs__msg__PoseWithCovarianceStamped()
+        }
+    }
+}

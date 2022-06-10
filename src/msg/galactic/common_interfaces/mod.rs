@@ -5,6 +5,7 @@ pub mod nav_msgs;
 pub mod sensor_msgs;
 pub mod shape_msgs;
 pub mod std_msgs;
+pub mod std_srvs;
 pub mod stereo_msgs;
 pub mod trajectory_msgs;
 pub mod visualization_msgs;

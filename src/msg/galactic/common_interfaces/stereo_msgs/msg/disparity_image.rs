@@ -43,14 +43,6 @@ impl Drop for DisparityImage {
     }
 }
 
-impl TopicMsg for DisparityImage {
-    fn type_support() -> *const rcl::rosidl_message_type_support_t {
-        unsafe {
-            rosidl_typesupport_c__get_message_type_support_handle__stereo_msgs__msg__DisparityImage()
-        }
-    }
-}
-
 #[repr(C)]
 #[derive(Debug)]
 pub struct DisparityImageSequence {
@@ -94,3 +86,10 @@ impl Drop for DisparityImageSequence {
     }
 }
 
+impl TopicMsg for DisparityImage {
+    fn type_support() -> *const rcl::rosidl_message_type_support_t {
+        unsafe {
+            rosidl_typesupport_c__get_message_type_support_handle__stereo_msgs__msg__DisparityImage()
+        }
+    }
+}

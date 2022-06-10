@@ -38,14 +38,6 @@ impl Drop for Vector3 {
     }
 }
 
-impl TopicMsg for Vector3 {
-    fn type_support() -> *const rcl::rosidl_message_type_support_t {
-        unsafe {
-            rosidl_typesupport_c__get_message_type_support_handle__geometry_msgs__msg__Vector3()
-        }
-    }
-}
-
 #[repr(C)]
 #[derive(Debug)]
 pub struct Vector3Sequence {
@@ -89,3 +81,10 @@ impl Drop for Vector3Sequence {
     }
 }
 
+impl TopicMsg for Vector3 {
+    fn type_support() -> *const rcl::rosidl_message_type_support_t {
+        unsafe {
+            rosidl_typesupport_c__get_message_type_support_handle__geometry_msgs__msg__Vector3()
+        }
+    }
+}

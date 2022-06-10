@@ -457,6 +457,8 @@ fn bindgen_test_layout_example_msg__srv__AddThreeInts_Request__Sequence() {
         )
     );
 }
+#[doc = " Constant 'PLANNING'."]
+pub const example_msg__srv__AddThreeInts_Response__PLANNING: &[u8; 9usize] = b"Planning\0";
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
 pub struct example_msg__srv__AddThreeInts_Response {

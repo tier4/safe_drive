@@ -37,14 +37,6 @@ impl Drop for InertiaStamped {
     }
 }
 
-impl TopicMsg for InertiaStamped {
-    fn type_support() -> *const rcl::rosidl_message_type_support_t {
-        unsafe {
-            rosidl_typesupport_c__get_message_type_support_handle__geometry_msgs__msg__InertiaStamped()
-        }
-    }
-}
-
 #[repr(C)]
 #[derive(Debug)]
 pub struct InertiaStampedSequence {
@@ -88,3 +80,10 @@ impl Drop for InertiaStampedSequence {
     }
 }
 
+impl TopicMsg for InertiaStamped {
+    fn type_support() -> *const rcl::rosidl_message_type_support_t {
+        unsafe {
+            rosidl_typesupport_c__get_message_type_support_handle__geometry_msgs__msg__InertiaStamped()
+        }
+    }
+}

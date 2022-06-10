@@ -47,14 +47,6 @@ impl Drop for PointField {
     }
 }
 
-impl TopicMsg for PointField {
-    fn type_support() -> *const rcl::rosidl_message_type_support_t {
-        unsafe {
-            rosidl_typesupport_c__get_message_type_support_handle__sensor_msgs__msg__PointField()
-        }
-    }
-}
-
 #[repr(C)]
 #[derive(Debug)]
 pub struct PointFieldSequence {
@@ -98,3 +90,10 @@ impl Drop for PointFieldSequence {
     }
 }
 
+impl TopicMsg for PointField {
+    fn type_support() -> *const rcl::rosidl_message_type_support_t {
+        unsafe {
+            rosidl_typesupport_c__get_message_type_support_handle__sensor_msgs__msg__PointField()
+        }
+    }
+}

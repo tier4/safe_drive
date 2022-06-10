@@ -19,6 +19,8 @@ pub trait TopicMsg {
 }
 
 pub trait ServiceMsg {
+    type Request;
+    type Response;
     fn type_support() -> *const rcl::rosidl_service_type_support_t;
 }
 

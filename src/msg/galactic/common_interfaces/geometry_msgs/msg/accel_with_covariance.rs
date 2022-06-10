@@ -37,14 +37,6 @@ impl Drop for AccelWithCovariance {
     }
 }
 
-impl TopicMsg for AccelWithCovariance {
-    fn type_support() -> *const rcl::rosidl_message_type_support_t {
-        unsafe {
-            rosidl_typesupport_c__get_message_type_support_handle__geometry_msgs__msg__AccelWithCovariance()
-        }
-    }
-}
-
 #[repr(C)]
 #[derive(Debug)]
 pub struct AccelWithCovarianceSequence {
@@ -88,3 +80,10 @@ impl Drop for AccelWithCovarianceSequence {
     }
 }
 
+impl TopicMsg for AccelWithCovariance {
+    fn type_support() -> *const rcl::rosidl_message_type_support_t {
+        unsafe {
+            rosidl_typesupport_c__get_message_type_support_handle__geometry_msgs__msg__AccelWithCovariance()
+        }
+    }
+}

@@ -38,14 +38,6 @@ impl Drop for Point32 {
     }
 }
 
-impl TopicMsg for Point32 {
-    fn type_support() -> *const rcl::rosidl_message_type_support_t {
-        unsafe {
-            rosidl_typesupport_c__get_message_type_support_handle__geometry_msgs__msg__Point32()
-        }
-    }
-}
-
 #[repr(C)]
 #[derive(Debug)]
 pub struct Point32Sequence {
@@ -89,3 +81,10 @@ impl Drop for Point32Sequence {
     }
 }
 
+impl TopicMsg for Point32 {
+    fn type_support() -> *const rcl::rosidl_message_type_support_t {
+        unsafe {
+            rosidl_typesupport_c__get_message_type_support_handle__geometry_msgs__msg__Point32()
+        }
+    }
+}

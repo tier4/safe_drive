@@ -40,14 +40,6 @@ impl Drop for RegionOfInterest {
     }
 }
 
-impl TopicMsg for RegionOfInterest {
-    fn type_support() -> *const rcl::rosidl_message_type_support_t {
-        unsafe {
-            rosidl_typesupport_c__get_message_type_support_handle__sensor_msgs__msg__RegionOfInterest()
-        }
-    }
-}
-
 #[repr(C)]
 #[derive(Debug)]
 pub struct RegionOfInterestSequence {
@@ -91,3 +83,10 @@ impl Drop for RegionOfInterestSequence {
     }
 }
 
+impl TopicMsg for RegionOfInterest {
+    fn type_support() -> *const rcl::rosidl_message_type_support_t {
+        unsafe {
+            rosidl_typesupport_c__get_message_type_support_handle__sensor_msgs__msg__RegionOfInterest()
+        }
+    }
+}

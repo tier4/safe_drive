@@ -55,14 +55,6 @@ impl Drop for ImageMarker {
     }
 }
 
-impl TopicMsg for ImageMarker {
-    fn type_support() -> *const rcl::rosidl_message_type_support_t {
-        unsafe {
-            rosidl_typesupport_c__get_message_type_support_handle__visualization_msgs__msg__ImageMarker()
-        }
-    }
-}
-
 #[repr(C)]
 #[derive(Debug)]
 pub struct ImageMarkerSequence {
@@ -106,3 +98,10 @@ impl Drop for ImageMarkerSequence {
     }
 }
 
+impl TopicMsg for ImageMarker {
+    fn type_support() -> *const rcl::rosidl_message_type_support_t {
+        unsafe {
+            rosidl_typesupport_c__get_message_type_support_handle__visualization_msgs__msg__ImageMarker()
+        }
+    }
+}

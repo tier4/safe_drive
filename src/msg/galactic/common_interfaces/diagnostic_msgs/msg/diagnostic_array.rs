@@ -37,14 +37,6 @@ impl Drop for DiagnosticArray {
     }
 }
 
-impl TopicMsg for DiagnosticArray {
-    fn type_support() -> *const rcl::rosidl_message_type_support_t {
-        unsafe {
-            rosidl_typesupport_c__get_message_type_support_handle__diagnostic_msgs__msg__DiagnosticArray()
-        }
-    }
-}
-
 #[repr(C)]
 #[derive(Debug)]
 pub struct DiagnosticArraySequence {
@@ -88,3 +80,10 @@ impl Drop for DiagnosticArraySequence {
     }
 }
 
+impl TopicMsg for DiagnosticArray {
+    fn type_support() -> *const rcl::rosidl_message_type_support_t {
+        unsafe {
+            rosidl_typesupport_c__get_message_type_support_handle__diagnostic_msgs__msg__DiagnosticArray()
+        }
+    }
+}

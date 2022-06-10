@@ -38,14 +38,6 @@ impl Drop for MultiDOFJointTrajectory {
     }
 }
 
-impl TopicMsg for MultiDOFJointTrajectory {
-    fn type_support() -> *const rcl::rosidl_message_type_support_t {
-        unsafe {
-            rosidl_typesupport_c__get_message_type_support_handle__trajectory_msgs__msg__MultiDOFJointTrajectory()
-        }
-    }
-}
-
 #[repr(C)]
 #[derive(Debug)]
 pub struct MultiDOFJointTrajectorySequence {
@@ -89,3 +81,10 @@ impl Drop for MultiDOFJointTrajectorySequence {
     }
 }
 
+impl TopicMsg for MultiDOFJointTrajectory {
+    fn type_support() -> *const rcl::rosidl_message_type_support_t {
+        unsafe {
+            rosidl_typesupport_c__get_message_type_support_handle__trajectory_msgs__msg__MultiDOFJointTrajectory()
+        }
+    }
+}

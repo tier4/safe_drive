@@ -38,14 +38,6 @@ impl Drop for MagneticField {
     }
 }
 
-impl TopicMsg for MagneticField {
-    fn type_support() -> *const rcl::rosidl_message_type_support_t {
-        unsafe {
-            rosidl_typesupport_c__get_message_type_support_handle__sensor_msgs__msg__MagneticField()
-        }
-    }
-}
-
 #[repr(C)]
 #[derive(Debug)]
 pub struct MagneticFieldSequence {
@@ -89,3 +81,10 @@ impl Drop for MagneticFieldSequence {
     }
 }
 
+impl TopicMsg for MagneticField {
+    fn type_support() -> *const rcl::rosidl_message_type_support_t {
+        unsafe {
+            rosidl_typesupport_c__get_message_type_support_handle__sensor_msgs__msg__MagneticField()
+        }
+    }
+}

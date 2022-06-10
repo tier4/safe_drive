@@ -37,14 +37,6 @@ impl Drop for AccelStamped {
     }
 }
 
-impl TopicMsg for AccelStamped {
-    fn type_support() -> *const rcl::rosidl_message_type_support_t {
-        unsafe {
-            rosidl_typesupport_c__get_message_type_support_handle__geometry_msgs__msg__AccelStamped()
-        }
-    }
-}
-
 #[repr(C)]
 #[derive(Debug)]
 pub struct AccelStampedSequence {
@@ -88,3 +80,10 @@ impl Drop for AccelStampedSequence {
     }
 }
 
+impl TopicMsg for AccelStamped {
+    fn type_support() -> *const rcl::rosidl_message_type_support_t {
+        unsafe {
+            rosidl_typesupport_c__get_message_type_support_handle__geometry_msgs__msg__AccelStamped()
+        }
+    }
+}

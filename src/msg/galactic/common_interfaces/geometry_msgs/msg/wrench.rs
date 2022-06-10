@@ -37,14 +37,6 @@ impl Drop for Wrench {
     }
 }
 
-impl TopicMsg for Wrench {
-    fn type_support() -> *const rcl::rosidl_message_type_support_t {
-        unsafe {
-            rosidl_typesupport_c__get_message_type_support_handle__geometry_msgs__msg__Wrench()
-        }
-    }
-}
-
 #[repr(C)]
 #[derive(Debug)]
 pub struct WrenchSequence {
@@ -88,3 +80,10 @@ impl Drop for WrenchSequence {
     }
 }
 
+impl TopicMsg for Wrench {
+    fn type_support() -> *const rcl::rosidl_message_type_support_t {
+        unsafe {
+            rosidl_typesupport_c__get_message_type_support_handle__geometry_msgs__msg__Wrench()
+        }
+    }
+}

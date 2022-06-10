@@ -39,14 +39,6 @@ impl Drop for ColorRGBA {
     }
 }
 
-impl TopicMsg for ColorRGBA {
-    fn type_support() -> *const rcl::rosidl_message_type_support_t {
-        unsafe {
-            rosidl_typesupport_c__get_message_type_support_handle__std_msgs__msg__ColorRGBA()
-        }
-    }
-}
-
 #[repr(C)]
 #[derive(Debug)]
 pub struct ColorRGBASequence {
@@ -90,3 +82,10 @@ impl Drop for ColorRGBASequence {
     }
 }
 
+impl TopicMsg for ColorRGBA {
+    fn type_support() -> *const rcl::rosidl_message_type_support_t {
+        unsafe {
+            rosidl_typesupport_c__get_message_type_support_handle__std_msgs__msg__ColorRGBA()
+        }
+    }
+}

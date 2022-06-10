@@ -38,14 +38,6 @@ impl Drop for RelativeHumidity {
     }
 }
 
-impl TopicMsg for RelativeHumidity {
-    fn type_support() -> *const rcl::rosidl_message_type_support_t {
-        unsafe {
-            rosidl_typesupport_c__get_message_type_support_handle__sensor_msgs__msg__RelativeHumidity()
-        }
-    }
-}
-
 #[repr(C)]
 #[derive(Debug)]
 pub struct RelativeHumiditySequence {
@@ -89,3 +81,10 @@ impl Drop for RelativeHumiditySequence {
     }
 }
 
+impl TopicMsg for RelativeHumidity {
+    fn type_support() -> *const rcl::rosidl_message_type_support_t {
+        unsafe {
+            rosidl_typesupport_c__get_message_type_support_handle__sensor_msgs__msg__RelativeHumidity()
+        }
+    }
+}

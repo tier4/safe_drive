@@ -38,14 +38,6 @@ impl Drop for FluidPressure {
     }
 }
 
-impl TopicMsg for FluidPressure {
-    fn type_support() -> *const rcl::rosidl_message_type_support_t {
-        unsafe {
-            rosidl_typesupport_c__get_message_type_support_handle__sensor_msgs__msg__FluidPressure()
-        }
-    }
-}
-
 #[repr(C)]
 #[derive(Debug)]
 pub struct FluidPressureSequence {
@@ -89,3 +81,10 @@ impl Drop for FluidPressureSequence {
     }
 }
 
+impl TopicMsg for FluidPressure {
+    fn type_support() -> *const rcl::rosidl_message_type_support_t {
+        unsafe {
+            rosidl_typesupport_c__get_message_type_support_handle__sensor_msgs__msg__FluidPressure()
+        }
+    }
+}

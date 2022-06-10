@@ -36,14 +36,6 @@ impl Drop for Byte {
     }
 }
 
-impl TopicMsg for Byte {
-    fn type_support() -> *const rcl::rosidl_message_type_support_t {
-        unsafe {
-            rosidl_typesupport_c__get_message_type_support_handle__std_msgs__msg__Byte()
-        }
-    }
-}
-
 #[repr(C)]
 #[derive(Debug)]
 pub struct ByteSequence {
@@ -87,3 +79,10 @@ impl Drop for ByteSequence {
     }
 }
 
+impl TopicMsg for Byte {
+    fn type_support() -> *const rcl::rosidl_message_type_support_t {
+        unsafe {
+            rosidl_typesupport_c__get_message_type_support_handle__std_msgs__msg__Byte()
+        }
+    }
+}

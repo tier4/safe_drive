@@ -37,14 +37,6 @@ impl Drop for TwistWithCovariance {
     }
 }
 
-impl TopicMsg for TwistWithCovariance {
-    fn type_support() -> *const rcl::rosidl_message_type_support_t {
-        unsafe {
-            rosidl_typesupport_c__get_message_type_support_handle__geometry_msgs__msg__TwistWithCovariance()
-        }
-    }
-}
-
 #[repr(C)]
 #[derive(Debug)]
 pub struct TwistWithCovarianceSequence {
@@ -88,3 +80,10 @@ impl Drop for TwistWithCovarianceSequence {
     }
 }
 
+impl TopicMsg for TwistWithCovariance {
+    fn type_support() -> *const rcl::rosidl_message_type_support_t {
+        unsafe {
+            rosidl_typesupport_c__get_message_type_support_handle__geometry_msgs__msg__TwistWithCovariance()
+        }
+    }
+}

@@ -40,14 +40,6 @@ impl Drop for MapMetaData {
     }
 }
 
-impl TopicMsg for MapMetaData {
-    fn type_support() -> *const rcl::rosidl_message_type_support_t {
-        unsafe {
-            rosidl_typesupport_c__get_message_type_support_handle__nav_msgs__msg__MapMetaData()
-        }
-    }
-}
-
 #[repr(C)]
 #[derive(Debug)]
 pub struct MapMetaDataSequence {
@@ -91,3 +83,10 @@ impl Drop for MapMetaDataSequence {
     }
 }
 
+impl TopicMsg for MapMetaData {
+    fn type_support() -> *const rcl::rosidl_message_type_support_t {
+        unsafe {
+            rosidl_typesupport_c__get_message_type_support_handle__nav_msgs__msg__MapMetaData()
+        }
+    }
+}
