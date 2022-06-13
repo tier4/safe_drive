@@ -7,6 +7,10 @@ pub(super) struct RCLGuardCondition {
 }
 
 impl RCLGuardCondition {
+    pub(super) fn as_ptr(&self) -> *const rcl::rcl_guard_condition_t {
+        self.cond.as_ref() as *const _
+    }
+
     pub(super) unsafe fn as_ptr_mut(&self) -> *mut rcl::rcl_guard_condition_t {
         self.cond.as_ref() as *const _ as *mut _
     }

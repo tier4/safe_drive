@@ -22,7 +22,8 @@ See [specifications](./specifications/).
 - [ ] Parameter
 - [ ] Timer
 - [ ] Action (service + topic)
-- [ ] Rust code generation from .msg and .srv files
+- [x] Rust code generation from .msg and .srv files
+  - [ros2msg_to_rs](https://github.com/tier4/ros2msg_to_rs)
 - [ ] Formal Specification
   - [ ] Callback based executer
   - [x] Basic scheduler

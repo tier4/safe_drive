@@ -41,7 +41,7 @@ fn test_select_subscriptions() -> Result<(), Box<dyn Error>> {
     let mut cnt2 = INIT_2;
     for _ in 0..COUNT {
         // wait messages
-        selector.wait(None)?;
+        selector.wait()?;
 
         // s1 receives a message
         match s1.try_recv() {
@@ -113,7 +113,7 @@ fn test_callback() -> Result<(), Box<dyn Error>> {
     );
 
     for _ in 0..COUNT {
-        selector.wait(None)?;
+        selector.wait()?;
     }
 
     p.join().unwrap();

@@ -28,7 +28,7 @@ fn test_pubsub() -> Result<(), Box<dyn Error>> {
     // wait messages
     let mut selector = ctx.create_selector()?;
     selector.add_subscriber(&subscriber, None, false);
-    selector.wait(None)?;
+    selector.wait()?;
 
     // receive the message
     match subscriber.try_recv() {
@@ -67,7 +67,7 @@ fn test_pubsub_string() -> Result<(), Box<dyn Error>> {
     // wait messages
     let mut selector = ctx.create_selector()?;
     selector.add_subscriber(&subscriber, None, false);
-    selector.wait(None)?;
+    selector.wait()?;
 
     // receive the message
     match subscriber.try_recv() {

@@ -37,7 +37,7 @@ fn test_service() -> Result<(), Box<dyn Error>> {
 
     // Server: wait the request
     selector.add_server(&server, None, true);
-    selector.wait(None)?;
+    selector.wait()?;
 
     // Server: receive the request
     match server.try_recv_with_header() {
@@ -57,7 +57,7 @@ fn test_service() -> Result<(), Box<dyn Error>> {
 
     // Client: wait the response
     selector.add_client(&rcv_client, None, true);
-    selector.wait(None)?;
+    selector.wait()?;
 
     // Client: receive the response
     match rcv_client.try_recv_with_header() {

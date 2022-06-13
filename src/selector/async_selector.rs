@@ -14,11 +14,14 @@ pub(crate) static SELECTOR: Lazy<Mutex<AsyncSelector>> =
     Lazy::new(|| Mutex::new(AsyncSelector::new()));
 
 pub(crate) enum Command {
-    Subscription(Arc<RCLSubscription>, Box<dyn Fn() + Send + Sync + 'static>),
+    Subscription(
+        Arc<RCLSubscription>,
+        Box<dyn FnMut() + Send + Sync + 'static>,
+    ),
     RemoveSubscription(Arc<RCLSubscription>),
-    Server(Arc<ServerData>, Box<dyn Fn() + Send + Sync + 'static>),
+    Server(Arc<ServerData>, Box<dyn FnMut() + Send + Sync + 'static>),
     RemoveServer(Arc<ServerData>),
-    Client(Arc<ClientData>, Box<dyn Fn() + Send + Sync + 'static>),
+    Client(Arc<ClientData>, Box<dyn FnMut() + Send + Sync + 'static>),
     RemoveClient(Arc<ClientData>),
 }
 
@@ -96,6 +99,6 @@ fn select(
             }
         }
 
-        selector.wait(None)?;
+        selector.wait()?;
     }
 }
