@@ -1,8 +1,8 @@
-# Basic Scheduler
+# Async/await Scheduler
 
-`safe_drive` provides a basic scheduler for asynchronous programming in Rust; async/await. [scheduler.tla](./scheduler.tla) is the specification of the scheduler.
+`safe_drive` provides a scheduler for asynchronous programming in Rust; async/await. [scheduler.tla](./scheduler.tla) is the specification of the scheduler.
 
-## Premises
+## Prerequisites
 
 - Worker threads make use of the work-stealing strategy, which is used by `async_std` and `Tokio`.
 - Servers, clients, and subscribers can take messages periodically.
