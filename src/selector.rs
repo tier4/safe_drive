@@ -12,6 +12,7 @@ use crate::{
 };
 use std::{
     collections::BTreeMap,
+    mem::replace,
     ptr::null_mut,
     sync::Arc,
     time::{Duration, SystemTime},
@@ -26,8 +27,13 @@ struct ConditionHandler<T> {
     handler: Option<Box<dyn FnMut()>>,
 }
 
+enum TimerType {
+    WallTimer(Duration),
+    OneShot,
+}
+
 pub struct Selector {
-    timer: DeltaList<ConditionHandler<()>>,
+    timer: DeltaList<ConditionHandler<TimerType>>,
     base_time: SystemTime,
     timer_cond: Arc<GuardCondition>,
     wait_set: rcl::rcl_wait_set_t,
@@ -194,6 +200,17 @@ impl Selector {
     /// Insert timer.
     /// `handler` is called after `t` seconds later.
     pub fn add_timer(&mut self, t: Duration, handler: Box<dyn FnMut()>) {
+        self.add_timer_inner(t, handler, TimerType::OneShot);
+    }
+
+    /// Insert timer.
+    /// `handler` is called after `t` seconds later.
+    /// The `handler` will be automatically reloaded after calling it.
+    pub fn add_wall_timer(&mut self, t: Duration, handler: Box<dyn FnMut()>) {
+        self.add_timer_inner(t, handler, TimerType::WallTimer(t));
+    }
+
+    fn add_timer_inner(&mut self, t: Duration, handler: Box<dyn FnMut()>, timer_type: TimerType) {
         let now_time = SystemTime::now();
 
         if self.timer.is_empty() {
@@ -220,7 +237,7 @@ impl Selector {
             delta,
             ConditionHandler {
                 is_once: true,
-                event: (),
+                event: timer_type,
                 handler: Some(handler),
             },
         );
@@ -306,8 +323,13 @@ impl Selector {
             // insert timer
             let now_time = SystemTime::now();
             let head_delta = *self.timer.front().unwrap().0;
-            let timeout = if self.base_time < now_time {
-                head_delta - now_time.duration_since(self.base_time).unwrap()
+            let timeout = if self.base_time <= now_time {
+                let diff = now_time.duration_since(self.base_time).unwrap();
+                if diff < head_delta {
+                    head_delta - diff
+                } else {
+                    Duration::ZERO
+                }
             } else {
                 head_delta + self.base_time.duration_since(now_time).unwrap()
             };
@@ -332,6 +354,7 @@ impl Selector {
 
     fn notify_timer(&mut self) {
         let now_time = SystemTime::now();
+        let mut reload = Vec::new(); // wall timer to be reloaded
         loop {
             if let Some(head) = self.timer.front() {
                 if let Some(head_time) = self.base_time.checked_add(*head.0) {
@@ -340,8 +363,13 @@ impl Selector {
                         let mut dlist = self.timer.pop().unwrap();
                         let head = dlist.front_mut().unwrap();
                         self.base_time += *head.0;
-                        if let Some(handler) = &mut head.1.handler {
+
+                        let handler = replace(&mut head.1.handler, None);
+                        if let Some(mut handler) = handler {
                             handler();
+                            if let TimerType::WallTimer(dur) = head.1.event {
+                                reload.push((dur, handler));
+                            }
                         }
                     } else {
                         break;
@@ -350,6 +378,11 @@ impl Selector {
             } else {
                 break;
             }
+        }
+
+        // reload wall timers
+        for (dur, handler) in reload {
+            self.add_wall_timer(dur, handler);
         }
     }
 }

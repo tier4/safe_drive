@@ -20,7 +20,7 @@ See [specifications](./specifications/).
 - [x] Callback based programming
 - [x] Logging
 - [ ] Parameter
-- [ ] Timer
+- [x] Timer
 - [ ] Action (service + topic)
 - [x] Rust code generation from .msg and .srv files
   - [ros2msg_to_rs](https://github.com/tier4/ros2msg_to_rs)
