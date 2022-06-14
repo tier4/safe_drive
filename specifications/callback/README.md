@@ -55,5 +55,5 @@ starvation_free == \A x \in Timers: (x \in {y.name: y \in ToSet(delta_list)} ~> 
 This is equivalent to
 
 $$
-\forall x \in \mathrm{Timers}(x \in \{y.\mathrm{name}\ |\ y \in \mathrm{delta\_list}\} \Rightarrow \lozenge x \in \mathrm{running}).
+\forall x \in \mathrm{Timers}(x \in \lbrace y.\mathrm{name}\ |\ y \in \mathrm{deltaList}\rbrace \Rightarrow \lozenge (x \in \mathrm{running})).
 $$
