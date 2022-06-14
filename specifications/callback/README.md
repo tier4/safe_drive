@@ -1,7 +1,7 @@
 # Single Threaded Callback Execution
 
 `safe_drive` makes use of the delta list, which was originally introduced by [Operating System Design, The Xinu Approach, Second Edition](https://xinu.cs.purdue.edu/)'s Chapter 13, for timer.
-[callback.tla] is a specification of the callback execution using the delta list.
+[callback.tla](./callback.tla) is a specification of the callback execution using the delta list.
 
 ## Prerequisites
 
