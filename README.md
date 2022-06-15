@@ -19,6 +19,7 @@ See [specifications](./specifications/).
 - [x] Asynchronous programming (async/await)
 - [x] Callback based programming
 - [x] Logging
+- [ ] Signal handling
 - [ ] Parameter
 - [x] Timer
 - [ ] Action (service + topic)
