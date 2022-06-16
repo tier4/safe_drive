@@ -2,7 +2,7 @@ use safe_drive::{context::Context, msg::common_interfaces::std_msgs};
 use std::{cell::RefCell, error::Error, rc::Rc, time::Duration};
 
 #[test]
-fn test_timer() -> Result<(), Box<dyn Error>> {
+fn test_timer() -> Result<(), Box<dyn Error + Sync + Send + 'static>> {
     let ctx = Context::new()?;
     let mut selector = ctx.create_selector()?;
 
@@ -30,7 +30,7 @@ fn test_timer() -> Result<(), Box<dyn Error>> {
 ///
 /// In contrast, our executor does not cause starvation.
 #[test]
-fn test_wall_timer() -> Result<(), Box<dyn Error>> {
+fn test_wall_timer() -> Result<(), Box<dyn Error + Sync + Send + 'static>> {
     let ctx = Context::new()?;
     let mut selector = ctx.create_selector()?;
 

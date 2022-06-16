@@ -2,12 +2,13 @@ use self::guard_condition::{GuardCondition, RCLGuardCondition};
 use crate::{
     context::Context,
     delta_list::DeltaList,
-    error::{RCLError, RCLResult},
+    error::{DynError, RCLError, RCLResult},
     rcl,
     service::{
         client::{ClientData, ClientRecv},
         server::{Server, ServerData},
     },
+    signal_handler,
     topic::subscriber::{RCLSubscription, Subscriber},
 };
 use std::{
@@ -19,7 +20,7 @@ use std::{
 };
 
 pub(crate) mod async_selector;
-mod guard_condition;
+pub(crate) mod guard_condition;
 
 struct ConditionHandler<T> {
     is_once: bool,
@@ -35,7 +36,7 @@ enum TimerType {
 pub struct Selector {
     timer: DeltaList<ConditionHandler<TimerType>>,
     base_time: SystemTime,
-    timer_cond: Arc<GuardCondition>,
+    signal_cond: Arc<GuardCondition>,
     wait_set: rcl::rcl_wait_set_t,
     services: BTreeMap<*const rcl::rcl_service_t, ConditionHandler<Arc<ServerData>>>,
     clients: BTreeMap<*const rcl::rcl_client_t, ConditionHandler<Arc<ClientData>>>,
@@ -63,17 +64,23 @@ impl Selector {
             )?;
         }
 
-        Ok(Selector {
+        let signal_cond = GuardCondition::new(context.clone())?;
+        let mut selector = Selector {
             timer: DeltaList::Nil,
             base_time: SystemTime::now(),
-            timer_cond: GuardCondition::new(context.clone())?,
+            signal_cond: signal_cond.clone(),
             wait_set,
             subscriptions: Default::default(),
             services: Default::default(),
             clients: Default::default(),
             cond: Default::default(),
             context,
-        })
+        };
+
+        selector.add_guard_condition(signal_cond.as_ref(), None);
+        signal_handler::register_guard_condition(signal_cond);
+
+        Ok(selector)
     }
 
     pub fn add_subscriber<T>(
@@ -243,15 +250,7 @@ impl Selector {
         );
     }
 
-    pub fn wait(&mut self) -> RCLResult<()> {
-        // add a dummy condition variable for wait timers
-        if self.cond.is_empty() && !self.timer.is_empty() {
-            let timer_cond = self.timer_cond.clone();
-            self.add_guard_condition(timer_cond.as_ref(), None);
-        } else if self.timer.is_empty() {
-            self.cond.remove(&self.timer_cond.cond.as_ptr());
-        }
-
+    pub fn wait(&mut self) -> Result<(), DynError> {
         {
             let guard = rcl::MT_UNSAFE_FN.lock();
             guard.rcl_wait_set_clear(&mut self.wait_set)?;
@@ -315,7 +314,11 @@ impl Selector {
         Ok(())
     }
 
-    fn wait_timeout(&mut self) -> RCLResult<()> {
+    fn wait_timeout(&mut self) -> Result<(), DynError> {
+        if signal_handler::is_halt() {
+            return Err("Signaled".into());
+        }
+
         if self.timer.is_empty() {
             // wait forever until arriving events
             rcl::MTSafeFn::rcl_wait(&mut self.wait_set, -1)?;
@@ -344,9 +347,13 @@ impl Selector {
 
             match rcl::MTSafeFn::rcl_wait(&mut self.wait_set, timeout_nanos) {
                 Err(RCLError::Timeout) => (),
-                Err(e) => return Err(e),
+                Err(e) => return Err(e.into()),
                 _ => (),
             }
+        }
+
+        if signal_handler::is_halt() {
+            return Err("Signaled".into());
         }
 
         Ok(())
@@ -389,6 +396,7 @@ impl Selector {
 
 impl Drop for Selector {
     fn drop(&mut self) {
+        signal_handler::unregister_guard_condition(self.signal_cond.as_ref());
         let guard = rcl::MT_UNSAFE_FN.lock();
         guard.rcl_wait_set_fini(&mut self.wait_set).unwrap()
     }

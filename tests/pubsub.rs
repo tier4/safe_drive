@@ -6,7 +6,7 @@ use std::error::Error;
 const TOPIC_NAME: &str = "test_pubsub";
 
 #[test]
-fn test_pubsub() -> Result<(), Box<dyn Error>> {
+fn test_pubsub() -> Result<(), Box<dyn Error + Sync + Send + 'static>> {
     // create a context
     let ctx = Context::new()?;
 
@@ -43,7 +43,7 @@ fn test_pubsub() -> Result<(), Box<dyn Error>> {
 const PUBSUB_MSG: &str = "Hello, World!";
 
 #[test]
-fn test_pubsub_string() -> Result<(), Box<dyn Error>> {
+fn test_pubsub_string() -> Result<(), Box<dyn Error + Sync + Send + 'static>> {
     // create a context
     let ctx = Context::new()?;
 

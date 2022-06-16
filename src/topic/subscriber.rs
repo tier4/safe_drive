@@ -1,5 +1,6 @@
 use crate::{
     error::{DynError, RCLError, RCLResult},
+    is_halt,
     msg::TopicMsg,
     node::Node,
     qos, rcl,
@@ -122,6 +123,10 @@ impl<'a, T> Future for AsyncReceiver<'a, T> {
     type Output = Result<T, DynError>;
 
     fn poll(self: Pin<&mut Self>, cx: &mut task::Context<'_>) -> Poll<Self::Output> {
+        if is_halt() {
+            return Poll::Ready(Err("Signaled".into()));
+        }
+
         let (is_waiting, subscription) = unsafe {
             let this = self.get_unchecked_mut();
             (&mut this.is_waiting, &this.subscription)

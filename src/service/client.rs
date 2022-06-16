@@ -1,6 +1,7 @@
 use super::Header;
 use crate::{
     error::{DynError, RCLError, RCLResult},
+    is_halt,
     msg::ServiceMsg,
     node::Node,
     qos::Profile,
@@ -223,6 +224,10 @@ impl<T: ServiceMsg> Future for AsyncReceiver<T> {
         self: std::pin::Pin<&mut Self>,
         cx: &mut std::task::Context<'_>,
     ) -> std::task::Poll<Self::Output> {
+        if is_halt() {
+            return Poll::Ready(Err("Signaled".into()));
+        }
+
         let (client, is_waiting) = unsafe {
             let this = self.get_unchecked_mut();
             (&this.client, &mut this.is_waiting)

@@ -29,6 +29,15 @@ macro_rules! pr_info {
     }}
 }
 
+#[macro_export(local_inner_macros)]
+macro_rules! pr_info_in {
+    ($logger:expr, $($arg:tt)*) => {{
+        let res = std::format!($($arg)*);
+        let _ = $logger.write_info(&res, crate::function!(), std::file!(), std::line!() as u64);
+        ()
+    }}
+}
+
 #[macro_export]
 macro_rules! pr_warn {
     ($logger:expr, $($arg:tt)*) => {{

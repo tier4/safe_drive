@@ -11,7 +11,7 @@ const INIT_2: i64 = 100;
 const COUNT: usize = 5;
 
 #[test]
-fn test_select_subscriptions() -> Result<(), Box<dyn Error>> {
+fn test_select_subscriptions() -> Result<(), Box<dyn Error + Sync + Send + 'static>> {
     // create a context
     let ctx = safe_drive::context::Context::new()?;
 
@@ -84,7 +84,7 @@ fn pub_thread(node: Arc<Node>, topic_name: &str, dur: Duration, init: i64) {
 }
 
 #[test]
-fn test_callback() -> Result<(), Box<dyn Error>> {
+fn test_callback() -> Result<(), Box<dyn Error + Sync + Send + 'static>> {
     // create a context
     let ctx = safe_drive::context::Context::new()?;
 

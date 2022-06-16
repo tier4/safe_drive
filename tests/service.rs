@@ -6,7 +6,7 @@ use std::error::Error;
 const SERVICE_NAME: &str = "test_service";
 
 #[test]
-fn test_service() -> Result<(), Box<dyn Error>> {
+fn test_service() -> Result<(), Box<dyn Error + Sync + Send + 'static>> {
     // create a context
     let ctx = Context::new()?;
 

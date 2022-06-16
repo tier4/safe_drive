@@ -2,7 +2,8 @@ use crate::{
     error::*,
     node::{Node, NodeOptions},
     rcl,
-    selector::Selector,
+    selector::{async_selector::SELECTOR, Selector},
+    signal_handler,
 };
 use once_cell::sync::Lazy;
 use std::{
@@ -75,8 +76,10 @@ impl Context {
 
 impl Drop for Context {
     fn drop(&mut self) {
-        rcl::MTSafeFn::rcl_shutdown(&mut self.context).unwrap();
+        SELECTOR.lock().halt(self).unwrap();
+        signal_handler::halt();
 
+        rcl::MTSafeFn::rcl_shutdown(&mut self.context).unwrap();
         let guard = rcl::MT_UNSAFE_FN.lock();
         guard.rcl_context_fini(&mut self.context).unwrap();
     }

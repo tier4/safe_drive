@@ -1,17 +1,17 @@
 use crate::{context::Context, error::RCLResult, rcl};
 use std::sync::Arc;
 
-pub(super) struct RCLGuardCondition {
-    pub(super) cond: Box<rcl::rcl_guard_condition_t>,
+pub(crate) struct RCLGuardCondition {
+    pub(crate) cond: Box<rcl::rcl_guard_condition_t>,
     _context: Arc<Context>,
 }
 
 impl RCLGuardCondition {
-    pub(super) fn as_ptr(&self) -> *const rcl::rcl_guard_condition_t {
+    pub(crate) fn as_ptr(&self) -> *const rcl::rcl_guard_condition_t {
         self.cond.as_ref() as *const _
     }
 
-    pub(super) unsafe fn as_ptr_mut(&self) -> *mut rcl::rcl_guard_condition_t {
+    pub(crate) unsafe fn as_ptr_mut(&self) -> *mut rcl::rcl_guard_condition_t {
         self.cond.as_ref() as *const _ as *mut _
     }
 }
@@ -23,12 +23,12 @@ impl Drop for RCLGuardCondition {
     }
 }
 
-pub(super) struct GuardCondition {
-    pub(super) cond: Arc<RCLGuardCondition>,
+pub(crate) struct GuardCondition {
+    pub(crate) cond: Arc<RCLGuardCondition>,
 }
 
 impl GuardCondition {
-    pub(super) fn new(context: Arc<Context>) -> RCLResult<Arc<Self>> {
+    pub(crate) fn new(context: Arc<Context>) -> RCLResult<Arc<Self>> {
         let mut guard_condition = rcl::MTSafeFn::rcl_get_zero_initialized_guard_condition();
         let allocator = rcl::MTSafeFn::rcutils_get_default_allocator();
 
@@ -48,7 +48,7 @@ impl GuardCondition {
         Ok(Arc::new(GuardCondition { cond }))
     }
 
-    pub(super) fn trigger(&self) -> RCLResult<()> {
+    pub(crate) fn trigger(&self) -> RCLResult<()> {
         let guard = rcl::MT_UNSAFE_FN.lock();
         guard.rcl_trigger_guard_condition(unsafe { self.cond.as_ptr_mut() })
     }

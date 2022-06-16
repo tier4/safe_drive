@@ -31,7 +31,7 @@ impl TopicMsg for num::example_msg__msg__Num {
 pub fn create_publisher(
     node: Arc<Node>,
     topic_name: &str,
-) -> Result<Publisher<num::example_msg__msg__Num>, Box<dyn Error>> {
+) -> Result<Publisher<num::example_msg__msg__Num>, Box<dyn Error + Sync + Send + 'static>> {
     let publisher =
         node.create_publisher::<num::example_msg__msg__Num>(topic_name, Default::default())?;
 
@@ -41,7 +41,7 @@ pub fn create_publisher(
 pub fn create_subscriber(
     node: Arc<Node>,
     topic_name: &str,
-) -> Result<Subscriber<num::example_msg__msg__Num>, Box<dyn Error>> {
+) -> Result<Subscriber<num::example_msg__msg__Num>, Box<dyn Error + Sync + Send + 'static>> {
     let subscriber =
         node.create_subscriber::<num::example_msg__msg__Num>(topic_name, Default::default())?;
 
@@ -67,13 +67,13 @@ impl ServiceMsg for ServiceType {
 pub fn create_server(
     node: Arc<Node>,
     service_name: &str,
-) -> Result<Server<ServiceType>, Box<dyn Error>> {
+) -> Result<Server<ServiceType>, Box<dyn Error + Sync + Send + 'static>> {
     Ok(node.create_server(service_name, None)?)
 }
 
 pub fn create_client(
     node: Arc<Node>,
     service_name: &str,
-) -> Result<Client<ServiceType>, Box<dyn Error>> {
+) -> Result<Client<ServiceType>, Box<dyn Error + Sync + Send + 'static>> {
     Ok(node.create_client(service_name, None)?)
 }
