@@ -81,6 +81,10 @@ impl Drop for MagneticFieldSequence {
     }
 }
 
+unsafe impl Send for MagneticFieldSequence {}
+unsafe impl Sync for MagneticFieldSequence {}
+
+
 impl TopicMsg for MagneticField {
     fn type_support() -> *const rcl::rosidl_message_type_support_t {
         unsafe {

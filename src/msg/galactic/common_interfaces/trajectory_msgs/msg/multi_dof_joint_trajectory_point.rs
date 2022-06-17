@@ -82,6 +82,10 @@ impl Drop for MultiDOFJointTrajectoryPointSequence {
     }
 }
 
+unsafe impl Send for MultiDOFJointTrajectoryPointSequence {}
+unsafe impl Sync for MultiDOFJointTrajectoryPointSequence {}
+
+
 impl TopicMsg for MultiDOFJointTrajectoryPoint {
     fn type_support() -> *const rcl::rosidl_message_type_support_t {
         unsafe {

@@ -80,6 +80,10 @@ impl Drop for ByteMultiArraySequence {
     }
 }
 
+unsafe impl Send for ByteMultiArraySequence {}
+unsafe impl Sync for ByteMultiArraySequence {}
+
+
 impl TopicMsg for ByteMultiArray {
     fn type_support() -> *const rcl::rosidl_message_type_support_t {
         unsafe {

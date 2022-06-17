@@ -18,16 +18,15 @@ impl InitOnce {
         F: Fn() -> R,
     {
         while !self.is_init.load(Ordering::Relaxed) {
-            if !self.lock.load(Ordering::Relaxed) {
-                if self
+            if !self.lock.load(Ordering::Relaxed)
+                && self
                     .lock
                     .compare_exchange(false, true, Ordering::Acquire, Ordering::Relaxed)
                     .is_ok()
-                {
-                    let result = f();
-                    self.is_init.store(true, Ordering::Release);
-                    return result;
-                }
+            {
+                let result = f();
+                self.is_init.store(true, Ordering::Release);
+                return result;
             }
         }
 

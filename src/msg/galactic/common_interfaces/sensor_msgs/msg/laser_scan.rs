@@ -88,6 +88,10 @@ impl Drop for LaserScanSequence {
     }
 }
 
+unsafe impl Send for LaserScanSequence {}
+unsafe impl Sync for LaserScanSequence {}
+
+
 impl TopicMsg for LaserScan {
     fn type_support() -> *const rcl::rosidl_message_type_support_t {
         unsafe {

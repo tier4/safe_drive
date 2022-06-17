@@ -90,6 +90,10 @@ impl Drop for PointFieldSequence {
     }
 }
 
+unsafe impl Send for PointFieldSequence {}
+unsafe impl Sync for PointFieldSequence {}
+
+
 impl TopicMsg for PointField {
     fn type_support() -> *const rcl::rosidl_message_type_support_t {
         unsafe {

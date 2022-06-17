@@ -96,6 +96,10 @@ impl Drop for LoadMapRequestSequence {
     }
 }
 
+unsafe impl Send for LoadMapRequestSequence {}
+unsafe impl Sync for LoadMapRequestSequence {}
+
+
 impl LoadMapResponse {
     pub fn new() -> Option<Self> {
         let mut msg: Self = unsafe { std::mem::MaybeUninit::zeroed().assume_init() };
@@ -155,6 +159,10 @@ impl Drop for LoadMapResponseSequence {
         unsafe { nav_msgs__srv__LoadMap_Response__Sequence__fini(self) };
     }
 }
+
+unsafe impl Send for LoadMapResponseSequence {}
+unsafe impl Sync for LoadMapResponseSequence {}
+
 
 pub struct LoadMap;
 

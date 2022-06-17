@@ -81,6 +81,10 @@ impl Drop for IlluminanceSequence {
     }
 }
 
+unsafe impl Send for IlluminanceSequence {}
+unsafe impl Sync for IlluminanceSequence {}
+
+
 impl TopicMsg for Illuminance {
     fn type_support() -> *const rcl::rosidl_message_type_support_t {
         unsafe {

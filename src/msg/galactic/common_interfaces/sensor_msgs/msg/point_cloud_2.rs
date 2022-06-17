@@ -87,6 +87,10 @@ impl Drop for PointCloud2Sequence {
     }
 }
 
+unsafe impl Send for PointCloud2Sequence {}
+unsafe impl Sync for PointCloud2Sequence {}
+
+
 impl TopicMsg for PointCloud2 {
     fn type_support() -> *const rcl::rosidl_message_type_support_t {
         unsafe {

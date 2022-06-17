@@ -85,6 +85,10 @@ impl Drop for InteractiveMarkerSequence {
     }
 }
 
+unsafe impl Send for InteractiveMarkerSequence {}
+unsafe impl Sync for InteractiveMarkerSequence {}
+
+
 impl TopicMsg for InteractiveMarker {
     fn type_support() -> *const rcl::rosidl_message_type_support_t {
         unsafe {

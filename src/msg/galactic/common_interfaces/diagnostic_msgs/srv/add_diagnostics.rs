@@ -91,6 +91,10 @@ impl Drop for AddDiagnosticsRequestSequence {
     }
 }
 
+unsafe impl Send for AddDiagnosticsRequestSequence {}
+unsafe impl Sync for AddDiagnosticsRequestSequence {}
+
+
 impl AddDiagnosticsResponse {
     pub fn new() -> Option<Self> {
         let mut msg: Self = unsafe { std::mem::MaybeUninit::zeroed().assume_init() };
@@ -150,6 +154,10 @@ impl Drop for AddDiagnosticsResponseSequence {
         unsafe { diagnostic_msgs__srv__AddDiagnostics_Response__Sequence__fini(self) };
     }
 }
+
+unsafe impl Send for AddDiagnosticsResponseSequence {}
+unsafe impl Sync for AddDiagnosticsResponseSequence {}
+
 
 pub struct AddDiagnostics;
 

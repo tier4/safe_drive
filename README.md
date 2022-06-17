@@ -4,13 +4,31 @@
 This library provides formal specifications and tested the specifications by using a model checker.
 Therefore, you can clearly understand how the scheduler work and the safeness of it.
 
+## Specifications
+
+Some algorithms we adopted are formally specified and tested the safeness by using TLA+.
+Original ROS2's executor (rclcpp) is suffering from starvation.
+In contrast, the starvation freedom of our executor has been validated by not only dynamic analysis but also
+formal verification.
+
+See [Specifications](./specifications/).
+
+We specified and tested as follows.
+
+- Async/await Scheduler
+  - Deadlock freedom
+  - Starvation freedom
+- Single Threaded Callback Execution
+  - Deadlock freedom
+  - Starvation freedom
+- Initialize Once
+  - Deadlock freedom
+  - Termination
+  - Initialization is performed just once
+
 ## Examples
 
 See [tests](./tests/).
-
-## Specifications
-
-See [specifications](./specifications/).
 
 ## Progress
 
@@ -19,7 +37,7 @@ See [specifications](./specifications/).
 - [x] Asynchronous programming (async/await)
 - [x] Callback based programming
 - [x] Logging
-- [ ] Signal handling
+- [x] Signal handling
 - [ ] Parameter
 - [x] Timer
 - [ ] Action (service + topic)

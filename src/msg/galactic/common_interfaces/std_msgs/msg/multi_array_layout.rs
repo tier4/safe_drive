@@ -80,6 +80,10 @@ impl Drop for MultiArrayLayoutSequence {
     }
 }
 
+unsafe impl Send for MultiArrayLayoutSequence {}
+unsafe impl Sync for MultiArrayLayoutSequence {}
+
+
 impl TopicMsg for MultiArrayLayout {
     fn type_support() -> *const rcl::rosidl_message_type_support_t {
         unsafe {

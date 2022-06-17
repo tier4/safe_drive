@@ -81,6 +81,10 @@ impl Drop for OccupancyGridSequence {
     }
 }
 
+unsafe impl Send for OccupancyGridSequence {}
+unsafe impl Sync for OccupancyGridSequence {}
+
+
 impl TopicMsg for OccupancyGrid {
     fn type_support() -> *const rcl::rosidl_message_type_support_t {
         unsafe {

@@ -115,6 +115,10 @@ impl Drop for BatteryStateSequence {
     }
 }
 
+unsafe impl Send for BatteryStateSequence {}
+unsafe impl Sync for BatteryStateSequence {}
+
+
 impl TopicMsg for BatteryState {
     fn type_support() -> *const rcl::rosidl_message_type_support_t {
         unsafe {

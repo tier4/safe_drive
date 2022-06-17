@@ -81,6 +81,10 @@ impl Drop for Point32Sequence {
     }
 }
 
+unsafe impl Send for Point32Sequence {}
+unsafe impl Sync for Point32Sequence {}
+
+
 impl TopicMsg for Point32 {
     fn type_support() -> *const rcl::rosidl_message_type_support_t {
         unsafe {

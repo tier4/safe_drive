@@ -80,6 +80,10 @@ impl Drop for HeaderSequence {
     }
 }
 
+unsafe impl Send for HeaderSequence {}
+unsafe impl Sync for HeaderSequence {}
+
+
 impl TopicMsg for Header {
     fn type_support() -> *const rcl::rosidl_message_type_support_t {
         unsafe {

@@ -79,6 +79,10 @@ impl Drop for UUIDSequence {
     }
 }
 
+unsafe impl Send for UUIDSequence {}
+unsafe impl Sync for UUIDSequence {}
+
+
 impl TopicMsg for UUID {
     fn type_support() -> *const rcl::rosidl_message_type_support_t {
         unsafe {

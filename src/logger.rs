@@ -25,43 +25,58 @@ macro_rules! pr_info {
     ($logger:expr, $($arg:tt)*) => {{
         let res = format!($($arg)*);
         let _ = $logger.write_info(&res, safe_drive::function!(), file!(), line!() as u64);
-        ()
     }}
 }
 
-#[macro_export(local_inner_macros)]
 macro_rules! pr_info_in {
     ($logger:expr, $($arg:tt)*) => {{
         let res = std::format!($($arg)*);
         let _ = $logger.write_info(&res, crate::function!(), std::file!(), std::line!() as u64);
-        ()
     }}
 }
+pub(crate) use pr_info_in;
 
 #[macro_export]
 macro_rules! pr_warn {
     ($logger:expr, $($arg:tt)*) => {{
         let res = format!($($arg)*);
         let _ = $logger.write_warn(&res, safe_drive::function!(), file!(), line!() as u64);
-        ()
     }}
 }
+
+#[cfg(test)]
+macro_rules! pr_warn_in {
+    ($logger:expr, $($arg:tt)*) => {{
+        let res = std::format!($($arg)*);
+        let _ = $logger.write_warn(&res, crate::function!(), std::file!(), std::line!() as u64);
+    }}
+}
+#[cfg(test)]
+pub(crate) use pr_warn_in;
 
 #[macro_export]
 macro_rules! pr_error {
     ($logger:expr, $($arg:tt)*) => {{
         let res = format!($($arg)*);
         let _ = $logger.write_error(&res, safe_drive::function!(), file!(), line!() as u64);
-        ()
     }}
 }
+
+#[cfg(test)]
+macro_rules! pr_error_in {
+    ($logger:expr, $($arg:tt)*) => {{
+        let res = std::format!($($arg)*);
+        let _ = $logger.write_error(&res, crate::function!(), std::file!(), std::line!() as u64);
+    }}
+}
+#[cfg(test)]
+pub(crate) use pr_error_in;
 
 #[macro_export]
 macro_rules! pr_fatal {
     ($logger:expr, $($arg:tt)*) => {{
         let res = format!($($arg)*);
         let _ = $logger.write_fatal(&res, safe_drive::function!(), file!(), line!() as u64);
-        ()
     }}
 }
 
@@ -70,7 +85,6 @@ macro_rules! pr_debug {
     ($logger:expr, $($arg:tt)*) => {{
         let res = format!($($arg)*);
         let _ = $logger.write_debug(&res, safe_drive::function!(), file!(), line!() as u64);
-        ()
     }}
 }
 

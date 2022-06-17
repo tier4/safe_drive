@@ -79,6 +79,10 @@ impl Drop for EmptySequence {
     }
 }
 
+unsafe impl Send for EmptySequence {}
+unsafe impl Sync for EmptySequence {}
+
+
 impl TopicMsg for Empty {
     fn type_support() -> *const rcl::rosidl_message_type_support_t {
         unsafe {

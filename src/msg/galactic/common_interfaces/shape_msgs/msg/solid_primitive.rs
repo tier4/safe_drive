@@ -92,6 +92,10 @@ impl Drop for SolidPrimitiveSequence {
     }
 }
 
+unsafe impl Send for SolidPrimitiveSequence {}
+unsafe impl Sync for SolidPrimitiveSequence {}
+
+
 impl TopicMsg for SolidPrimitive {
     fn type_support() -> *const rcl::rosidl_message_type_support_t {
         unsafe {

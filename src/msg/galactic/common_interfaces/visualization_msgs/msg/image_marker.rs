@@ -98,6 +98,10 @@ impl Drop for ImageMarkerSequence {
     }
 }
 
+unsafe impl Send for ImageMarkerSequence {}
+unsafe impl Sync for ImageMarkerSequence {}
+
+
 impl TopicMsg for ImageMarker {
     fn type_support() -> *const rcl::rosidl_message_type_support_t {
         unsafe {

@@ -79,6 +79,10 @@ impl Drop for StringSequence {
     }
 }
 
+unsafe impl Send for StringSequence {}
+unsafe impl Sync for StringSequence {}
+
+
 impl TopicMsg for String {
     fn type_support() -> *const rcl::rosidl_message_type_support_t {
         unsafe {

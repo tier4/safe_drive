@@ -88,6 +88,10 @@ impl Drop for MultiEchoLaserScanSequence {
     }
 }
 
+unsafe impl Send for MultiEchoLaserScanSequence {}
+unsafe impl Sync for MultiEchoLaserScanSequence {}
+
+
 impl TopicMsg for MultiEchoLaserScan {
     fn type_support() -> *const rcl::rosidl_message_type_support_t {
         unsafe {

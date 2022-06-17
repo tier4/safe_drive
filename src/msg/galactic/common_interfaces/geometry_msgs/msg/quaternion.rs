@@ -82,6 +82,10 @@ impl Drop for QuaternionSequence {
     }
 }
 
+unsafe impl Send for QuaternionSequence {}
+unsafe impl Sync for QuaternionSequence {}
+
+
 impl TopicMsg for Quaternion {
     fn type_support() -> *const rcl::rosidl_message_type_support_t {
         unsafe {

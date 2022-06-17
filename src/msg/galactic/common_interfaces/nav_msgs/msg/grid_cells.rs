@@ -82,6 +82,10 @@ impl Drop for GridCellsSequence {
     }
 }
 
+unsafe impl Send for GridCellsSequence {}
+unsafe impl Sync for GridCellsSequence {}
+
+
 impl TopicMsg for GridCells {
     fn type_support() -> *const rcl::rosidl_message_type_support_t {
         unsafe {

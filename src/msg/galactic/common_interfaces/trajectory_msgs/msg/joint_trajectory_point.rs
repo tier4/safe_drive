@@ -83,6 +83,10 @@ impl Drop for JointTrajectoryPointSequence {
     }
 }
 
+unsafe impl Send for JointTrajectoryPointSequence {}
+unsafe impl Sync for JointTrajectoryPointSequence {}
+
+
 impl TopicMsg for JointTrajectoryPoint {
     fn type_support() -> *const rcl::rosidl_message_type_support_t {
         unsafe {

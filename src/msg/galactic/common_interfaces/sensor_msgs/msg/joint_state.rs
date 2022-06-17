@@ -83,6 +83,10 @@ impl Drop for JointStateSequence {
     }
 }
 
+unsafe impl Send for JointStateSequence {}
+unsafe impl Sync for JointStateSequence {}
+
+
 impl TopicMsg for JointState {
     fn type_support() -> *const rcl::rosidl_message_type_support_t {
         unsafe {

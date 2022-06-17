@@ -81,6 +81,10 @@ impl Drop for JoySequence {
     }
 }
 
+unsafe impl Send for JoySequence {}
+unsafe impl Sync for JoySequence {}
+
+
 impl TopicMsg for Joy {
     fn type_support() -> *const rcl::rosidl_message_type_support_t {
         unsafe {

@@ -1,5 +1,8 @@
 use crate::{
-    helper::InitOnce, logger::Logger, pr_info_in, rcl, selector::guard_condition::GuardCondition,
+    helper::InitOnce,
+    logger::{pr_info_in, Logger},
+    rcl,
+    selector::guard_condition::GuardCondition,
 };
 use once_cell::sync::Lazy;
 use parking_lot::{lock_api::MutexGuard, Mutex, RawMutex};
@@ -89,7 +92,7 @@ fn handler(mut signals: SignalsInfo) {
             SIGTERM | SIGINT | SIGQUIT | SIGHUP => {
                 IS_HALT.store(true, Ordering::SeqCst);
                 let mut cond = get_guard_condition();
-                let cond = std::mem::replace(&mut *cond, ConditionSet::new());
+                let cond = std::mem::take(&mut *cond);
 
                 for (_, c) in cond {
                     c.trigger().unwrap();

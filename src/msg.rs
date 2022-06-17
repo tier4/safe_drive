@@ -105,6 +105,9 @@ macro_rules! def_sequence {
                 unsafe { $fini(&mut self.0 as *mut _) };
             }
         }
+
+        unsafe impl<const N: usize> Sync for $ty<N> {}
+        unsafe impl<const N: usize> Send for $ty<N> {}
     };
 }
 
@@ -255,7 +258,7 @@ impl<const N: usize> RosString<N> {
         }
     }
 
-    pub fn to_string(&self) -> String {
+    fn get_string(&self) -> String {
         if let Some(s) = self.as_slice() {
             if let Ok(m) = String::from_utf8(s.iter().map(|&c| c as u8).collect()) {
                 m
@@ -276,10 +279,13 @@ impl<const N: usize> Drop for RosString<N> {
 
 impl<const N: usize> Display for RosString<N> {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        let s = self.to_string();
+        let s = self.get_string();
         write!(f, "{s}")
     }
 }
+
+unsafe impl<const N: usize> Sync for RosString<N> {}
+unsafe impl<const N: usize> Send for RosString<N> {}
 
 /// Sequence of string.
 /// `STRLEN` represents the maximum number of characters excluding `\0`.
@@ -337,6 +343,9 @@ impl<const STRLEN: usize, const SEQLEN: usize> Drop for RosStringSeq<STRLEN, SEQ
         unsafe { rosidl_runtime_c__String__Sequence__fini(&mut self.0 as *mut _) };
     }
 }
+
+unsafe impl<const STRLEN: usize, const SEQLEN: usize> Sync for RosStringSeq<STRLEN, SEQLEN> {}
+unsafe impl<const STRLEN: usize, const SEQLEN: usize> Send for RosStringSeq<STRLEN, SEQLEN> {}
 
 // Definition of builtin_interfaces ---------------------------------------------------------------
 

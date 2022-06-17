@@ -91,6 +91,10 @@ impl Drop for SetMapRequestSequence {
     }
 }
 
+unsafe impl Send for SetMapRequestSequence {}
+unsafe impl Sync for SetMapRequestSequence {}
+
+
 impl SetMapResponse {
     pub fn new() -> Option<Self> {
         let mut msg: Self = unsafe { std::mem::MaybeUninit::zeroed().assume_init() };
@@ -150,6 +154,10 @@ impl Drop for SetMapResponseSequence {
         unsafe { nav_msgs__srv__SetMap_Response__Sequence__fini(self) };
     }
 }
+
+unsafe impl Send for SetMapResponseSequence {}
+unsafe impl Sync for SetMapResponseSequence {}
+
 
 pub struct SetMap;
 

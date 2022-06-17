@@ -362,28 +362,24 @@ impl Selector {
     fn notify_timer(&mut self) {
         let now_time = SystemTime::now();
         let mut reload = Vec::new(); // wall timer to be reloaded
-        loop {
-            if let Some(head) = self.timer.front() {
-                if let Some(head_time) = self.base_time.checked_add(*head.0) {
-                    if head_time < now_time {
-                        // pop and execute a callback function
-                        let mut dlist = self.timer.pop().unwrap();
-                        let head = dlist.front_mut().unwrap();
-                        self.base_time += *head.0;
+        while let Some(head) = self.timer.front() {
+            if let Some(head_time) = self.base_time.checked_add(*head.0) {
+                if head_time < now_time {
+                    // pop and execute a callback function
+                    let mut dlist = self.timer.pop().unwrap();
+                    let head = dlist.front_mut().unwrap();
+                    self.base_time += *head.0;
 
-                        let handler = replace(&mut head.1.handler, None);
-                        if let Some(mut handler) = handler {
-                            handler();
-                            if let TimerType::WallTimer(dur) = head.1.event {
-                                reload.push((dur, handler));
-                            }
+                    let handler = replace(&mut head.1.handler, None);
+                    if let Some(mut handler) = handler {
+                        handler();
+                        if let TimerType::WallTimer(dur) = head.1.event {
+                            reload.push((dur, handler));
                         }
-                    } else {
-                        break;
                     }
+                } else {
+                    break;
                 }
-            } else {
-                break;
             }
         }
 
@@ -423,11 +419,11 @@ fn notify<K, V>(m: &mut BTreeMap<*const K, ConditionHandler<V>>, array: *const *
 
 #[cfg(test)]
 mod test {
-    use crate::{context::Context, error::RCLResult};
+    use crate::{context::Context, error::DynError};
     use std::thread;
 
     #[test]
-    fn test_guard_condition() -> RCLResult<()> {
+    fn test_guard_condition() -> Result<(), DynError> {
         let ctx = Context::new()?;
         let cond = super::GuardCondition::new(ctx.clone())?;
 

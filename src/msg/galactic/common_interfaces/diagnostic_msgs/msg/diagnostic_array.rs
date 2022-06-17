@@ -80,6 +80,10 @@ impl Drop for DiagnosticArraySequence {
     }
 }
 
+unsafe impl Send for DiagnosticArraySequence {}
+unsafe impl Sync for DiagnosticArraySequence {}
+
+
 impl TopicMsg for DiagnosticArray {
     fn type_support() -> *const rcl::rosidl_message_type_support_t {
         unsafe {

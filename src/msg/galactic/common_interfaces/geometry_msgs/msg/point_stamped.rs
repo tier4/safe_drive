@@ -80,6 +80,10 @@ impl Drop for PointStampedSequence {
     }
 }
 
+unsafe impl Send for PointStampedSequence {}
+unsafe impl Sync for PointStampedSequence {}
+
+
 impl TopicMsg for PointStamped {
     fn type_support() -> *const rcl::rosidl_message_type_support_t {
         unsafe {

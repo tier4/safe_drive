@@ -86,6 +86,10 @@ impl Drop for DisparityImageSequence {
     }
 }
 
+unsafe impl Send for DisparityImageSequence {}
+unsafe impl Sync for DisparityImageSequence {}
+
+
 impl TopicMsg for DisparityImage {
     fn type_support() -> *const rcl::rosidl_message_type_support_t {
         unsafe {

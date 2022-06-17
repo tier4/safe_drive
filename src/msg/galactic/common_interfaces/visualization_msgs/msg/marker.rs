@@ -109,6 +109,10 @@ impl Drop for MarkerSequence {
     }
 }
 
+unsafe impl Send for MarkerSequence {}
+unsafe impl Sync for MarkerSequence {}
+
+
 impl TopicMsg for Marker {
     fn type_support() -> *const rcl::rosidl_message_type_support_t {
         unsafe {

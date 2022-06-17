@@ -92,6 +92,10 @@ impl Drop for GetPlanRequestSequence {
     }
 }
 
+unsafe impl Send for GetPlanRequestSequence {}
+unsafe impl Sync for GetPlanRequestSequence {}
+
+
 impl GetPlanResponse {
     pub fn new() -> Option<Self> {
         let mut msg: Self = unsafe { std::mem::MaybeUninit::zeroed().assume_init() };
@@ -151,6 +155,10 @@ impl Drop for GetPlanResponseSequence {
         unsafe { nav_msgs__srv__GetPlan_Response__Sequence__fini(self) };
     }
 }
+
+unsafe impl Send for GetPlanResponseSequence {}
+unsafe impl Sync for GetPlanResponseSequence {}
+
 
 pub struct GetPlan;
 

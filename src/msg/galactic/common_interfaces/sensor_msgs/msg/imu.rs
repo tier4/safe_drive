@@ -85,6 +85,10 @@ impl Drop for ImuSequence {
     }
 }
 
+unsafe impl Send for ImuSequence {}
+unsafe impl Sync for ImuSequence {}
+
+
 impl TopicMsg for Imu {
     fn type_support() -> *const rcl::rosidl_message_type_support_t {
         unsafe {

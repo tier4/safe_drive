@@ -89,6 +89,10 @@ impl Drop for NavSatFixSequence {
     }
 }
 
+unsafe impl Send for NavSatFixSequence {}
+unsafe impl Sync for NavSatFixSequence {}
+
+
 impl TopicMsg for NavSatFix {
     fn type_support() -> *const rcl::rosidl_message_type_support_t {
         unsafe {

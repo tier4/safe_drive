@@ -85,6 +85,10 @@ impl Drop for ImageSequence {
     }
 }
 
+unsafe impl Send for ImageSequence {}
+unsafe impl Sync for ImageSequence {}
+
+
 impl TopicMsg for Image {
     fn type_support() -> *const rcl::rosidl_message_type_support_t {
         unsafe {

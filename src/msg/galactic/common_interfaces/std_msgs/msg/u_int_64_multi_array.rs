@@ -80,6 +80,10 @@ impl Drop for UInt64MultiArraySequence {
     }
 }
 
+unsafe impl Send for UInt64MultiArraySequence {}
+unsafe impl Sync for UInt64MultiArraySequence {}
+
+
 impl TopicMsg for UInt64MultiArray {
     fn type_support() -> *const rcl::rosidl_message_type_support_t {
         unsafe {

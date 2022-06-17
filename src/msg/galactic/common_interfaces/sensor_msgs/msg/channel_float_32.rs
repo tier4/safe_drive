@@ -80,6 +80,10 @@ impl Drop for ChannelFloat32Sequence {
     }
 }
 
+unsafe impl Send for ChannelFloat32Sequence {}
+unsafe impl Sync for ChannelFloat32Sequence {}
+
+
 impl TopicMsg for ChannelFloat32 {
     fn type_support() -> *const rcl::rosidl_message_type_support_t {
         unsafe {

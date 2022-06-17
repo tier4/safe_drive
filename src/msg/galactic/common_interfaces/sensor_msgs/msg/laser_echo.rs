@@ -79,6 +79,10 @@ impl Drop for LaserEchoSequence {
     }
 }
 
+unsafe impl Send for LaserEchoSequence {}
+unsafe impl Sync for LaserEchoSequence {}
+
+
 impl TopicMsg for LaserEcho {
     fn type_support() -> *const rcl::rosidl_message_type_support_t {
         unsafe {

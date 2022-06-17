@@ -79,6 +79,10 @@ impl Drop for Float64Sequence {
     }
 }
 
+unsafe impl Send for Float64Sequence {}
+unsafe impl Sync for Float64Sequence {}
+
+
 impl TopicMsg for Float64 {
     fn type_support() -> *const rcl::rosidl_message_type_support_t {
         unsafe {

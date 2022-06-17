@@ -87,6 +87,10 @@ impl Drop for DiagnosticStatusSequence {
     }
 }
 
+unsafe impl Send for DiagnosticStatusSequence {}
+unsafe impl Sync for DiagnosticStatusSequence {}
+
+
 impl TopicMsg for DiagnosticStatus {
     fn type_support() -> *const rcl::rosidl_message_type_support_t {
         unsafe {

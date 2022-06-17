@@ -54,11 +54,7 @@ impl<T> DeltaList<T> {
     }
 
     pub fn is_empty(&self) -> bool {
-        if let DeltaList::Nil = self {
-            true
-        } else {
-            false
-        }
+        matches!(self, DeltaList::Nil)
     }
 }
 

@@ -79,6 +79,10 @@ impl Drop for UInt32Sequence {
     }
 }
 
+unsafe impl Send for UInt32Sequence {}
+unsafe impl Sync for UInt32Sequence {}
+
+
 impl TopicMsg for UInt32 {
     fn type_support() -> *const rcl::rosidl_message_type_support_t {
         unsafe {

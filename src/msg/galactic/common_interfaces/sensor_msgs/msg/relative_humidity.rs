@@ -81,6 +81,10 @@ impl Drop for RelativeHumiditySequence {
     }
 }
 
+unsafe impl Send for RelativeHumiditySequence {}
+unsafe impl Sync for RelativeHumiditySequence {}
+
+
 impl TopicMsg for RelativeHumidity {
     fn type_support() -> *const rcl::rosidl_message_type_support_t {
         unsafe {

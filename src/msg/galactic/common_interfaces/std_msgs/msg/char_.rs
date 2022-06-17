@@ -79,6 +79,10 @@ impl Drop for CharSequence {
     }
 }
 
+unsafe impl Send for CharSequence {}
+unsafe impl Sync for CharSequence {}
+
+
 impl TopicMsg for Char {
     fn type_support() -> *const rcl::rosidl_message_type_support_t {
         unsafe {

@@ -4,7 +4,7 @@ use safe_drive::{self, context::Context, error::RCLError};
 use std::error::Error;
 
 #[test]
-fn test_subscription() -> Result<(), Box<dyn Error>> {
+fn test_subscription() -> Result<(), Box<dyn Error + Sync + Send + 'static>> {
     let ctx = Context::new()?;
     let node = ctx
         .create_node("test_subscription_node", None, Default::default())

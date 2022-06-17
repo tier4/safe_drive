@@ -79,6 +79,10 @@ impl Drop for ByteSequence {
     }
 }
 
+unsafe impl Send for ByteSequence {}
+unsafe impl Sync for ByteSequence {}
+
+
 impl TopicMsg for Byte {
     fn type_support() -> *const rcl::rosidl_message_type_support_t {
         unsafe {

@@ -81,6 +81,10 @@ impl Drop for TemperatureSequence {
     }
 }
 
+unsafe impl Send for TemperatureSequence {}
+unsafe impl Sync for TemperatureSequence {}
+
+
 impl TopicMsg for Temperature {
     fn type_support() -> *const rcl::rosidl_message_type_support_t {
         unsafe {

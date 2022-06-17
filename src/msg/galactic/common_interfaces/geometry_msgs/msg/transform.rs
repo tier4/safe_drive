@@ -80,6 +80,10 @@ impl Drop for TransformSequence {
     }
 }
 
+unsafe impl Send for TransformSequence {}
+unsafe impl Sync for TransformSequence {}
+
+
 impl TopicMsg for Transform {
     fn type_support() -> *const rcl::rosidl_message_type_support_t {
         unsafe {

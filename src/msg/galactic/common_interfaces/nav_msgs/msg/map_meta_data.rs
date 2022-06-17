@@ -83,6 +83,10 @@ impl Drop for MapMetaDataSequence {
     }
 }
 
+unsafe impl Send for MapMetaDataSequence {}
+unsafe impl Sync for MapMetaDataSequence {}
+
+
 impl TopicMsg for MapMetaData {
     fn type_support() -> *const rcl::rosidl_message_type_support_t {
         unsafe {

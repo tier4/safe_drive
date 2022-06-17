@@ -80,6 +80,10 @@ impl Drop for TwistWithCovarianceStampedSequence {
     }
 }
 
+unsafe impl Send for TwistWithCovarianceStampedSequence {}
+unsafe impl Sync for TwistWithCovarianceStampedSequence {}
+
+
 impl TopicMsg for TwistWithCovarianceStamped {
     fn type_support() -> *const rcl::rosidl_message_type_support_t {
         unsafe {

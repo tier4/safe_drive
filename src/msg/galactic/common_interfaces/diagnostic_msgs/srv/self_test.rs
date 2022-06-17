@@ -92,6 +92,10 @@ impl Drop for SelfTestRequestSequence {
     }
 }
 
+unsafe impl Send for SelfTestRequestSequence {}
+unsafe impl Sync for SelfTestRequestSequence {}
+
+
 impl SelfTestResponse {
     pub fn new() -> Option<Self> {
         let mut msg: Self = unsafe { std::mem::MaybeUninit::zeroed().assume_init() };
@@ -151,6 +155,10 @@ impl Drop for SelfTestResponseSequence {
         unsafe { diagnostic_msgs__srv__SelfTest_Response__Sequence__fini(self) };
     }
 }
+
+unsafe impl Send for SelfTestResponseSequence {}
+unsafe impl Sync for SelfTestResponseSequence {}
+
 
 pub struct SelfTest;
 

@@ -52,7 +52,7 @@ pub enum RCLError {
 
 impl fmt::Display for RCLError {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "{:?} ({})", self, self.clone() as u32)
+        write!(f, "{:?} ({})", self, *self as u32)
     }
 }
 

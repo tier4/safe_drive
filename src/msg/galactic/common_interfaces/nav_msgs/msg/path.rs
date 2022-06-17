@@ -80,6 +80,10 @@ impl Drop for PathSequence {
     }
 }
 
+unsafe impl Send for PathSequence {}
+unsafe impl Sync for PathSequence {}
+
+
 impl TopicMsg for Path {
     fn type_support() -> *const rcl::rosidl_message_type_support_t {
         unsafe {

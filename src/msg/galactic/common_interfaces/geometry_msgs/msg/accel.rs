@@ -80,6 +80,10 @@ impl Drop for AccelSequence {
     }
 }
 
+unsafe impl Send for AccelSequence {}
+unsafe impl Sync for AccelSequence {}
+
+
 impl TopicMsg for Accel {
     fn type_support() -> *const rcl::rosidl_message_type_support_t {
         unsafe {

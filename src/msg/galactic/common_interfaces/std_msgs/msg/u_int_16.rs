@@ -79,6 +79,10 @@ impl Drop for UInt16Sequence {
     }
 }
 
+unsafe impl Send for UInt16Sequence {}
+unsafe impl Sync for UInt16Sequence {}
+
+
 impl TopicMsg for UInt16 {
     fn type_support() -> *const rcl::rosidl_message_type_support_t {
         unsafe {

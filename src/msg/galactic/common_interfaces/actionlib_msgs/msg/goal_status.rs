@@ -91,6 +91,10 @@ impl Drop for GoalStatusSequence {
     }
 }
 
+unsafe impl Send for GoalStatusSequence {}
+unsafe impl Sync for GoalStatusSequence {}
+
+
 impl TopicMsg for GoalStatus {
     fn type_support() -> *const rcl::rosidl_message_type_support_t {
         unsafe {

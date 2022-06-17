@@ -81,6 +81,10 @@ impl Drop for MultiArrayDimensionSequence {
     }
 }
 
+unsafe impl Send for MultiArrayDimensionSequence {}
+unsafe impl Sync for MultiArrayDimensionSequence {}
+
+
 impl TopicMsg for MultiArrayDimension {
     fn type_support() -> *const rcl::rosidl_message_type_support_t {
         unsafe {

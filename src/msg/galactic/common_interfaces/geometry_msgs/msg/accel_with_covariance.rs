@@ -80,6 +80,10 @@ impl Drop for AccelWithCovarianceSequence {
     }
 }
 
+unsafe impl Send for AccelWithCovarianceSequence {}
+unsafe impl Sync for AccelWithCovarianceSequence {}
+
+
 impl TopicMsg for AccelWithCovariance {
     fn type_support() -> *const rcl::rosidl_message_type_support_t {
         unsafe {

@@ -86,6 +86,10 @@ impl Drop for MenuEntrySequence {
     }
 }
 
+unsafe impl Send for MenuEntrySequence {}
+unsafe impl Sync for MenuEntrySequence {}
+
+
 impl TopicMsg for MenuEntry {
     fn type_support() -> *const rcl::rosidl_message_type_support_t {
         unsafe {

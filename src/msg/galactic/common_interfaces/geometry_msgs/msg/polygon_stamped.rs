@@ -80,6 +80,10 @@ impl Drop for PolygonStampedSequence {
     }
 }
 
+unsafe impl Send for PolygonStampedSequence {}
+unsafe impl Sync for PolygonStampedSequence {}
+
+
 impl TopicMsg for PolygonStamped {
     fn type_support() -> *const rcl::rosidl_message_type_support_t {
         unsafe {

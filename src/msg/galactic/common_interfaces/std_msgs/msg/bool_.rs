@@ -79,6 +79,10 @@ impl Drop for BoolSequence {
     }
 }
 
+unsafe impl Send for BoolSequence {}
+unsafe impl Sync for BoolSequence {}
+
+
 impl TopicMsg for Bool {
     fn type_support() -> *const rcl::rosidl_message_type_support_t {
         unsafe {

@@ -91,6 +91,10 @@ impl Drop for GetInteractiveMarkersRequestSequence {
     }
 }
 
+unsafe impl Send for GetInteractiveMarkersRequestSequence {}
+unsafe impl Sync for GetInteractiveMarkersRequestSequence {}
+
+
 impl GetInteractiveMarkersResponse {
     pub fn new() -> Option<Self> {
         let mut msg: Self = unsafe { std::mem::MaybeUninit::zeroed().assume_init() };
@@ -150,6 +154,10 @@ impl Drop for GetInteractiveMarkersResponseSequence {
         unsafe { visualization_msgs__srv__GetInteractiveMarkers_Response__Sequence__fini(self) };
     }
 }
+
+unsafe impl Send for GetInteractiveMarkersResponseSequence {}
+unsafe impl Sync for GetInteractiveMarkersResponseSequence {}
+
 
 pub struct GetInteractiveMarkers;
 

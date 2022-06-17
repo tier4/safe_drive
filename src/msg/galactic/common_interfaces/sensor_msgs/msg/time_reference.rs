@@ -81,6 +81,10 @@ impl Drop for TimeReferenceSequence {
     }
 }
 
+unsafe impl Send for TimeReferenceSequence {}
+unsafe impl Sync for TimeReferenceSequence {}
+
+
 impl TopicMsg for TimeReference {
     fn type_support() -> *const rcl::rosidl_message_type_support_t {
         unsafe {

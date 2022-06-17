@@ -79,6 +79,10 @@ impl Drop for MeshTriangleSequence {
     }
 }
 
+unsafe impl Send for MeshTriangleSequence {}
+unsafe impl Sync for MeshTriangleSequence {}
+
+
 impl TopicMsg for MeshTriangle {
     fn type_support() -> *const rcl::rosidl_message_type_support_t {
         unsafe {

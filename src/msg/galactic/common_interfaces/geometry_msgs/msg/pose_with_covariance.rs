@@ -80,6 +80,10 @@ impl Drop for PoseWithCovarianceSequence {
     }
 }
 
+unsafe impl Send for PoseWithCovarianceSequence {}
+unsafe impl Sync for PoseWithCovarianceSequence {}
+
+
 impl TopicMsg for PoseWithCovariance {
     fn type_support() -> *const rcl::rosidl_message_type_support_t {
         unsafe {

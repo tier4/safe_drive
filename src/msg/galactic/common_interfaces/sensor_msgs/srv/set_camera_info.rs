@@ -91,6 +91,10 @@ impl Drop for SetCameraInfoRequestSequence {
     }
 }
 
+unsafe impl Send for SetCameraInfoRequestSequence {}
+unsafe impl Sync for SetCameraInfoRequestSequence {}
+
+
 impl SetCameraInfoResponse {
     pub fn new() -> Option<Self> {
         let mut msg: Self = unsafe { std::mem::MaybeUninit::zeroed().assume_init() };
@@ -150,6 +154,10 @@ impl Drop for SetCameraInfoResponseSequence {
         unsafe { sensor_msgs__srv__SetCameraInfo_Response__Sequence__fini(self) };
     }
 }
+
+unsafe impl Send for SetCameraInfoResponseSequence {}
+unsafe impl Sync for SetCameraInfoResponseSequence {}
+
 
 pub struct SetCameraInfo;
 

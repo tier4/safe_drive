@@ -99,6 +99,10 @@ impl Drop for InteractiveMarkerControlSequence {
     }
 }
 
+unsafe impl Send for InteractiveMarkerControlSequence {}
+unsafe impl Sync for InteractiveMarkerControlSequence {}
+
+
 impl TopicMsg for InteractiveMarkerControl {
     fn type_support() -> *const rcl::rosidl_message_type_support_t {
         unsafe {

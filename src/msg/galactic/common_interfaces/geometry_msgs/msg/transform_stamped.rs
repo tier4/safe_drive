@@ -81,6 +81,10 @@ impl Drop for TransformStampedSequence {
     }
 }
 
+unsafe impl Send for TransformStampedSequence {}
+unsafe impl Sync for TransformStampedSequence {}
+
+
 impl TopicMsg for TransformStamped {
     fn type_support() -> *const rcl::rosidl_message_type_support_t {
         unsafe {

@@ -91,6 +91,10 @@ impl Drop for TriggerRequestSequence {
     }
 }
 
+unsafe impl Send for TriggerRequestSequence {}
+unsafe impl Sync for TriggerRequestSequence {}
+
+
 impl TriggerResponse {
     pub fn new() -> Option<Self> {
         let mut msg: Self = unsafe { std::mem::MaybeUninit::zeroed().assume_init() };
@@ -150,6 +154,10 @@ impl Drop for TriggerResponseSequence {
         unsafe { std_srvs__srv__Trigger_Response__Sequence__fini(self) };
     }
 }
+
+unsafe impl Send for TriggerResponseSequence {}
+unsafe impl Sync for TriggerResponseSequence {}
+
 
 pub struct Trigger;
 

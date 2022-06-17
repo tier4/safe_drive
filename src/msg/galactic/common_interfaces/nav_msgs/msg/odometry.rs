@@ -82,6 +82,10 @@ impl Drop for OdometrySequence {
     }
 }
 
+unsafe impl Send for OdometrySequence {}
+unsafe impl Sync for OdometrySequence {}
+
+
 impl TopicMsg for Odometry {
     fn type_support() -> *const rcl::rosidl_message_type_support_t {
         unsafe {

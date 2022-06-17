@@ -90,6 +90,10 @@ impl Drop for EmptyRequestSequence {
     }
 }
 
+unsafe impl Send for EmptyRequestSequence {}
+unsafe impl Sync for EmptyRequestSequence {}
+
+
 impl EmptyResponse {
     pub fn new() -> Option<Self> {
         let mut msg: Self = unsafe { std::mem::MaybeUninit::zeroed().assume_init() };
@@ -149,6 +153,10 @@ impl Drop for EmptyResponseSequence {
         unsafe { std_srvs__srv__Empty_Response__Sequence__fini(self) };
     }
 }
+
+unsafe impl Send for EmptyResponseSequence {}
+unsafe impl Sync for EmptyResponseSequence {}
+
 
 pub struct Empty;
 

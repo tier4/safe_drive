@@ -6,16 +6,10 @@ use crate::{
     signal_handler,
 };
 use once_cell::sync::Lazy;
-use std::{
-    env,
-    ffi::CString,
-    sync::{
-        atomic::{AtomicUsize, Ordering},
-        Arc,
-    },
-};
+use parking_lot::Mutex;
+use std::{collections::BTreeSet, env, ffi::CString, sync::Arc};
 
-pub static NUM_CONTEXT: Lazy<AtomicUsize> = Lazy::new(|| AtomicUsize::new(0));
+pub static ID_CONTEXT: Lazy<Mutex<BTreeSet<usize>>> = Lazy::new(|| Mutex::new(BTreeSet::new()));
 
 pub struct Context {
     context: rcl::rcl_context_t,
@@ -23,7 +17,7 @@ pub struct Context {
 }
 
 impl Context {
-    pub fn new() -> RCLResult<Arc<Self>> {
+    pub fn new() -> Result<Arc<Self>, DynError> {
         // allocate context
         let mut context = rcl::MTSafeFn::rcl_get_zero_initialized_context();
 
@@ -45,11 +39,21 @@ impl Context {
             )?;
         }
 
-        NUM_CONTEXT.fetch_add(1, Ordering::Relaxed);
-        Ok(Arc::new(Context {
-            context,
-            id: NUM_CONTEXT.load(Ordering::Relaxed),
-        }))
+        let id;
+        {
+            let mut guard = ID_CONTEXT.lock();
+            let mut n = 0;
+            loop {
+                if !guard.contains(&n) {
+                    id = n;
+                    guard.insert(n);
+                    break;
+                }
+                n += 1;
+            }
+        }
+
+        Ok(Arc::new(Context { context, id }))
     }
 
     pub fn create_node(
@@ -76,12 +80,20 @@ impl Context {
 
 impl Drop for Context {
     fn drop(&mut self) {
-        SELECTOR.lock().halt(self).unwrap();
-        signal_handler::halt();
+        {
+            let mut guard = ID_CONTEXT.lock();
+            guard.remove(&self.id);
+            if guard.is_empty() {
+                SELECTOR.lock().halt(self).unwrap();
+                signal_handler::halt();
+            }
+        };
 
         rcl::MTSafeFn::rcl_shutdown(&mut self.context).unwrap();
-        let guard = rcl::MT_UNSAFE_FN.lock();
-        guard.rcl_context_fini(&mut self.context).unwrap();
+        {
+            let guard = rcl::MT_UNSAFE_FN.lock();
+            guard.rcl_context_fini(&mut self.context).unwrap();
+        }
     }
 }
 

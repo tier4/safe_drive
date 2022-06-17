@@ -91,6 +91,10 @@ impl Drop for SetBoolRequestSequence {
     }
 }
 
+unsafe impl Send for SetBoolRequestSequence {}
+unsafe impl Sync for SetBoolRequestSequence {}
+
+
 impl SetBoolResponse {
     pub fn new() -> Option<Self> {
         let mut msg: Self = unsafe { std::mem::MaybeUninit::zeroed().assume_init() };
@@ -150,6 +154,10 @@ impl Drop for SetBoolResponseSequence {
         unsafe { std_srvs__srv__SetBool_Response__Sequence__fini(self) };
     }
 }
+
+unsafe impl Send for SetBoolResponseSequence {}
+unsafe impl Sync for SetBoolResponseSequence {}
+
 
 pub struct SetBool;
 

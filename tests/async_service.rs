@@ -13,7 +13,7 @@ use std::{error::Error, time::Duration};
 const SERVICE_NAME: &str = "test_async_service";
 
 #[test]
-fn test_async() -> Result<(), Box<dyn Error>> {
+fn test_async() -> Result<(), Box<dyn Error + Sync + Send + 'static>> {
     // create a context
     let ctx = Context::new()?;
 

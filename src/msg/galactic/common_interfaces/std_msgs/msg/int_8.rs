@@ -79,6 +79,10 @@ impl Drop for Int8Sequence {
     }
 }
 
+unsafe impl Send for Int8Sequence {}
+unsafe impl Sync for Int8Sequence {}
+
+
 impl TopicMsg for Int8 {
     fn type_support() -> *const rcl::rosidl_message_type_support_t {
         unsafe {

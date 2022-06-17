@@ -79,6 +79,10 @@ impl Drop for PlaneSequence {
     }
 }
 
+unsafe impl Send for PlaneSequence {}
+unsafe impl Sync for PlaneSequence {}
+
+
 impl TopicMsg for Plane {
     fn type_support() -> *const rcl::rosidl_message_type_support_t {
         unsafe {

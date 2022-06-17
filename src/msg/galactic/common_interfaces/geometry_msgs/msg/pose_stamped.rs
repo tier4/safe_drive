@@ -80,6 +80,10 @@ impl Drop for PoseStampedSequence {
     }
 }
 
+unsafe impl Send for PoseStampedSequence {}
+unsafe impl Sync for PoseStampedSequence {}
+
+
 impl TopicMsg for PoseStamped {
     fn type_support() -> *const rcl::rosidl_message_type_support_t {
         unsafe {

@@ -82,6 +82,10 @@ impl Drop for ColorRGBASequence {
     }
 }
 
+unsafe impl Send for ColorRGBASequence {}
+unsafe impl Sync for ColorRGBASequence {}
+
+
 impl TopicMsg for ColorRGBA {
     fn type_support() -> *const rcl::rosidl_message_type_support_t {
         unsafe {

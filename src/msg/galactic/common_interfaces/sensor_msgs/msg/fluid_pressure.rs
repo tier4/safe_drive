@@ -81,6 +81,10 @@ impl Drop for FluidPressureSequence {
     }
 }
 
+unsafe impl Send for FluidPressureSequence {}
+unsafe impl Sync for FluidPressureSequence {}
+
+
 impl TopicMsg for FluidPressure {
     fn type_support() -> *const rcl::rosidl_message_type_support_t {
         unsafe {

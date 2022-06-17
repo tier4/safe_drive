@@ -80,6 +80,10 @@ impl Drop for InertiaStampedSequence {
     }
 }
 
+unsafe impl Send for InertiaStampedSequence {}
+unsafe impl Sync for InertiaStampedSequence {}
+
+
 impl TopicMsg for InertiaStamped {
     fn type_support() -> *const rcl::rosidl_message_type_support_t {
         unsafe {

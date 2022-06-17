@@ -89,6 +89,10 @@ impl Drop for CameraInfoSequence {
     }
 }
 
+unsafe impl Send for CameraInfoSequence {}
+unsafe impl Sync for CameraInfoSequence {}
+
+
 impl TopicMsg for CameraInfo {
     fn type_support() -> *const rcl::rosidl_message_type_support_t {
         unsafe {

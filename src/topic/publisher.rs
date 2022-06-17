@@ -1,6 +1,77 @@
+//! Publisher to publish messages.
+//!
+//! When creating publisher, you can specify a QoS profile.
+//!
+//! # Examples
+//!
+//! ## Default QoS Profile
+//!
+//! ```
+//! use safe_drive::{context::Context, msg::common_interfaces::std_msgs};
+//!
+//! let ctx = Context::new().unwrap();
+//! let node_pub = ctx
+//!     .create_node("publisher_rs", None, Default::default())
+//!     .unwrap();
+//!
+//! // Create a publisher.
+//! let publisher = node_pub
+//!     .create_publisher::<std_msgs::msg::UInt32>("publisher_rs_topic", None)
+//!     .unwrap();
+//!
+//! // Send a message.
+//! let mut msg = std_msgs::msg::UInt32::new().unwrap();
+//! msg.data = 1234;
+//! publisher.send(msg).unwrap();
+//! ```
+//!
+//! ## Specifying QoS Profile
+//!
+//! ```
+//! use safe_drive::{context::Context, msg::common_interfaces::std_msgs, qos::{Profile, policy::HistoryPolicy}};
+//!
+//! let ctx = Context::new().unwrap();
+//! let node_pub = ctx
+//!     .create_node("publisher_rs_qos", None, Default::default())
+//!     .unwrap();
+//!
+//! // Create a QoS policy.
+//! let mut profile = Profile::default();
+//! profile.history = HistoryPolicy::KeepAll;
+//!
+//! // Create a publisher with the QoS profile.
+//! let publisher = node_pub
+//!     .create_publisher::<std_msgs::msg::UInt32>("publisher_rs_topic_qos", Some(profile))
+//!     .unwrap();
+//! ```
+//!
+//! `None` of the 2nd argument of `create_publisher` is equivalent to `Some(Profile::default())`.
+
 use crate::{error::RCLResult, msg::TopicMsg, node::Node, qos, rcl};
 use std::{ffi::CString, marker::PhantomData, ptr::null_mut, sync::Arc};
 
+/// Publisher.
+///
+/// # Example
+///
+/// ```
+/// use safe_drive::{context::Context, msg::common_interfaces::std_msgs};
+///
+/// let ctx = Context::new().unwrap();
+/// let node_pub = ctx
+///     .create_node("publish_rs", None, Default::default())
+///     .unwrap();
+///
+/// // Create a publisher.
+/// let publisher = node_pub
+///     .create_publisher::<std_msgs::msg::UInt32>("publish_rs_topic", None)
+///     .unwrap();
+///
+/// // Send a message.
+/// let mut msg = std_msgs::msg::UInt32::new().unwrap();
+/// msg.data = 1234;
+/// publisher.send(msg).unwrap();
+/// ```
 pub struct Publisher<T> {
     publisher: rcl::rcl_publisher_t,
     node: Arc<Node>,
@@ -8,7 +79,11 @@ pub struct Publisher<T> {
 }
 
 impl<T: TopicMsg> Publisher<T> {
-    pub fn new(node: Arc<Node>, topic_name: &str, qos: Option<qos::Profile>) -> RCLResult<Self> {
+    pub(crate) fn new(
+        node: Arc<Node>,
+        topic_name: &str,
+        qos: Option<qos::Profile>,
+    ) -> RCLResult<Self> {
         let mut publisher = rcl::MTSafeFn::rcl_get_zero_initialized_publisher();
 
         let topic_name = CString::new(topic_name).unwrap_or_default();
@@ -34,6 +109,24 @@ impl<T: TopicMsg> Publisher<T> {
 
     /// Send a message.
     ///
+    /// # Example
+    ///
+    /// ```
+    /// use safe_drive::{context::Context, msg::common_interfaces::std_msgs};
+    ///
+    /// let ctx = Context::new().unwrap();
+    /// let node = ctx
+    ///     .create_node("publish_rs_send", None, Default::default())
+    ///     .unwrap();
+    ///
+    /// // Create a publisher.
+    /// let publisher = node.create_publisher("publish_rs_send_topic", None).unwrap();
+    ///
+    /// // Send a message.
+    /// let msg = std_msgs::msg::Empty::new().unwrap();
+    /// publisher.send(msg).unwrap();
+    /// ```
+    ///
     /// # Errors
     ///
     /// - `RCLError::InvalidArgument` if any arguments are invalid, or
@@ -56,12 +149,12 @@ impl<T> Drop for Publisher<T> {
 }
 
 /// Options for publishers.
-pub struct Options {
+struct Options {
     options: rcl::rcl_publisher_options_t,
 }
 
 impl Options {
-    pub fn new(qos: &qos::Profile) -> Self {
+    fn new(qos: &qos::Profile) -> Self {
         let options = rcl::rcl_publisher_options_t {
             qos: qos.into(),
             allocator: rcl::MTSafeFn::rcutils_get_default_allocator(),

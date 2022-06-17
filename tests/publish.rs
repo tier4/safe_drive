@@ -4,7 +4,7 @@ use safe_drive::{self, context::Context};
 use std::error::Error;
 
 #[test]
-fn test_publish() -> Result<(), Box<dyn Error>> {
+fn test_publish() -> Result<(), Box<dyn Error + Sync + Send + 'static>> {
     let ctx = Context::new()?;
     let node = ctx
         .create_node("test_publish_node", None, Default::default())

@@ -80,6 +80,10 @@ impl Drop for PoseWithCovarianceStampedSequence {
     }
 }
 
+unsafe impl Send for PoseWithCovarianceStampedSequence {}
+unsafe impl Sync for PoseWithCovarianceStampedSequence {}
+
+
 impl TopicMsg for PoseWithCovarianceStamped {
     fn type_support() -> *const rcl::rosidl_message_type_support_t {
         unsafe {

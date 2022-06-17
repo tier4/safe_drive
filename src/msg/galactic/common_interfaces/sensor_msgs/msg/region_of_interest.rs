@@ -83,6 +83,10 @@ impl Drop for RegionOfInterestSequence {
     }
 }
 
+unsafe impl Send for RegionOfInterestSequence {}
+unsafe impl Sync for RegionOfInterestSequence {}
+
+
 impl TopicMsg for RegionOfInterest {
     fn type_support() -> *const rcl::rosidl_message_type_support_t {
         unsafe {

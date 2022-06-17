@@ -81,6 +81,10 @@ impl Drop for Pose2DSequence {
     }
 }
 
+unsafe impl Send for Pose2DSequence {}
+unsafe impl Sync for Pose2DSequence {}
+
+
 impl TopicMsg for Pose2D {
     fn type_support() -> *const rcl::rosidl_message_type_support_t {
         unsafe {

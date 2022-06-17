@@ -79,6 +79,10 @@ impl Drop for PolygonSequence {
     }
 }
 
+unsafe impl Send for PolygonSequence {}
+unsafe impl Sync for PolygonSequence {}
+
+
 impl TopicMsg for Polygon {
     fn type_support() -> *const rcl::rosidl_message_type_support_t {
         unsafe {

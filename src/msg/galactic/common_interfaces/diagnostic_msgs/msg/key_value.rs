@@ -80,6 +80,10 @@ impl Drop for KeyValueSequence {
     }
 }
 
+unsafe impl Send for KeyValueSequence {}
+unsafe impl Sync for KeyValueSequence {}
+
+
 impl TopicMsg for KeyValue {
     fn type_support() -> *const rcl::rosidl_message_type_support_t {
         unsafe {

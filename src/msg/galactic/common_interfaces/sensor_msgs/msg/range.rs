@@ -86,6 +86,10 @@ impl Drop for RangeSequence {
     }
 }
 
+unsafe impl Send for RangeSequence {}
+unsafe impl Sync for RangeSequence {}
+
+
 impl TopicMsg for Range {
     fn type_support() -> *const rcl::rosidl_message_type_support_t {
         unsafe {

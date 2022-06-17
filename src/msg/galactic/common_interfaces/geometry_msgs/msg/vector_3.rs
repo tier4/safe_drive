@@ -81,6 +81,10 @@ impl Drop for Vector3Sequence {
     }
 }
 
+unsafe impl Send for Vector3Sequence {}
+unsafe impl Sync for Vector3Sequence {}
+
+
 impl TopicMsg for Vector3 {
     fn type_support() -> *const rcl::rosidl_message_type_support_t {
         unsafe {

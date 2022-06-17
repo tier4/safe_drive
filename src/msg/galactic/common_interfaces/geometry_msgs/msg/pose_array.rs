@@ -80,6 +80,10 @@ impl Drop for PoseArraySequence {
     }
 }
 
+unsafe impl Send for PoseArraySequence {}
+unsafe impl Sync for PoseArraySequence {}
+
+
 impl TopicMsg for PoseArray {
     fn type_support() -> *const rcl::rosidl_message_type_support_t {
         unsafe {
