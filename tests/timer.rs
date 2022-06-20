@@ -1,5 +1,5 @@
-use safe_drive::{context::Context, msg::common_interfaces::std_msgs, selector::CallbackResult};
-use std::{error::Error, rc::Rc, time::Duration};
+use safe_drive::{context::Context, msg::common_interfaces::std_msgs};
+use std::{error::Error, time::Duration};
 
 #[test]
 fn test_timer() -> Result<(), Box<dyn Error + Sync + Send + 'static>> {
@@ -10,7 +10,6 @@ fn test_timer() -> Result<(), Box<dyn Error + Sync + Send + 'static>> {
         Duration::from_millis(100),
         Box::new(|| {
             println!("timer: 100[ms]");
-            CallbackResult::Ok
         }),
     );
 
@@ -18,7 +17,6 @@ fn test_timer() -> Result<(), Box<dyn Error + Sync + Send + 'static>> {
         Duration::from_millis(200),
         Box::new(|| {
             println!("timer: 200[ms]");
-            CallbackResult::Ok
         }),
     );
 
@@ -55,7 +53,6 @@ fn test_wall_timer() -> Result<(), Box<dyn Error + Sync + Send + 'static>> {
         Box::new(|| {
             println!("long timer: 1000[ms]");
             std::thread::sleep(Duration::from_millis(1000));
-            CallbackResult::Ok
         }),
     );
 
@@ -67,7 +64,6 @@ fn test_wall_timer() -> Result<(), Box<dyn Error + Sync + Send + 'static>> {
             msg.data.assign("Hello, World!");
             publisher.send(msg).unwrap();
             std::thread::sleep(Duration::from_millis(100));
-            CallbackResult::Ok
         }),
     );
 
@@ -76,7 +72,6 @@ fn test_wall_timer() -> Result<(), Box<dyn Error + Sync + Send + 'static>> {
         subscriber,
         Box::new(move |msg| {
             println!("recv: {}", msg.data);
-            CallbackResult::Ok
         }),
         false,
     );

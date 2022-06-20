@@ -1,4 +1,10 @@
 //! Server receiving a request and replying to the it.
+//!
+//! # Examples
+//!
+//! ## Single and Multi Threaded Execution
+//!
+//! ###
 
 use super::Header;
 use crate::{
@@ -12,7 +18,7 @@ use crate::{
         async_selector::{self, SELECTOR},
         CallbackResult,
     },
-    PhantomUnsync,
+    PhantomUnsync, RecvResult,
 };
 use std::{
     ffi::CString, future::Future, marker::PhantomData, mem::MaybeUninit, os::raw::c_void,
@@ -76,35 +82,78 @@ impl<T: ServiceMsg> Server<T> {
 
     /// Receive a request.
     /// `try_recv` is a non-blocking function, and
-    /// this returns `Err(RCLError::ServiceTakeFailed)` if there is no available data.
+    /// this returns `RecvResult::RetryLater` if there is no available data.
     /// So, please retry later if this error is returned.
     ///
     /// # Return value
     ///
-    /// `Ok((ServerSend<T1, T2>, T1))` is returned.
+    /// `RecvResult::Ok((ServerSend<T1, T2>, T1))` is returned.
     /// `T1` is a type of request.
     /// After receiving a request, `ServerSend` can be used to send a response.
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// use safe_drive::{
+    ///     context::Context, logger::Logger, msg::common_interfaces::std_srvs, pr_error, pr_info,
+    ///     RecvResult,
+    /// };
+    /// use std::error::Error;
+    ///
+    /// // Create a context.
+    /// let ctx = Context::new().unwrap();
+    ///
+    /// // Create a server node.
+    /// let node = ctx.create_node("service_server_rs", None, Default::default()).unwrap();
+    ///
+    /// // create a server and a client
+    /// let server = node
+    ///     .create_server::<std_srvs::srv::Empty>("service_name1", None)
+    ///     .unwrap();
+    ///
+    /// let logger = Logger::new("service_rs");
+    ///
+    /// match server.try_recv() {
+    ///     RecvResult::Ok((sender, request)) => pr_info!(logger, "received"),
+    ///     RecvResult::RetryLater => pr_info!(logger, "retry later"),
+    ///     RecvResult::Err(e) => pr_error!(logger, "error: {e}"),
+    /// }
+    /// ```
     ///
     /// # Errors
     ///
     /// - `RCLError::InvalidArgument` if any arguments are invalid, or
     /// - `RCLError::ServiceInvalid` if the service is invalid, or
     /// - `RCLError::BadAlloc` if allocating memory failed, or
-    /// - `RCLError::ServiceTakeFailed` if take failed but no error occurred in the middleware, or
     /// - `RCLError::Error` if an unspecified error occurs.
-    pub fn try_recv(self) -> RCLResult<(ServerSend<T>, <T as ServiceMsg>::Request)> {
-        let (s, d, _) = self.try_recv_with_header()?;
-        Ok((s, d))
+    #[must_use]
+    pub fn try_recv(self) -> RecvResult<(ServerSend<T>, <T as ServiceMsg>::Request)> {
+        let (request, header) =
+            match rcl_take_request_with_info::<<T as ServiceMsg>::Request>(&self.data.service) {
+                Ok(data) => data,
+                Err(RCLError::ServiceTakeFailed) => return RecvResult::RetryLater,
+                Err(e) => return RecvResult::Err(e),
+            };
+
+        RecvResult::Ok((
+            ServerSend {
+                data: self.data,
+                request_id: header.request_id,
+                _phantom: Default::default(),
+                _unsync: Default::default(),
+            },
+            request,
+        ))
     }
 
     /// `try_recv_with_header` equivalent to `try_recv`, but
     /// this function returns `super::Header` including some information together.
-    /// `Err(RCLError::ServiceTakeFailed)` is returned if there is no available data.
+    /// `RecvResult::RetryLater` is returned if there is no available data.
     /// So, please retry later if this error is returned.
     ///
     /// # Return value
     ///
-    /// `Ok((ServerSend<T1, T2>, T1, Header))` is returned.
+    /// `RecvResult::Ok((ServerSend<T1, T2>, T1, Header))` is returned.
     /// `T1` is a type of request.
     /// After receiving a request, `ServerSend` can be used to send a response.
     ///
@@ -113,18 +162,19 @@ impl<T: ServiceMsg> Server<T> {
     /// - `RCLError::InvalidArgument` if any arguments are invalid, or
     /// - `RCLError::ServiceInvalid` if the service is invalid, or
     /// - `RCLError::BadAlloc` if allocating memory failed, or
-    /// - `RCLError::ServiceTakeFailed` if take failed but no error occurred in the middleware, or
     /// - `RCLError::Error` if an unspecified error occurs.
+    #[must_use]
     pub fn try_recv_with_header(
         self,
-    ) -> RCLResult<(ServerSend<T>, <T as ServiceMsg>::Request, Header)> {
+    ) -> RecvResult<(ServerSend<T>, <T as ServiceMsg>::Request, Header)> {
         let (request, header) =
             match rcl_take_request_with_info::<<T as ServiceMsg>::Request>(&self.data.service) {
                 Ok(data) => data,
-                Err(e) => return Err(e),
+                Err(RCLError::ServiceTakeFailed) => return RecvResult::RetryLater,
+                Err(e) => return RecvResult::Err(e),
             };
 
-        Ok((
+        RecvResult::Ok((
             ServerSend {
                 data: self.data,
                 request_id: header.request_id,

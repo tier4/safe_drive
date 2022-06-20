@@ -1,6 +1,6 @@
 pub mod common;
 
-use safe_drive::{self, node::Node, selector::CallbackResult};
+use safe_drive::{self, node::Node};
 use std::{error::Error, sync::Arc, thread, time::Duration};
 
 const TOPIC_NAME_1: &str = "test_select_1";
@@ -42,7 +42,6 @@ fn test_select_subscriptions() -> Result<(), Box<dyn Error + Sync + Send + 'stat
         Box::new(move |msg| {
             assert_eq!(msg.num, *cnt1);
             *cnt1 += 1;
-            CallbackResult::Ok
         }),
         false,
     );
@@ -54,7 +53,6 @@ fn test_select_subscriptions() -> Result<(), Box<dyn Error + Sync + Send + 'stat
         Box::new(move |msg| {
             assert_eq!(msg.num, *cnt2);
             *cnt2 += 1;
-            CallbackResult::Ok
         }),
         false,
     );
@@ -105,7 +103,6 @@ fn test_callback() -> Result<(), Box<dyn Error + Sync + Send + 'static>> {
         subscriber,
         Box::new(move |msg| {
             println!("callback: num = {}", msg.num);
-            CallbackResult::Ok
         }),
         false,
     );

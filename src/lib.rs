@@ -94,11 +94,6 @@
 //!     Box::new(move |msg| {
 //!         // Print the message
 //!         pr_info!(logger_sub, "Received: msg = {}", msg.data); // Print a message.
-//!
-//!         // If a callback function return `CallbackResult::Remove`,
-//!         // the callback function is unregister.
-//!         // Otherwise, the behavior depends on the 3rd argument of `add_subscriber()`.
-//!         CallbackResult::Ok
 //!     }),
 //!     false,
 //! );
@@ -111,7 +106,6 @@
 //!         msg.data.assign("Hello, World!");
 //!         pr_info!(logger_pub, "Send: msg = {}", msg.data); // Print a message.
 //!         publisher.send(msg).unwrap();
-//!         CallbackResult::Ok
 //!     }),
 //! );
 //!

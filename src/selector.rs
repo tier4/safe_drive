@@ -4,11 +4,12 @@ use crate::{
     delta_list::DeltaList,
     error::{DynError, RCLError, RCLResult},
     logger::{pr_error_in, Logger},
-    msg::TopicMsg,
+    msg::{ServiceMsg, TopicMsg},
     rcl,
     service::{
-        client::{ClientData, ClientRecv},
+        client::ClientData,
         server::{Server, ServerData},
+        Header,
     },
     signal_handler,
     topic::subscriber::{RCLSubscription, Subscriber},
@@ -97,7 +98,7 @@ impl Selector {
     pub fn add_subscriber<T: TopicMsg + 'static>(
         &mut self,
         subscriber: Subscriber<T>,
-        mut handler: Box<dyn FnMut(T) -> CallbackResult>,
+        mut handler: Box<dyn FnMut(T)>,
         is_once: bool,
     ) -> bool {
         let sub = subscriber.subscription.clone();
@@ -154,14 +155,56 @@ impl Selector {
         );
     }
 
-    pub fn add_server<T>(
+    pub fn add_server<T: ServiceMsg + 'static>(
         &mut self,
-        server: &Server<T>,
-        handler: Option<Box<dyn FnMut() -> CallbackResult>>,
+        server: Server<T>,
+        mut handler: Box<dyn FnMut(T::Request, Header) -> T::Response>,
         is_once: bool,
     ) -> bool {
-        if self.context.as_ptr() == server.data.node.context.as_ptr() {
-            self.add_server_data(server.data.clone(), handler, is_once);
+        let context_ptr = server.data.node.context.as_ptr();
+        let srv = server.data.clone();
+        let mut server = Some(server);
+
+        let f = move || {
+            let start = SystemTime::now();
+            let dur = Duration::from_millis(10);
+
+            loop {
+                let s = server.take().unwrap();
+                match s.try_recv_with_header() {
+                    RecvResult::Ok((server_send, request, header)) => {
+                        let result = handler(request, header);
+                        match server_send.send(result) {
+                            Ok(s) => {
+                                server = Some(s);
+                            }
+                            Err(e) => {
+                                let logger = Logger::new("safe_drive");
+                                pr_error_in!(logger, "{e}");
+                                return CallbackResult::Remove;
+                            }
+                        }
+                    }
+                    RecvResult::RetryLater => return CallbackResult::Ok,
+                    RecvResult::Err(e) => {
+                        let logger = Logger::new("safe_drive");
+                        pr_error_in!(logger, "failed try_recv() of server: {}", e);
+                        return CallbackResult::Remove;
+                    }
+                }
+
+                if let Ok(t) = start.elapsed() {
+                    if t > dur {
+                        return CallbackResult::Ok;
+                    }
+                } else {
+                    return CallbackResult::Ok;
+                }
+            }
+        };
+
+        if self.context.as_ptr() == context_ptr {
+            self.add_server_data(srv, Some(Box::new(f)), is_once);
             true
         } else {
             false
@@ -183,20 +226,6 @@ impl Selector {
                     is_once,
                 },
             );
-        }
-    }
-
-    pub fn add_client<T>(
-        &mut self,
-        client: &ClientRecv<T>,
-        handler: Option<Box<dyn FnMut() -> CallbackResult>>,
-        is_once: bool,
-    ) -> bool {
-        if self.context.as_ptr() == client.data.node.context.as_ptr() {
-            self.add_client_data(client.data.clone(), handler, is_once);
-            true
-        } else {
-            false
         }
     }
 
@@ -251,15 +280,29 @@ impl Selector {
 
     /// Insert timer.
     /// `handler` is called after `t` seconds later.
-    pub fn add_timer(&mut self, t: Duration, handler: Box<dyn FnMut() -> CallbackResult>) {
-        self.add_timer_inner(t, handler, TimerType::OneShot);
+    pub fn add_timer(&mut self, t: Duration, mut handler: Box<dyn FnMut()>) {
+        self.add_timer_inner(
+            t,
+            Box::new(move || {
+                handler();
+                CallbackResult::Ok
+            }),
+            TimerType::OneShot,
+        );
     }
 
     /// Insert timer.
     /// `handler` is called after `t` seconds later.
     /// The `handler` will be automatically reloaded after calling it.
-    pub fn add_wall_timer(&mut self, t: Duration, handler: Box<dyn FnMut() -> CallbackResult>) {
-        self.add_timer_inner(t, handler, TimerType::WallTimer(t));
+    pub fn add_wall_timer(&mut self, t: Duration, mut handler: Box<dyn FnMut()>) {
+        self.add_timer_inner(
+            t,
+            Box::new(move || {
+                handler();
+                CallbackResult::Ok
+            }),
+            TimerType::WallTimer(t),
+        );
     }
 
     fn add_timer_inner(
@@ -435,7 +478,7 @@ impl Selector {
 
         // reload wall timers
         for (dur, handler) in reload {
-            self.add_wall_timer(dur, handler);
+            self.add_timer_inner(dur, handler, TimerType::WallTimer(dur));
         }
     }
 }

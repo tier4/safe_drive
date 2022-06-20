@@ -1,8 +1,6 @@
 pub mod common;
 
-use safe_drive::{
-    self, context::Context, msg::common_interfaces::std_msgs, selector::CallbackResult,
-};
+use safe_drive::{self, context::Context, msg::common_interfaces::std_msgs};
 use std::error::Error;
 
 const TOPIC_NAME: &str = "test_pubsub";
@@ -33,7 +31,6 @@ fn test_pubsub() -> Result<(), Box<dyn Error + Sync + Send + 'static>> {
         subscriber,
         Box::new(move |msg| {
             assert_eq!(msg.num, n);
-            CallbackResult::Ok
         }),
         false,
     );
@@ -74,7 +71,6 @@ fn test_pubsub_string() -> Result<(), Box<dyn Error + Sync + Send + 'static>> {
             let s = msg.data.to_string();
             println!("{s}");
             assert_eq!(&s, PUBSUB_MSG);
-            CallbackResult::Ok
         }),
         false,
     );

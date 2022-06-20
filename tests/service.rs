@@ -1,7 +1,7 @@
 pub mod common;
 
 use safe_drive::{self, context::Context};
-use std::error::Error;
+use std::{error::Error, time::Duration};
 
 const SERVICE_NAME: &str = "test_service";
 
@@ -36,28 +36,22 @@ fn test_service() -> Result<(), Box<dyn Error + Sync + Send + 'static>> {
     };
 
     // Server: wait the request
-    selector.add_server(&server, None, true);
+    selector.add_server(
+        server,
+        Box::new(move |request, header| {
+            println!(
+                "Server: received: data = {:?}, header = {:?}",
+                request, header
+            );
+            common::Response {
+                sum: request.a + request.b + request.c,
+            }
+        }),
+        true,
+    );
     selector.wait()?;
 
-    // Server: receive the request
-    match server.try_recv_with_header() {
-        Ok((srv_send, data, header)) => {
-            println!("Server: received: data = {:?}, header = {:?}", data, header);
-            let response = common::Response {
-                sum: data.a + data.b + data.c,
-            };
-
-            // Server: send a response
-            let _ = srv_send.send(response);
-        }
-        Err(e) => {
-            return Err(e.into());
-        }
-    }
-
-    // Client: wait the response
-    selector.add_client(&rcv_client, None, true);
-    selector.wait()?;
+    std::thread::sleep(Duration::from_millis(1));
 
     // Client: receive the response
     match rcv_client.try_recv_with_header() {
