@@ -7,8 +7,8 @@ use crate::rcl;
 extern "C" {
     fn geometry_msgs__msg__Transform__init(msg: *mut Transform) -> bool;
     fn geometry_msgs__msg__Transform__fini(msg: *mut Transform);
-    fn geometry_msgs__msg__Transform__Sequence__init(msg: *mut TransformSequence, size: usize) -> bool;
-    fn geometry_msgs__msg__Transform__Sequence__fini(msg: *mut TransformSequence);
+    fn geometry_msgs__msg__Transform__Sequence__init(msg: *mut TransformSeqRaw, size: usize) -> bool;
+    fn geometry_msgs__msg__Transform__Sequence__fini(msg: *mut TransformSeqRaw);
     fn rosidl_typesupport_c__get_message_type_support_handle__geometry_msgs__msg__Transform() -> *const rcl::rosidl_message_type_support_t;
 }
 
@@ -37,19 +37,37 @@ impl Drop for Transform {
     }
 }
 
-#[repr(C)]
-#[derive(Debug)]
-pub struct TransformSequence {
+
+struct TransformSeqRaw {
     data: *mut Transform,
     size: usize,
     capacity: usize,
 }
 
-impl TransformSequence {
+/// Sequence of Transform.
+/// `N` is the maximum number of elements.
+/// If `N` is `0`, the size is unlimited.
+#[repr(C)]
+#[derive(Debug)]
+pub struct TransformSeq<const N: usize> {
+    data: *mut Transform,
+    size: usize,
+    capacity: usize,
+}
+
+impl<const N: usize> TransformSeq<N> {
+    /// Create a sequence of.
+    /// `N` represents the maximum number of elements.
+    /// If `N` is `0`, the sequence is unlimited.
     pub fn new(size: usize) -> Option<Self> {
-        let mut msg: Self = unsafe { std::mem::MaybeUninit::zeroed().assume_init() };
+        if N != 0 && size >= N {
+            // the size exceeds in the maximum number
+            return None;
+        }
+
+        let mut msg: TransformSeqRaw = unsafe { std::mem::MaybeUninit::zeroed().assume_init() };
         if unsafe { geometry_msgs__msg__Transform__Sequence__init(&mut msg, size) } {
-            Some(msg)
+            Some(Self {data: msg.data, size: msg.size, capacity: msg.capacity })
         } else {
             None
         }
@@ -74,14 +92,15 @@ impl TransformSequence {
     }
 }
 
-impl Drop for TransformSequence {
+impl<const N: usize> Drop for TransformSeq<N> {
     fn drop(&mut self) {
-        unsafe { geometry_msgs__msg__Transform__Sequence__fini(self) };
+        let mut msg = TransformSeqRaw{data: self.data, size: self.size, capacity: self.capacity};
+        unsafe { geometry_msgs__msg__Transform__Sequence__fini(&mut msg) };
     }
 }
 
-unsafe impl Send for TransformSequence {}
-unsafe impl Sync for TransformSequence {}
+unsafe impl<const N: usize> Send for TransformSeq<N> {}
+unsafe impl<const N: usize> Sync for TransformSeq<N> {}
 
 
 impl TopicMsg for Transform {

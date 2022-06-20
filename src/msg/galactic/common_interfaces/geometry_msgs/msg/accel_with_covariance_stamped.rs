@@ -7,8 +7,8 @@ use crate::rcl;
 extern "C" {
     fn geometry_msgs__msg__AccelWithCovarianceStamped__init(msg: *mut AccelWithCovarianceStamped) -> bool;
     fn geometry_msgs__msg__AccelWithCovarianceStamped__fini(msg: *mut AccelWithCovarianceStamped);
-    fn geometry_msgs__msg__AccelWithCovarianceStamped__Sequence__init(msg: *mut AccelWithCovarianceStampedSequence, size: usize) -> bool;
-    fn geometry_msgs__msg__AccelWithCovarianceStamped__Sequence__fini(msg: *mut AccelWithCovarianceStampedSequence);
+    fn geometry_msgs__msg__AccelWithCovarianceStamped__Sequence__init(msg: *mut AccelWithCovarianceStampedSeqRaw, size: usize) -> bool;
+    fn geometry_msgs__msg__AccelWithCovarianceStamped__Sequence__fini(msg: *mut AccelWithCovarianceStampedSeqRaw);
     fn rosidl_typesupport_c__get_message_type_support_handle__geometry_msgs__msg__AccelWithCovarianceStamped() -> *const rcl::rosidl_message_type_support_t;
 }
 
@@ -37,19 +37,37 @@ impl Drop for AccelWithCovarianceStamped {
     }
 }
 
-#[repr(C)]
-#[derive(Debug)]
-pub struct AccelWithCovarianceStampedSequence {
+
+struct AccelWithCovarianceStampedSeqRaw {
     data: *mut AccelWithCovarianceStamped,
     size: usize,
     capacity: usize,
 }
 
-impl AccelWithCovarianceStampedSequence {
+/// Sequence of AccelWithCovarianceStamped.
+/// `N` is the maximum number of elements.
+/// If `N` is `0`, the size is unlimited.
+#[repr(C)]
+#[derive(Debug)]
+pub struct AccelWithCovarianceStampedSeq<const N: usize> {
+    data: *mut AccelWithCovarianceStamped,
+    size: usize,
+    capacity: usize,
+}
+
+impl<const N: usize> AccelWithCovarianceStampedSeq<N> {
+    /// Create a sequence of.
+    /// `N` represents the maximum number of elements.
+    /// If `N` is `0`, the sequence is unlimited.
     pub fn new(size: usize) -> Option<Self> {
-        let mut msg: Self = unsafe { std::mem::MaybeUninit::zeroed().assume_init() };
+        if N != 0 && size >= N {
+            // the size exceeds in the maximum number
+            return None;
+        }
+
+        let mut msg: AccelWithCovarianceStampedSeqRaw = unsafe { std::mem::MaybeUninit::zeroed().assume_init() };
         if unsafe { geometry_msgs__msg__AccelWithCovarianceStamped__Sequence__init(&mut msg, size) } {
-            Some(msg)
+            Some(Self {data: msg.data, size: msg.size, capacity: msg.capacity })
         } else {
             None
         }
@@ -74,14 +92,15 @@ impl AccelWithCovarianceStampedSequence {
     }
 }
 
-impl Drop for AccelWithCovarianceStampedSequence {
+impl<const N: usize> Drop for AccelWithCovarianceStampedSeq<N> {
     fn drop(&mut self) {
-        unsafe { geometry_msgs__msg__AccelWithCovarianceStamped__Sequence__fini(self) };
+        let mut msg = AccelWithCovarianceStampedSeqRaw{data: self.data, size: self.size, capacity: self.capacity};
+        unsafe { geometry_msgs__msg__AccelWithCovarianceStamped__Sequence__fini(&mut msg) };
     }
 }
 
-unsafe impl Send for AccelWithCovarianceStampedSequence {}
-unsafe impl Sync for AccelWithCovarianceStampedSequence {}
+unsafe impl<const N: usize> Send for AccelWithCovarianceStampedSeq<N> {}
+unsafe impl<const N: usize> Sync for AccelWithCovarianceStampedSeq<N> {}
 
 
 impl TopicMsg for AccelWithCovarianceStamped {

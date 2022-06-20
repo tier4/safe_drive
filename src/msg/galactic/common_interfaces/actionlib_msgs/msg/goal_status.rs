@@ -17,8 +17,8 @@ pub const LOST: u8 = 9; // An action client can determine that a goal is LOST. T
 extern "C" {
     fn actionlib_msgs__msg__GoalStatus__init(msg: *mut GoalStatus) -> bool;
     fn actionlib_msgs__msg__GoalStatus__fini(msg: *mut GoalStatus);
-    fn actionlib_msgs__msg__GoalStatus__Sequence__init(msg: *mut GoalStatusSequence, size: usize) -> bool;
-    fn actionlib_msgs__msg__GoalStatus__Sequence__fini(msg: *mut GoalStatusSequence);
+    fn actionlib_msgs__msg__GoalStatus__Sequence__init(msg: *mut GoalStatusSeqRaw, size: usize) -> bool;
+    fn actionlib_msgs__msg__GoalStatus__Sequence__fini(msg: *mut GoalStatusSeqRaw);
     fn rosidl_typesupport_c__get_message_type_support_handle__actionlib_msgs__msg__GoalStatus() -> *const rcl::rosidl_message_type_support_t;
 }
 
@@ -48,19 +48,37 @@ impl Drop for GoalStatus {
     }
 }
 
-#[repr(C)]
-#[derive(Debug)]
-pub struct GoalStatusSequence {
+
+struct GoalStatusSeqRaw {
     data: *mut GoalStatus,
     size: usize,
     capacity: usize,
 }
 
-impl GoalStatusSequence {
+/// Sequence of GoalStatus.
+/// `N` is the maximum number of elements.
+/// If `N` is `0`, the size is unlimited.
+#[repr(C)]
+#[derive(Debug)]
+pub struct GoalStatusSeq<const N: usize> {
+    data: *mut GoalStatus,
+    size: usize,
+    capacity: usize,
+}
+
+impl<const N: usize> GoalStatusSeq<N> {
+    /// Create a sequence of.
+    /// `N` represents the maximum number of elements.
+    /// If `N` is `0`, the sequence is unlimited.
     pub fn new(size: usize) -> Option<Self> {
-        let mut msg: Self = unsafe { std::mem::MaybeUninit::zeroed().assume_init() };
+        if N != 0 && size >= N {
+            // the size exceeds in the maximum number
+            return None;
+        }
+
+        let mut msg: GoalStatusSeqRaw = unsafe { std::mem::MaybeUninit::zeroed().assume_init() };
         if unsafe { actionlib_msgs__msg__GoalStatus__Sequence__init(&mut msg, size) } {
-            Some(msg)
+            Some(Self {data: msg.data, size: msg.size, capacity: msg.capacity })
         } else {
             None
         }
@@ -85,14 +103,15 @@ impl GoalStatusSequence {
     }
 }
 
-impl Drop for GoalStatusSequence {
+impl<const N: usize> Drop for GoalStatusSeq<N> {
     fn drop(&mut self) {
-        unsafe { actionlib_msgs__msg__GoalStatus__Sequence__fini(self) };
+        let mut msg = GoalStatusSeqRaw{data: self.data, size: self.size, capacity: self.capacity};
+        unsafe { actionlib_msgs__msg__GoalStatus__Sequence__fini(&mut msg) };
     }
 }
 
-unsafe impl Send for GoalStatusSequence {}
-unsafe impl Sync for GoalStatusSequence {}
+unsafe impl<const N: usize> Send for GoalStatusSeq<N> {}
+unsafe impl<const N: usize> Sync for GoalStatusSeq<N> {}
 
 
 impl TopicMsg for GoalStatus {

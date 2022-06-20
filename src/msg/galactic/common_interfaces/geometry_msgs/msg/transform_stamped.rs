@@ -7,8 +7,8 @@ use crate::rcl;
 extern "C" {
     fn geometry_msgs__msg__TransformStamped__init(msg: *mut TransformStamped) -> bool;
     fn geometry_msgs__msg__TransformStamped__fini(msg: *mut TransformStamped);
-    fn geometry_msgs__msg__TransformStamped__Sequence__init(msg: *mut TransformStampedSequence, size: usize) -> bool;
-    fn geometry_msgs__msg__TransformStamped__Sequence__fini(msg: *mut TransformStampedSequence);
+    fn geometry_msgs__msg__TransformStamped__Sequence__init(msg: *mut TransformStampedSeqRaw, size: usize) -> bool;
+    fn geometry_msgs__msg__TransformStamped__Sequence__fini(msg: *mut TransformStampedSeqRaw);
     fn rosidl_typesupport_c__get_message_type_support_handle__geometry_msgs__msg__TransformStamped() -> *const rcl::rosidl_message_type_support_t;
 }
 
@@ -38,19 +38,37 @@ impl Drop for TransformStamped {
     }
 }
 
-#[repr(C)]
-#[derive(Debug)]
-pub struct TransformStampedSequence {
+
+struct TransformStampedSeqRaw {
     data: *mut TransformStamped,
     size: usize,
     capacity: usize,
 }
 
-impl TransformStampedSequence {
+/// Sequence of TransformStamped.
+/// `N` is the maximum number of elements.
+/// If `N` is `0`, the size is unlimited.
+#[repr(C)]
+#[derive(Debug)]
+pub struct TransformStampedSeq<const N: usize> {
+    data: *mut TransformStamped,
+    size: usize,
+    capacity: usize,
+}
+
+impl<const N: usize> TransformStampedSeq<N> {
+    /// Create a sequence of.
+    /// `N` represents the maximum number of elements.
+    /// If `N` is `0`, the sequence is unlimited.
     pub fn new(size: usize) -> Option<Self> {
-        let mut msg: Self = unsafe { std::mem::MaybeUninit::zeroed().assume_init() };
+        if N != 0 && size >= N {
+            // the size exceeds in the maximum number
+            return None;
+        }
+
+        let mut msg: TransformStampedSeqRaw = unsafe { std::mem::MaybeUninit::zeroed().assume_init() };
         if unsafe { geometry_msgs__msg__TransformStamped__Sequence__init(&mut msg, size) } {
-            Some(msg)
+            Some(Self {data: msg.data, size: msg.size, capacity: msg.capacity })
         } else {
             None
         }
@@ -75,14 +93,15 @@ impl TransformStampedSequence {
     }
 }
 
-impl Drop for TransformStampedSequence {
+impl<const N: usize> Drop for TransformStampedSeq<N> {
     fn drop(&mut self) {
-        unsafe { geometry_msgs__msg__TransformStamped__Sequence__fini(self) };
+        let mut msg = TransformStampedSeqRaw{data: self.data, size: self.size, capacity: self.capacity};
+        unsafe { geometry_msgs__msg__TransformStamped__Sequence__fini(&mut msg) };
     }
 }
 
-unsafe impl Send for TransformStampedSequence {}
-unsafe impl Sync for TransformStampedSequence {}
+unsafe impl<const N: usize> Send for TransformStampedSeq<N> {}
+unsafe impl<const N: usize> Sync for TransformStampedSeq<N> {}
 
 
 impl TopicMsg for TransformStamped {

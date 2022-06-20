@@ -7,8 +7,8 @@ use crate::rcl;
 extern "C" {
     fn sensor_msgs__msg__LaserScan__init(msg: *mut LaserScan) -> bool;
     fn sensor_msgs__msg__LaserScan__fini(msg: *mut LaserScan);
-    fn sensor_msgs__msg__LaserScan__Sequence__init(msg: *mut LaserScanSequence, size: usize) -> bool;
-    fn sensor_msgs__msg__LaserScan__Sequence__fini(msg: *mut LaserScanSequence);
+    fn sensor_msgs__msg__LaserScan__Sequence__init(msg: *mut LaserScanSeqRaw, size: usize) -> bool;
+    fn sensor_msgs__msg__LaserScan__Sequence__fini(msg: *mut LaserScanSeqRaw);
     fn rosidl_typesupport_c__get_message_type_support_handle__sensor_msgs__msg__LaserScan() -> *const rcl::rosidl_message_type_support_t;
 }
 
@@ -45,19 +45,37 @@ impl Drop for LaserScan {
     }
 }
 
-#[repr(C)]
-#[derive(Debug)]
-pub struct LaserScanSequence {
+
+struct LaserScanSeqRaw {
     data: *mut LaserScan,
     size: usize,
     capacity: usize,
 }
 
-impl LaserScanSequence {
+/// Sequence of LaserScan.
+/// `N` is the maximum number of elements.
+/// If `N` is `0`, the size is unlimited.
+#[repr(C)]
+#[derive(Debug)]
+pub struct LaserScanSeq<const N: usize> {
+    data: *mut LaserScan,
+    size: usize,
+    capacity: usize,
+}
+
+impl<const N: usize> LaserScanSeq<N> {
+    /// Create a sequence of.
+    /// `N` represents the maximum number of elements.
+    /// If `N` is `0`, the sequence is unlimited.
     pub fn new(size: usize) -> Option<Self> {
-        let mut msg: Self = unsafe { std::mem::MaybeUninit::zeroed().assume_init() };
+        if N != 0 && size >= N {
+            // the size exceeds in the maximum number
+            return None;
+        }
+
+        let mut msg: LaserScanSeqRaw = unsafe { std::mem::MaybeUninit::zeroed().assume_init() };
         if unsafe { sensor_msgs__msg__LaserScan__Sequence__init(&mut msg, size) } {
-            Some(msg)
+            Some(Self {data: msg.data, size: msg.size, capacity: msg.capacity })
         } else {
             None
         }
@@ -82,14 +100,15 @@ impl LaserScanSequence {
     }
 }
 
-impl Drop for LaserScanSequence {
+impl<const N: usize> Drop for LaserScanSeq<N> {
     fn drop(&mut self) {
-        unsafe { sensor_msgs__msg__LaserScan__Sequence__fini(self) };
+        let mut msg = LaserScanSeqRaw{data: self.data, size: self.size, capacity: self.capacity};
+        unsafe { sensor_msgs__msg__LaserScan__Sequence__fini(&mut msg) };
     }
 }
 
-unsafe impl Send for LaserScanSequence {}
-unsafe impl Sync for LaserScanSequence {}
+unsafe impl<const N: usize> Send for LaserScanSeq<N> {}
+unsafe impl<const N: usize> Sync for LaserScanSeq<N> {}
 
 
 impl TopicMsg for LaserScan {

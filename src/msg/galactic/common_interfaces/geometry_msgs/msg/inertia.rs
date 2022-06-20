@@ -7,8 +7,8 @@ use crate::rcl;
 extern "C" {
     fn geometry_msgs__msg__Inertia__init(msg: *mut Inertia) -> bool;
     fn geometry_msgs__msg__Inertia__fini(msg: *mut Inertia);
-    fn geometry_msgs__msg__Inertia__Sequence__init(msg: *mut InertiaSequence, size: usize) -> bool;
-    fn geometry_msgs__msg__Inertia__Sequence__fini(msg: *mut InertiaSequence);
+    fn geometry_msgs__msg__Inertia__Sequence__init(msg: *mut InertiaSeqRaw, size: usize) -> bool;
+    fn geometry_msgs__msg__Inertia__Sequence__fini(msg: *mut InertiaSeqRaw);
     fn rosidl_typesupport_c__get_message_type_support_handle__geometry_msgs__msg__Inertia() -> *const rcl::rosidl_message_type_support_t;
 }
 
@@ -43,19 +43,37 @@ impl Drop for Inertia {
     }
 }
 
-#[repr(C)]
-#[derive(Debug)]
-pub struct InertiaSequence {
+
+struct InertiaSeqRaw {
     data: *mut Inertia,
     size: usize,
     capacity: usize,
 }
 
-impl InertiaSequence {
+/// Sequence of Inertia.
+/// `N` is the maximum number of elements.
+/// If `N` is `0`, the size is unlimited.
+#[repr(C)]
+#[derive(Debug)]
+pub struct InertiaSeq<const N: usize> {
+    data: *mut Inertia,
+    size: usize,
+    capacity: usize,
+}
+
+impl<const N: usize> InertiaSeq<N> {
+    /// Create a sequence of.
+    /// `N` represents the maximum number of elements.
+    /// If `N` is `0`, the sequence is unlimited.
     pub fn new(size: usize) -> Option<Self> {
-        let mut msg: Self = unsafe { std::mem::MaybeUninit::zeroed().assume_init() };
+        if N != 0 && size >= N {
+            // the size exceeds in the maximum number
+            return None;
+        }
+
+        let mut msg: InertiaSeqRaw = unsafe { std::mem::MaybeUninit::zeroed().assume_init() };
         if unsafe { geometry_msgs__msg__Inertia__Sequence__init(&mut msg, size) } {
-            Some(msg)
+            Some(Self {data: msg.data, size: msg.size, capacity: msg.capacity })
         } else {
             None
         }
@@ -80,14 +98,15 @@ impl InertiaSequence {
     }
 }
 
-impl Drop for InertiaSequence {
+impl<const N: usize> Drop for InertiaSeq<N> {
     fn drop(&mut self) {
-        unsafe { geometry_msgs__msg__Inertia__Sequence__fini(self) };
+        let mut msg = InertiaSeqRaw{data: self.data, size: self.size, capacity: self.capacity};
+        unsafe { geometry_msgs__msg__Inertia__Sequence__fini(&mut msg) };
     }
 }
 
-unsafe impl Send for InertiaSequence {}
-unsafe impl Sync for InertiaSequence {}
+unsafe impl<const N: usize> Send for InertiaSeq<N> {}
+unsafe impl<const N: usize> Sync for InertiaSeq<N> {}
 
 
 impl TopicMsg for Inertia {

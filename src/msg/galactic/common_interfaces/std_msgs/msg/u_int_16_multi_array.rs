@@ -7,8 +7,8 @@ use crate::rcl;
 extern "C" {
     fn std_msgs__msg__UInt16MultiArray__init(msg: *mut UInt16MultiArray) -> bool;
     fn std_msgs__msg__UInt16MultiArray__fini(msg: *mut UInt16MultiArray);
-    fn std_msgs__msg__UInt16MultiArray__Sequence__init(msg: *mut UInt16MultiArraySequence, size: usize) -> bool;
-    fn std_msgs__msg__UInt16MultiArray__Sequence__fini(msg: *mut UInt16MultiArraySequence);
+    fn std_msgs__msg__UInt16MultiArray__Sequence__init(msg: *mut UInt16MultiArraySeqRaw, size: usize) -> bool;
+    fn std_msgs__msg__UInt16MultiArray__Sequence__fini(msg: *mut UInt16MultiArraySeqRaw);
     fn rosidl_typesupport_c__get_message_type_support_handle__std_msgs__msg__UInt16MultiArray() -> *const rcl::rosidl_message_type_support_t;
 }
 
@@ -37,19 +37,37 @@ impl Drop for UInt16MultiArray {
     }
 }
 
-#[repr(C)]
-#[derive(Debug)]
-pub struct UInt16MultiArraySequence {
+
+struct UInt16MultiArraySeqRaw {
     data: *mut UInt16MultiArray,
     size: usize,
     capacity: usize,
 }
 
-impl UInt16MultiArraySequence {
+/// Sequence of UInt16MultiArray.
+/// `N` is the maximum number of elements.
+/// If `N` is `0`, the size is unlimited.
+#[repr(C)]
+#[derive(Debug)]
+pub struct UInt16MultiArraySeq<const N: usize> {
+    data: *mut UInt16MultiArray,
+    size: usize,
+    capacity: usize,
+}
+
+impl<const N: usize> UInt16MultiArraySeq<N> {
+    /// Create a sequence of.
+    /// `N` represents the maximum number of elements.
+    /// If `N` is `0`, the sequence is unlimited.
     pub fn new(size: usize) -> Option<Self> {
-        let mut msg: Self = unsafe { std::mem::MaybeUninit::zeroed().assume_init() };
+        if N != 0 && size >= N {
+            // the size exceeds in the maximum number
+            return None;
+        }
+
+        let mut msg: UInt16MultiArraySeqRaw = unsafe { std::mem::MaybeUninit::zeroed().assume_init() };
         if unsafe { std_msgs__msg__UInt16MultiArray__Sequence__init(&mut msg, size) } {
-            Some(msg)
+            Some(Self {data: msg.data, size: msg.size, capacity: msg.capacity })
         } else {
             None
         }
@@ -74,14 +92,15 @@ impl UInt16MultiArraySequence {
     }
 }
 
-impl Drop for UInt16MultiArraySequence {
+impl<const N: usize> Drop for UInt16MultiArraySeq<N> {
     fn drop(&mut self) {
-        unsafe { std_msgs__msg__UInt16MultiArray__Sequence__fini(self) };
+        let mut msg = UInt16MultiArraySeqRaw{data: self.data, size: self.size, capacity: self.capacity};
+        unsafe { std_msgs__msg__UInt16MultiArray__Sequence__fini(&mut msg) };
     }
 }
 
-unsafe impl Send for UInt16MultiArraySequence {}
-unsafe impl Sync for UInt16MultiArraySequence {}
+unsafe impl<const N: usize> Send for UInt16MultiArraySeq<N> {}
+unsafe impl<const N: usize> Sync for UInt16MultiArraySeq<N> {}
 
 
 impl TopicMsg for UInt16MultiArray {

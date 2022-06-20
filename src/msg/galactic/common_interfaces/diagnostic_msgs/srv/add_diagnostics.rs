@@ -8,12 +8,12 @@ use crate::msg::common_interfaces::*;
 extern "C" {
     fn diagnostic_msgs__srv__AddDiagnostics_Request__init(msg: *mut AddDiagnosticsRequest) -> bool;
     fn diagnostic_msgs__srv__AddDiagnostics_Request__fini(msg: *mut AddDiagnosticsRequest);
-    fn diagnostic_msgs__srv__AddDiagnostics_Request__Sequence__init(msg: *mut AddDiagnosticsRequestSequence, size: usize) -> bool;
-    fn diagnostic_msgs__srv__AddDiagnostics_Request__Sequence__fini(msg: *mut AddDiagnosticsRequestSequence);
+    fn diagnostic_msgs__srv__AddDiagnostics_Request__Sequence__init(msg: *mut AddDiagnosticsRequestSeqRaw, size: usize) -> bool;
+    fn diagnostic_msgs__srv__AddDiagnostics_Request__Sequence__fini(msg: *mut AddDiagnosticsRequestSeqRaw);
     fn diagnostic_msgs__srv__AddDiagnostics_Response__init(msg: *mut AddDiagnosticsResponse) -> bool;
     fn diagnostic_msgs__srv__AddDiagnostics_Response__fini(msg: *mut AddDiagnosticsResponse);
-    fn diagnostic_msgs__srv__AddDiagnostics_Response__Sequence__init(msg: *mut AddDiagnosticsResponseSequence, size: usize) -> bool;
-    fn diagnostic_msgs__srv__AddDiagnostics_Response__Sequence__fini(msg: *mut AddDiagnosticsResponseSequence);
+    fn diagnostic_msgs__srv__AddDiagnostics_Response__Sequence__init(msg: *mut AddDiagnosticsResponseSeqRaw, size: usize) -> bool;
+    fn diagnostic_msgs__srv__AddDiagnostics_Response__Sequence__fini(msg: *mut AddDiagnosticsResponseSeqRaw);
     fn rosidl_typesupport_c__get_service_type_support_handle__diagnostic_msgs__srv__AddDiagnostics() -> *const rcl::rosidl_service_type_support_t;
 }
 
@@ -48,19 +48,37 @@ impl Drop for AddDiagnosticsRequest {
     }
 }
 
-#[repr(C)]
-#[derive(Debug)]
-pub struct AddDiagnosticsRequestSequence {
+
+struct AddDiagnosticsRequestSeqRaw {
     data: *mut AddDiagnosticsRequest,
     size: usize,
     capacity: usize,
 }
 
-impl AddDiagnosticsRequestSequence {
+/// Sequence of AddDiagnosticsRequest.
+/// `N` is the maximum number of elements.
+/// If `N` is `0`, the size is unlimited.
+#[repr(C)]
+#[derive(Debug)]
+pub struct AddDiagnosticsRequestSeq<const N: usize> {
+    data: *mut AddDiagnosticsRequest,
+    size: usize,
+    capacity: usize,
+}
+
+impl<const N: usize> AddDiagnosticsRequestSeq<N> {
+    /// Create a sequence of.
+    /// `N` represents the maximum number of elements.
+    /// If `N` is `0`, the sequence is unlimited.
     pub fn new(size: usize) -> Option<Self> {
-        let mut msg: Self = unsafe { std::mem::MaybeUninit::zeroed().assume_init() };
+        if N != 0 && size >= N {
+            // the size exceeds in the maximum number
+            return None;
+        }
+
+        let mut msg: AddDiagnosticsRequestSeqRaw = unsafe { std::mem::MaybeUninit::zeroed().assume_init() };
         if unsafe { diagnostic_msgs__srv__AddDiagnostics_Request__Sequence__init(&mut msg, size) } {
-            Some(msg)
+            Some(Self {data: msg.data, size: msg.size, capacity: msg.capacity })
         } else {
             None
         }
@@ -85,14 +103,15 @@ impl AddDiagnosticsRequestSequence {
     }
 }
 
-impl Drop for AddDiagnosticsRequestSequence {
+impl<const N: usize> Drop for AddDiagnosticsRequestSeq<N> {
     fn drop(&mut self) {
-        unsafe { diagnostic_msgs__srv__AddDiagnostics_Request__Sequence__fini(self) };
+        let mut msg = AddDiagnosticsRequestSeqRaw{data: self.data, size: self.size, capacity: self.capacity};
+        unsafe { diagnostic_msgs__srv__AddDiagnostics_Request__Sequence__fini(&mut msg) };
     }
 }
 
-unsafe impl Send for AddDiagnosticsRequestSequence {}
-unsafe impl Sync for AddDiagnosticsRequestSequence {}
+unsafe impl<const N: usize> Send for AddDiagnosticsRequestSeq<N> {}
+unsafe impl<const N: usize> Sync for AddDiagnosticsRequestSeq<N> {}
 
 
 impl AddDiagnosticsResponse {
@@ -112,19 +131,37 @@ impl Drop for AddDiagnosticsResponse {
     }
 }
 
-#[repr(C)]
-#[derive(Debug)]
-pub struct AddDiagnosticsResponseSequence {
+
+struct AddDiagnosticsResponseSeqRaw {
     data: *mut AddDiagnosticsResponse,
     size: usize,
     capacity: usize,
 }
 
-impl AddDiagnosticsResponseSequence {
+/// Sequence of AddDiagnosticsResponse.
+/// `N` is the maximum number of elements.
+/// If `N` is `0`, the size is unlimited.
+#[repr(C)]
+#[derive(Debug)]
+pub struct AddDiagnosticsResponseSeq<const N: usize> {
+    data: *mut AddDiagnosticsResponse,
+    size: usize,
+    capacity: usize,
+}
+
+impl<const N: usize> AddDiagnosticsResponseSeq<N> {
+    /// Create a sequence of.
+    /// `N` represents the maximum number of elements.
+    /// If `N` is `0`, the sequence is unlimited.
     pub fn new(size: usize) -> Option<Self> {
-        let mut msg: Self = unsafe { std::mem::MaybeUninit::zeroed().assume_init() };
+        if N != 0 && size >= N {
+            // the size exceeds in the maximum number
+            return None;
+        }
+
+        let mut msg: AddDiagnosticsResponseSeqRaw = unsafe { std::mem::MaybeUninit::zeroed().assume_init() };
         if unsafe { diagnostic_msgs__srv__AddDiagnostics_Response__Sequence__init(&mut msg, size) } {
-            Some(msg)
+            Some(Self {data: msg.data, size: msg.size, capacity: msg.capacity })
         } else {
             None
         }
@@ -149,14 +186,15 @@ impl AddDiagnosticsResponseSequence {
     }
 }
 
-impl Drop for AddDiagnosticsResponseSequence {
+impl<const N: usize> Drop for AddDiagnosticsResponseSeq<N> {
     fn drop(&mut self) {
-        unsafe { diagnostic_msgs__srv__AddDiagnostics_Response__Sequence__fini(self) };
+        let mut msg = AddDiagnosticsResponseSeqRaw{data: self.data, size: self.size, capacity: self.capacity};
+        unsafe { diagnostic_msgs__srv__AddDiagnostics_Response__Sequence__fini(&mut msg) };
     }
 }
 
-unsafe impl Send for AddDiagnosticsResponseSequence {}
-unsafe impl Sync for AddDiagnosticsResponseSequence {}
+unsafe impl<const N: usize> Send for AddDiagnosticsResponseSeq<N> {}
+unsafe impl<const N: usize> Sync for AddDiagnosticsResponseSeq<N> {}
 
 
 pub struct AddDiagnostics;

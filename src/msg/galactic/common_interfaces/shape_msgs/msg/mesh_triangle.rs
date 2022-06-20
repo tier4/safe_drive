@@ -7,8 +7,8 @@ use crate::rcl;
 extern "C" {
     fn shape_msgs__msg__MeshTriangle__init(msg: *mut MeshTriangle) -> bool;
     fn shape_msgs__msg__MeshTriangle__fini(msg: *mut MeshTriangle);
-    fn shape_msgs__msg__MeshTriangle__Sequence__init(msg: *mut MeshTriangleSequence, size: usize) -> bool;
-    fn shape_msgs__msg__MeshTriangle__Sequence__fini(msg: *mut MeshTriangleSequence);
+    fn shape_msgs__msg__MeshTriangle__Sequence__init(msg: *mut MeshTriangleSeqRaw, size: usize) -> bool;
+    fn shape_msgs__msg__MeshTriangle__Sequence__fini(msg: *mut MeshTriangleSeqRaw);
     fn rosidl_typesupport_c__get_message_type_support_handle__shape_msgs__msg__MeshTriangle() -> *const rcl::rosidl_message_type_support_t;
 }
 
@@ -36,19 +36,37 @@ impl Drop for MeshTriangle {
     }
 }
 
-#[repr(C)]
-#[derive(Debug)]
-pub struct MeshTriangleSequence {
+
+struct MeshTriangleSeqRaw {
     data: *mut MeshTriangle,
     size: usize,
     capacity: usize,
 }
 
-impl MeshTriangleSequence {
+/// Sequence of MeshTriangle.
+/// `N` is the maximum number of elements.
+/// If `N` is `0`, the size is unlimited.
+#[repr(C)]
+#[derive(Debug)]
+pub struct MeshTriangleSeq<const N: usize> {
+    data: *mut MeshTriangle,
+    size: usize,
+    capacity: usize,
+}
+
+impl<const N: usize> MeshTriangleSeq<N> {
+    /// Create a sequence of.
+    /// `N` represents the maximum number of elements.
+    /// If `N` is `0`, the sequence is unlimited.
     pub fn new(size: usize) -> Option<Self> {
-        let mut msg: Self = unsafe { std::mem::MaybeUninit::zeroed().assume_init() };
+        if N != 0 && size >= N {
+            // the size exceeds in the maximum number
+            return None;
+        }
+
+        let mut msg: MeshTriangleSeqRaw = unsafe { std::mem::MaybeUninit::zeroed().assume_init() };
         if unsafe { shape_msgs__msg__MeshTriangle__Sequence__init(&mut msg, size) } {
-            Some(msg)
+            Some(Self {data: msg.data, size: msg.size, capacity: msg.capacity })
         } else {
             None
         }
@@ -73,14 +91,15 @@ impl MeshTriangleSequence {
     }
 }
 
-impl Drop for MeshTriangleSequence {
+impl<const N: usize> Drop for MeshTriangleSeq<N> {
     fn drop(&mut self) {
-        unsafe { shape_msgs__msg__MeshTriangle__Sequence__fini(self) };
+        let mut msg = MeshTriangleSeqRaw{data: self.data, size: self.size, capacity: self.capacity};
+        unsafe { shape_msgs__msg__MeshTriangle__Sequence__fini(&mut msg) };
     }
 }
 
-unsafe impl Send for MeshTriangleSequence {}
-unsafe impl Sync for MeshTriangleSequence {}
+unsafe impl<const N: usize> Send for MeshTriangleSeq<N> {}
+unsafe impl<const N: usize> Sync for MeshTriangleSeq<N> {}
 
 
 impl TopicMsg for MeshTriangle {

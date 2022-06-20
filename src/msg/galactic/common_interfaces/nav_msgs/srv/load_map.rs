@@ -13,12 +13,12 @@ pub const RESULT_UNDEFINED_FAILURE: u8 = 255;
 extern "C" {
     fn nav_msgs__srv__LoadMap_Request__init(msg: *mut LoadMapRequest) -> bool;
     fn nav_msgs__srv__LoadMap_Request__fini(msg: *mut LoadMapRequest);
-    fn nav_msgs__srv__LoadMap_Request__Sequence__init(msg: *mut LoadMapRequestSequence, size: usize) -> bool;
-    fn nav_msgs__srv__LoadMap_Request__Sequence__fini(msg: *mut LoadMapRequestSequence);
+    fn nav_msgs__srv__LoadMap_Request__Sequence__init(msg: *mut LoadMapRequestSeqRaw, size: usize) -> bool;
+    fn nav_msgs__srv__LoadMap_Request__Sequence__fini(msg: *mut LoadMapRequestSeqRaw);
     fn nav_msgs__srv__LoadMap_Response__init(msg: *mut LoadMapResponse) -> bool;
     fn nav_msgs__srv__LoadMap_Response__fini(msg: *mut LoadMapResponse);
-    fn nav_msgs__srv__LoadMap_Response__Sequence__init(msg: *mut LoadMapResponseSequence, size: usize) -> bool;
-    fn nav_msgs__srv__LoadMap_Response__Sequence__fini(msg: *mut LoadMapResponseSequence);
+    fn nav_msgs__srv__LoadMap_Response__Sequence__init(msg: *mut LoadMapResponseSeqRaw, size: usize) -> bool;
+    fn nav_msgs__srv__LoadMap_Response__Sequence__fini(msg: *mut LoadMapResponseSeqRaw);
     fn rosidl_typesupport_c__get_service_type_support_handle__nav_msgs__srv__LoadMap() -> *const rcl::rosidl_service_type_support_t;
 }
 
@@ -53,19 +53,37 @@ impl Drop for LoadMapRequest {
     }
 }
 
-#[repr(C)]
-#[derive(Debug)]
-pub struct LoadMapRequestSequence {
+
+struct LoadMapRequestSeqRaw {
     data: *mut LoadMapRequest,
     size: usize,
     capacity: usize,
 }
 
-impl LoadMapRequestSequence {
+/// Sequence of LoadMapRequest.
+/// `N` is the maximum number of elements.
+/// If `N` is `0`, the size is unlimited.
+#[repr(C)]
+#[derive(Debug)]
+pub struct LoadMapRequestSeq<const N: usize> {
+    data: *mut LoadMapRequest,
+    size: usize,
+    capacity: usize,
+}
+
+impl<const N: usize> LoadMapRequestSeq<N> {
+    /// Create a sequence of.
+    /// `N` represents the maximum number of elements.
+    /// If `N` is `0`, the sequence is unlimited.
     pub fn new(size: usize) -> Option<Self> {
-        let mut msg: Self = unsafe { std::mem::MaybeUninit::zeroed().assume_init() };
+        if N != 0 && size >= N {
+            // the size exceeds in the maximum number
+            return None;
+        }
+
+        let mut msg: LoadMapRequestSeqRaw = unsafe { std::mem::MaybeUninit::zeroed().assume_init() };
         if unsafe { nav_msgs__srv__LoadMap_Request__Sequence__init(&mut msg, size) } {
-            Some(msg)
+            Some(Self {data: msg.data, size: msg.size, capacity: msg.capacity })
         } else {
             None
         }
@@ -90,14 +108,15 @@ impl LoadMapRequestSequence {
     }
 }
 
-impl Drop for LoadMapRequestSequence {
+impl<const N: usize> Drop for LoadMapRequestSeq<N> {
     fn drop(&mut self) {
-        unsafe { nav_msgs__srv__LoadMap_Request__Sequence__fini(self) };
+        let mut msg = LoadMapRequestSeqRaw{data: self.data, size: self.size, capacity: self.capacity};
+        unsafe { nav_msgs__srv__LoadMap_Request__Sequence__fini(&mut msg) };
     }
 }
 
-unsafe impl Send for LoadMapRequestSequence {}
-unsafe impl Sync for LoadMapRequestSequence {}
+unsafe impl<const N: usize> Send for LoadMapRequestSeq<N> {}
+unsafe impl<const N: usize> Sync for LoadMapRequestSeq<N> {}
 
 
 impl LoadMapResponse {
@@ -117,19 +136,37 @@ impl Drop for LoadMapResponse {
     }
 }
 
-#[repr(C)]
-#[derive(Debug)]
-pub struct LoadMapResponseSequence {
+
+struct LoadMapResponseSeqRaw {
     data: *mut LoadMapResponse,
     size: usize,
     capacity: usize,
 }
 
-impl LoadMapResponseSequence {
+/// Sequence of LoadMapResponse.
+/// `N` is the maximum number of elements.
+/// If `N` is `0`, the size is unlimited.
+#[repr(C)]
+#[derive(Debug)]
+pub struct LoadMapResponseSeq<const N: usize> {
+    data: *mut LoadMapResponse,
+    size: usize,
+    capacity: usize,
+}
+
+impl<const N: usize> LoadMapResponseSeq<N> {
+    /// Create a sequence of.
+    /// `N` represents the maximum number of elements.
+    /// If `N` is `0`, the sequence is unlimited.
     pub fn new(size: usize) -> Option<Self> {
-        let mut msg: Self = unsafe { std::mem::MaybeUninit::zeroed().assume_init() };
+        if N != 0 && size >= N {
+            // the size exceeds in the maximum number
+            return None;
+        }
+
+        let mut msg: LoadMapResponseSeqRaw = unsafe { std::mem::MaybeUninit::zeroed().assume_init() };
         if unsafe { nav_msgs__srv__LoadMap_Response__Sequence__init(&mut msg, size) } {
-            Some(msg)
+            Some(Self {data: msg.data, size: msg.size, capacity: msg.capacity })
         } else {
             None
         }
@@ -154,14 +191,15 @@ impl LoadMapResponseSequence {
     }
 }
 
-impl Drop for LoadMapResponseSequence {
+impl<const N: usize> Drop for LoadMapResponseSeq<N> {
     fn drop(&mut self) {
-        unsafe { nav_msgs__srv__LoadMap_Response__Sequence__fini(self) };
+        let mut msg = LoadMapResponseSeqRaw{data: self.data, size: self.size, capacity: self.capacity};
+        unsafe { nav_msgs__srv__LoadMap_Response__Sequence__fini(&mut msg) };
     }
 }
 
-unsafe impl Send for LoadMapResponseSequence {}
-unsafe impl Sync for LoadMapResponseSequence {}
+unsafe impl<const N: usize> Send for LoadMapResponseSeq<N> {}
+unsafe impl<const N: usize> Sync for LoadMapResponseSeq<N> {}
 
 
 pub struct LoadMap;

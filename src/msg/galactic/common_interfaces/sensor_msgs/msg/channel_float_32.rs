@@ -7,8 +7,8 @@ use crate::rcl;
 extern "C" {
     fn sensor_msgs__msg__ChannelFloat32__init(msg: *mut ChannelFloat32) -> bool;
     fn sensor_msgs__msg__ChannelFloat32__fini(msg: *mut ChannelFloat32);
-    fn sensor_msgs__msg__ChannelFloat32__Sequence__init(msg: *mut ChannelFloat32Sequence, size: usize) -> bool;
-    fn sensor_msgs__msg__ChannelFloat32__Sequence__fini(msg: *mut ChannelFloat32Sequence);
+    fn sensor_msgs__msg__ChannelFloat32__Sequence__init(msg: *mut ChannelFloat32SeqRaw, size: usize) -> bool;
+    fn sensor_msgs__msg__ChannelFloat32__Sequence__fini(msg: *mut ChannelFloat32SeqRaw);
     fn rosidl_typesupport_c__get_message_type_support_handle__sensor_msgs__msg__ChannelFloat32() -> *const rcl::rosidl_message_type_support_t;
 }
 
@@ -37,19 +37,37 @@ impl Drop for ChannelFloat32 {
     }
 }
 
-#[repr(C)]
-#[derive(Debug)]
-pub struct ChannelFloat32Sequence {
+
+struct ChannelFloat32SeqRaw {
     data: *mut ChannelFloat32,
     size: usize,
     capacity: usize,
 }
 
-impl ChannelFloat32Sequence {
+/// Sequence of ChannelFloat32.
+/// `N` is the maximum number of elements.
+/// If `N` is `0`, the size is unlimited.
+#[repr(C)]
+#[derive(Debug)]
+pub struct ChannelFloat32Seq<const N: usize> {
+    data: *mut ChannelFloat32,
+    size: usize,
+    capacity: usize,
+}
+
+impl<const N: usize> ChannelFloat32Seq<N> {
+    /// Create a sequence of.
+    /// `N` represents the maximum number of elements.
+    /// If `N` is `0`, the sequence is unlimited.
     pub fn new(size: usize) -> Option<Self> {
-        let mut msg: Self = unsafe { std::mem::MaybeUninit::zeroed().assume_init() };
+        if N != 0 && size >= N {
+            // the size exceeds in the maximum number
+            return None;
+        }
+
+        let mut msg: ChannelFloat32SeqRaw = unsafe { std::mem::MaybeUninit::zeroed().assume_init() };
         if unsafe { sensor_msgs__msg__ChannelFloat32__Sequence__init(&mut msg, size) } {
-            Some(msg)
+            Some(Self {data: msg.data, size: msg.size, capacity: msg.capacity })
         } else {
             None
         }
@@ -74,14 +92,15 @@ impl ChannelFloat32Sequence {
     }
 }
 
-impl Drop for ChannelFloat32Sequence {
+impl<const N: usize> Drop for ChannelFloat32Seq<N> {
     fn drop(&mut self) {
-        unsafe { sensor_msgs__msg__ChannelFloat32__Sequence__fini(self) };
+        let mut msg = ChannelFloat32SeqRaw{data: self.data, size: self.size, capacity: self.capacity};
+        unsafe { sensor_msgs__msg__ChannelFloat32__Sequence__fini(&mut msg) };
     }
 }
 
-unsafe impl Send for ChannelFloat32Sequence {}
-unsafe impl Sync for ChannelFloat32Sequence {}
+unsafe impl<const N: usize> Send for ChannelFloat32Seq<N> {}
+unsafe impl<const N: usize> Sync for ChannelFloat32Seq<N> {}
 
 
 impl TopicMsg for ChannelFloat32 {

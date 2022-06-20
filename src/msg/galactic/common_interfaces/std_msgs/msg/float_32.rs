@@ -7,8 +7,8 @@ use crate::rcl;
 extern "C" {
     fn std_msgs__msg__Float32__init(msg: *mut Float32) -> bool;
     fn std_msgs__msg__Float32__fini(msg: *mut Float32);
-    fn std_msgs__msg__Float32__Sequence__init(msg: *mut Float32Sequence, size: usize) -> bool;
-    fn std_msgs__msg__Float32__Sequence__fini(msg: *mut Float32Sequence);
+    fn std_msgs__msg__Float32__Sequence__init(msg: *mut Float32SeqRaw, size: usize) -> bool;
+    fn std_msgs__msg__Float32__Sequence__fini(msg: *mut Float32SeqRaw);
     fn rosidl_typesupport_c__get_message_type_support_handle__std_msgs__msg__Float32() -> *const rcl::rosidl_message_type_support_t;
 }
 
@@ -36,19 +36,37 @@ impl Drop for Float32 {
     }
 }
 
-#[repr(C)]
-#[derive(Debug)]
-pub struct Float32Sequence {
+
+struct Float32SeqRaw {
     data: *mut Float32,
     size: usize,
     capacity: usize,
 }
 
-impl Float32Sequence {
+/// Sequence of Float32.
+/// `N` is the maximum number of elements.
+/// If `N` is `0`, the size is unlimited.
+#[repr(C)]
+#[derive(Debug)]
+pub struct Float32Seq<const N: usize> {
+    data: *mut Float32,
+    size: usize,
+    capacity: usize,
+}
+
+impl<const N: usize> Float32Seq<N> {
+    /// Create a sequence of.
+    /// `N` represents the maximum number of elements.
+    /// If `N` is `0`, the sequence is unlimited.
     pub fn new(size: usize) -> Option<Self> {
-        let mut msg: Self = unsafe { std::mem::MaybeUninit::zeroed().assume_init() };
+        if N != 0 && size >= N {
+            // the size exceeds in the maximum number
+            return None;
+        }
+
+        let mut msg: Float32SeqRaw = unsafe { std::mem::MaybeUninit::zeroed().assume_init() };
         if unsafe { std_msgs__msg__Float32__Sequence__init(&mut msg, size) } {
-            Some(msg)
+            Some(Self {data: msg.data, size: msg.size, capacity: msg.capacity })
         } else {
             None
         }
@@ -73,14 +91,15 @@ impl Float32Sequence {
     }
 }
 
-impl Drop for Float32Sequence {
+impl<const N: usize> Drop for Float32Seq<N> {
     fn drop(&mut self) {
-        unsafe { std_msgs__msg__Float32__Sequence__fini(self) };
+        let mut msg = Float32SeqRaw{data: self.data, size: self.size, capacity: self.capacity};
+        unsafe { std_msgs__msg__Float32__Sequence__fini(&mut msg) };
     }
 }
 
-unsafe impl Send for Float32Sequence {}
-unsafe impl Sync for Float32Sequence {}
+unsafe impl<const N: usize> Send for Float32Seq<N> {}
+unsafe impl<const N: usize> Sync for Float32Seq<N> {}
 
 
 impl TopicMsg for Float32 {

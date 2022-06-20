@@ -7,8 +7,8 @@ use crate::rcl;
 extern "C" {
     fn sensor_msgs__msg__CompressedImage__init(msg: *mut CompressedImage) -> bool;
     fn sensor_msgs__msg__CompressedImage__fini(msg: *mut CompressedImage);
-    fn sensor_msgs__msg__CompressedImage__Sequence__init(msg: *mut CompressedImageSequence, size: usize) -> bool;
-    fn sensor_msgs__msg__CompressedImage__Sequence__fini(msg: *mut CompressedImageSequence);
+    fn sensor_msgs__msg__CompressedImage__Sequence__init(msg: *mut CompressedImageSeqRaw, size: usize) -> bool;
+    fn sensor_msgs__msg__CompressedImage__Sequence__fini(msg: *mut CompressedImageSeqRaw);
     fn rosidl_typesupport_c__get_message_type_support_handle__sensor_msgs__msg__CompressedImage() -> *const rcl::rosidl_message_type_support_t;
 }
 
@@ -38,19 +38,37 @@ impl Drop for CompressedImage {
     }
 }
 
-#[repr(C)]
-#[derive(Debug)]
-pub struct CompressedImageSequence {
+
+struct CompressedImageSeqRaw {
     data: *mut CompressedImage,
     size: usize,
     capacity: usize,
 }
 
-impl CompressedImageSequence {
+/// Sequence of CompressedImage.
+/// `N` is the maximum number of elements.
+/// If `N` is `0`, the size is unlimited.
+#[repr(C)]
+#[derive(Debug)]
+pub struct CompressedImageSeq<const N: usize> {
+    data: *mut CompressedImage,
+    size: usize,
+    capacity: usize,
+}
+
+impl<const N: usize> CompressedImageSeq<N> {
+    /// Create a sequence of.
+    /// `N` represents the maximum number of elements.
+    /// If `N` is `0`, the sequence is unlimited.
     pub fn new(size: usize) -> Option<Self> {
-        let mut msg: Self = unsafe { std::mem::MaybeUninit::zeroed().assume_init() };
+        if N != 0 && size >= N {
+            // the size exceeds in the maximum number
+            return None;
+        }
+
+        let mut msg: CompressedImageSeqRaw = unsafe { std::mem::MaybeUninit::zeroed().assume_init() };
         if unsafe { sensor_msgs__msg__CompressedImage__Sequence__init(&mut msg, size) } {
-            Some(msg)
+            Some(Self {data: msg.data, size: msg.size, capacity: msg.capacity })
         } else {
             None
         }
@@ -75,14 +93,15 @@ impl CompressedImageSequence {
     }
 }
 
-impl Drop for CompressedImageSequence {
+impl<const N: usize> Drop for CompressedImageSeq<N> {
     fn drop(&mut self) {
-        unsafe { sensor_msgs__msg__CompressedImage__Sequence__fini(self) };
+        let mut msg = CompressedImageSeqRaw{data: self.data, size: self.size, capacity: self.capacity};
+        unsafe { sensor_msgs__msg__CompressedImage__Sequence__fini(&mut msg) };
     }
 }
 
-unsafe impl Send for CompressedImageSequence {}
-unsafe impl Sync for CompressedImageSequence {}
+unsafe impl<const N: usize> Send for CompressedImageSeq<N> {}
+unsafe impl<const N: usize> Sync for CompressedImageSeq<N> {}
 
 
 impl TopicMsg for CompressedImage {

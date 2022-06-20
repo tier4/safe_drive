@@ -7,8 +7,8 @@ use crate::rcl;
 extern "C" {
     fn std_msgs__msg__ColorRGBA__init(msg: *mut ColorRGBA) -> bool;
     fn std_msgs__msg__ColorRGBA__fini(msg: *mut ColorRGBA);
-    fn std_msgs__msg__ColorRGBA__Sequence__init(msg: *mut ColorRGBASequence, size: usize) -> bool;
-    fn std_msgs__msg__ColorRGBA__Sequence__fini(msg: *mut ColorRGBASequence);
+    fn std_msgs__msg__ColorRGBA__Sequence__init(msg: *mut ColorRGBASeqRaw, size: usize) -> bool;
+    fn std_msgs__msg__ColorRGBA__Sequence__fini(msg: *mut ColorRGBASeqRaw);
     fn rosidl_typesupport_c__get_message_type_support_handle__std_msgs__msg__ColorRGBA() -> *const rcl::rosidl_message_type_support_t;
 }
 
@@ -39,19 +39,37 @@ impl Drop for ColorRGBA {
     }
 }
 
-#[repr(C)]
-#[derive(Debug)]
-pub struct ColorRGBASequence {
+
+struct ColorRGBASeqRaw {
     data: *mut ColorRGBA,
     size: usize,
     capacity: usize,
 }
 
-impl ColorRGBASequence {
+/// Sequence of ColorRGBA.
+/// `N` is the maximum number of elements.
+/// If `N` is `0`, the size is unlimited.
+#[repr(C)]
+#[derive(Debug)]
+pub struct ColorRGBASeq<const N: usize> {
+    data: *mut ColorRGBA,
+    size: usize,
+    capacity: usize,
+}
+
+impl<const N: usize> ColorRGBASeq<N> {
+    /// Create a sequence of.
+    /// `N` represents the maximum number of elements.
+    /// If `N` is `0`, the sequence is unlimited.
     pub fn new(size: usize) -> Option<Self> {
-        let mut msg: Self = unsafe { std::mem::MaybeUninit::zeroed().assume_init() };
+        if N != 0 && size >= N {
+            // the size exceeds in the maximum number
+            return None;
+        }
+
+        let mut msg: ColorRGBASeqRaw = unsafe { std::mem::MaybeUninit::zeroed().assume_init() };
         if unsafe { std_msgs__msg__ColorRGBA__Sequence__init(&mut msg, size) } {
-            Some(msg)
+            Some(Self {data: msg.data, size: msg.size, capacity: msg.capacity })
         } else {
             None
         }
@@ -76,14 +94,15 @@ impl ColorRGBASequence {
     }
 }
 
-impl Drop for ColorRGBASequence {
+impl<const N: usize> Drop for ColorRGBASeq<N> {
     fn drop(&mut self) {
-        unsafe { std_msgs__msg__ColorRGBA__Sequence__fini(self) };
+        let mut msg = ColorRGBASeqRaw{data: self.data, size: self.size, capacity: self.capacity};
+        unsafe { std_msgs__msg__ColorRGBA__Sequence__fini(&mut msg) };
     }
 }
 
-unsafe impl Send for ColorRGBASequence {}
-unsafe impl Sync for ColorRGBASequence {}
+unsafe impl<const N: usize> Send for ColorRGBASeq<N> {}
+unsafe impl<const N: usize> Sync for ColorRGBASeq<N> {}
 
 
 impl TopicMsg for ColorRGBA {

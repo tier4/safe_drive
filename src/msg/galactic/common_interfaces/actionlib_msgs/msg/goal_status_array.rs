@@ -7,8 +7,8 @@ use crate::rcl;
 extern "C" {
     fn actionlib_msgs__msg__GoalStatusArray__init(msg: *mut GoalStatusArray) -> bool;
     fn actionlib_msgs__msg__GoalStatusArray__fini(msg: *mut GoalStatusArray);
-    fn actionlib_msgs__msg__GoalStatusArray__Sequence__init(msg: *mut GoalStatusArraySequence, size: usize) -> bool;
-    fn actionlib_msgs__msg__GoalStatusArray__Sequence__fini(msg: *mut GoalStatusArraySequence);
+    fn actionlib_msgs__msg__GoalStatusArray__Sequence__init(msg: *mut GoalStatusArraySeqRaw, size: usize) -> bool;
+    fn actionlib_msgs__msg__GoalStatusArray__Sequence__fini(msg: *mut GoalStatusArraySeqRaw);
     fn rosidl_typesupport_c__get_message_type_support_handle__actionlib_msgs__msg__GoalStatusArray() -> *const rcl::rosidl_message_type_support_t;
 }
 
@@ -17,7 +17,7 @@ extern "C" {
 #[derive(Debug)]
 pub struct GoalStatusArray {
     pub header: std_msgs::msg::Header,
-    pub status_list: GoalStatusSequence,
+    pub status_list: GoalStatusSeq<0>,
 }
 
 impl GoalStatusArray {
@@ -37,19 +37,37 @@ impl Drop for GoalStatusArray {
     }
 }
 
-#[repr(C)]
-#[derive(Debug)]
-pub struct GoalStatusArraySequence {
+
+struct GoalStatusArraySeqRaw {
     data: *mut GoalStatusArray,
     size: usize,
     capacity: usize,
 }
 
-impl GoalStatusArraySequence {
+/// Sequence of GoalStatusArray.
+/// `N` is the maximum number of elements.
+/// If `N` is `0`, the size is unlimited.
+#[repr(C)]
+#[derive(Debug)]
+pub struct GoalStatusArraySeq<const N: usize> {
+    data: *mut GoalStatusArray,
+    size: usize,
+    capacity: usize,
+}
+
+impl<const N: usize> GoalStatusArraySeq<N> {
+    /// Create a sequence of.
+    /// `N` represents the maximum number of elements.
+    /// If `N` is `0`, the sequence is unlimited.
     pub fn new(size: usize) -> Option<Self> {
-        let mut msg: Self = unsafe { std::mem::MaybeUninit::zeroed().assume_init() };
+        if N != 0 && size >= N {
+            // the size exceeds in the maximum number
+            return None;
+        }
+
+        let mut msg: GoalStatusArraySeqRaw = unsafe { std::mem::MaybeUninit::zeroed().assume_init() };
         if unsafe { actionlib_msgs__msg__GoalStatusArray__Sequence__init(&mut msg, size) } {
-            Some(msg)
+            Some(Self {data: msg.data, size: msg.size, capacity: msg.capacity })
         } else {
             None
         }
@@ -74,14 +92,15 @@ impl GoalStatusArraySequence {
     }
 }
 
-impl Drop for GoalStatusArraySequence {
+impl<const N: usize> Drop for GoalStatusArraySeq<N> {
     fn drop(&mut self) {
-        unsafe { actionlib_msgs__msg__GoalStatusArray__Sequence__fini(self) };
+        let mut msg = GoalStatusArraySeqRaw{data: self.data, size: self.size, capacity: self.capacity};
+        unsafe { actionlib_msgs__msg__GoalStatusArray__Sequence__fini(&mut msg) };
     }
 }
 
-unsafe impl Send for GoalStatusArraySequence {}
-unsafe impl Sync for GoalStatusArraySequence {}
+unsafe impl<const N: usize> Send for GoalStatusArraySeq<N> {}
+unsafe impl<const N: usize> Sync for GoalStatusArraySeq<N> {}
 
 
 impl TopicMsg for GoalStatusArray {

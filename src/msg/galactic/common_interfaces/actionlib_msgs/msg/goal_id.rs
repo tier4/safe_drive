@@ -7,8 +7,8 @@ use crate::rcl;
 extern "C" {
     fn actionlib_msgs__msg__GoalID__init(msg: *mut GoalID) -> bool;
     fn actionlib_msgs__msg__GoalID__fini(msg: *mut GoalID);
-    fn actionlib_msgs__msg__GoalID__Sequence__init(msg: *mut GoalIDSequence, size: usize) -> bool;
-    fn actionlib_msgs__msg__GoalID__Sequence__fini(msg: *mut GoalIDSequence);
+    fn actionlib_msgs__msg__GoalID__Sequence__init(msg: *mut GoalIDSeqRaw, size: usize) -> bool;
+    fn actionlib_msgs__msg__GoalID__Sequence__fini(msg: *mut GoalIDSeqRaw);
     fn rosidl_typesupport_c__get_message_type_support_handle__actionlib_msgs__msg__GoalID() -> *const rcl::rosidl_message_type_support_t;
 }
 
@@ -37,19 +37,37 @@ impl Drop for GoalID {
     }
 }
 
-#[repr(C)]
-#[derive(Debug)]
-pub struct GoalIDSequence {
+
+struct GoalIDSeqRaw {
     data: *mut GoalID,
     size: usize,
     capacity: usize,
 }
 
-impl GoalIDSequence {
+/// Sequence of GoalID.
+/// `N` is the maximum number of elements.
+/// If `N` is `0`, the size is unlimited.
+#[repr(C)]
+#[derive(Debug)]
+pub struct GoalIDSeq<const N: usize> {
+    data: *mut GoalID,
+    size: usize,
+    capacity: usize,
+}
+
+impl<const N: usize> GoalIDSeq<N> {
+    /// Create a sequence of.
+    /// `N` represents the maximum number of elements.
+    /// If `N` is `0`, the sequence is unlimited.
     pub fn new(size: usize) -> Option<Self> {
-        let mut msg: Self = unsafe { std::mem::MaybeUninit::zeroed().assume_init() };
+        if N != 0 && size >= N {
+            // the size exceeds in the maximum number
+            return None;
+        }
+
+        let mut msg: GoalIDSeqRaw = unsafe { std::mem::MaybeUninit::zeroed().assume_init() };
         if unsafe { actionlib_msgs__msg__GoalID__Sequence__init(&mut msg, size) } {
-            Some(msg)
+            Some(Self {data: msg.data, size: msg.size, capacity: msg.capacity })
         } else {
             None
         }
@@ -74,14 +92,15 @@ impl GoalIDSequence {
     }
 }
 
-impl Drop for GoalIDSequence {
+impl<const N: usize> Drop for GoalIDSeq<N> {
     fn drop(&mut self) {
-        unsafe { actionlib_msgs__msg__GoalID__Sequence__fini(self) };
+        let mut msg = GoalIDSeqRaw{data: self.data, size: self.size, capacity: self.capacity};
+        unsafe { actionlib_msgs__msg__GoalID__Sequence__fini(&mut msg) };
     }
 }
 
-unsafe impl Send for GoalIDSequence {}
-unsafe impl Sync for GoalIDSequence {}
+unsafe impl<const N: usize> Send for GoalIDSeq<N> {}
+unsafe impl<const N: usize> Sync for GoalIDSeq<N> {}
 
 
 impl TopicMsg for GoalID {

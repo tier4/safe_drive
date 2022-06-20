@@ -7,8 +7,8 @@ use crate::rcl;
 extern "C" {
     fn geometry_msgs__msg__TwistStamped__init(msg: *mut TwistStamped) -> bool;
     fn geometry_msgs__msg__TwistStamped__fini(msg: *mut TwistStamped);
-    fn geometry_msgs__msg__TwistStamped__Sequence__init(msg: *mut TwistStampedSequence, size: usize) -> bool;
-    fn geometry_msgs__msg__TwistStamped__Sequence__fini(msg: *mut TwistStampedSequence);
+    fn geometry_msgs__msg__TwistStamped__Sequence__init(msg: *mut TwistStampedSeqRaw, size: usize) -> bool;
+    fn geometry_msgs__msg__TwistStamped__Sequence__fini(msg: *mut TwistStampedSeqRaw);
     fn rosidl_typesupport_c__get_message_type_support_handle__geometry_msgs__msg__TwistStamped() -> *const rcl::rosidl_message_type_support_t;
 }
 
@@ -37,19 +37,37 @@ impl Drop for TwistStamped {
     }
 }
 
-#[repr(C)]
-#[derive(Debug)]
-pub struct TwistStampedSequence {
+
+struct TwistStampedSeqRaw {
     data: *mut TwistStamped,
     size: usize,
     capacity: usize,
 }
 
-impl TwistStampedSequence {
+/// Sequence of TwistStamped.
+/// `N` is the maximum number of elements.
+/// If `N` is `0`, the size is unlimited.
+#[repr(C)]
+#[derive(Debug)]
+pub struct TwistStampedSeq<const N: usize> {
+    data: *mut TwistStamped,
+    size: usize,
+    capacity: usize,
+}
+
+impl<const N: usize> TwistStampedSeq<N> {
+    /// Create a sequence of.
+    /// `N` represents the maximum number of elements.
+    /// If `N` is `0`, the sequence is unlimited.
     pub fn new(size: usize) -> Option<Self> {
-        let mut msg: Self = unsafe { std::mem::MaybeUninit::zeroed().assume_init() };
+        if N != 0 && size >= N {
+            // the size exceeds in the maximum number
+            return None;
+        }
+
+        let mut msg: TwistStampedSeqRaw = unsafe { std::mem::MaybeUninit::zeroed().assume_init() };
         if unsafe { geometry_msgs__msg__TwistStamped__Sequence__init(&mut msg, size) } {
-            Some(msg)
+            Some(Self {data: msg.data, size: msg.size, capacity: msg.capacity })
         } else {
             None
         }
@@ -74,14 +92,15 @@ impl TwistStampedSequence {
     }
 }
 
-impl Drop for TwistStampedSequence {
+impl<const N: usize> Drop for TwistStampedSeq<N> {
     fn drop(&mut self) {
-        unsafe { geometry_msgs__msg__TwistStamped__Sequence__fini(self) };
+        let mut msg = TwistStampedSeqRaw{data: self.data, size: self.size, capacity: self.capacity};
+        unsafe { geometry_msgs__msg__TwistStamped__Sequence__fini(&mut msg) };
     }
 }
 
-unsafe impl Send for TwistStampedSequence {}
-unsafe impl Sync for TwistStampedSequence {}
+unsafe impl<const N: usize> Send for TwistStampedSeq<N> {}
+unsafe impl<const N: usize> Sync for TwistStampedSeq<N> {}
 
 
 impl TopicMsg for TwistStamped {

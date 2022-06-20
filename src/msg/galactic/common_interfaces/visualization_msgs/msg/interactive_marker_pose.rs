@@ -7,8 +7,8 @@ use crate::rcl;
 extern "C" {
     fn visualization_msgs__msg__InteractiveMarkerPose__init(msg: *mut InteractiveMarkerPose) -> bool;
     fn visualization_msgs__msg__InteractiveMarkerPose__fini(msg: *mut InteractiveMarkerPose);
-    fn visualization_msgs__msg__InteractiveMarkerPose__Sequence__init(msg: *mut InteractiveMarkerPoseSequence, size: usize) -> bool;
-    fn visualization_msgs__msg__InteractiveMarkerPose__Sequence__fini(msg: *mut InteractiveMarkerPoseSequence);
+    fn visualization_msgs__msg__InteractiveMarkerPose__Sequence__init(msg: *mut InteractiveMarkerPoseSeqRaw, size: usize) -> bool;
+    fn visualization_msgs__msg__InteractiveMarkerPose__Sequence__fini(msg: *mut InteractiveMarkerPoseSeqRaw);
     fn rosidl_typesupport_c__get_message_type_support_handle__visualization_msgs__msg__InteractiveMarkerPose() -> *const rcl::rosidl_message_type_support_t;
 }
 
@@ -38,19 +38,37 @@ impl Drop for InteractiveMarkerPose {
     }
 }
 
-#[repr(C)]
-#[derive(Debug)]
-pub struct InteractiveMarkerPoseSequence {
+
+struct InteractiveMarkerPoseSeqRaw {
     data: *mut InteractiveMarkerPose,
     size: usize,
     capacity: usize,
 }
 
-impl InteractiveMarkerPoseSequence {
+/// Sequence of InteractiveMarkerPose.
+/// `N` is the maximum number of elements.
+/// If `N` is `0`, the size is unlimited.
+#[repr(C)]
+#[derive(Debug)]
+pub struct InteractiveMarkerPoseSeq<const N: usize> {
+    data: *mut InteractiveMarkerPose,
+    size: usize,
+    capacity: usize,
+}
+
+impl<const N: usize> InteractiveMarkerPoseSeq<N> {
+    /// Create a sequence of.
+    /// `N` represents the maximum number of elements.
+    /// If `N` is `0`, the sequence is unlimited.
     pub fn new(size: usize) -> Option<Self> {
-        let mut msg: Self = unsafe { std::mem::MaybeUninit::zeroed().assume_init() };
+        if N != 0 && size >= N {
+            // the size exceeds in the maximum number
+            return None;
+        }
+
+        let mut msg: InteractiveMarkerPoseSeqRaw = unsafe { std::mem::MaybeUninit::zeroed().assume_init() };
         if unsafe { visualization_msgs__msg__InteractiveMarkerPose__Sequence__init(&mut msg, size) } {
-            Some(msg)
+            Some(Self {data: msg.data, size: msg.size, capacity: msg.capacity })
         } else {
             None
         }
@@ -75,14 +93,15 @@ impl InteractiveMarkerPoseSequence {
     }
 }
 
-impl Drop for InteractiveMarkerPoseSequence {
+impl<const N: usize> Drop for InteractiveMarkerPoseSeq<N> {
     fn drop(&mut self) {
-        unsafe { visualization_msgs__msg__InteractiveMarkerPose__Sequence__fini(self) };
+        let mut msg = InteractiveMarkerPoseSeqRaw{data: self.data, size: self.size, capacity: self.capacity};
+        unsafe { visualization_msgs__msg__InteractiveMarkerPose__Sequence__fini(&mut msg) };
     }
 }
 
-unsafe impl Send for InteractiveMarkerPoseSequence {}
-unsafe impl Sync for InteractiveMarkerPoseSequence {}
+unsafe impl<const N: usize> Send for InteractiveMarkerPoseSeq<N> {}
+unsafe impl<const N: usize> Sync for InteractiveMarkerPoseSeq<N> {}
 
 
 impl TopicMsg for InteractiveMarkerPose {

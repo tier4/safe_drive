@@ -7,8 +7,8 @@ use crate::rcl;
 extern "C" {
     fn geometry_msgs__msg__WrenchStamped__init(msg: *mut WrenchStamped) -> bool;
     fn geometry_msgs__msg__WrenchStamped__fini(msg: *mut WrenchStamped);
-    fn geometry_msgs__msg__WrenchStamped__Sequence__init(msg: *mut WrenchStampedSequence, size: usize) -> bool;
-    fn geometry_msgs__msg__WrenchStamped__Sequence__fini(msg: *mut WrenchStampedSequence);
+    fn geometry_msgs__msg__WrenchStamped__Sequence__init(msg: *mut WrenchStampedSeqRaw, size: usize) -> bool;
+    fn geometry_msgs__msg__WrenchStamped__Sequence__fini(msg: *mut WrenchStampedSeqRaw);
     fn rosidl_typesupport_c__get_message_type_support_handle__geometry_msgs__msg__WrenchStamped() -> *const rcl::rosidl_message_type_support_t;
 }
 
@@ -37,19 +37,37 @@ impl Drop for WrenchStamped {
     }
 }
 
-#[repr(C)]
-#[derive(Debug)]
-pub struct WrenchStampedSequence {
+
+struct WrenchStampedSeqRaw {
     data: *mut WrenchStamped,
     size: usize,
     capacity: usize,
 }
 
-impl WrenchStampedSequence {
+/// Sequence of WrenchStamped.
+/// `N` is the maximum number of elements.
+/// If `N` is `0`, the size is unlimited.
+#[repr(C)]
+#[derive(Debug)]
+pub struct WrenchStampedSeq<const N: usize> {
+    data: *mut WrenchStamped,
+    size: usize,
+    capacity: usize,
+}
+
+impl<const N: usize> WrenchStampedSeq<N> {
+    /// Create a sequence of.
+    /// `N` represents the maximum number of elements.
+    /// If `N` is `0`, the sequence is unlimited.
     pub fn new(size: usize) -> Option<Self> {
-        let mut msg: Self = unsafe { std::mem::MaybeUninit::zeroed().assume_init() };
+        if N != 0 && size >= N {
+            // the size exceeds in the maximum number
+            return None;
+        }
+
+        let mut msg: WrenchStampedSeqRaw = unsafe { std::mem::MaybeUninit::zeroed().assume_init() };
         if unsafe { geometry_msgs__msg__WrenchStamped__Sequence__init(&mut msg, size) } {
-            Some(msg)
+            Some(Self {data: msg.data, size: msg.size, capacity: msg.capacity })
         } else {
             None
         }
@@ -74,14 +92,15 @@ impl WrenchStampedSequence {
     }
 }
 
-impl Drop for WrenchStampedSequence {
+impl<const N: usize> Drop for WrenchStampedSeq<N> {
     fn drop(&mut self) {
-        unsafe { geometry_msgs__msg__WrenchStamped__Sequence__fini(self) };
+        let mut msg = WrenchStampedSeqRaw{data: self.data, size: self.size, capacity: self.capacity};
+        unsafe { geometry_msgs__msg__WrenchStamped__Sequence__fini(&mut msg) };
     }
 }
 
-unsafe impl Send for WrenchStampedSequence {}
-unsafe impl Sync for WrenchStampedSequence {}
+unsafe impl<const N: usize> Send for WrenchStampedSeq<N> {}
+unsafe impl<const N: usize> Sync for WrenchStampedSeq<N> {}
 
 
 impl TopicMsg for WrenchStamped {

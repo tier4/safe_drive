@@ -8,12 +8,12 @@ use crate::msg::common_interfaces::*;
 extern "C" {
     fn std_srvs__srv__Empty_Request__init(msg: *mut EmptyRequest) -> bool;
     fn std_srvs__srv__Empty_Request__fini(msg: *mut EmptyRequest);
-    fn std_srvs__srv__Empty_Request__Sequence__init(msg: *mut EmptyRequestSequence, size: usize) -> bool;
-    fn std_srvs__srv__Empty_Request__Sequence__fini(msg: *mut EmptyRequestSequence);
+    fn std_srvs__srv__Empty_Request__Sequence__init(msg: *mut EmptyRequestSeqRaw, size: usize) -> bool;
+    fn std_srvs__srv__Empty_Request__Sequence__fini(msg: *mut EmptyRequestSeqRaw);
     fn std_srvs__srv__Empty_Response__init(msg: *mut EmptyResponse) -> bool;
     fn std_srvs__srv__Empty_Response__fini(msg: *mut EmptyResponse);
-    fn std_srvs__srv__Empty_Response__Sequence__init(msg: *mut EmptyResponseSequence, size: usize) -> bool;
-    fn std_srvs__srv__Empty_Response__Sequence__fini(msg: *mut EmptyResponseSequence);
+    fn std_srvs__srv__Empty_Response__Sequence__init(msg: *mut EmptyResponseSeqRaw, size: usize) -> bool;
+    fn std_srvs__srv__Empty_Response__Sequence__fini(msg: *mut EmptyResponseSeqRaw);
     fn rosidl_typesupport_c__get_service_type_support_handle__std_srvs__srv__Empty() -> *const rcl::rosidl_service_type_support_t;
 }
 
@@ -47,19 +47,37 @@ impl Drop for EmptyRequest {
     }
 }
 
-#[repr(C)]
-#[derive(Debug)]
-pub struct EmptyRequestSequence {
+
+struct EmptyRequestSeqRaw {
     data: *mut EmptyRequest,
     size: usize,
     capacity: usize,
 }
 
-impl EmptyRequestSequence {
+/// Sequence of EmptyRequest.
+/// `N` is the maximum number of elements.
+/// If `N` is `0`, the size is unlimited.
+#[repr(C)]
+#[derive(Debug)]
+pub struct EmptyRequestSeq<const N: usize> {
+    data: *mut EmptyRequest,
+    size: usize,
+    capacity: usize,
+}
+
+impl<const N: usize> EmptyRequestSeq<N> {
+    /// Create a sequence of.
+    /// `N` represents the maximum number of elements.
+    /// If `N` is `0`, the sequence is unlimited.
     pub fn new(size: usize) -> Option<Self> {
-        let mut msg: Self = unsafe { std::mem::MaybeUninit::zeroed().assume_init() };
+        if N != 0 && size >= N {
+            // the size exceeds in the maximum number
+            return None;
+        }
+
+        let mut msg: EmptyRequestSeqRaw = unsafe { std::mem::MaybeUninit::zeroed().assume_init() };
         if unsafe { std_srvs__srv__Empty_Request__Sequence__init(&mut msg, size) } {
-            Some(msg)
+            Some(Self {data: msg.data, size: msg.size, capacity: msg.capacity })
         } else {
             None
         }
@@ -84,14 +102,15 @@ impl EmptyRequestSequence {
     }
 }
 
-impl Drop for EmptyRequestSequence {
+impl<const N: usize> Drop for EmptyRequestSeq<N> {
     fn drop(&mut self) {
-        unsafe { std_srvs__srv__Empty_Request__Sequence__fini(self) };
+        let mut msg = EmptyRequestSeqRaw{data: self.data, size: self.size, capacity: self.capacity};
+        unsafe { std_srvs__srv__Empty_Request__Sequence__fini(&mut msg) };
     }
 }
 
-unsafe impl Send for EmptyRequestSequence {}
-unsafe impl Sync for EmptyRequestSequence {}
+unsafe impl<const N: usize> Send for EmptyRequestSeq<N> {}
+unsafe impl<const N: usize> Sync for EmptyRequestSeq<N> {}
 
 
 impl EmptyResponse {
@@ -111,19 +130,37 @@ impl Drop for EmptyResponse {
     }
 }
 
-#[repr(C)]
-#[derive(Debug)]
-pub struct EmptyResponseSequence {
+
+struct EmptyResponseSeqRaw {
     data: *mut EmptyResponse,
     size: usize,
     capacity: usize,
 }
 
-impl EmptyResponseSequence {
+/// Sequence of EmptyResponse.
+/// `N` is the maximum number of elements.
+/// If `N` is `0`, the size is unlimited.
+#[repr(C)]
+#[derive(Debug)]
+pub struct EmptyResponseSeq<const N: usize> {
+    data: *mut EmptyResponse,
+    size: usize,
+    capacity: usize,
+}
+
+impl<const N: usize> EmptyResponseSeq<N> {
+    /// Create a sequence of.
+    /// `N` represents the maximum number of elements.
+    /// If `N` is `0`, the sequence is unlimited.
     pub fn new(size: usize) -> Option<Self> {
-        let mut msg: Self = unsafe { std::mem::MaybeUninit::zeroed().assume_init() };
+        if N != 0 && size >= N {
+            // the size exceeds in the maximum number
+            return None;
+        }
+
+        let mut msg: EmptyResponseSeqRaw = unsafe { std::mem::MaybeUninit::zeroed().assume_init() };
         if unsafe { std_srvs__srv__Empty_Response__Sequence__init(&mut msg, size) } {
-            Some(msg)
+            Some(Self {data: msg.data, size: msg.size, capacity: msg.capacity })
         } else {
             None
         }
@@ -148,14 +185,15 @@ impl EmptyResponseSequence {
     }
 }
 
-impl Drop for EmptyResponseSequence {
+impl<const N: usize> Drop for EmptyResponseSeq<N> {
     fn drop(&mut self) {
-        unsafe { std_srvs__srv__Empty_Response__Sequence__fini(self) };
+        let mut msg = EmptyResponseSeqRaw{data: self.data, size: self.size, capacity: self.capacity};
+        unsafe { std_srvs__srv__Empty_Response__Sequence__fini(&mut msg) };
     }
 }
 
-unsafe impl Send for EmptyResponseSequence {}
-unsafe impl Sync for EmptyResponseSequence {}
+unsafe impl<const N: usize> Send for EmptyResponseSeq<N> {}
+unsafe impl<const N: usize> Sync for EmptyResponseSeq<N> {}
 
 
 pub struct Empty;

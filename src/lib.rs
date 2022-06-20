@@ -225,7 +225,7 @@ mod signal_handler;
 mod time;
 
 type PhantomUnsync = PhantomData<Cell<()>>;
-type _PhantomUnsend = PhantomData<MutexGuard<'static, ()>>;
+type PhantomUnsend = PhantomData<MutexGuard<'static, ()>>;
 
 pub use signal_handler::is_halt;
 

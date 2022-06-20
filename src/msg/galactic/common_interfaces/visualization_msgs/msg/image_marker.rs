@@ -14,8 +14,8 @@ pub const REMOVE: i32 = 1;
 extern "C" {
     fn visualization_msgs__msg__ImageMarker__init(msg: *mut ImageMarker) -> bool;
     fn visualization_msgs__msg__ImageMarker__fini(msg: *mut ImageMarker);
-    fn visualization_msgs__msg__ImageMarker__Sequence__init(msg: *mut ImageMarkerSequence, size: usize) -> bool;
-    fn visualization_msgs__msg__ImageMarker__Sequence__fini(msg: *mut ImageMarkerSequence);
+    fn visualization_msgs__msg__ImageMarker__Sequence__init(msg: *mut ImageMarkerSeqRaw, size: usize) -> bool;
+    fn visualization_msgs__msg__ImageMarker__Sequence__fini(msg: *mut ImageMarkerSeqRaw);
     fn rosidl_typesupport_c__get_message_type_support_handle__visualization_msgs__msg__ImageMarker() -> *const rcl::rosidl_message_type_support_t;
 }
 
@@ -34,8 +34,8 @@ pub struct ImageMarker {
     pub filled: u8,
     pub fill_color: std_msgs::msg::ColorRGBA,
     pub lifetime: builtin_interfaces__msg__Duration,
-    pub points: geometry_msgs::msg::PointSequence,
-    pub outline_colors: std_msgs::msg::ColorRGBASequence,
+    pub points: geometry_msgs::msg::PointSeq<0>,
+    pub outline_colors: std_msgs::msg::ColorRGBASeq<0>,
 }
 
 impl ImageMarker {
@@ -55,19 +55,37 @@ impl Drop for ImageMarker {
     }
 }
 
-#[repr(C)]
-#[derive(Debug)]
-pub struct ImageMarkerSequence {
+
+struct ImageMarkerSeqRaw {
     data: *mut ImageMarker,
     size: usize,
     capacity: usize,
 }
 
-impl ImageMarkerSequence {
+/// Sequence of ImageMarker.
+/// `N` is the maximum number of elements.
+/// If `N` is `0`, the size is unlimited.
+#[repr(C)]
+#[derive(Debug)]
+pub struct ImageMarkerSeq<const N: usize> {
+    data: *mut ImageMarker,
+    size: usize,
+    capacity: usize,
+}
+
+impl<const N: usize> ImageMarkerSeq<N> {
+    /// Create a sequence of.
+    /// `N` represents the maximum number of elements.
+    /// If `N` is `0`, the sequence is unlimited.
     pub fn new(size: usize) -> Option<Self> {
-        let mut msg: Self = unsafe { std::mem::MaybeUninit::zeroed().assume_init() };
+        if N != 0 && size >= N {
+            // the size exceeds in the maximum number
+            return None;
+        }
+
+        let mut msg: ImageMarkerSeqRaw = unsafe { std::mem::MaybeUninit::zeroed().assume_init() };
         if unsafe { visualization_msgs__msg__ImageMarker__Sequence__init(&mut msg, size) } {
-            Some(msg)
+            Some(Self {data: msg.data, size: msg.size, capacity: msg.capacity })
         } else {
             None
         }
@@ -92,14 +110,15 @@ impl ImageMarkerSequence {
     }
 }
 
-impl Drop for ImageMarkerSequence {
+impl<const N: usize> Drop for ImageMarkerSeq<N> {
     fn drop(&mut self) {
-        unsafe { visualization_msgs__msg__ImageMarker__Sequence__fini(self) };
+        let mut msg = ImageMarkerSeqRaw{data: self.data, size: self.size, capacity: self.capacity};
+        unsafe { visualization_msgs__msg__ImageMarker__Sequence__fini(&mut msg) };
     }
 }
 
-unsafe impl Send for ImageMarkerSequence {}
-unsafe impl Sync for ImageMarkerSequence {}
+unsafe impl<const N: usize> Send for ImageMarkerSeq<N> {}
+unsafe impl<const N: usize> Sync for ImageMarkerSeq<N> {}
 
 
 impl TopicMsg for ImageMarker {

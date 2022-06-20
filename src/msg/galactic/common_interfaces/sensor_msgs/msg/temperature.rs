@@ -7,8 +7,8 @@ use crate::rcl;
 extern "C" {
     fn sensor_msgs__msg__Temperature__init(msg: *mut Temperature) -> bool;
     fn sensor_msgs__msg__Temperature__fini(msg: *mut Temperature);
-    fn sensor_msgs__msg__Temperature__Sequence__init(msg: *mut TemperatureSequence, size: usize) -> bool;
-    fn sensor_msgs__msg__Temperature__Sequence__fini(msg: *mut TemperatureSequence);
+    fn sensor_msgs__msg__Temperature__Sequence__init(msg: *mut TemperatureSeqRaw, size: usize) -> bool;
+    fn sensor_msgs__msg__Temperature__Sequence__fini(msg: *mut TemperatureSeqRaw);
     fn rosidl_typesupport_c__get_message_type_support_handle__sensor_msgs__msg__Temperature() -> *const rcl::rosidl_message_type_support_t;
 }
 
@@ -38,19 +38,37 @@ impl Drop for Temperature {
     }
 }
 
-#[repr(C)]
-#[derive(Debug)]
-pub struct TemperatureSequence {
+
+struct TemperatureSeqRaw {
     data: *mut Temperature,
     size: usize,
     capacity: usize,
 }
 
-impl TemperatureSequence {
+/// Sequence of Temperature.
+/// `N` is the maximum number of elements.
+/// If `N` is `0`, the size is unlimited.
+#[repr(C)]
+#[derive(Debug)]
+pub struct TemperatureSeq<const N: usize> {
+    data: *mut Temperature,
+    size: usize,
+    capacity: usize,
+}
+
+impl<const N: usize> TemperatureSeq<N> {
+    /// Create a sequence of.
+    /// `N` represents the maximum number of elements.
+    /// If `N` is `0`, the sequence is unlimited.
     pub fn new(size: usize) -> Option<Self> {
-        let mut msg: Self = unsafe { std::mem::MaybeUninit::zeroed().assume_init() };
+        if N != 0 && size >= N {
+            // the size exceeds in the maximum number
+            return None;
+        }
+
+        let mut msg: TemperatureSeqRaw = unsafe { std::mem::MaybeUninit::zeroed().assume_init() };
         if unsafe { sensor_msgs__msg__Temperature__Sequence__init(&mut msg, size) } {
-            Some(msg)
+            Some(Self {data: msg.data, size: msg.size, capacity: msg.capacity })
         } else {
             None
         }
@@ -75,14 +93,15 @@ impl TemperatureSequence {
     }
 }
 
-impl Drop for TemperatureSequence {
+impl<const N: usize> Drop for TemperatureSeq<N> {
     fn drop(&mut self) {
-        unsafe { sensor_msgs__msg__Temperature__Sequence__fini(self) };
+        let mut msg = TemperatureSeqRaw{data: self.data, size: self.size, capacity: self.capacity};
+        unsafe { sensor_msgs__msg__Temperature__Sequence__fini(&mut msg) };
     }
 }
 
-unsafe impl Send for TemperatureSequence {}
-unsafe impl Sync for TemperatureSequence {}
+unsafe impl<const N: usize> Send for TemperatureSeq<N> {}
+unsafe impl<const N: usize> Sync for TemperatureSeq<N> {}
 
 
 impl TopicMsg for Temperature {

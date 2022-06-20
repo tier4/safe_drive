@@ -9,8 +9,8 @@ pub const INFRARED: u8 = 1;
 extern "C" {
     fn sensor_msgs__msg__Range__init(msg: *mut Range) -> bool;
     fn sensor_msgs__msg__Range__fini(msg: *mut Range);
-    fn sensor_msgs__msg__Range__Sequence__init(msg: *mut RangeSequence, size: usize) -> bool;
-    fn sensor_msgs__msg__Range__Sequence__fini(msg: *mut RangeSequence);
+    fn sensor_msgs__msg__Range__Sequence__init(msg: *mut RangeSeqRaw, size: usize) -> bool;
+    fn sensor_msgs__msg__Range__Sequence__fini(msg: *mut RangeSeqRaw);
     fn rosidl_typesupport_c__get_message_type_support_handle__sensor_msgs__msg__Range() -> *const rcl::rosidl_message_type_support_t;
 }
 
@@ -43,19 +43,37 @@ impl Drop for Range {
     }
 }
 
-#[repr(C)]
-#[derive(Debug)]
-pub struct RangeSequence {
+
+struct RangeSeqRaw {
     data: *mut Range,
     size: usize,
     capacity: usize,
 }
 
-impl RangeSequence {
+/// Sequence of Range.
+/// `N` is the maximum number of elements.
+/// If `N` is `0`, the size is unlimited.
+#[repr(C)]
+#[derive(Debug)]
+pub struct RangeSeq<const N: usize> {
+    data: *mut Range,
+    size: usize,
+    capacity: usize,
+}
+
+impl<const N: usize> RangeSeq<N> {
+    /// Create a sequence of.
+    /// `N` represents the maximum number of elements.
+    /// If `N` is `0`, the sequence is unlimited.
     pub fn new(size: usize) -> Option<Self> {
-        let mut msg: Self = unsafe { std::mem::MaybeUninit::zeroed().assume_init() };
+        if N != 0 && size >= N {
+            // the size exceeds in the maximum number
+            return None;
+        }
+
+        let mut msg: RangeSeqRaw = unsafe { std::mem::MaybeUninit::zeroed().assume_init() };
         if unsafe { sensor_msgs__msg__Range__Sequence__init(&mut msg, size) } {
-            Some(msg)
+            Some(Self {data: msg.data, size: msg.size, capacity: msg.capacity })
         } else {
             None
         }
@@ -80,14 +98,15 @@ impl RangeSequence {
     }
 }
 
-impl Drop for RangeSequence {
+impl<const N: usize> Drop for RangeSeq<N> {
     fn drop(&mut self) {
-        unsafe { sensor_msgs__msg__Range__Sequence__fini(self) };
+        let mut msg = RangeSeqRaw{data: self.data, size: self.size, capacity: self.capacity};
+        unsafe { sensor_msgs__msg__Range__Sequence__fini(&mut msg) };
     }
 }
 
-unsafe impl Send for RangeSequence {}
-unsafe impl Sync for RangeSequence {}
+unsafe impl<const N: usize> Send for RangeSeq<N> {}
+unsafe impl<const N: usize> Sync for RangeSeq<N> {}
 
 
 impl TopicMsg for Range {

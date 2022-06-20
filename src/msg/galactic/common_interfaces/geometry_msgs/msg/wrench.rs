@@ -7,8 +7,8 @@ use crate::rcl;
 extern "C" {
     fn geometry_msgs__msg__Wrench__init(msg: *mut Wrench) -> bool;
     fn geometry_msgs__msg__Wrench__fini(msg: *mut Wrench);
-    fn geometry_msgs__msg__Wrench__Sequence__init(msg: *mut WrenchSequence, size: usize) -> bool;
-    fn geometry_msgs__msg__Wrench__Sequence__fini(msg: *mut WrenchSequence);
+    fn geometry_msgs__msg__Wrench__Sequence__init(msg: *mut WrenchSeqRaw, size: usize) -> bool;
+    fn geometry_msgs__msg__Wrench__Sequence__fini(msg: *mut WrenchSeqRaw);
     fn rosidl_typesupport_c__get_message_type_support_handle__geometry_msgs__msg__Wrench() -> *const rcl::rosidl_message_type_support_t;
 }
 
@@ -37,19 +37,37 @@ impl Drop for Wrench {
     }
 }
 
-#[repr(C)]
-#[derive(Debug)]
-pub struct WrenchSequence {
+
+struct WrenchSeqRaw {
     data: *mut Wrench,
     size: usize,
     capacity: usize,
 }
 
-impl WrenchSequence {
+/// Sequence of Wrench.
+/// `N` is the maximum number of elements.
+/// If `N` is `0`, the size is unlimited.
+#[repr(C)]
+#[derive(Debug)]
+pub struct WrenchSeq<const N: usize> {
+    data: *mut Wrench,
+    size: usize,
+    capacity: usize,
+}
+
+impl<const N: usize> WrenchSeq<N> {
+    /// Create a sequence of.
+    /// `N` represents the maximum number of elements.
+    /// If `N` is `0`, the sequence is unlimited.
     pub fn new(size: usize) -> Option<Self> {
-        let mut msg: Self = unsafe { std::mem::MaybeUninit::zeroed().assume_init() };
+        if N != 0 && size >= N {
+            // the size exceeds in the maximum number
+            return None;
+        }
+
+        let mut msg: WrenchSeqRaw = unsafe { std::mem::MaybeUninit::zeroed().assume_init() };
         if unsafe { geometry_msgs__msg__Wrench__Sequence__init(&mut msg, size) } {
-            Some(msg)
+            Some(Self {data: msg.data, size: msg.size, capacity: msg.capacity })
         } else {
             None
         }
@@ -74,14 +92,15 @@ impl WrenchSequence {
     }
 }
 
-impl Drop for WrenchSequence {
+impl<const N: usize> Drop for WrenchSeq<N> {
     fn drop(&mut self) {
-        unsafe { geometry_msgs__msg__Wrench__Sequence__fini(self) };
+        let mut msg = WrenchSeqRaw{data: self.data, size: self.size, capacity: self.capacity};
+        unsafe { geometry_msgs__msg__Wrench__Sequence__fini(&mut msg) };
     }
 }
 
-unsafe impl Send for WrenchSequence {}
-unsafe impl Sync for WrenchSequence {}
+unsafe impl<const N: usize> Send for WrenchSeq<N> {}
+unsafe impl<const N: usize> Sync for WrenchSeq<N> {}
 
 
 impl TopicMsg for Wrench {

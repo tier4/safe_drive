@@ -7,8 +7,8 @@ use crate::rcl;
 extern "C" {
     fn visualization_msgs__msg__MarkerArray__init(msg: *mut MarkerArray) -> bool;
     fn visualization_msgs__msg__MarkerArray__fini(msg: *mut MarkerArray);
-    fn visualization_msgs__msg__MarkerArray__Sequence__init(msg: *mut MarkerArraySequence, size: usize) -> bool;
-    fn visualization_msgs__msg__MarkerArray__Sequence__fini(msg: *mut MarkerArraySequence);
+    fn visualization_msgs__msg__MarkerArray__Sequence__init(msg: *mut MarkerArraySeqRaw, size: usize) -> bool;
+    fn visualization_msgs__msg__MarkerArray__Sequence__fini(msg: *mut MarkerArraySeqRaw);
     fn rosidl_typesupport_c__get_message_type_support_handle__visualization_msgs__msg__MarkerArray() -> *const rcl::rosidl_message_type_support_t;
 }
 
@@ -16,7 +16,7 @@ extern "C" {
 #[repr(C)]
 #[derive(Debug)]
 pub struct MarkerArray {
-    pub markers: MarkerSequence,
+    pub markers: MarkerSeq<0>,
 }
 
 impl MarkerArray {
@@ -36,19 +36,37 @@ impl Drop for MarkerArray {
     }
 }
 
-#[repr(C)]
-#[derive(Debug)]
-pub struct MarkerArraySequence {
+
+struct MarkerArraySeqRaw {
     data: *mut MarkerArray,
     size: usize,
     capacity: usize,
 }
 
-impl MarkerArraySequence {
+/// Sequence of MarkerArray.
+/// `N` is the maximum number of elements.
+/// If `N` is `0`, the size is unlimited.
+#[repr(C)]
+#[derive(Debug)]
+pub struct MarkerArraySeq<const N: usize> {
+    data: *mut MarkerArray,
+    size: usize,
+    capacity: usize,
+}
+
+impl<const N: usize> MarkerArraySeq<N> {
+    /// Create a sequence of.
+    /// `N` represents the maximum number of elements.
+    /// If `N` is `0`, the sequence is unlimited.
     pub fn new(size: usize) -> Option<Self> {
-        let mut msg: Self = unsafe { std::mem::MaybeUninit::zeroed().assume_init() };
+        if N != 0 && size >= N {
+            // the size exceeds in the maximum number
+            return None;
+        }
+
+        let mut msg: MarkerArraySeqRaw = unsafe { std::mem::MaybeUninit::zeroed().assume_init() };
         if unsafe { visualization_msgs__msg__MarkerArray__Sequence__init(&mut msg, size) } {
-            Some(msg)
+            Some(Self {data: msg.data, size: msg.size, capacity: msg.capacity })
         } else {
             None
         }
@@ -73,14 +91,15 @@ impl MarkerArraySequence {
     }
 }
 
-impl Drop for MarkerArraySequence {
+impl<const N: usize> Drop for MarkerArraySeq<N> {
     fn drop(&mut self) {
-        unsafe { visualization_msgs__msg__MarkerArray__Sequence__fini(self) };
+        let mut msg = MarkerArraySeqRaw{data: self.data, size: self.size, capacity: self.capacity};
+        unsafe { visualization_msgs__msg__MarkerArray__Sequence__fini(&mut msg) };
     }
 }
 
-unsafe impl Send for MarkerArraySequence {}
-unsafe impl Sync for MarkerArraySequence {}
+unsafe impl<const N: usize> Send for MarkerArraySeq<N> {}
+unsafe impl<const N: usize> Sync for MarkerArraySeq<N> {}
 
 
 impl TopicMsg for MarkerArray {

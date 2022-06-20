@@ -7,8 +7,8 @@ use crate::rcl;
 extern "C" {
     fn shape_msgs__msg__Mesh__init(msg: *mut Mesh) -> bool;
     fn shape_msgs__msg__Mesh__fini(msg: *mut Mesh);
-    fn shape_msgs__msg__Mesh__Sequence__init(msg: *mut MeshSequence, size: usize) -> bool;
-    fn shape_msgs__msg__Mesh__Sequence__fini(msg: *mut MeshSequence);
+    fn shape_msgs__msg__Mesh__Sequence__init(msg: *mut MeshSeqRaw, size: usize) -> bool;
+    fn shape_msgs__msg__Mesh__Sequence__fini(msg: *mut MeshSeqRaw);
     fn rosidl_typesupport_c__get_message_type_support_handle__shape_msgs__msg__Mesh() -> *const rcl::rosidl_message_type_support_t;
 }
 
@@ -16,8 +16,8 @@ extern "C" {
 #[repr(C)]
 #[derive(Debug)]
 pub struct Mesh {
-    pub triangles: MeshTriangleSequence,
-    pub vertices: geometry_msgs::msg::PointSequence,
+    pub triangles: MeshTriangleSeq<0>,
+    pub vertices: geometry_msgs::msg::PointSeq<0>,
 }
 
 impl Mesh {
@@ -37,19 +37,37 @@ impl Drop for Mesh {
     }
 }
 
-#[repr(C)]
-#[derive(Debug)]
-pub struct MeshSequence {
+
+struct MeshSeqRaw {
     data: *mut Mesh,
     size: usize,
     capacity: usize,
 }
 
-impl MeshSequence {
+/// Sequence of Mesh.
+/// `N` is the maximum number of elements.
+/// If `N` is `0`, the size is unlimited.
+#[repr(C)]
+#[derive(Debug)]
+pub struct MeshSeq<const N: usize> {
+    data: *mut Mesh,
+    size: usize,
+    capacity: usize,
+}
+
+impl<const N: usize> MeshSeq<N> {
+    /// Create a sequence of.
+    /// `N` represents the maximum number of elements.
+    /// If `N` is `0`, the sequence is unlimited.
     pub fn new(size: usize) -> Option<Self> {
-        let mut msg: Self = unsafe { std::mem::MaybeUninit::zeroed().assume_init() };
+        if N != 0 && size >= N {
+            // the size exceeds in the maximum number
+            return None;
+        }
+
+        let mut msg: MeshSeqRaw = unsafe { std::mem::MaybeUninit::zeroed().assume_init() };
         if unsafe { shape_msgs__msg__Mesh__Sequence__init(&mut msg, size) } {
-            Some(msg)
+            Some(Self {data: msg.data, size: msg.size, capacity: msg.capacity })
         } else {
             None
         }
@@ -74,14 +92,15 @@ impl MeshSequence {
     }
 }
 
-impl Drop for MeshSequence {
+impl<const N: usize> Drop for MeshSeq<N> {
     fn drop(&mut self) {
-        unsafe { shape_msgs__msg__Mesh__Sequence__fini(self) };
+        let mut msg = MeshSeqRaw{data: self.data, size: self.size, capacity: self.capacity};
+        unsafe { shape_msgs__msg__Mesh__Sequence__fini(&mut msg) };
     }
 }
 
-unsafe impl Send for MeshSequence {}
-unsafe impl Sync for MeshSequence {}
+unsafe impl<const N: usize> Send for MeshSeq<N> {}
+unsafe impl<const N: usize> Sync for MeshSeq<N> {}
 
 
 impl TopicMsg for Mesh {

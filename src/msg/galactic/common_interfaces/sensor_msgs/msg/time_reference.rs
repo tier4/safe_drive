@@ -7,8 +7,8 @@ use crate::rcl;
 extern "C" {
     fn sensor_msgs__msg__TimeReference__init(msg: *mut TimeReference) -> bool;
     fn sensor_msgs__msg__TimeReference__fini(msg: *mut TimeReference);
-    fn sensor_msgs__msg__TimeReference__Sequence__init(msg: *mut TimeReferenceSequence, size: usize) -> bool;
-    fn sensor_msgs__msg__TimeReference__Sequence__fini(msg: *mut TimeReferenceSequence);
+    fn sensor_msgs__msg__TimeReference__Sequence__init(msg: *mut TimeReferenceSeqRaw, size: usize) -> bool;
+    fn sensor_msgs__msg__TimeReference__Sequence__fini(msg: *mut TimeReferenceSeqRaw);
     fn rosidl_typesupport_c__get_message_type_support_handle__sensor_msgs__msg__TimeReference() -> *const rcl::rosidl_message_type_support_t;
 }
 
@@ -38,19 +38,37 @@ impl Drop for TimeReference {
     }
 }
 
-#[repr(C)]
-#[derive(Debug)]
-pub struct TimeReferenceSequence {
+
+struct TimeReferenceSeqRaw {
     data: *mut TimeReference,
     size: usize,
     capacity: usize,
 }
 
-impl TimeReferenceSequence {
+/// Sequence of TimeReference.
+/// `N` is the maximum number of elements.
+/// If `N` is `0`, the size is unlimited.
+#[repr(C)]
+#[derive(Debug)]
+pub struct TimeReferenceSeq<const N: usize> {
+    data: *mut TimeReference,
+    size: usize,
+    capacity: usize,
+}
+
+impl<const N: usize> TimeReferenceSeq<N> {
+    /// Create a sequence of.
+    /// `N` represents the maximum number of elements.
+    /// If `N` is `0`, the sequence is unlimited.
     pub fn new(size: usize) -> Option<Self> {
-        let mut msg: Self = unsafe { std::mem::MaybeUninit::zeroed().assume_init() };
+        if N != 0 && size >= N {
+            // the size exceeds in the maximum number
+            return None;
+        }
+
+        let mut msg: TimeReferenceSeqRaw = unsafe { std::mem::MaybeUninit::zeroed().assume_init() };
         if unsafe { sensor_msgs__msg__TimeReference__Sequence__init(&mut msg, size) } {
-            Some(msg)
+            Some(Self {data: msg.data, size: msg.size, capacity: msg.capacity })
         } else {
             None
         }
@@ -75,14 +93,15 @@ impl TimeReferenceSequence {
     }
 }
 
-impl Drop for TimeReferenceSequence {
+impl<const N: usize> Drop for TimeReferenceSeq<N> {
     fn drop(&mut self) {
-        unsafe { sensor_msgs__msg__TimeReference__Sequence__fini(self) };
+        let mut msg = TimeReferenceSeqRaw{data: self.data, size: self.size, capacity: self.capacity};
+        unsafe { sensor_msgs__msg__TimeReference__Sequence__fini(&mut msg) };
     }
 }
 
-unsafe impl Send for TimeReferenceSequence {}
-unsafe impl Sync for TimeReferenceSequence {}
+unsafe impl<const N: usize> Send for TimeReferenceSeq<N> {}
+unsafe impl<const N: usize> Sync for TimeReferenceSeq<N> {}
 
 
 impl TopicMsg for TimeReference {

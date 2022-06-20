@@ -7,8 +7,8 @@ use crate::rcl;
 extern "C" {
     fn geometry_msgs__msg__PoseStamped__init(msg: *mut PoseStamped) -> bool;
     fn geometry_msgs__msg__PoseStamped__fini(msg: *mut PoseStamped);
-    fn geometry_msgs__msg__PoseStamped__Sequence__init(msg: *mut PoseStampedSequence, size: usize) -> bool;
-    fn geometry_msgs__msg__PoseStamped__Sequence__fini(msg: *mut PoseStampedSequence);
+    fn geometry_msgs__msg__PoseStamped__Sequence__init(msg: *mut PoseStampedSeqRaw, size: usize) -> bool;
+    fn geometry_msgs__msg__PoseStamped__Sequence__fini(msg: *mut PoseStampedSeqRaw);
     fn rosidl_typesupport_c__get_message_type_support_handle__geometry_msgs__msg__PoseStamped() -> *const rcl::rosidl_message_type_support_t;
 }
 
@@ -37,19 +37,37 @@ impl Drop for PoseStamped {
     }
 }
 
-#[repr(C)]
-#[derive(Debug)]
-pub struct PoseStampedSequence {
+
+struct PoseStampedSeqRaw {
     data: *mut PoseStamped,
     size: usize,
     capacity: usize,
 }
 
-impl PoseStampedSequence {
+/// Sequence of PoseStamped.
+/// `N` is the maximum number of elements.
+/// If `N` is `0`, the size is unlimited.
+#[repr(C)]
+#[derive(Debug)]
+pub struct PoseStampedSeq<const N: usize> {
+    data: *mut PoseStamped,
+    size: usize,
+    capacity: usize,
+}
+
+impl<const N: usize> PoseStampedSeq<N> {
+    /// Create a sequence of.
+    /// `N` represents the maximum number of elements.
+    /// If `N` is `0`, the sequence is unlimited.
     pub fn new(size: usize) -> Option<Self> {
-        let mut msg: Self = unsafe { std::mem::MaybeUninit::zeroed().assume_init() };
+        if N != 0 && size >= N {
+            // the size exceeds in the maximum number
+            return None;
+        }
+
+        let mut msg: PoseStampedSeqRaw = unsafe { std::mem::MaybeUninit::zeroed().assume_init() };
         if unsafe { geometry_msgs__msg__PoseStamped__Sequence__init(&mut msg, size) } {
-            Some(msg)
+            Some(Self {data: msg.data, size: msg.size, capacity: msg.capacity })
         } else {
             None
         }
@@ -74,14 +92,15 @@ impl PoseStampedSequence {
     }
 }
 
-impl Drop for PoseStampedSequence {
+impl<const N: usize> Drop for PoseStampedSeq<N> {
     fn drop(&mut self) {
-        unsafe { geometry_msgs__msg__PoseStamped__Sequence__fini(self) };
+        let mut msg = PoseStampedSeqRaw{data: self.data, size: self.size, capacity: self.capacity};
+        unsafe { geometry_msgs__msg__PoseStamped__Sequence__fini(&mut msg) };
     }
 }
 
-unsafe impl Send for PoseStampedSequence {}
-unsafe impl Sync for PoseStampedSequence {}
+unsafe impl<const N: usize> Send for PoseStampedSeq<N> {}
+unsafe impl<const N: usize> Sync for PoseStampedSeq<N> {}
 
 
 impl TopicMsg for PoseStamped {

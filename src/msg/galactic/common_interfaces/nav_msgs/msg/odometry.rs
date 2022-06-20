@@ -7,8 +7,8 @@ use crate::rcl;
 extern "C" {
     fn nav_msgs__msg__Odometry__init(msg: *mut Odometry) -> bool;
     fn nav_msgs__msg__Odometry__fini(msg: *mut Odometry);
-    fn nav_msgs__msg__Odometry__Sequence__init(msg: *mut OdometrySequence, size: usize) -> bool;
-    fn nav_msgs__msg__Odometry__Sequence__fini(msg: *mut OdometrySequence);
+    fn nav_msgs__msg__Odometry__Sequence__init(msg: *mut OdometrySeqRaw, size: usize) -> bool;
+    fn nav_msgs__msg__Odometry__Sequence__fini(msg: *mut OdometrySeqRaw);
     fn rosidl_typesupport_c__get_message_type_support_handle__nav_msgs__msg__Odometry() -> *const rcl::rosidl_message_type_support_t;
 }
 
@@ -39,19 +39,37 @@ impl Drop for Odometry {
     }
 }
 
-#[repr(C)]
-#[derive(Debug)]
-pub struct OdometrySequence {
+
+struct OdometrySeqRaw {
     data: *mut Odometry,
     size: usize,
     capacity: usize,
 }
 
-impl OdometrySequence {
+/// Sequence of Odometry.
+/// `N` is the maximum number of elements.
+/// If `N` is `0`, the size is unlimited.
+#[repr(C)]
+#[derive(Debug)]
+pub struct OdometrySeq<const N: usize> {
+    data: *mut Odometry,
+    size: usize,
+    capacity: usize,
+}
+
+impl<const N: usize> OdometrySeq<N> {
+    /// Create a sequence of.
+    /// `N` represents the maximum number of elements.
+    /// If `N` is `0`, the sequence is unlimited.
     pub fn new(size: usize) -> Option<Self> {
-        let mut msg: Self = unsafe { std::mem::MaybeUninit::zeroed().assume_init() };
+        if N != 0 && size >= N {
+            // the size exceeds in the maximum number
+            return None;
+        }
+
+        let mut msg: OdometrySeqRaw = unsafe { std::mem::MaybeUninit::zeroed().assume_init() };
         if unsafe { nav_msgs__msg__Odometry__Sequence__init(&mut msg, size) } {
-            Some(msg)
+            Some(Self {data: msg.data, size: msg.size, capacity: msg.capacity })
         } else {
             None
         }
@@ -76,14 +94,15 @@ impl OdometrySequence {
     }
 }
 
-impl Drop for OdometrySequence {
+impl<const N: usize> Drop for OdometrySeq<N> {
     fn drop(&mut self) {
-        unsafe { nav_msgs__msg__Odometry__Sequence__fini(self) };
+        let mut msg = OdometrySeqRaw{data: self.data, size: self.size, capacity: self.capacity};
+        unsafe { nav_msgs__msg__Odometry__Sequence__fini(&mut msg) };
     }
 }
 
-unsafe impl Send for OdometrySequence {}
-unsafe impl Sync for OdometrySequence {}
+unsafe impl<const N: usize> Send for OdometrySeq<N> {}
+unsafe impl<const N: usize> Sync for OdometrySeq<N> {}
 
 
 impl TopicMsg for Odometry {

@@ -15,8 +15,8 @@ pub const SERVICE_GALILEO: u16 = 8;
 extern "C" {
     fn sensor_msgs__msg__NavSatStatus__init(msg: *mut NavSatStatus) -> bool;
     fn sensor_msgs__msg__NavSatStatus__fini(msg: *mut NavSatStatus);
-    fn sensor_msgs__msg__NavSatStatus__Sequence__init(msg: *mut NavSatStatusSequence, size: usize) -> bool;
-    fn sensor_msgs__msg__NavSatStatus__Sequence__fini(msg: *mut NavSatStatusSequence);
+    fn sensor_msgs__msg__NavSatStatus__Sequence__init(msg: *mut NavSatStatusSeqRaw, size: usize) -> bool;
+    fn sensor_msgs__msg__NavSatStatus__Sequence__fini(msg: *mut NavSatStatusSeqRaw);
     fn rosidl_typesupport_c__get_message_type_support_handle__sensor_msgs__msg__NavSatStatus() -> *const rcl::rosidl_message_type_support_t;
 }
 
@@ -45,19 +45,37 @@ impl Drop for NavSatStatus {
     }
 }
 
-#[repr(C)]
-#[derive(Debug)]
-pub struct NavSatStatusSequence {
+
+struct NavSatStatusSeqRaw {
     data: *mut NavSatStatus,
     size: usize,
     capacity: usize,
 }
 
-impl NavSatStatusSequence {
+/// Sequence of NavSatStatus.
+/// `N` is the maximum number of elements.
+/// If `N` is `0`, the size is unlimited.
+#[repr(C)]
+#[derive(Debug)]
+pub struct NavSatStatusSeq<const N: usize> {
+    data: *mut NavSatStatus,
+    size: usize,
+    capacity: usize,
+}
+
+impl<const N: usize> NavSatStatusSeq<N> {
+    /// Create a sequence of.
+    /// `N` represents the maximum number of elements.
+    /// If `N` is `0`, the sequence is unlimited.
     pub fn new(size: usize) -> Option<Self> {
-        let mut msg: Self = unsafe { std::mem::MaybeUninit::zeroed().assume_init() };
+        if N != 0 && size >= N {
+            // the size exceeds in the maximum number
+            return None;
+        }
+
+        let mut msg: NavSatStatusSeqRaw = unsafe { std::mem::MaybeUninit::zeroed().assume_init() };
         if unsafe { sensor_msgs__msg__NavSatStatus__Sequence__init(&mut msg, size) } {
-            Some(msg)
+            Some(Self {data: msg.data, size: msg.size, capacity: msg.capacity })
         } else {
             None
         }
@@ -82,14 +100,15 @@ impl NavSatStatusSequence {
     }
 }
 
-impl Drop for NavSatStatusSequence {
+impl<const N: usize> Drop for NavSatStatusSeq<N> {
     fn drop(&mut self) {
-        unsafe { sensor_msgs__msg__NavSatStatus__Sequence__fini(self) };
+        let mut msg = NavSatStatusSeqRaw{data: self.data, size: self.size, capacity: self.capacity};
+        unsafe { sensor_msgs__msg__NavSatStatus__Sequence__fini(&mut msg) };
     }
 }
 
-unsafe impl Send for NavSatStatusSequence {}
-unsafe impl Sync for NavSatStatusSequence {}
+unsafe impl<const N: usize> Send for NavSatStatusSeq<N> {}
+unsafe impl<const N: usize> Sync for NavSatStatusSeq<N> {}
 
 
 impl TopicMsg for NavSatStatus {

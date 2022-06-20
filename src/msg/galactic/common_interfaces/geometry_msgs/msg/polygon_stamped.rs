@@ -7,8 +7,8 @@ use crate::rcl;
 extern "C" {
     fn geometry_msgs__msg__PolygonStamped__init(msg: *mut PolygonStamped) -> bool;
     fn geometry_msgs__msg__PolygonStamped__fini(msg: *mut PolygonStamped);
-    fn geometry_msgs__msg__PolygonStamped__Sequence__init(msg: *mut PolygonStampedSequence, size: usize) -> bool;
-    fn geometry_msgs__msg__PolygonStamped__Sequence__fini(msg: *mut PolygonStampedSequence);
+    fn geometry_msgs__msg__PolygonStamped__Sequence__init(msg: *mut PolygonStampedSeqRaw, size: usize) -> bool;
+    fn geometry_msgs__msg__PolygonStamped__Sequence__fini(msg: *mut PolygonStampedSeqRaw);
     fn rosidl_typesupport_c__get_message_type_support_handle__geometry_msgs__msg__PolygonStamped() -> *const rcl::rosidl_message_type_support_t;
 }
 
@@ -37,19 +37,37 @@ impl Drop for PolygonStamped {
     }
 }
 
-#[repr(C)]
-#[derive(Debug)]
-pub struct PolygonStampedSequence {
+
+struct PolygonStampedSeqRaw {
     data: *mut PolygonStamped,
     size: usize,
     capacity: usize,
 }
 
-impl PolygonStampedSequence {
+/// Sequence of PolygonStamped.
+/// `N` is the maximum number of elements.
+/// If `N` is `0`, the size is unlimited.
+#[repr(C)]
+#[derive(Debug)]
+pub struct PolygonStampedSeq<const N: usize> {
+    data: *mut PolygonStamped,
+    size: usize,
+    capacity: usize,
+}
+
+impl<const N: usize> PolygonStampedSeq<N> {
+    /// Create a sequence of.
+    /// `N` represents the maximum number of elements.
+    /// If `N` is `0`, the sequence is unlimited.
     pub fn new(size: usize) -> Option<Self> {
-        let mut msg: Self = unsafe { std::mem::MaybeUninit::zeroed().assume_init() };
+        if N != 0 && size >= N {
+            // the size exceeds in the maximum number
+            return None;
+        }
+
+        let mut msg: PolygonStampedSeqRaw = unsafe { std::mem::MaybeUninit::zeroed().assume_init() };
         if unsafe { geometry_msgs__msg__PolygonStamped__Sequence__init(&mut msg, size) } {
-            Some(msg)
+            Some(Self {data: msg.data, size: msg.size, capacity: msg.capacity })
         } else {
             None
         }
@@ -74,14 +92,15 @@ impl PolygonStampedSequence {
     }
 }
 
-impl Drop for PolygonStampedSequence {
+impl<const N: usize> Drop for PolygonStampedSeq<N> {
     fn drop(&mut self) {
-        unsafe { geometry_msgs__msg__PolygonStamped__Sequence__fini(self) };
+        let mut msg = PolygonStampedSeqRaw{data: self.data, size: self.size, capacity: self.capacity};
+        unsafe { geometry_msgs__msg__PolygonStamped__Sequence__fini(&mut msg) };
     }
 }
 
-unsafe impl Send for PolygonStampedSequence {}
-unsafe impl Sync for PolygonStampedSequence {}
+unsafe impl<const N: usize> Send for PolygonStampedSeq<N> {}
+unsafe impl<const N: usize> Sync for PolygonStampedSeq<N> {}
 
 
 impl TopicMsg for PolygonStamped {

@@ -7,8 +7,8 @@ use crate::rcl;
 extern "C" {
     fn std_msgs__msg__Float32MultiArray__init(msg: *mut Float32MultiArray) -> bool;
     fn std_msgs__msg__Float32MultiArray__fini(msg: *mut Float32MultiArray);
-    fn std_msgs__msg__Float32MultiArray__Sequence__init(msg: *mut Float32MultiArraySequence, size: usize) -> bool;
-    fn std_msgs__msg__Float32MultiArray__Sequence__fini(msg: *mut Float32MultiArraySequence);
+    fn std_msgs__msg__Float32MultiArray__Sequence__init(msg: *mut Float32MultiArraySeqRaw, size: usize) -> bool;
+    fn std_msgs__msg__Float32MultiArray__Sequence__fini(msg: *mut Float32MultiArraySeqRaw);
     fn rosidl_typesupport_c__get_message_type_support_handle__std_msgs__msg__Float32MultiArray() -> *const rcl::rosidl_message_type_support_t;
 }
 
@@ -37,19 +37,37 @@ impl Drop for Float32MultiArray {
     }
 }
 
-#[repr(C)]
-#[derive(Debug)]
-pub struct Float32MultiArraySequence {
+
+struct Float32MultiArraySeqRaw {
     data: *mut Float32MultiArray,
     size: usize,
     capacity: usize,
 }
 
-impl Float32MultiArraySequence {
+/// Sequence of Float32MultiArray.
+/// `N` is the maximum number of elements.
+/// If `N` is `0`, the size is unlimited.
+#[repr(C)]
+#[derive(Debug)]
+pub struct Float32MultiArraySeq<const N: usize> {
+    data: *mut Float32MultiArray,
+    size: usize,
+    capacity: usize,
+}
+
+impl<const N: usize> Float32MultiArraySeq<N> {
+    /// Create a sequence of.
+    /// `N` represents the maximum number of elements.
+    /// If `N` is `0`, the sequence is unlimited.
     pub fn new(size: usize) -> Option<Self> {
-        let mut msg: Self = unsafe { std::mem::MaybeUninit::zeroed().assume_init() };
+        if N != 0 && size >= N {
+            // the size exceeds in the maximum number
+            return None;
+        }
+
+        let mut msg: Float32MultiArraySeqRaw = unsafe { std::mem::MaybeUninit::zeroed().assume_init() };
         if unsafe { std_msgs__msg__Float32MultiArray__Sequence__init(&mut msg, size) } {
-            Some(msg)
+            Some(Self {data: msg.data, size: msg.size, capacity: msg.capacity })
         } else {
             None
         }
@@ -74,14 +92,15 @@ impl Float32MultiArraySequence {
     }
 }
 
-impl Drop for Float32MultiArraySequence {
+impl<const N: usize> Drop for Float32MultiArraySeq<N> {
     fn drop(&mut self) {
-        unsafe { std_msgs__msg__Float32MultiArray__Sequence__fini(self) };
+        let mut msg = Float32MultiArraySeqRaw{data: self.data, size: self.size, capacity: self.capacity};
+        unsafe { std_msgs__msg__Float32MultiArray__Sequence__fini(&mut msg) };
     }
 }
 
-unsafe impl Send for Float32MultiArraySequence {}
-unsafe impl Sync for Float32MultiArraySequence {}
+unsafe impl<const N: usize> Send for Float32MultiArraySeq<N> {}
+unsafe impl<const N: usize> Sync for Float32MultiArraySeq<N> {}
 
 
 impl TopicMsg for Float32MultiArray {

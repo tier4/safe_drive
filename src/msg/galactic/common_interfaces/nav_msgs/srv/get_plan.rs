@@ -8,12 +8,12 @@ use crate::msg::common_interfaces::*;
 extern "C" {
     fn nav_msgs__srv__GetPlan_Request__init(msg: *mut GetPlanRequest) -> bool;
     fn nav_msgs__srv__GetPlan_Request__fini(msg: *mut GetPlanRequest);
-    fn nav_msgs__srv__GetPlan_Request__Sequence__init(msg: *mut GetPlanRequestSequence, size: usize) -> bool;
-    fn nav_msgs__srv__GetPlan_Request__Sequence__fini(msg: *mut GetPlanRequestSequence);
+    fn nav_msgs__srv__GetPlan_Request__Sequence__init(msg: *mut GetPlanRequestSeqRaw, size: usize) -> bool;
+    fn nav_msgs__srv__GetPlan_Request__Sequence__fini(msg: *mut GetPlanRequestSeqRaw);
     fn nav_msgs__srv__GetPlan_Response__init(msg: *mut GetPlanResponse) -> bool;
     fn nav_msgs__srv__GetPlan_Response__fini(msg: *mut GetPlanResponse);
-    fn nav_msgs__srv__GetPlan_Response__Sequence__init(msg: *mut GetPlanResponseSequence, size: usize) -> bool;
-    fn nav_msgs__srv__GetPlan_Response__Sequence__fini(msg: *mut GetPlanResponseSequence);
+    fn nav_msgs__srv__GetPlan_Response__Sequence__init(msg: *mut GetPlanResponseSeqRaw, size: usize) -> bool;
+    fn nav_msgs__srv__GetPlan_Response__Sequence__fini(msg: *mut GetPlanResponseSeqRaw);
     fn rosidl_typesupport_c__get_service_type_support_handle__nav_msgs__srv__GetPlan() -> *const rcl::rosidl_service_type_support_t;
 }
 
@@ -49,19 +49,37 @@ impl Drop for GetPlanRequest {
     }
 }
 
-#[repr(C)]
-#[derive(Debug)]
-pub struct GetPlanRequestSequence {
+
+struct GetPlanRequestSeqRaw {
     data: *mut GetPlanRequest,
     size: usize,
     capacity: usize,
 }
 
-impl GetPlanRequestSequence {
+/// Sequence of GetPlanRequest.
+/// `N` is the maximum number of elements.
+/// If `N` is `0`, the size is unlimited.
+#[repr(C)]
+#[derive(Debug)]
+pub struct GetPlanRequestSeq<const N: usize> {
+    data: *mut GetPlanRequest,
+    size: usize,
+    capacity: usize,
+}
+
+impl<const N: usize> GetPlanRequestSeq<N> {
+    /// Create a sequence of.
+    /// `N` represents the maximum number of elements.
+    /// If `N` is `0`, the sequence is unlimited.
     pub fn new(size: usize) -> Option<Self> {
-        let mut msg: Self = unsafe { std::mem::MaybeUninit::zeroed().assume_init() };
+        if N != 0 && size >= N {
+            // the size exceeds in the maximum number
+            return None;
+        }
+
+        let mut msg: GetPlanRequestSeqRaw = unsafe { std::mem::MaybeUninit::zeroed().assume_init() };
         if unsafe { nav_msgs__srv__GetPlan_Request__Sequence__init(&mut msg, size) } {
-            Some(msg)
+            Some(Self {data: msg.data, size: msg.size, capacity: msg.capacity })
         } else {
             None
         }
@@ -86,14 +104,15 @@ impl GetPlanRequestSequence {
     }
 }
 
-impl Drop for GetPlanRequestSequence {
+impl<const N: usize> Drop for GetPlanRequestSeq<N> {
     fn drop(&mut self) {
-        unsafe { nav_msgs__srv__GetPlan_Request__Sequence__fini(self) };
+        let mut msg = GetPlanRequestSeqRaw{data: self.data, size: self.size, capacity: self.capacity};
+        unsafe { nav_msgs__srv__GetPlan_Request__Sequence__fini(&mut msg) };
     }
 }
 
-unsafe impl Send for GetPlanRequestSequence {}
-unsafe impl Sync for GetPlanRequestSequence {}
+unsafe impl<const N: usize> Send for GetPlanRequestSeq<N> {}
+unsafe impl<const N: usize> Sync for GetPlanRequestSeq<N> {}
 
 
 impl GetPlanResponse {
@@ -113,19 +132,37 @@ impl Drop for GetPlanResponse {
     }
 }
 
-#[repr(C)]
-#[derive(Debug)]
-pub struct GetPlanResponseSequence {
+
+struct GetPlanResponseSeqRaw {
     data: *mut GetPlanResponse,
     size: usize,
     capacity: usize,
 }
 
-impl GetPlanResponseSequence {
+/// Sequence of GetPlanResponse.
+/// `N` is the maximum number of elements.
+/// If `N` is `0`, the size is unlimited.
+#[repr(C)]
+#[derive(Debug)]
+pub struct GetPlanResponseSeq<const N: usize> {
+    data: *mut GetPlanResponse,
+    size: usize,
+    capacity: usize,
+}
+
+impl<const N: usize> GetPlanResponseSeq<N> {
+    /// Create a sequence of.
+    /// `N` represents the maximum number of elements.
+    /// If `N` is `0`, the sequence is unlimited.
     pub fn new(size: usize) -> Option<Self> {
-        let mut msg: Self = unsafe { std::mem::MaybeUninit::zeroed().assume_init() };
+        if N != 0 && size >= N {
+            // the size exceeds in the maximum number
+            return None;
+        }
+
+        let mut msg: GetPlanResponseSeqRaw = unsafe { std::mem::MaybeUninit::zeroed().assume_init() };
         if unsafe { nav_msgs__srv__GetPlan_Response__Sequence__init(&mut msg, size) } {
-            Some(msg)
+            Some(Self {data: msg.data, size: msg.size, capacity: msg.capacity })
         } else {
             None
         }
@@ -150,14 +187,15 @@ impl GetPlanResponseSequence {
     }
 }
 
-impl Drop for GetPlanResponseSequence {
+impl<const N: usize> Drop for GetPlanResponseSeq<N> {
     fn drop(&mut self) {
-        unsafe { nav_msgs__srv__GetPlan_Response__Sequence__fini(self) };
+        let mut msg = GetPlanResponseSeqRaw{data: self.data, size: self.size, capacity: self.capacity};
+        unsafe { nav_msgs__srv__GetPlan_Response__Sequence__fini(&mut msg) };
     }
 }
 
-unsafe impl Send for GetPlanResponseSequence {}
-unsafe impl Sync for GetPlanResponseSequence {}
+unsafe impl<const N: usize> Send for GetPlanResponseSeq<N> {}
+unsafe impl<const N: usize> Sync for GetPlanResponseSeq<N> {}
 
 
 pub struct GetPlan;

@@ -7,8 +7,8 @@ use crate::rcl;
 extern "C" {
     fn geometry_msgs__msg__QuaternionStamped__init(msg: *mut QuaternionStamped) -> bool;
     fn geometry_msgs__msg__QuaternionStamped__fini(msg: *mut QuaternionStamped);
-    fn geometry_msgs__msg__QuaternionStamped__Sequence__init(msg: *mut QuaternionStampedSequence, size: usize) -> bool;
-    fn geometry_msgs__msg__QuaternionStamped__Sequence__fini(msg: *mut QuaternionStampedSequence);
+    fn geometry_msgs__msg__QuaternionStamped__Sequence__init(msg: *mut QuaternionStampedSeqRaw, size: usize) -> bool;
+    fn geometry_msgs__msg__QuaternionStamped__Sequence__fini(msg: *mut QuaternionStampedSeqRaw);
     fn rosidl_typesupport_c__get_message_type_support_handle__geometry_msgs__msg__QuaternionStamped() -> *const rcl::rosidl_message_type_support_t;
 }
 
@@ -37,19 +37,37 @@ impl Drop for QuaternionStamped {
     }
 }
 
-#[repr(C)]
-#[derive(Debug)]
-pub struct QuaternionStampedSequence {
+
+struct QuaternionStampedSeqRaw {
     data: *mut QuaternionStamped,
     size: usize,
     capacity: usize,
 }
 
-impl QuaternionStampedSequence {
+/// Sequence of QuaternionStamped.
+/// `N` is the maximum number of elements.
+/// If `N` is `0`, the size is unlimited.
+#[repr(C)]
+#[derive(Debug)]
+pub struct QuaternionStampedSeq<const N: usize> {
+    data: *mut QuaternionStamped,
+    size: usize,
+    capacity: usize,
+}
+
+impl<const N: usize> QuaternionStampedSeq<N> {
+    /// Create a sequence of.
+    /// `N` represents the maximum number of elements.
+    /// If `N` is `0`, the sequence is unlimited.
     pub fn new(size: usize) -> Option<Self> {
-        let mut msg: Self = unsafe { std::mem::MaybeUninit::zeroed().assume_init() };
+        if N != 0 && size >= N {
+            // the size exceeds in the maximum number
+            return None;
+        }
+
+        let mut msg: QuaternionStampedSeqRaw = unsafe { std::mem::MaybeUninit::zeroed().assume_init() };
         if unsafe { geometry_msgs__msg__QuaternionStamped__Sequence__init(&mut msg, size) } {
-            Some(msg)
+            Some(Self {data: msg.data, size: msg.size, capacity: msg.capacity })
         } else {
             None
         }
@@ -74,14 +92,15 @@ impl QuaternionStampedSequence {
     }
 }
 
-impl Drop for QuaternionStampedSequence {
+impl<const N: usize> Drop for QuaternionStampedSeq<N> {
     fn drop(&mut self) {
-        unsafe { geometry_msgs__msg__QuaternionStamped__Sequence__fini(self) };
+        let mut msg = QuaternionStampedSeqRaw{data: self.data, size: self.size, capacity: self.capacity};
+        unsafe { geometry_msgs__msg__QuaternionStamped__Sequence__fini(&mut msg) };
     }
 }
 
-unsafe impl Send for QuaternionStampedSequence {}
-unsafe impl Sync for QuaternionStampedSequence {}
+unsafe impl<const N: usize> Send for QuaternionStampedSeq<N> {}
+unsafe impl<const N: usize> Sync for QuaternionStampedSeq<N> {}
 
 
 impl TopicMsg for QuaternionStamped {

@@ -7,8 +7,8 @@ use crate::rcl;
 extern "C" {
     fn geometry_msgs__msg__PointStamped__init(msg: *mut PointStamped) -> bool;
     fn geometry_msgs__msg__PointStamped__fini(msg: *mut PointStamped);
-    fn geometry_msgs__msg__PointStamped__Sequence__init(msg: *mut PointStampedSequence, size: usize) -> bool;
-    fn geometry_msgs__msg__PointStamped__Sequence__fini(msg: *mut PointStampedSequence);
+    fn geometry_msgs__msg__PointStamped__Sequence__init(msg: *mut PointStampedSeqRaw, size: usize) -> bool;
+    fn geometry_msgs__msg__PointStamped__Sequence__fini(msg: *mut PointStampedSeqRaw);
     fn rosidl_typesupport_c__get_message_type_support_handle__geometry_msgs__msg__PointStamped() -> *const rcl::rosidl_message_type_support_t;
 }
 
@@ -37,19 +37,37 @@ impl Drop for PointStamped {
     }
 }
 
-#[repr(C)]
-#[derive(Debug)]
-pub struct PointStampedSequence {
+
+struct PointStampedSeqRaw {
     data: *mut PointStamped,
     size: usize,
     capacity: usize,
 }
 
-impl PointStampedSequence {
+/// Sequence of PointStamped.
+/// `N` is the maximum number of elements.
+/// If `N` is `0`, the size is unlimited.
+#[repr(C)]
+#[derive(Debug)]
+pub struct PointStampedSeq<const N: usize> {
+    data: *mut PointStamped,
+    size: usize,
+    capacity: usize,
+}
+
+impl<const N: usize> PointStampedSeq<N> {
+    /// Create a sequence of.
+    /// `N` represents the maximum number of elements.
+    /// If `N` is `0`, the sequence is unlimited.
     pub fn new(size: usize) -> Option<Self> {
-        let mut msg: Self = unsafe { std::mem::MaybeUninit::zeroed().assume_init() };
+        if N != 0 && size >= N {
+            // the size exceeds in the maximum number
+            return None;
+        }
+
+        let mut msg: PointStampedSeqRaw = unsafe { std::mem::MaybeUninit::zeroed().assume_init() };
         if unsafe { geometry_msgs__msg__PointStamped__Sequence__init(&mut msg, size) } {
-            Some(msg)
+            Some(Self {data: msg.data, size: msg.size, capacity: msg.capacity })
         } else {
             None
         }
@@ -74,14 +92,15 @@ impl PointStampedSequence {
     }
 }
 
-impl Drop for PointStampedSequence {
+impl<const N: usize> Drop for PointStampedSeq<N> {
     fn drop(&mut self) {
-        unsafe { geometry_msgs__msg__PointStamped__Sequence__fini(self) };
+        let mut msg = PointStampedSeqRaw{data: self.data, size: self.size, capacity: self.capacity};
+        unsafe { geometry_msgs__msg__PointStamped__Sequence__fini(&mut msg) };
     }
 }
 
-unsafe impl Send for PointStampedSequence {}
-unsafe impl Sync for PointStampedSequence {}
+unsafe impl<const N: usize> Send for PointStampedSeq<N> {}
+unsafe impl<const N: usize> Sync for PointStampedSeq<N> {}
 
 
 impl TopicMsg for PointStamped {

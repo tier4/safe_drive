@@ -7,8 +7,8 @@ use crate::rcl;
 extern "C" {
     fn geometry_msgs__msg__Twist__init(msg: *mut Twist) -> bool;
     fn geometry_msgs__msg__Twist__fini(msg: *mut Twist);
-    fn geometry_msgs__msg__Twist__Sequence__init(msg: *mut TwistSequence, size: usize) -> bool;
-    fn geometry_msgs__msg__Twist__Sequence__fini(msg: *mut TwistSequence);
+    fn geometry_msgs__msg__Twist__Sequence__init(msg: *mut TwistSeqRaw, size: usize) -> bool;
+    fn geometry_msgs__msg__Twist__Sequence__fini(msg: *mut TwistSeqRaw);
     fn rosidl_typesupport_c__get_message_type_support_handle__geometry_msgs__msg__Twist() -> *const rcl::rosidl_message_type_support_t;
 }
 
@@ -37,19 +37,37 @@ impl Drop for Twist {
     }
 }
 
-#[repr(C)]
-#[derive(Debug)]
-pub struct TwistSequence {
+
+struct TwistSeqRaw {
     data: *mut Twist,
     size: usize,
     capacity: usize,
 }
 
-impl TwistSequence {
+/// Sequence of Twist.
+/// `N` is the maximum number of elements.
+/// If `N` is `0`, the size is unlimited.
+#[repr(C)]
+#[derive(Debug)]
+pub struct TwistSeq<const N: usize> {
+    data: *mut Twist,
+    size: usize,
+    capacity: usize,
+}
+
+impl<const N: usize> TwistSeq<N> {
+    /// Create a sequence of.
+    /// `N` represents the maximum number of elements.
+    /// If `N` is `0`, the sequence is unlimited.
     pub fn new(size: usize) -> Option<Self> {
-        let mut msg: Self = unsafe { std::mem::MaybeUninit::zeroed().assume_init() };
+        if N != 0 && size >= N {
+            // the size exceeds in the maximum number
+            return None;
+        }
+
+        let mut msg: TwistSeqRaw = unsafe { std::mem::MaybeUninit::zeroed().assume_init() };
         if unsafe { geometry_msgs__msg__Twist__Sequence__init(&mut msg, size) } {
-            Some(msg)
+            Some(Self {data: msg.data, size: msg.size, capacity: msg.capacity })
         } else {
             None
         }
@@ -74,14 +92,15 @@ impl TwistSequence {
     }
 }
 
-impl Drop for TwistSequence {
+impl<const N: usize> Drop for TwistSeq<N> {
     fn drop(&mut self) {
-        unsafe { geometry_msgs__msg__Twist__Sequence__fini(self) };
+        let mut msg = TwistSeqRaw{data: self.data, size: self.size, capacity: self.capacity};
+        unsafe { geometry_msgs__msg__Twist__Sequence__fini(&mut msg) };
     }
 }
 
-unsafe impl Send for TwistSequence {}
-unsafe impl Sync for TwistSequence {}
+unsafe impl<const N: usize> Send for TwistSeq<N> {}
+unsafe impl<const N: usize> Sync for TwistSeq<N> {}
 
 
 impl TopicMsg for Twist {

@@ -7,8 +7,8 @@ use crate::rcl;
 extern "C" {
     fn std_msgs__msg__String__init(msg: *mut String) -> bool;
     fn std_msgs__msg__String__fini(msg: *mut String);
-    fn std_msgs__msg__String__Sequence__init(msg: *mut StringSequence, size: usize) -> bool;
-    fn std_msgs__msg__String__Sequence__fini(msg: *mut StringSequence);
+    fn std_msgs__msg__String__Sequence__init(msg: *mut StringSeqRaw, size: usize) -> bool;
+    fn std_msgs__msg__String__Sequence__fini(msg: *mut StringSeqRaw);
     fn rosidl_typesupport_c__get_message_type_support_handle__std_msgs__msg__String() -> *const rcl::rosidl_message_type_support_t;
 }
 
@@ -36,19 +36,37 @@ impl Drop for String {
     }
 }
 
-#[repr(C)]
-#[derive(Debug)]
-pub struct StringSequence {
+
+struct StringSeqRaw {
     data: *mut String,
     size: usize,
     capacity: usize,
 }
 
-impl StringSequence {
+/// Sequence of String.
+/// `N` is the maximum number of elements.
+/// If `N` is `0`, the size is unlimited.
+#[repr(C)]
+#[derive(Debug)]
+pub struct StringSeq<const N: usize> {
+    data: *mut String,
+    size: usize,
+    capacity: usize,
+}
+
+impl<const N: usize> StringSeq<N> {
+    /// Create a sequence of.
+    /// `N` represents the maximum number of elements.
+    /// If `N` is `0`, the sequence is unlimited.
     pub fn new(size: usize) -> Option<Self> {
-        let mut msg: Self = unsafe { std::mem::MaybeUninit::zeroed().assume_init() };
+        if N != 0 && size >= N {
+            // the size exceeds in the maximum number
+            return None;
+        }
+
+        let mut msg: StringSeqRaw = unsafe { std::mem::MaybeUninit::zeroed().assume_init() };
         if unsafe { std_msgs__msg__String__Sequence__init(&mut msg, size) } {
-            Some(msg)
+            Some(Self {data: msg.data, size: msg.size, capacity: msg.capacity })
         } else {
             None
         }
@@ -73,14 +91,15 @@ impl StringSequence {
     }
 }
 
-impl Drop for StringSequence {
+impl<const N: usize> Drop for StringSeq<N> {
     fn drop(&mut self) {
-        unsafe { std_msgs__msg__String__Sequence__fini(self) };
+        let mut msg = StringSeqRaw{data: self.data, size: self.size, capacity: self.capacity};
+        unsafe { std_msgs__msg__String__Sequence__fini(&mut msg) };
     }
 }
 
-unsafe impl Send for StringSequence {}
-unsafe impl Sync for StringSequence {}
+unsafe impl<const N: usize> Send for StringSeq<N> {}
+unsafe impl<const N: usize> Sync for StringSeq<N> {}
 
 
 impl TopicMsg for String {

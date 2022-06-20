@@ -7,8 +7,8 @@ use crate::rcl;
 extern "C" {
     fn sensor_msgs__msg__CameraInfo__init(msg: *mut CameraInfo) -> bool;
     fn sensor_msgs__msg__CameraInfo__fini(msg: *mut CameraInfo);
-    fn sensor_msgs__msg__CameraInfo__Sequence__init(msg: *mut CameraInfoSequence, size: usize) -> bool;
-    fn sensor_msgs__msg__CameraInfo__Sequence__fini(msg: *mut CameraInfoSequence);
+    fn sensor_msgs__msg__CameraInfo__Sequence__init(msg: *mut CameraInfoSeqRaw, size: usize) -> bool;
+    fn sensor_msgs__msg__CameraInfo__Sequence__fini(msg: *mut CameraInfoSeqRaw);
     fn rosidl_typesupport_c__get_message_type_support_handle__sensor_msgs__msg__CameraInfo() -> *const rcl::rosidl_message_type_support_t;
 }
 
@@ -46,19 +46,37 @@ impl Drop for CameraInfo {
     }
 }
 
-#[repr(C)]
-#[derive(Debug)]
-pub struct CameraInfoSequence {
+
+struct CameraInfoSeqRaw {
     data: *mut CameraInfo,
     size: usize,
     capacity: usize,
 }
 
-impl CameraInfoSequence {
+/// Sequence of CameraInfo.
+/// `N` is the maximum number of elements.
+/// If `N` is `0`, the size is unlimited.
+#[repr(C)]
+#[derive(Debug)]
+pub struct CameraInfoSeq<const N: usize> {
+    data: *mut CameraInfo,
+    size: usize,
+    capacity: usize,
+}
+
+impl<const N: usize> CameraInfoSeq<N> {
+    /// Create a sequence of.
+    /// `N` represents the maximum number of elements.
+    /// If `N` is `0`, the sequence is unlimited.
     pub fn new(size: usize) -> Option<Self> {
-        let mut msg: Self = unsafe { std::mem::MaybeUninit::zeroed().assume_init() };
+        if N != 0 && size >= N {
+            // the size exceeds in the maximum number
+            return None;
+        }
+
+        let mut msg: CameraInfoSeqRaw = unsafe { std::mem::MaybeUninit::zeroed().assume_init() };
         if unsafe { sensor_msgs__msg__CameraInfo__Sequence__init(&mut msg, size) } {
-            Some(msg)
+            Some(Self {data: msg.data, size: msg.size, capacity: msg.capacity })
         } else {
             None
         }
@@ -83,14 +101,15 @@ impl CameraInfoSequence {
     }
 }
 
-impl Drop for CameraInfoSequence {
+impl<const N: usize> Drop for CameraInfoSeq<N> {
     fn drop(&mut self) {
-        unsafe { sensor_msgs__msg__CameraInfo__Sequence__fini(self) };
+        let mut msg = CameraInfoSeqRaw{data: self.data, size: self.size, capacity: self.capacity};
+        unsafe { sensor_msgs__msg__CameraInfo__Sequence__fini(&mut msg) };
     }
 }
 
-unsafe impl Send for CameraInfoSequence {}
-unsafe impl Sync for CameraInfoSequence {}
+unsafe impl<const N: usize> Send for CameraInfoSeq<N> {}
+unsafe impl<const N: usize> Sync for CameraInfoSeq<N> {}
 
 
 impl TopicMsg for CameraInfo {

@@ -7,8 +7,8 @@ use crate::rcl;
 extern "C" {
     fn geometry_msgs__msg__PoseArray__init(msg: *mut PoseArray) -> bool;
     fn geometry_msgs__msg__PoseArray__fini(msg: *mut PoseArray);
-    fn geometry_msgs__msg__PoseArray__Sequence__init(msg: *mut PoseArraySequence, size: usize) -> bool;
-    fn geometry_msgs__msg__PoseArray__Sequence__fini(msg: *mut PoseArraySequence);
+    fn geometry_msgs__msg__PoseArray__Sequence__init(msg: *mut PoseArraySeqRaw, size: usize) -> bool;
+    fn geometry_msgs__msg__PoseArray__Sequence__fini(msg: *mut PoseArraySeqRaw);
     fn rosidl_typesupport_c__get_message_type_support_handle__geometry_msgs__msg__PoseArray() -> *const rcl::rosidl_message_type_support_t;
 }
 
@@ -17,7 +17,7 @@ extern "C" {
 #[derive(Debug)]
 pub struct PoseArray {
     pub header: std_msgs::msg::Header,
-    pub poses: PoseSequence,
+    pub poses: PoseSeq<0>,
 }
 
 impl PoseArray {
@@ -37,19 +37,37 @@ impl Drop for PoseArray {
     }
 }
 
-#[repr(C)]
-#[derive(Debug)]
-pub struct PoseArraySequence {
+
+struct PoseArraySeqRaw {
     data: *mut PoseArray,
     size: usize,
     capacity: usize,
 }
 
-impl PoseArraySequence {
+/// Sequence of PoseArray.
+/// `N` is the maximum number of elements.
+/// If `N` is `0`, the size is unlimited.
+#[repr(C)]
+#[derive(Debug)]
+pub struct PoseArraySeq<const N: usize> {
+    data: *mut PoseArray,
+    size: usize,
+    capacity: usize,
+}
+
+impl<const N: usize> PoseArraySeq<N> {
+    /// Create a sequence of.
+    /// `N` represents the maximum number of elements.
+    /// If `N` is `0`, the sequence is unlimited.
     pub fn new(size: usize) -> Option<Self> {
-        let mut msg: Self = unsafe { std::mem::MaybeUninit::zeroed().assume_init() };
+        if N != 0 && size >= N {
+            // the size exceeds in the maximum number
+            return None;
+        }
+
+        let mut msg: PoseArraySeqRaw = unsafe { std::mem::MaybeUninit::zeroed().assume_init() };
         if unsafe { geometry_msgs__msg__PoseArray__Sequence__init(&mut msg, size) } {
-            Some(msg)
+            Some(Self {data: msg.data, size: msg.size, capacity: msg.capacity })
         } else {
             None
         }
@@ -74,14 +92,15 @@ impl PoseArraySequence {
     }
 }
 
-impl Drop for PoseArraySequence {
+impl<const N: usize> Drop for PoseArraySeq<N> {
     fn drop(&mut self) {
-        unsafe { geometry_msgs__msg__PoseArray__Sequence__fini(self) };
+        let mut msg = PoseArraySeqRaw{data: self.data, size: self.size, capacity: self.capacity};
+        unsafe { geometry_msgs__msg__PoseArray__Sequence__fini(&mut msg) };
     }
 }
 
-unsafe impl Send for PoseArraySequence {}
-unsafe impl Sync for PoseArraySequence {}
+unsafe impl<const N: usize> Send for PoseArraySeq<N> {}
+unsafe impl<const N: usize> Sync for PoseArraySeq<N> {}
 
 
 impl TopicMsg for PoseArray {

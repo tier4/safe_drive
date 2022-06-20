@@ -8,12 +8,12 @@ use crate::msg::common_interfaces::*;
 extern "C" {
     fn nav_msgs__srv__SetMap_Request__init(msg: *mut SetMapRequest) -> bool;
     fn nav_msgs__srv__SetMap_Request__fini(msg: *mut SetMapRequest);
-    fn nav_msgs__srv__SetMap_Request__Sequence__init(msg: *mut SetMapRequestSequence, size: usize) -> bool;
-    fn nav_msgs__srv__SetMap_Request__Sequence__fini(msg: *mut SetMapRequestSequence);
+    fn nav_msgs__srv__SetMap_Request__Sequence__init(msg: *mut SetMapRequestSeqRaw, size: usize) -> bool;
+    fn nav_msgs__srv__SetMap_Request__Sequence__fini(msg: *mut SetMapRequestSeqRaw);
     fn nav_msgs__srv__SetMap_Response__init(msg: *mut SetMapResponse) -> bool;
     fn nav_msgs__srv__SetMap_Response__fini(msg: *mut SetMapResponse);
-    fn nav_msgs__srv__SetMap_Response__Sequence__init(msg: *mut SetMapResponseSequence, size: usize) -> bool;
-    fn nav_msgs__srv__SetMap_Response__Sequence__fini(msg: *mut SetMapResponseSequence);
+    fn nav_msgs__srv__SetMap_Response__Sequence__init(msg: *mut SetMapResponseSeqRaw, size: usize) -> bool;
+    fn nav_msgs__srv__SetMap_Response__Sequence__fini(msg: *mut SetMapResponseSeqRaw);
     fn rosidl_typesupport_c__get_service_type_support_handle__nav_msgs__srv__SetMap() -> *const rcl::rosidl_service_type_support_t;
 }
 
@@ -48,19 +48,37 @@ impl Drop for SetMapRequest {
     }
 }
 
-#[repr(C)]
-#[derive(Debug)]
-pub struct SetMapRequestSequence {
+
+struct SetMapRequestSeqRaw {
     data: *mut SetMapRequest,
     size: usize,
     capacity: usize,
 }
 
-impl SetMapRequestSequence {
+/// Sequence of SetMapRequest.
+/// `N` is the maximum number of elements.
+/// If `N` is `0`, the size is unlimited.
+#[repr(C)]
+#[derive(Debug)]
+pub struct SetMapRequestSeq<const N: usize> {
+    data: *mut SetMapRequest,
+    size: usize,
+    capacity: usize,
+}
+
+impl<const N: usize> SetMapRequestSeq<N> {
+    /// Create a sequence of.
+    /// `N` represents the maximum number of elements.
+    /// If `N` is `0`, the sequence is unlimited.
     pub fn new(size: usize) -> Option<Self> {
-        let mut msg: Self = unsafe { std::mem::MaybeUninit::zeroed().assume_init() };
+        if N != 0 && size >= N {
+            // the size exceeds in the maximum number
+            return None;
+        }
+
+        let mut msg: SetMapRequestSeqRaw = unsafe { std::mem::MaybeUninit::zeroed().assume_init() };
         if unsafe { nav_msgs__srv__SetMap_Request__Sequence__init(&mut msg, size) } {
-            Some(msg)
+            Some(Self {data: msg.data, size: msg.size, capacity: msg.capacity })
         } else {
             None
         }
@@ -85,14 +103,15 @@ impl SetMapRequestSequence {
     }
 }
 
-impl Drop for SetMapRequestSequence {
+impl<const N: usize> Drop for SetMapRequestSeq<N> {
     fn drop(&mut self) {
-        unsafe { nav_msgs__srv__SetMap_Request__Sequence__fini(self) };
+        let mut msg = SetMapRequestSeqRaw{data: self.data, size: self.size, capacity: self.capacity};
+        unsafe { nav_msgs__srv__SetMap_Request__Sequence__fini(&mut msg) };
     }
 }
 
-unsafe impl Send for SetMapRequestSequence {}
-unsafe impl Sync for SetMapRequestSequence {}
+unsafe impl<const N: usize> Send for SetMapRequestSeq<N> {}
+unsafe impl<const N: usize> Sync for SetMapRequestSeq<N> {}
 
 
 impl SetMapResponse {
@@ -112,19 +131,37 @@ impl Drop for SetMapResponse {
     }
 }
 
-#[repr(C)]
-#[derive(Debug)]
-pub struct SetMapResponseSequence {
+
+struct SetMapResponseSeqRaw {
     data: *mut SetMapResponse,
     size: usize,
     capacity: usize,
 }
 
-impl SetMapResponseSequence {
+/// Sequence of SetMapResponse.
+/// `N` is the maximum number of elements.
+/// If `N` is `0`, the size is unlimited.
+#[repr(C)]
+#[derive(Debug)]
+pub struct SetMapResponseSeq<const N: usize> {
+    data: *mut SetMapResponse,
+    size: usize,
+    capacity: usize,
+}
+
+impl<const N: usize> SetMapResponseSeq<N> {
+    /// Create a sequence of.
+    /// `N` represents the maximum number of elements.
+    /// If `N` is `0`, the sequence is unlimited.
     pub fn new(size: usize) -> Option<Self> {
-        let mut msg: Self = unsafe { std::mem::MaybeUninit::zeroed().assume_init() };
+        if N != 0 && size >= N {
+            // the size exceeds in the maximum number
+            return None;
+        }
+
+        let mut msg: SetMapResponseSeqRaw = unsafe { std::mem::MaybeUninit::zeroed().assume_init() };
         if unsafe { nav_msgs__srv__SetMap_Response__Sequence__init(&mut msg, size) } {
-            Some(msg)
+            Some(Self {data: msg.data, size: msg.size, capacity: msg.capacity })
         } else {
             None
         }
@@ -149,14 +186,15 @@ impl SetMapResponseSequence {
     }
 }
 
-impl Drop for SetMapResponseSequence {
+impl<const N: usize> Drop for SetMapResponseSeq<N> {
     fn drop(&mut self) {
-        unsafe { nav_msgs__srv__SetMap_Response__Sequence__fini(self) };
+        let mut msg = SetMapResponseSeqRaw{data: self.data, size: self.size, capacity: self.capacity};
+        unsafe { nav_msgs__srv__SetMap_Response__Sequence__fini(&mut msg) };
     }
 }
 
-unsafe impl Send for SetMapResponseSequence {}
-unsafe impl Sync for SetMapResponseSequence {}
+unsafe impl<const N: usize> Send for SetMapResponseSeq<N> {}
+unsafe impl<const N: usize> Sync for SetMapResponseSeq<N> {}
 
 
 pub struct SetMap;

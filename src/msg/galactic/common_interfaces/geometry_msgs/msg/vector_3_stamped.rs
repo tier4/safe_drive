@@ -7,8 +7,8 @@ use crate::rcl;
 extern "C" {
     fn geometry_msgs__msg__Vector3Stamped__init(msg: *mut Vector3Stamped) -> bool;
     fn geometry_msgs__msg__Vector3Stamped__fini(msg: *mut Vector3Stamped);
-    fn geometry_msgs__msg__Vector3Stamped__Sequence__init(msg: *mut Vector3StampedSequence, size: usize) -> bool;
-    fn geometry_msgs__msg__Vector3Stamped__Sequence__fini(msg: *mut Vector3StampedSequence);
+    fn geometry_msgs__msg__Vector3Stamped__Sequence__init(msg: *mut Vector3StampedSeqRaw, size: usize) -> bool;
+    fn geometry_msgs__msg__Vector3Stamped__Sequence__fini(msg: *mut Vector3StampedSeqRaw);
     fn rosidl_typesupport_c__get_message_type_support_handle__geometry_msgs__msg__Vector3Stamped() -> *const rcl::rosidl_message_type_support_t;
 }
 
@@ -37,19 +37,37 @@ impl Drop for Vector3Stamped {
     }
 }
 
-#[repr(C)]
-#[derive(Debug)]
-pub struct Vector3StampedSequence {
+
+struct Vector3StampedSeqRaw {
     data: *mut Vector3Stamped,
     size: usize,
     capacity: usize,
 }
 
-impl Vector3StampedSequence {
+/// Sequence of Vector3Stamped.
+/// `N` is the maximum number of elements.
+/// If `N` is `0`, the size is unlimited.
+#[repr(C)]
+#[derive(Debug)]
+pub struct Vector3StampedSeq<const N: usize> {
+    data: *mut Vector3Stamped,
+    size: usize,
+    capacity: usize,
+}
+
+impl<const N: usize> Vector3StampedSeq<N> {
+    /// Create a sequence of.
+    /// `N` represents the maximum number of elements.
+    /// If `N` is `0`, the sequence is unlimited.
     pub fn new(size: usize) -> Option<Self> {
-        let mut msg: Self = unsafe { std::mem::MaybeUninit::zeroed().assume_init() };
+        if N != 0 && size >= N {
+            // the size exceeds in the maximum number
+            return None;
+        }
+
+        let mut msg: Vector3StampedSeqRaw = unsafe { std::mem::MaybeUninit::zeroed().assume_init() };
         if unsafe { geometry_msgs__msg__Vector3Stamped__Sequence__init(&mut msg, size) } {
-            Some(msg)
+            Some(Self {data: msg.data, size: msg.size, capacity: msg.capacity })
         } else {
             None
         }
@@ -74,14 +92,15 @@ impl Vector3StampedSequence {
     }
 }
 
-impl Drop for Vector3StampedSequence {
+impl<const N: usize> Drop for Vector3StampedSeq<N> {
     fn drop(&mut self) {
-        unsafe { geometry_msgs__msg__Vector3Stamped__Sequence__fini(self) };
+        let mut msg = Vector3StampedSeqRaw{data: self.data, size: self.size, capacity: self.capacity};
+        unsafe { geometry_msgs__msg__Vector3Stamped__Sequence__fini(&mut msg) };
     }
 }
 
-unsafe impl Send for Vector3StampedSequence {}
-unsafe impl Sync for Vector3StampedSequence {}
+unsafe impl<const N: usize> Send for Vector3StampedSeq<N> {}
+unsafe impl<const N: usize> Sync for Vector3StampedSeq<N> {}
 
 
 impl TopicMsg for Vector3Stamped {

@@ -8,12 +8,12 @@ use crate::msg::common_interfaces::*;
 extern "C" {
     fn std_srvs__srv__Trigger_Request__init(msg: *mut TriggerRequest) -> bool;
     fn std_srvs__srv__Trigger_Request__fini(msg: *mut TriggerRequest);
-    fn std_srvs__srv__Trigger_Request__Sequence__init(msg: *mut TriggerRequestSequence, size: usize) -> bool;
-    fn std_srvs__srv__Trigger_Request__Sequence__fini(msg: *mut TriggerRequestSequence);
+    fn std_srvs__srv__Trigger_Request__Sequence__init(msg: *mut TriggerRequestSeqRaw, size: usize) -> bool;
+    fn std_srvs__srv__Trigger_Request__Sequence__fini(msg: *mut TriggerRequestSeqRaw);
     fn std_srvs__srv__Trigger_Response__init(msg: *mut TriggerResponse) -> bool;
     fn std_srvs__srv__Trigger_Response__fini(msg: *mut TriggerResponse);
-    fn std_srvs__srv__Trigger_Response__Sequence__init(msg: *mut TriggerResponseSequence, size: usize) -> bool;
-    fn std_srvs__srv__Trigger_Response__Sequence__fini(msg: *mut TriggerResponseSequence);
+    fn std_srvs__srv__Trigger_Response__Sequence__init(msg: *mut TriggerResponseSeqRaw, size: usize) -> bool;
+    fn std_srvs__srv__Trigger_Response__Sequence__fini(msg: *mut TriggerResponseSeqRaw);
     fn rosidl_typesupport_c__get_service_type_support_handle__std_srvs__srv__Trigger() -> *const rcl::rosidl_service_type_support_t;
 }
 
@@ -48,19 +48,37 @@ impl Drop for TriggerRequest {
     }
 }
 
-#[repr(C)]
-#[derive(Debug)]
-pub struct TriggerRequestSequence {
+
+struct TriggerRequestSeqRaw {
     data: *mut TriggerRequest,
     size: usize,
     capacity: usize,
 }
 
-impl TriggerRequestSequence {
+/// Sequence of TriggerRequest.
+/// `N` is the maximum number of elements.
+/// If `N` is `0`, the size is unlimited.
+#[repr(C)]
+#[derive(Debug)]
+pub struct TriggerRequestSeq<const N: usize> {
+    data: *mut TriggerRequest,
+    size: usize,
+    capacity: usize,
+}
+
+impl<const N: usize> TriggerRequestSeq<N> {
+    /// Create a sequence of.
+    /// `N` represents the maximum number of elements.
+    /// If `N` is `0`, the sequence is unlimited.
     pub fn new(size: usize) -> Option<Self> {
-        let mut msg: Self = unsafe { std::mem::MaybeUninit::zeroed().assume_init() };
+        if N != 0 && size >= N {
+            // the size exceeds in the maximum number
+            return None;
+        }
+
+        let mut msg: TriggerRequestSeqRaw = unsafe { std::mem::MaybeUninit::zeroed().assume_init() };
         if unsafe { std_srvs__srv__Trigger_Request__Sequence__init(&mut msg, size) } {
-            Some(msg)
+            Some(Self {data: msg.data, size: msg.size, capacity: msg.capacity })
         } else {
             None
         }
@@ -85,14 +103,15 @@ impl TriggerRequestSequence {
     }
 }
 
-impl Drop for TriggerRequestSequence {
+impl<const N: usize> Drop for TriggerRequestSeq<N> {
     fn drop(&mut self) {
-        unsafe { std_srvs__srv__Trigger_Request__Sequence__fini(self) };
+        let mut msg = TriggerRequestSeqRaw{data: self.data, size: self.size, capacity: self.capacity};
+        unsafe { std_srvs__srv__Trigger_Request__Sequence__fini(&mut msg) };
     }
 }
 
-unsafe impl Send for TriggerRequestSequence {}
-unsafe impl Sync for TriggerRequestSequence {}
+unsafe impl<const N: usize> Send for TriggerRequestSeq<N> {}
+unsafe impl<const N: usize> Sync for TriggerRequestSeq<N> {}
 
 
 impl TriggerResponse {
@@ -112,19 +131,37 @@ impl Drop for TriggerResponse {
     }
 }
 
-#[repr(C)]
-#[derive(Debug)]
-pub struct TriggerResponseSequence {
+
+struct TriggerResponseSeqRaw {
     data: *mut TriggerResponse,
     size: usize,
     capacity: usize,
 }
 
-impl TriggerResponseSequence {
+/// Sequence of TriggerResponse.
+/// `N` is the maximum number of elements.
+/// If `N` is `0`, the size is unlimited.
+#[repr(C)]
+#[derive(Debug)]
+pub struct TriggerResponseSeq<const N: usize> {
+    data: *mut TriggerResponse,
+    size: usize,
+    capacity: usize,
+}
+
+impl<const N: usize> TriggerResponseSeq<N> {
+    /// Create a sequence of.
+    /// `N` represents the maximum number of elements.
+    /// If `N` is `0`, the sequence is unlimited.
     pub fn new(size: usize) -> Option<Self> {
-        let mut msg: Self = unsafe { std::mem::MaybeUninit::zeroed().assume_init() };
+        if N != 0 && size >= N {
+            // the size exceeds in the maximum number
+            return None;
+        }
+
+        let mut msg: TriggerResponseSeqRaw = unsafe { std::mem::MaybeUninit::zeroed().assume_init() };
         if unsafe { std_srvs__srv__Trigger_Response__Sequence__init(&mut msg, size) } {
-            Some(msg)
+            Some(Self {data: msg.data, size: msg.size, capacity: msg.capacity })
         } else {
             None
         }
@@ -149,14 +186,15 @@ impl TriggerResponseSequence {
     }
 }
 
-impl Drop for TriggerResponseSequence {
+impl<const N: usize> Drop for TriggerResponseSeq<N> {
     fn drop(&mut self) {
-        unsafe { std_srvs__srv__Trigger_Response__Sequence__fini(self) };
+        let mut msg = TriggerResponseSeqRaw{data: self.data, size: self.size, capacity: self.capacity};
+        unsafe { std_srvs__srv__Trigger_Response__Sequence__fini(&mut msg) };
     }
 }
 
-unsafe impl Send for TriggerResponseSequence {}
-unsafe impl Sync for TriggerResponseSequence {}
+unsafe impl<const N: usize> Send for TriggerResponseSeq<N> {}
+unsafe impl<const N: usize> Sync for TriggerResponseSeq<N> {}
 
 
 pub struct Trigger;

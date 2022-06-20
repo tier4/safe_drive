@@ -7,8 +7,8 @@ use crate::rcl;
 extern "C" {
     fn trajectory_msgs__msg__MultiDOFJointTrajectory__init(msg: *mut MultiDOFJointTrajectory) -> bool;
     fn trajectory_msgs__msg__MultiDOFJointTrajectory__fini(msg: *mut MultiDOFJointTrajectory);
-    fn trajectory_msgs__msg__MultiDOFJointTrajectory__Sequence__init(msg: *mut MultiDOFJointTrajectorySequence, size: usize) -> bool;
-    fn trajectory_msgs__msg__MultiDOFJointTrajectory__Sequence__fini(msg: *mut MultiDOFJointTrajectorySequence);
+    fn trajectory_msgs__msg__MultiDOFJointTrajectory__Sequence__init(msg: *mut MultiDOFJointTrajectorySeqRaw, size: usize) -> bool;
+    fn trajectory_msgs__msg__MultiDOFJointTrajectory__Sequence__fini(msg: *mut MultiDOFJointTrajectorySeqRaw);
     fn rosidl_typesupport_c__get_message_type_support_handle__trajectory_msgs__msg__MultiDOFJointTrajectory() -> *const rcl::rosidl_message_type_support_t;
 }
 
@@ -18,7 +18,7 @@ extern "C" {
 pub struct MultiDOFJointTrajectory {
     pub header: std_msgs::msg::Header,
     pub joint_names: crate::msg::RosStringSeq<0, 0>,
-    pub points: MultiDOFJointTrajectoryPointSequence,
+    pub points: MultiDOFJointTrajectoryPointSeq<0>,
 }
 
 impl MultiDOFJointTrajectory {
@@ -38,19 +38,37 @@ impl Drop for MultiDOFJointTrajectory {
     }
 }
 
-#[repr(C)]
-#[derive(Debug)]
-pub struct MultiDOFJointTrajectorySequence {
+
+struct MultiDOFJointTrajectorySeqRaw {
     data: *mut MultiDOFJointTrajectory,
     size: usize,
     capacity: usize,
 }
 
-impl MultiDOFJointTrajectorySequence {
+/// Sequence of MultiDOFJointTrajectory.
+/// `N` is the maximum number of elements.
+/// If `N` is `0`, the size is unlimited.
+#[repr(C)]
+#[derive(Debug)]
+pub struct MultiDOFJointTrajectorySeq<const N: usize> {
+    data: *mut MultiDOFJointTrajectory,
+    size: usize,
+    capacity: usize,
+}
+
+impl<const N: usize> MultiDOFJointTrajectorySeq<N> {
+    /// Create a sequence of.
+    /// `N` represents the maximum number of elements.
+    /// If `N` is `0`, the sequence is unlimited.
     pub fn new(size: usize) -> Option<Self> {
-        let mut msg: Self = unsafe { std::mem::MaybeUninit::zeroed().assume_init() };
+        if N != 0 && size >= N {
+            // the size exceeds in the maximum number
+            return None;
+        }
+
+        let mut msg: MultiDOFJointTrajectorySeqRaw = unsafe { std::mem::MaybeUninit::zeroed().assume_init() };
         if unsafe { trajectory_msgs__msg__MultiDOFJointTrajectory__Sequence__init(&mut msg, size) } {
-            Some(msg)
+            Some(Self {data: msg.data, size: msg.size, capacity: msg.capacity })
         } else {
             None
         }
@@ -75,14 +93,15 @@ impl MultiDOFJointTrajectorySequence {
     }
 }
 
-impl Drop for MultiDOFJointTrajectorySequence {
+impl<const N: usize> Drop for MultiDOFJointTrajectorySeq<N> {
     fn drop(&mut self) {
-        unsafe { trajectory_msgs__msg__MultiDOFJointTrajectory__Sequence__fini(self) };
+        let mut msg = MultiDOFJointTrajectorySeqRaw{data: self.data, size: self.size, capacity: self.capacity};
+        unsafe { trajectory_msgs__msg__MultiDOFJointTrajectory__Sequence__fini(&mut msg) };
     }
 }
 
-unsafe impl Send for MultiDOFJointTrajectorySequence {}
-unsafe impl Sync for MultiDOFJointTrajectorySequence {}
+unsafe impl<const N: usize> Send for MultiDOFJointTrajectorySeq<N> {}
+unsafe impl<const N: usize> Sync for MultiDOFJointTrajectorySeq<N> {}
 
 
 impl TopicMsg for MultiDOFJointTrajectory {

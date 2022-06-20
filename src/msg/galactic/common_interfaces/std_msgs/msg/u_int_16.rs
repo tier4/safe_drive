@@ -7,8 +7,8 @@ use crate::rcl;
 extern "C" {
     fn std_msgs__msg__UInt16__init(msg: *mut UInt16) -> bool;
     fn std_msgs__msg__UInt16__fini(msg: *mut UInt16);
-    fn std_msgs__msg__UInt16__Sequence__init(msg: *mut UInt16Sequence, size: usize) -> bool;
-    fn std_msgs__msg__UInt16__Sequence__fini(msg: *mut UInt16Sequence);
+    fn std_msgs__msg__UInt16__Sequence__init(msg: *mut UInt16SeqRaw, size: usize) -> bool;
+    fn std_msgs__msg__UInt16__Sequence__fini(msg: *mut UInt16SeqRaw);
     fn rosidl_typesupport_c__get_message_type_support_handle__std_msgs__msg__UInt16() -> *const rcl::rosidl_message_type_support_t;
 }
 
@@ -36,19 +36,37 @@ impl Drop for UInt16 {
     }
 }
 
-#[repr(C)]
-#[derive(Debug)]
-pub struct UInt16Sequence {
+
+struct UInt16SeqRaw {
     data: *mut UInt16,
     size: usize,
     capacity: usize,
 }
 
-impl UInt16Sequence {
+/// Sequence of UInt16.
+/// `N` is the maximum number of elements.
+/// If `N` is `0`, the size is unlimited.
+#[repr(C)]
+#[derive(Debug)]
+pub struct UInt16Seq<const N: usize> {
+    data: *mut UInt16,
+    size: usize,
+    capacity: usize,
+}
+
+impl<const N: usize> UInt16Seq<N> {
+    /// Create a sequence of.
+    /// `N` represents the maximum number of elements.
+    /// If `N` is `0`, the sequence is unlimited.
     pub fn new(size: usize) -> Option<Self> {
-        let mut msg: Self = unsafe { std::mem::MaybeUninit::zeroed().assume_init() };
+        if N != 0 && size >= N {
+            // the size exceeds in the maximum number
+            return None;
+        }
+
+        let mut msg: UInt16SeqRaw = unsafe { std::mem::MaybeUninit::zeroed().assume_init() };
         if unsafe { std_msgs__msg__UInt16__Sequence__init(&mut msg, size) } {
-            Some(msg)
+            Some(Self {data: msg.data, size: msg.size, capacity: msg.capacity })
         } else {
             None
         }
@@ -73,14 +91,15 @@ impl UInt16Sequence {
     }
 }
 
-impl Drop for UInt16Sequence {
+impl<const N: usize> Drop for UInt16Seq<N> {
     fn drop(&mut self) {
-        unsafe { std_msgs__msg__UInt16__Sequence__fini(self) };
+        let mut msg = UInt16SeqRaw{data: self.data, size: self.size, capacity: self.capacity};
+        unsafe { std_msgs__msg__UInt16__Sequence__fini(&mut msg) };
     }
 }
 
-unsafe impl Send for UInt16Sequence {}
-unsafe impl Sync for UInt16Sequence {}
+unsafe impl<const N: usize> Send for UInt16Seq<N> {}
+unsafe impl<const N: usize> Sync for UInt16Seq<N> {}
 
 
 impl TopicMsg for UInt16 {

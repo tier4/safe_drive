@@ -7,8 +7,8 @@ use crate::rcl;
 extern "C" {
     fn sensor_msgs__msg__Joy__init(msg: *mut Joy) -> bool;
     fn sensor_msgs__msg__Joy__fini(msg: *mut Joy);
-    fn sensor_msgs__msg__Joy__Sequence__init(msg: *mut JoySequence, size: usize) -> bool;
-    fn sensor_msgs__msg__Joy__Sequence__fini(msg: *mut JoySequence);
+    fn sensor_msgs__msg__Joy__Sequence__init(msg: *mut JoySeqRaw, size: usize) -> bool;
+    fn sensor_msgs__msg__Joy__Sequence__fini(msg: *mut JoySeqRaw);
     fn rosidl_typesupport_c__get_message_type_support_handle__sensor_msgs__msg__Joy() -> *const rcl::rosidl_message_type_support_t;
 }
 
@@ -38,19 +38,37 @@ impl Drop for Joy {
     }
 }
 
-#[repr(C)]
-#[derive(Debug)]
-pub struct JoySequence {
+
+struct JoySeqRaw {
     data: *mut Joy,
     size: usize,
     capacity: usize,
 }
 
-impl JoySequence {
+/// Sequence of Joy.
+/// `N` is the maximum number of elements.
+/// If `N` is `0`, the size is unlimited.
+#[repr(C)]
+#[derive(Debug)]
+pub struct JoySeq<const N: usize> {
+    data: *mut Joy,
+    size: usize,
+    capacity: usize,
+}
+
+impl<const N: usize> JoySeq<N> {
+    /// Create a sequence of.
+    /// `N` represents the maximum number of elements.
+    /// If `N` is `0`, the sequence is unlimited.
     pub fn new(size: usize) -> Option<Self> {
-        let mut msg: Self = unsafe { std::mem::MaybeUninit::zeroed().assume_init() };
+        if N != 0 && size >= N {
+            // the size exceeds in the maximum number
+            return None;
+        }
+
+        let mut msg: JoySeqRaw = unsafe { std::mem::MaybeUninit::zeroed().assume_init() };
         if unsafe { sensor_msgs__msg__Joy__Sequence__init(&mut msg, size) } {
-            Some(msg)
+            Some(Self {data: msg.data, size: msg.size, capacity: msg.capacity })
         } else {
             None
         }
@@ -75,14 +93,15 @@ impl JoySequence {
     }
 }
 
-impl Drop for JoySequence {
+impl<const N: usize> Drop for JoySeq<N> {
     fn drop(&mut self) {
-        unsafe { sensor_msgs__msg__Joy__Sequence__fini(self) };
+        let mut msg = JoySeqRaw{data: self.data, size: self.size, capacity: self.capacity};
+        unsafe { sensor_msgs__msg__Joy__Sequence__fini(&mut msg) };
     }
 }
 
-unsafe impl Send for JoySequence {}
-unsafe impl Sync for JoySequence {}
+unsafe impl<const N: usize> Send for JoySeq<N> {}
+unsafe impl<const N: usize> Sync for JoySeq<N> {}
 
 
 impl TopicMsg for Joy {

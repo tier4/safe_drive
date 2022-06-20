@@ -7,8 +7,8 @@ use crate::rcl;
 extern "C" {
     fn std_msgs__msg__Empty__init(msg: *mut Empty) -> bool;
     fn std_msgs__msg__Empty__fini(msg: *mut Empty);
-    fn std_msgs__msg__Empty__Sequence__init(msg: *mut EmptySequence, size: usize) -> bool;
-    fn std_msgs__msg__Empty__Sequence__fini(msg: *mut EmptySequence);
+    fn std_msgs__msg__Empty__Sequence__init(msg: *mut EmptySeqRaw, size: usize) -> bool;
+    fn std_msgs__msg__Empty__Sequence__fini(msg: *mut EmptySeqRaw);
     fn rosidl_typesupport_c__get_message_type_support_handle__std_msgs__msg__Empty() -> *const rcl::rosidl_message_type_support_t;
 }
 
@@ -36,19 +36,37 @@ impl Drop for Empty {
     }
 }
 
-#[repr(C)]
-#[derive(Debug)]
-pub struct EmptySequence {
+
+struct EmptySeqRaw {
     data: *mut Empty,
     size: usize,
     capacity: usize,
 }
 
-impl EmptySequence {
+/// Sequence of Empty.
+/// `N` is the maximum number of elements.
+/// If `N` is `0`, the size is unlimited.
+#[repr(C)]
+#[derive(Debug)]
+pub struct EmptySeq<const N: usize> {
+    data: *mut Empty,
+    size: usize,
+    capacity: usize,
+}
+
+impl<const N: usize> EmptySeq<N> {
+    /// Create a sequence of.
+    /// `N` represents the maximum number of elements.
+    /// If `N` is `0`, the sequence is unlimited.
     pub fn new(size: usize) -> Option<Self> {
-        let mut msg: Self = unsafe { std::mem::MaybeUninit::zeroed().assume_init() };
+        if N != 0 && size >= N {
+            // the size exceeds in the maximum number
+            return None;
+        }
+
+        let mut msg: EmptySeqRaw = unsafe { std::mem::MaybeUninit::zeroed().assume_init() };
         if unsafe { std_msgs__msg__Empty__Sequence__init(&mut msg, size) } {
-            Some(msg)
+            Some(Self {data: msg.data, size: msg.size, capacity: msg.capacity })
         } else {
             None
         }
@@ -73,14 +91,15 @@ impl EmptySequence {
     }
 }
 
-impl Drop for EmptySequence {
+impl<const N: usize> Drop for EmptySeq<N> {
     fn drop(&mut self) {
-        unsafe { std_msgs__msg__Empty__Sequence__fini(self) };
+        let mut msg = EmptySeqRaw{data: self.data, size: self.size, capacity: self.capacity};
+        unsafe { std_msgs__msg__Empty__Sequence__fini(&mut msg) };
     }
 }
 
-unsafe impl Send for EmptySequence {}
-unsafe impl Sync for EmptySequence {}
+unsafe impl<const N: usize> Send for EmptySeq<N> {}
+unsafe impl<const N: usize> Sync for EmptySeq<N> {}
 
 
 impl TopicMsg for Empty {

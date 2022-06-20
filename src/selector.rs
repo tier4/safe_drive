@@ -10,6 +10,7 @@ use crate::{
     },
     signal_handler,
     topic::subscriber::{RCLSubscription, Subscriber},
+    PhantomUnsend, PhantomUnsync,
 };
 use std::{
     collections::BTreeMap,
@@ -43,6 +44,7 @@ pub struct Selector {
     subscriptions: BTreeMap<*const rcl::rcl_subscription_t, ConditionHandler<Arc<RCLSubscription>>>,
     cond: BTreeMap<*const rcl::rcl_guard_condition_t, ConditionHandler<Arc<RCLGuardCondition>>>,
     context: Arc<Context>,
+    _unused: (PhantomUnsync, PhantomUnsend),
 }
 
 impl Selector {
@@ -75,6 +77,7 @@ impl Selector {
             clients: Default::default(),
             cond: Default::default(),
             context,
+            _unused: (Default::default(), Default::default()),
         };
 
         selector.add_guard_condition(signal_cond.as_ref(), None);

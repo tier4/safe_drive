@@ -7,8 +7,8 @@ use crate::rcl;
 extern "C" {
     fn geometry_msgs__msg__PoseWithCovariance__init(msg: *mut PoseWithCovariance) -> bool;
     fn geometry_msgs__msg__PoseWithCovariance__fini(msg: *mut PoseWithCovariance);
-    fn geometry_msgs__msg__PoseWithCovariance__Sequence__init(msg: *mut PoseWithCovarianceSequence, size: usize) -> bool;
-    fn geometry_msgs__msg__PoseWithCovariance__Sequence__fini(msg: *mut PoseWithCovarianceSequence);
+    fn geometry_msgs__msg__PoseWithCovariance__Sequence__init(msg: *mut PoseWithCovarianceSeqRaw, size: usize) -> bool;
+    fn geometry_msgs__msg__PoseWithCovariance__Sequence__fini(msg: *mut PoseWithCovarianceSeqRaw);
     fn rosidl_typesupport_c__get_message_type_support_handle__geometry_msgs__msg__PoseWithCovariance() -> *const rcl::rosidl_message_type_support_t;
 }
 
@@ -37,19 +37,37 @@ impl Drop for PoseWithCovariance {
     }
 }
 
-#[repr(C)]
-#[derive(Debug)]
-pub struct PoseWithCovarianceSequence {
+
+struct PoseWithCovarianceSeqRaw {
     data: *mut PoseWithCovariance,
     size: usize,
     capacity: usize,
 }
 
-impl PoseWithCovarianceSequence {
+/// Sequence of PoseWithCovariance.
+/// `N` is the maximum number of elements.
+/// If `N` is `0`, the size is unlimited.
+#[repr(C)]
+#[derive(Debug)]
+pub struct PoseWithCovarianceSeq<const N: usize> {
+    data: *mut PoseWithCovariance,
+    size: usize,
+    capacity: usize,
+}
+
+impl<const N: usize> PoseWithCovarianceSeq<N> {
+    /// Create a sequence of.
+    /// `N` represents the maximum number of elements.
+    /// If `N` is `0`, the sequence is unlimited.
     pub fn new(size: usize) -> Option<Self> {
-        let mut msg: Self = unsafe { std::mem::MaybeUninit::zeroed().assume_init() };
+        if N != 0 && size >= N {
+            // the size exceeds in the maximum number
+            return None;
+        }
+
+        let mut msg: PoseWithCovarianceSeqRaw = unsafe { std::mem::MaybeUninit::zeroed().assume_init() };
         if unsafe { geometry_msgs__msg__PoseWithCovariance__Sequence__init(&mut msg, size) } {
-            Some(msg)
+            Some(Self {data: msg.data, size: msg.size, capacity: msg.capacity })
         } else {
             None
         }
@@ -74,14 +92,15 @@ impl PoseWithCovarianceSequence {
     }
 }
 
-impl Drop for PoseWithCovarianceSequence {
+impl<const N: usize> Drop for PoseWithCovarianceSeq<N> {
     fn drop(&mut self) {
-        unsafe { geometry_msgs__msg__PoseWithCovariance__Sequence__fini(self) };
+        let mut msg = PoseWithCovarianceSeqRaw{data: self.data, size: self.size, capacity: self.capacity};
+        unsafe { geometry_msgs__msg__PoseWithCovariance__Sequence__fini(&mut msg) };
     }
 }
 
-unsafe impl Send for PoseWithCovarianceSequence {}
-unsafe impl Sync for PoseWithCovarianceSequence {}
+unsafe impl<const N: usize> Send for PoseWithCovarianceSeq<N> {}
+unsafe impl<const N: usize> Sync for PoseWithCovarianceSeq<N> {}
 
 
 impl TopicMsg for PoseWithCovariance {

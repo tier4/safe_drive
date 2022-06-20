@@ -7,8 +7,8 @@ use crate::rcl;
 extern "C" {
     fn sensor_msgs__msg__RelativeHumidity__init(msg: *mut RelativeHumidity) -> bool;
     fn sensor_msgs__msg__RelativeHumidity__fini(msg: *mut RelativeHumidity);
-    fn sensor_msgs__msg__RelativeHumidity__Sequence__init(msg: *mut RelativeHumiditySequence, size: usize) -> bool;
-    fn sensor_msgs__msg__RelativeHumidity__Sequence__fini(msg: *mut RelativeHumiditySequence);
+    fn sensor_msgs__msg__RelativeHumidity__Sequence__init(msg: *mut RelativeHumiditySeqRaw, size: usize) -> bool;
+    fn sensor_msgs__msg__RelativeHumidity__Sequence__fini(msg: *mut RelativeHumiditySeqRaw);
     fn rosidl_typesupport_c__get_message_type_support_handle__sensor_msgs__msg__RelativeHumidity() -> *const rcl::rosidl_message_type_support_t;
 }
 
@@ -38,19 +38,37 @@ impl Drop for RelativeHumidity {
     }
 }
 
-#[repr(C)]
-#[derive(Debug)]
-pub struct RelativeHumiditySequence {
+
+struct RelativeHumiditySeqRaw {
     data: *mut RelativeHumidity,
     size: usize,
     capacity: usize,
 }
 
-impl RelativeHumiditySequence {
+/// Sequence of RelativeHumidity.
+/// `N` is the maximum number of elements.
+/// If `N` is `0`, the size is unlimited.
+#[repr(C)]
+#[derive(Debug)]
+pub struct RelativeHumiditySeq<const N: usize> {
+    data: *mut RelativeHumidity,
+    size: usize,
+    capacity: usize,
+}
+
+impl<const N: usize> RelativeHumiditySeq<N> {
+    /// Create a sequence of.
+    /// `N` represents the maximum number of elements.
+    /// If `N` is `0`, the sequence is unlimited.
     pub fn new(size: usize) -> Option<Self> {
-        let mut msg: Self = unsafe { std::mem::MaybeUninit::zeroed().assume_init() };
+        if N != 0 && size >= N {
+            // the size exceeds in the maximum number
+            return None;
+        }
+
+        let mut msg: RelativeHumiditySeqRaw = unsafe { std::mem::MaybeUninit::zeroed().assume_init() };
         if unsafe { sensor_msgs__msg__RelativeHumidity__Sequence__init(&mut msg, size) } {
-            Some(msg)
+            Some(Self {data: msg.data, size: msg.size, capacity: msg.capacity })
         } else {
             None
         }
@@ -75,14 +93,15 @@ impl RelativeHumiditySequence {
     }
 }
 
-impl Drop for RelativeHumiditySequence {
+impl<const N: usize> Drop for RelativeHumiditySeq<N> {
     fn drop(&mut self) {
-        unsafe { sensor_msgs__msg__RelativeHumidity__Sequence__fini(self) };
+        let mut msg = RelativeHumiditySeqRaw{data: self.data, size: self.size, capacity: self.capacity};
+        unsafe { sensor_msgs__msg__RelativeHumidity__Sequence__fini(&mut msg) };
     }
 }
 
-unsafe impl Send for RelativeHumiditySequence {}
-unsafe impl Sync for RelativeHumiditySequence {}
+unsafe impl<const N: usize> Send for RelativeHumiditySeq<N> {}
+unsafe impl<const N: usize> Sync for RelativeHumiditySeq<N> {}
 
 
 impl TopicMsg for RelativeHumidity {

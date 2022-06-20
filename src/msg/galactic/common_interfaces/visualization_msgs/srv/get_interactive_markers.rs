@@ -8,12 +8,12 @@ use crate::msg::common_interfaces::*;
 extern "C" {
     fn visualization_msgs__srv__GetInteractiveMarkers_Request__init(msg: *mut GetInteractiveMarkersRequest) -> bool;
     fn visualization_msgs__srv__GetInteractiveMarkers_Request__fini(msg: *mut GetInteractiveMarkersRequest);
-    fn visualization_msgs__srv__GetInteractiveMarkers_Request__Sequence__init(msg: *mut GetInteractiveMarkersRequestSequence, size: usize) -> bool;
-    fn visualization_msgs__srv__GetInteractiveMarkers_Request__Sequence__fini(msg: *mut GetInteractiveMarkersRequestSequence);
+    fn visualization_msgs__srv__GetInteractiveMarkers_Request__Sequence__init(msg: *mut GetInteractiveMarkersRequestSeqRaw, size: usize) -> bool;
+    fn visualization_msgs__srv__GetInteractiveMarkers_Request__Sequence__fini(msg: *mut GetInteractiveMarkersRequestSeqRaw);
     fn visualization_msgs__srv__GetInteractiveMarkers_Response__init(msg: *mut GetInteractiveMarkersResponse) -> bool;
     fn visualization_msgs__srv__GetInteractiveMarkers_Response__fini(msg: *mut GetInteractiveMarkersResponse);
-    fn visualization_msgs__srv__GetInteractiveMarkers_Response__Sequence__init(msg: *mut GetInteractiveMarkersResponseSequence, size: usize) -> bool;
-    fn visualization_msgs__srv__GetInteractiveMarkers_Response__Sequence__fini(msg: *mut GetInteractiveMarkersResponseSequence);
+    fn visualization_msgs__srv__GetInteractiveMarkers_Response__Sequence__init(msg: *mut GetInteractiveMarkersResponseSeqRaw, size: usize) -> bool;
+    fn visualization_msgs__srv__GetInteractiveMarkers_Response__Sequence__fini(msg: *mut GetInteractiveMarkersResponseSeqRaw);
     fn rosidl_typesupport_c__get_service_type_support_handle__visualization_msgs__srv__GetInteractiveMarkers() -> *const rcl::rosidl_service_type_support_t;
 }
 
@@ -28,7 +28,7 @@ pub struct GetInteractiveMarkersRequest {
 #[derive(Debug)]
 pub struct GetInteractiveMarkersResponse {
     pub sequence_number: u64,
-    pub markers: InteractiveMarkerSequence,
+    pub markers: InteractiveMarkerSeq<0>,
 }
 
 impl GetInteractiveMarkersRequest {
@@ -48,19 +48,37 @@ impl Drop for GetInteractiveMarkersRequest {
     }
 }
 
-#[repr(C)]
-#[derive(Debug)]
-pub struct GetInteractiveMarkersRequestSequence {
+
+struct GetInteractiveMarkersRequestSeqRaw {
     data: *mut GetInteractiveMarkersRequest,
     size: usize,
     capacity: usize,
 }
 
-impl GetInteractiveMarkersRequestSequence {
+/// Sequence of GetInteractiveMarkersRequest.
+/// `N` is the maximum number of elements.
+/// If `N` is `0`, the size is unlimited.
+#[repr(C)]
+#[derive(Debug)]
+pub struct GetInteractiveMarkersRequestSeq<const N: usize> {
+    data: *mut GetInteractiveMarkersRequest,
+    size: usize,
+    capacity: usize,
+}
+
+impl<const N: usize> GetInteractiveMarkersRequestSeq<N> {
+    /// Create a sequence of.
+    /// `N` represents the maximum number of elements.
+    /// If `N` is `0`, the sequence is unlimited.
     pub fn new(size: usize) -> Option<Self> {
-        let mut msg: Self = unsafe { std::mem::MaybeUninit::zeroed().assume_init() };
+        if N != 0 && size >= N {
+            // the size exceeds in the maximum number
+            return None;
+        }
+
+        let mut msg: GetInteractiveMarkersRequestSeqRaw = unsafe { std::mem::MaybeUninit::zeroed().assume_init() };
         if unsafe { visualization_msgs__srv__GetInteractiveMarkers_Request__Sequence__init(&mut msg, size) } {
-            Some(msg)
+            Some(Self {data: msg.data, size: msg.size, capacity: msg.capacity })
         } else {
             None
         }
@@ -85,14 +103,15 @@ impl GetInteractiveMarkersRequestSequence {
     }
 }
 
-impl Drop for GetInteractiveMarkersRequestSequence {
+impl<const N: usize> Drop for GetInteractiveMarkersRequestSeq<N> {
     fn drop(&mut self) {
-        unsafe { visualization_msgs__srv__GetInteractiveMarkers_Request__Sequence__fini(self) };
+        let mut msg = GetInteractiveMarkersRequestSeqRaw{data: self.data, size: self.size, capacity: self.capacity};
+        unsafe { visualization_msgs__srv__GetInteractiveMarkers_Request__Sequence__fini(&mut msg) };
     }
 }
 
-unsafe impl Send for GetInteractiveMarkersRequestSequence {}
-unsafe impl Sync for GetInteractiveMarkersRequestSequence {}
+unsafe impl<const N: usize> Send for GetInteractiveMarkersRequestSeq<N> {}
+unsafe impl<const N: usize> Sync for GetInteractiveMarkersRequestSeq<N> {}
 
 
 impl GetInteractiveMarkersResponse {
@@ -112,19 +131,37 @@ impl Drop for GetInteractiveMarkersResponse {
     }
 }
 
-#[repr(C)]
-#[derive(Debug)]
-pub struct GetInteractiveMarkersResponseSequence {
+
+struct GetInteractiveMarkersResponseSeqRaw {
     data: *mut GetInteractiveMarkersResponse,
     size: usize,
     capacity: usize,
 }
 
-impl GetInteractiveMarkersResponseSequence {
+/// Sequence of GetInteractiveMarkersResponse.
+/// `N` is the maximum number of elements.
+/// If `N` is `0`, the size is unlimited.
+#[repr(C)]
+#[derive(Debug)]
+pub struct GetInteractiveMarkersResponseSeq<const N: usize> {
+    data: *mut GetInteractiveMarkersResponse,
+    size: usize,
+    capacity: usize,
+}
+
+impl<const N: usize> GetInteractiveMarkersResponseSeq<N> {
+    /// Create a sequence of.
+    /// `N` represents the maximum number of elements.
+    /// If `N` is `0`, the sequence is unlimited.
     pub fn new(size: usize) -> Option<Self> {
-        let mut msg: Self = unsafe { std::mem::MaybeUninit::zeroed().assume_init() };
+        if N != 0 && size >= N {
+            // the size exceeds in the maximum number
+            return None;
+        }
+
+        let mut msg: GetInteractiveMarkersResponseSeqRaw = unsafe { std::mem::MaybeUninit::zeroed().assume_init() };
         if unsafe { visualization_msgs__srv__GetInteractiveMarkers_Response__Sequence__init(&mut msg, size) } {
-            Some(msg)
+            Some(Self {data: msg.data, size: msg.size, capacity: msg.capacity })
         } else {
             None
         }
@@ -149,14 +186,15 @@ impl GetInteractiveMarkersResponseSequence {
     }
 }
 
-impl Drop for GetInteractiveMarkersResponseSequence {
+impl<const N: usize> Drop for GetInteractiveMarkersResponseSeq<N> {
     fn drop(&mut self) {
-        unsafe { visualization_msgs__srv__GetInteractiveMarkers_Response__Sequence__fini(self) };
+        let mut msg = GetInteractiveMarkersResponseSeqRaw{data: self.data, size: self.size, capacity: self.capacity};
+        unsafe { visualization_msgs__srv__GetInteractiveMarkers_Response__Sequence__fini(&mut msg) };
     }
 }
 
-unsafe impl Send for GetInteractiveMarkersResponseSequence {}
-unsafe impl Sync for GetInteractiveMarkersResponseSequence {}
+unsafe impl<const N: usize> Send for GetInteractiveMarkersResponseSeq<N> {}
+unsafe impl<const N: usize> Sync for GetInteractiveMarkersResponseSeq<N> {}
 
 
 pub struct GetInteractiveMarkers;

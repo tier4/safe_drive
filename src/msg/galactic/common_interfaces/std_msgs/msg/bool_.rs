@@ -7,8 +7,8 @@ use crate::rcl;
 extern "C" {
     fn std_msgs__msg__Bool__init(msg: *mut Bool) -> bool;
     fn std_msgs__msg__Bool__fini(msg: *mut Bool);
-    fn std_msgs__msg__Bool__Sequence__init(msg: *mut BoolSequence, size: usize) -> bool;
-    fn std_msgs__msg__Bool__Sequence__fini(msg: *mut BoolSequence);
+    fn std_msgs__msg__Bool__Sequence__init(msg: *mut BoolSeqRaw, size: usize) -> bool;
+    fn std_msgs__msg__Bool__Sequence__fini(msg: *mut BoolSeqRaw);
     fn rosidl_typesupport_c__get_message_type_support_handle__std_msgs__msg__Bool() -> *const rcl::rosidl_message_type_support_t;
 }
 
@@ -36,19 +36,37 @@ impl Drop for Bool {
     }
 }
 
-#[repr(C)]
-#[derive(Debug)]
-pub struct BoolSequence {
+
+struct BoolSeqRaw {
     data: *mut Bool,
     size: usize,
     capacity: usize,
 }
 
-impl BoolSequence {
+/// Sequence of Bool.
+/// `N` is the maximum number of elements.
+/// If `N` is `0`, the size is unlimited.
+#[repr(C)]
+#[derive(Debug)]
+pub struct BoolSeq<const N: usize> {
+    data: *mut Bool,
+    size: usize,
+    capacity: usize,
+}
+
+impl<const N: usize> BoolSeq<N> {
+    /// Create a sequence of.
+    /// `N` represents the maximum number of elements.
+    /// If `N` is `0`, the sequence is unlimited.
     pub fn new(size: usize) -> Option<Self> {
-        let mut msg: Self = unsafe { std::mem::MaybeUninit::zeroed().assume_init() };
+        if N != 0 && size >= N {
+            // the size exceeds in the maximum number
+            return None;
+        }
+
+        let mut msg: BoolSeqRaw = unsafe { std::mem::MaybeUninit::zeroed().assume_init() };
         if unsafe { std_msgs__msg__Bool__Sequence__init(&mut msg, size) } {
-            Some(msg)
+            Some(Self {data: msg.data, size: msg.size, capacity: msg.capacity })
         } else {
             None
         }
@@ -73,14 +91,15 @@ impl BoolSequence {
     }
 }
 
-impl Drop for BoolSequence {
+impl<const N: usize> Drop for BoolSeq<N> {
     fn drop(&mut self) {
-        unsafe { std_msgs__msg__Bool__Sequence__fini(self) };
+        let mut msg = BoolSeqRaw{data: self.data, size: self.size, capacity: self.capacity};
+        unsafe { std_msgs__msg__Bool__Sequence__fini(&mut msg) };
     }
 }
 
-unsafe impl Send for BoolSequence {}
-unsafe impl Sync for BoolSequence {}
+unsafe impl<const N: usize> Send for BoolSeq<N> {}
+unsafe impl<const N: usize> Sync for BoolSeq<N> {}
 
 
 impl TopicMsg for Bool {

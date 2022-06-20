@@ -7,8 +7,8 @@ use crate::rcl;
 extern "C" {
     fn sensor_msgs__msg__Illuminance__init(msg: *mut Illuminance) -> bool;
     fn sensor_msgs__msg__Illuminance__fini(msg: *mut Illuminance);
-    fn sensor_msgs__msg__Illuminance__Sequence__init(msg: *mut IlluminanceSequence, size: usize) -> bool;
-    fn sensor_msgs__msg__Illuminance__Sequence__fini(msg: *mut IlluminanceSequence);
+    fn sensor_msgs__msg__Illuminance__Sequence__init(msg: *mut IlluminanceSeqRaw, size: usize) -> bool;
+    fn sensor_msgs__msg__Illuminance__Sequence__fini(msg: *mut IlluminanceSeqRaw);
     fn rosidl_typesupport_c__get_message_type_support_handle__sensor_msgs__msg__Illuminance() -> *const rcl::rosidl_message_type_support_t;
 }
 
@@ -38,19 +38,37 @@ impl Drop for Illuminance {
     }
 }
 
-#[repr(C)]
-#[derive(Debug)]
-pub struct IlluminanceSequence {
+
+struct IlluminanceSeqRaw {
     data: *mut Illuminance,
     size: usize,
     capacity: usize,
 }
 
-impl IlluminanceSequence {
+/// Sequence of Illuminance.
+/// `N` is the maximum number of elements.
+/// If `N` is `0`, the size is unlimited.
+#[repr(C)]
+#[derive(Debug)]
+pub struct IlluminanceSeq<const N: usize> {
+    data: *mut Illuminance,
+    size: usize,
+    capacity: usize,
+}
+
+impl<const N: usize> IlluminanceSeq<N> {
+    /// Create a sequence of.
+    /// `N` represents the maximum number of elements.
+    /// If `N` is `0`, the sequence is unlimited.
     pub fn new(size: usize) -> Option<Self> {
-        let mut msg: Self = unsafe { std::mem::MaybeUninit::zeroed().assume_init() };
+        if N != 0 && size >= N {
+            // the size exceeds in the maximum number
+            return None;
+        }
+
+        let mut msg: IlluminanceSeqRaw = unsafe { std::mem::MaybeUninit::zeroed().assume_init() };
         if unsafe { sensor_msgs__msg__Illuminance__Sequence__init(&mut msg, size) } {
-            Some(msg)
+            Some(Self {data: msg.data, size: msg.size, capacity: msg.capacity })
         } else {
             None
         }
@@ -75,14 +93,15 @@ impl IlluminanceSequence {
     }
 }
 
-impl Drop for IlluminanceSequence {
+impl<const N: usize> Drop for IlluminanceSeq<N> {
     fn drop(&mut self) {
-        unsafe { sensor_msgs__msg__Illuminance__Sequence__fini(self) };
+        let mut msg = IlluminanceSeqRaw{data: self.data, size: self.size, capacity: self.capacity};
+        unsafe { sensor_msgs__msg__Illuminance__Sequence__fini(&mut msg) };
     }
 }
 
-unsafe impl Send for IlluminanceSequence {}
-unsafe impl Sync for IlluminanceSequence {}
+unsafe impl<const N: usize> Send for IlluminanceSeq<N> {}
+unsafe impl<const N: usize> Sync for IlluminanceSeq<N> {}
 
 
 impl TopicMsg for Illuminance {

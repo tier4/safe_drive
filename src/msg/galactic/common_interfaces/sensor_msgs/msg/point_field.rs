@@ -7,8 +7,8 @@ use crate::rcl;
 extern "C" {
     fn sensor_msgs__msg__PointField__init(msg: *mut PointField) -> bool;
     fn sensor_msgs__msg__PointField__fini(msg: *mut PointField);
-    fn sensor_msgs__msg__PointField__Sequence__init(msg: *mut PointFieldSequence, size: usize) -> bool;
-    fn sensor_msgs__msg__PointField__Sequence__fini(msg: *mut PointFieldSequence);
+    fn sensor_msgs__msg__PointField__Sequence__init(msg: *mut PointFieldSeqRaw, size: usize) -> bool;
+    fn sensor_msgs__msg__PointField__Sequence__fini(msg: *mut PointFieldSeqRaw);
     fn rosidl_typesupport_c__get_message_type_support_handle__sensor_msgs__msg__PointField() -> *const rcl::rosidl_message_type_support_t;
 }
 
@@ -47,19 +47,37 @@ impl Drop for PointField {
     }
 }
 
-#[repr(C)]
-#[derive(Debug)]
-pub struct PointFieldSequence {
+
+struct PointFieldSeqRaw {
     data: *mut PointField,
     size: usize,
     capacity: usize,
 }
 
-impl PointFieldSequence {
+/// Sequence of PointField.
+/// `N` is the maximum number of elements.
+/// If `N` is `0`, the size is unlimited.
+#[repr(C)]
+#[derive(Debug)]
+pub struct PointFieldSeq<const N: usize> {
+    data: *mut PointField,
+    size: usize,
+    capacity: usize,
+}
+
+impl<const N: usize> PointFieldSeq<N> {
+    /// Create a sequence of.
+    /// `N` represents the maximum number of elements.
+    /// If `N` is `0`, the sequence is unlimited.
     pub fn new(size: usize) -> Option<Self> {
-        let mut msg: Self = unsafe { std::mem::MaybeUninit::zeroed().assume_init() };
+        if N != 0 && size >= N {
+            // the size exceeds in the maximum number
+            return None;
+        }
+
+        let mut msg: PointFieldSeqRaw = unsafe { std::mem::MaybeUninit::zeroed().assume_init() };
         if unsafe { sensor_msgs__msg__PointField__Sequence__init(&mut msg, size) } {
-            Some(msg)
+            Some(Self {data: msg.data, size: msg.size, capacity: msg.capacity })
         } else {
             None
         }
@@ -84,14 +102,15 @@ impl PointFieldSequence {
     }
 }
 
-impl Drop for PointFieldSequence {
+impl<const N: usize> Drop for PointFieldSeq<N> {
     fn drop(&mut self) {
-        unsafe { sensor_msgs__msg__PointField__Sequence__fini(self) };
+        let mut msg = PointFieldSeqRaw{data: self.data, size: self.size, capacity: self.capacity};
+        unsafe { sensor_msgs__msg__PointField__Sequence__fini(&mut msg) };
     }
 }
 
-unsafe impl Send for PointFieldSequence {}
-unsafe impl Sync for PointFieldSequence {}
+unsafe impl<const N: usize> Send for PointFieldSeq<N> {}
+unsafe impl<const N: usize> Sync for PointFieldSeq<N> {}
 
 
 impl TopicMsg for PointField {

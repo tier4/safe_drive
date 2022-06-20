@@ -7,8 +7,8 @@ use crate::rcl;
 extern "C" {
     fn nav_msgs__msg__OccupancyGrid__init(msg: *mut OccupancyGrid) -> bool;
     fn nav_msgs__msg__OccupancyGrid__fini(msg: *mut OccupancyGrid);
-    fn nav_msgs__msg__OccupancyGrid__Sequence__init(msg: *mut OccupancyGridSequence, size: usize) -> bool;
-    fn nav_msgs__msg__OccupancyGrid__Sequence__fini(msg: *mut OccupancyGridSequence);
+    fn nav_msgs__msg__OccupancyGrid__Sequence__init(msg: *mut OccupancyGridSeqRaw, size: usize) -> bool;
+    fn nav_msgs__msg__OccupancyGrid__Sequence__fini(msg: *mut OccupancyGridSeqRaw);
     fn rosidl_typesupport_c__get_message_type_support_handle__nav_msgs__msg__OccupancyGrid() -> *const rcl::rosidl_message_type_support_t;
 }
 
@@ -38,19 +38,37 @@ impl Drop for OccupancyGrid {
     }
 }
 
-#[repr(C)]
-#[derive(Debug)]
-pub struct OccupancyGridSequence {
+
+struct OccupancyGridSeqRaw {
     data: *mut OccupancyGrid,
     size: usize,
     capacity: usize,
 }
 
-impl OccupancyGridSequence {
+/// Sequence of OccupancyGrid.
+/// `N` is the maximum number of elements.
+/// If `N` is `0`, the size is unlimited.
+#[repr(C)]
+#[derive(Debug)]
+pub struct OccupancyGridSeq<const N: usize> {
+    data: *mut OccupancyGrid,
+    size: usize,
+    capacity: usize,
+}
+
+impl<const N: usize> OccupancyGridSeq<N> {
+    /// Create a sequence of.
+    /// `N` represents the maximum number of elements.
+    /// If `N` is `0`, the sequence is unlimited.
     pub fn new(size: usize) -> Option<Self> {
-        let mut msg: Self = unsafe { std::mem::MaybeUninit::zeroed().assume_init() };
+        if N != 0 && size >= N {
+            // the size exceeds in the maximum number
+            return None;
+        }
+
+        let mut msg: OccupancyGridSeqRaw = unsafe { std::mem::MaybeUninit::zeroed().assume_init() };
         if unsafe { nav_msgs__msg__OccupancyGrid__Sequence__init(&mut msg, size) } {
-            Some(msg)
+            Some(Self {data: msg.data, size: msg.size, capacity: msg.capacity })
         } else {
             None
         }
@@ -75,14 +93,15 @@ impl OccupancyGridSequence {
     }
 }
 
-impl Drop for OccupancyGridSequence {
+impl<const N: usize> Drop for OccupancyGridSeq<N> {
     fn drop(&mut self) {
-        unsafe { nav_msgs__msg__OccupancyGrid__Sequence__fini(self) };
+        let mut msg = OccupancyGridSeqRaw{data: self.data, size: self.size, capacity: self.capacity};
+        unsafe { nav_msgs__msg__OccupancyGrid__Sequence__fini(&mut msg) };
     }
 }
 
-unsafe impl Send for OccupancyGridSequence {}
-unsafe impl Sync for OccupancyGridSequence {}
+unsafe impl<const N: usize> Send for OccupancyGridSeq<N> {}
+unsafe impl<const N: usize> Sync for OccupancyGridSeq<N> {}
 
 
 impl TopicMsg for OccupancyGrid {

@@ -7,8 +7,8 @@ use crate::rcl;
 extern "C" {
     fn geometry_msgs__msg__AccelWithCovariance__init(msg: *mut AccelWithCovariance) -> bool;
     fn geometry_msgs__msg__AccelWithCovariance__fini(msg: *mut AccelWithCovariance);
-    fn geometry_msgs__msg__AccelWithCovariance__Sequence__init(msg: *mut AccelWithCovarianceSequence, size: usize) -> bool;
-    fn geometry_msgs__msg__AccelWithCovariance__Sequence__fini(msg: *mut AccelWithCovarianceSequence);
+    fn geometry_msgs__msg__AccelWithCovariance__Sequence__init(msg: *mut AccelWithCovarianceSeqRaw, size: usize) -> bool;
+    fn geometry_msgs__msg__AccelWithCovariance__Sequence__fini(msg: *mut AccelWithCovarianceSeqRaw);
     fn rosidl_typesupport_c__get_message_type_support_handle__geometry_msgs__msg__AccelWithCovariance() -> *const rcl::rosidl_message_type_support_t;
 }
 
@@ -37,19 +37,37 @@ impl Drop for AccelWithCovariance {
     }
 }
 
-#[repr(C)]
-#[derive(Debug)]
-pub struct AccelWithCovarianceSequence {
+
+struct AccelWithCovarianceSeqRaw {
     data: *mut AccelWithCovariance,
     size: usize,
     capacity: usize,
 }
 
-impl AccelWithCovarianceSequence {
+/// Sequence of AccelWithCovariance.
+/// `N` is the maximum number of elements.
+/// If `N` is `0`, the size is unlimited.
+#[repr(C)]
+#[derive(Debug)]
+pub struct AccelWithCovarianceSeq<const N: usize> {
+    data: *mut AccelWithCovariance,
+    size: usize,
+    capacity: usize,
+}
+
+impl<const N: usize> AccelWithCovarianceSeq<N> {
+    /// Create a sequence of.
+    /// `N` represents the maximum number of elements.
+    /// If `N` is `0`, the sequence is unlimited.
     pub fn new(size: usize) -> Option<Self> {
-        let mut msg: Self = unsafe { std::mem::MaybeUninit::zeroed().assume_init() };
+        if N != 0 && size >= N {
+            // the size exceeds in the maximum number
+            return None;
+        }
+
+        let mut msg: AccelWithCovarianceSeqRaw = unsafe { std::mem::MaybeUninit::zeroed().assume_init() };
         if unsafe { geometry_msgs__msg__AccelWithCovariance__Sequence__init(&mut msg, size) } {
-            Some(msg)
+            Some(Self {data: msg.data, size: msg.size, capacity: msg.capacity })
         } else {
             None
         }
@@ -74,14 +92,15 @@ impl AccelWithCovarianceSequence {
     }
 }
 
-impl Drop for AccelWithCovarianceSequence {
+impl<const N: usize> Drop for AccelWithCovarianceSeq<N> {
     fn drop(&mut self) {
-        unsafe { geometry_msgs__msg__AccelWithCovariance__Sequence__fini(self) };
+        let mut msg = AccelWithCovarianceSeqRaw{data: self.data, size: self.size, capacity: self.capacity};
+        unsafe { geometry_msgs__msg__AccelWithCovariance__Sequence__fini(&mut msg) };
     }
 }
 
-unsafe impl Send for AccelWithCovarianceSequence {}
-unsafe impl Sync for AccelWithCovarianceSequence {}
+unsafe impl<const N: usize> Send for AccelWithCovarianceSeq<N> {}
+unsafe impl<const N: usize> Sync for AccelWithCovarianceSeq<N> {}
 
 
 impl TopicMsg for AccelWithCovariance {

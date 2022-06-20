@@ -7,8 +7,8 @@ use crate::rcl;
 extern "C" {
     fn shape_msgs__msg__Plane__init(msg: *mut Plane) -> bool;
     fn shape_msgs__msg__Plane__fini(msg: *mut Plane);
-    fn shape_msgs__msg__Plane__Sequence__init(msg: *mut PlaneSequence, size: usize) -> bool;
-    fn shape_msgs__msg__Plane__Sequence__fini(msg: *mut PlaneSequence);
+    fn shape_msgs__msg__Plane__Sequence__init(msg: *mut PlaneSeqRaw, size: usize) -> bool;
+    fn shape_msgs__msg__Plane__Sequence__fini(msg: *mut PlaneSeqRaw);
     fn rosidl_typesupport_c__get_message_type_support_handle__shape_msgs__msg__Plane() -> *const rcl::rosidl_message_type_support_t;
 }
 
@@ -36,19 +36,37 @@ impl Drop for Plane {
     }
 }
 
-#[repr(C)]
-#[derive(Debug)]
-pub struct PlaneSequence {
+
+struct PlaneSeqRaw {
     data: *mut Plane,
     size: usize,
     capacity: usize,
 }
 
-impl PlaneSequence {
+/// Sequence of Plane.
+/// `N` is the maximum number of elements.
+/// If `N` is `0`, the size is unlimited.
+#[repr(C)]
+#[derive(Debug)]
+pub struct PlaneSeq<const N: usize> {
+    data: *mut Plane,
+    size: usize,
+    capacity: usize,
+}
+
+impl<const N: usize> PlaneSeq<N> {
+    /// Create a sequence of.
+    /// `N` represents the maximum number of elements.
+    /// If `N` is `0`, the sequence is unlimited.
     pub fn new(size: usize) -> Option<Self> {
-        let mut msg: Self = unsafe { std::mem::MaybeUninit::zeroed().assume_init() };
+        if N != 0 && size >= N {
+            // the size exceeds in the maximum number
+            return None;
+        }
+
+        let mut msg: PlaneSeqRaw = unsafe { std::mem::MaybeUninit::zeroed().assume_init() };
         if unsafe { shape_msgs__msg__Plane__Sequence__init(&mut msg, size) } {
-            Some(msg)
+            Some(Self {data: msg.data, size: msg.size, capacity: msg.capacity })
         } else {
             None
         }
@@ -73,14 +91,15 @@ impl PlaneSequence {
     }
 }
 
-impl Drop for PlaneSequence {
+impl<const N: usize> Drop for PlaneSeq<N> {
     fn drop(&mut self) {
-        unsafe { shape_msgs__msg__Plane__Sequence__fini(self) };
+        let mut msg = PlaneSeqRaw{data: self.data, size: self.size, capacity: self.capacity};
+        unsafe { shape_msgs__msg__Plane__Sequence__fini(&mut msg) };
     }
 }
 
-unsafe impl Send for PlaneSequence {}
-unsafe impl Sync for PlaneSequence {}
+unsafe impl<const N: usize> Send for PlaneSeq<N> {}
+unsafe impl<const N: usize> Sync for PlaneSeq<N> {}
 
 
 impl TopicMsg for Plane {

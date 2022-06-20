@@ -7,8 +7,8 @@ use crate::rcl;
 extern "C" {
     fn stereo_msgs__msg__DisparityImage__init(msg: *mut DisparityImage) -> bool;
     fn stereo_msgs__msg__DisparityImage__fini(msg: *mut DisparityImage);
-    fn stereo_msgs__msg__DisparityImage__Sequence__init(msg: *mut DisparityImageSequence, size: usize) -> bool;
-    fn stereo_msgs__msg__DisparityImage__Sequence__fini(msg: *mut DisparityImageSequence);
+    fn stereo_msgs__msg__DisparityImage__Sequence__init(msg: *mut DisparityImageSeqRaw, size: usize) -> bool;
+    fn stereo_msgs__msg__DisparityImage__Sequence__fini(msg: *mut DisparityImageSeqRaw);
     fn rosidl_typesupport_c__get_message_type_support_handle__stereo_msgs__msg__DisparityImage() -> *const rcl::rosidl_message_type_support_t;
 }
 
@@ -43,19 +43,37 @@ impl Drop for DisparityImage {
     }
 }
 
-#[repr(C)]
-#[derive(Debug)]
-pub struct DisparityImageSequence {
+
+struct DisparityImageSeqRaw {
     data: *mut DisparityImage,
     size: usize,
     capacity: usize,
 }
 
-impl DisparityImageSequence {
+/// Sequence of DisparityImage.
+/// `N` is the maximum number of elements.
+/// If `N` is `0`, the size is unlimited.
+#[repr(C)]
+#[derive(Debug)]
+pub struct DisparityImageSeq<const N: usize> {
+    data: *mut DisparityImage,
+    size: usize,
+    capacity: usize,
+}
+
+impl<const N: usize> DisparityImageSeq<N> {
+    /// Create a sequence of.
+    /// `N` represents the maximum number of elements.
+    /// If `N` is `0`, the sequence is unlimited.
     pub fn new(size: usize) -> Option<Self> {
-        let mut msg: Self = unsafe { std::mem::MaybeUninit::zeroed().assume_init() };
+        if N != 0 && size >= N {
+            // the size exceeds in the maximum number
+            return None;
+        }
+
+        let mut msg: DisparityImageSeqRaw = unsafe { std::mem::MaybeUninit::zeroed().assume_init() };
         if unsafe { stereo_msgs__msg__DisparityImage__Sequence__init(&mut msg, size) } {
-            Some(msg)
+            Some(Self {data: msg.data, size: msg.size, capacity: msg.capacity })
         } else {
             None
         }
@@ -80,14 +98,15 @@ impl DisparityImageSequence {
     }
 }
 
-impl Drop for DisparityImageSequence {
+impl<const N: usize> Drop for DisparityImageSeq<N> {
     fn drop(&mut self) {
-        unsafe { stereo_msgs__msg__DisparityImage__Sequence__fini(self) };
+        let mut msg = DisparityImageSeqRaw{data: self.data, size: self.size, capacity: self.capacity};
+        unsafe { stereo_msgs__msg__DisparityImage__Sequence__fini(&mut msg) };
     }
 }
 
-unsafe impl Send for DisparityImageSequence {}
-unsafe impl Sync for DisparityImageSequence {}
+unsafe impl<const N: usize> Send for DisparityImageSeq<N> {}
+unsafe impl<const N: usize> Sync for DisparityImageSeq<N> {}
 
 
 impl TopicMsg for DisparityImage {

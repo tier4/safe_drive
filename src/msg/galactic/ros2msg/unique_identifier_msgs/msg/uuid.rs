@@ -7,8 +7,8 @@ use crate::rcl;
 extern "C" {
     fn unique_identifier_msgs__msg__UUID__init(msg: *mut UUID) -> bool;
     fn unique_identifier_msgs__msg__UUID__fini(msg: *mut UUID);
-    fn unique_identifier_msgs__msg__UUID__Sequence__init(msg: *mut UUIDSequence, size: usize) -> bool;
-    fn unique_identifier_msgs__msg__UUID__Sequence__fini(msg: *mut UUIDSequence);
+    fn unique_identifier_msgs__msg__UUID__Sequence__init(msg: *mut UUIDSeqRaw, size: usize) -> bool;
+    fn unique_identifier_msgs__msg__UUID__Sequence__fini(msg: *mut UUIDSeqRaw);
     fn rosidl_typesupport_c__get_message_type_support_handle__unique_identifier_msgs__msg__UUID() -> *const rcl::rosidl_message_type_support_t;
 }
 
@@ -36,19 +36,37 @@ impl Drop for UUID {
     }
 }
 
-#[repr(C)]
-#[derive(Debug)]
-pub struct UUIDSequence {
+
+struct UUIDSeqRaw {
     data: *mut UUID,
     size: usize,
     capacity: usize,
 }
 
-impl UUIDSequence {
+/// Sequence of UUID.
+/// `N` is the maximum number of elements.
+/// If `N` is `0`, the size is unlimited.
+#[repr(C)]
+#[derive(Debug)]
+pub struct UUIDSeq<const N: usize> {
+    data: *mut UUID,
+    size: usize,
+    capacity: usize,
+}
+
+impl<const N: usize> UUIDSeq<N> {
+    /// Create a sequence of.
+    /// `N` represents the maximum number of elements.
+    /// If `N` is `0`, the sequence is unlimited.
     pub fn new(size: usize) -> Option<Self> {
-        let mut msg: Self = unsafe { std::mem::MaybeUninit::zeroed().assume_init() };
+        if N != 0 && size >= N {
+            // the size exceeds in the maximum number
+            return None;
+        }
+
+        let mut msg: UUIDSeqRaw = unsafe { std::mem::MaybeUninit::zeroed().assume_init() };
         if unsafe { unique_identifier_msgs__msg__UUID__Sequence__init(&mut msg, size) } {
-            Some(msg)
+            Some(Self {data: msg.data, size: msg.size, capacity: msg.capacity })
         } else {
             None
         }
@@ -73,14 +91,15 @@ impl UUIDSequence {
     }
 }
 
-impl Drop for UUIDSequence {
+impl<const N: usize> Drop for UUIDSeq<N> {
     fn drop(&mut self) {
-        unsafe { unique_identifier_msgs__msg__UUID__Sequence__fini(self) };
+        let mut msg = UUIDSeqRaw{data: self.data, size: self.size, capacity: self.capacity};
+        unsafe { unique_identifier_msgs__msg__UUID__Sequence__fini(&mut msg) };
     }
 }
 
-unsafe impl Send for UUIDSequence {}
-unsafe impl Sync for UUIDSequence {}
+unsafe impl<const N: usize> Send for UUIDSeq<N> {}
+unsafe impl<const N: usize> Sync for UUIDSeq<N> {}
 
 
 impl TopicMsg for UUID {

@@ -7,8 +7,8 @@ use crate::rcl;
 extern "C" {
     fn sensor_msgs__msg__LaserEcho__init(msg: *mut LaserEcho) -> bool;
     fn sensor_msgs__msg__LaserEcho__fini(msg: *mut LaserEcho);
-    fn sensor_msgs__msg__LaserEcho__Sequence__init(msg: *mut LaserEchoSequence, size: usize) -> bool;
-    fn sensor_msgs__msg__LaserEcho__Sequence__fini(msg: *mut LaserEchoSequence);
+    fn sensor_msgs__msg__LaserEcho__Sequence__init(msg: *mut LaserEchoSeqRaw, size: usize) -> bool;
+    fn sensor_msgs__msg__LaserEcho__Sequence__fini(msg: *mut LaserEchoSeqRaw);
     fn rosidl_typesupport_c__get_message_type_support_handle__sensor_msgs__msg__LaserEcho() -> *const rcl::rosidl_message_type_support_t;
 }
 
@@ -36,19 +36,37 @@ impl Drop for LaserEcho {
     }
 }
 
-#[repr(C)]
-#[derive(Debug)]
-pub struct LaserEchoSequence {
+
+struct LaserEchoSeqRaw {
     data: *mut LaserEcho,
     size: usize,
     capacity: usize,
 }
 
-impl LaserEchoSequence {
+/// Sequence of LaserEcho.
+/// `N` is the maximum number of elements.
+/// If `N` is `0`, the size is unlimited.
+#[repr(C)]
+#[derive(Debug)]
+pub struct LaserEchoSeq<const N: usize> {
+    data: *mut LaserEcho,
+    size: usize,
+    capacity: usize,
+}
+
+impl<const N: usize> LaserEchoSeq<N> {
+    /// Create a sequence of.
+    /// `N` represents the maximum number of elements.
+    /// If `N` is `0`, the sequence is unlimited.
     pub fn new(size: usize) -> Option<Self> {
-        let mut msg: Self = unsafe { std::mem::MaybeUninit::zeroed().assume_init() };
+        if N != 0 && size >= N {
+            // the size exceeds in the maximum number
+            return None;
+        }
+
+        let mut msg: LaserEchoSeqRaw = unsafe { std::mem::MaybeUninit::zeroed().assume_init() };
         if unsafe { sensor_msgs__msg__LaserEcho__Sequence__init(&mut msg, size) } {
-            Some(msg)
+            Some(Self {data: msg.data, size: msg.size, capacity: msg.capacity })
         } else {
             None
         }
@@ -73,14 +91,15 @@ impl LaserEchoSequence {
     }
 }
 
-impl Drop for LaserEchoSequence {
+impl<const N: usize> Drop for LaserEchoSeq<N> {
     fn drop(&mut self) {
-        unsafe { sensor_msgs__msg__LaserEcho__Sequence__fini(self) };
+        let mut msg = LaserEchoSeqRaw{data: self.data, size: self.size, capacity: self.capacity};
+        unsafe { sensor_msgs__msg__LaserEcho__Sequence__fini(&mut msg) };
     }
 }
 
-unsafe impl Send for LaserEchoSequence {}
-unsafe impl Sync for LaserEchoSequence {}
+unsafe impl<const N: usize> Send for LaserEchoSeq<N> {}
+unsafe impl<const N: usize> Sync for LaserEchoSeq<N> {}
 
 
 impl TopicMsg for LaserEcho {

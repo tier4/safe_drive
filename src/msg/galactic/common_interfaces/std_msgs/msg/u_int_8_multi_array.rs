@@ -7,8 +7,8 @@ use crate::rcl;
 extern "C" {
     fn std_msgs__msg__UInt8MultiArray__init(msg: *mut UInt8MultiArray) -> bool;
     fn std_msgs__msg__UInt8MultiArray__fini(msg: *mut UInt8MultiArray);
-    fn std_msgs__msg__UInt8MultiArray__Sequence__init(msg: *mut UInt8MultiArraySequence, size: usize) -> bool;
-    fn std_msgs__msg__UInt8MultiArray__Sequence__fini(msg: *mut UInt8MultiArraySequence);
+    fn std_msgs__msg__UInt8MultiArray__Sequence__init(msg: *mut UInt8MultiArraySeqRaw, size: usize) -> bool;
+    fn std_msgs__msg__UInt8MultiArray__Sequence__fini(msg: *mut UInt8MultiArraySeqRaw);
     fn rosidl_typesupport_c__get_message_type_support_handle__std_msgs__msg__UInt8MultiArray() -> *const rcl::rosidl_message_type_support_t;
 }
 
@@ -37,19 +37,37 @@ impl Drop for UInt8MultiArray {
     }
 }
 
-#[repr(C)]
-#[derive(Debug)]
-pub struct UInt8MultiArraySequence {
+
+struct UInt8MultiArraySeqRaw {
     data: *mut UInt8MultiArray,
     size: usize,
     capacity: usize,
 }
 
-impl UInt8MultiArraySequence {
+/// Sequence of UInt8MultiArray.
+/// `N` is the maximum number of elements.
+/// If `N` is `0`, the size is unlimited.
+#[repr(C)]
+#[derive(Debug)]
+pub struct UInt8MultiArraySeq<const N: usize> {
+    data: *mut UInt8MultiArray,
+    size: usize,
+    capacity: usize,
+}
+
+impl<const N: usize> UInt8MultiArraySeq<N> {
+    /// Create a sequence of.
+    /// `N` represents the maximum number of elements.
+    /// If `N` is `0`, the sequence is unlimited.
     pub fn new(size: usize) -> Option<Self> {
-        let mut msg: Self = unsafe { std::mem::MaybeUninit::zeroed().assume_init() };
+        if N != 0 && size >= N {
+            // the size exceeds in the maximum number
+            return None;
+        }
+
+        let mut msg: UInt8MultiArraySeqRaw = unsafe { std::mem::MaybeUninit::zeroed().assume_init() };
         if unsafe { std_msgs__msg__UInt8MultiArray__Sequence__init(&mut msg, size) } {
-            Some(msg)
+            Some(Self {data: msg.data, size: msg.size, capacity: msg.capacity })
         } else {
             None
         }
@@ -74,14 +92,15 @@ impl UInt8MultiArraySequence {
     }
 }
 
-impl Drop for UInt8MultiArraySequence {
+impl<const N: usize> Drop for UInt8MultiArraySeq<N> {
     fn drop(&mut self) {
-        unsafe { std_msgs__msg__UInt8MultiArray__Sequence__fini(self) };
+        let mut msg = UInt8MultiArraySeqRaw{data: self.data, size: self.size, capacity: self.capacity};
+        unsafe { std_msgs__msg__UInt8MultiArray__Sequence__fini(&mut msg) };
     }
 }
 
-unsafe impl Send for UInt8MultiArraySequence {}
-unsafe impl Sync for UInt8MultiArraySequence {}
+unsafe impl<const N: usize> Send for UInt8MultiArraySeq<N> {}
+unsafe impl<const N: usize> Sync for UInt8MultiArraySeq<N> {}
 
 
 impl TopicMsg for UInt8MultiArray {

@@ -28,8 +28,8 @@ pub const POWER_SUPPLY_TECHNOLOGY_LIMN: u8 = 6;
 extern "C" {
     fn sensor_msgs__msg__BatteryState__init(msg: *mut BatteryState) -> bool;
     fn sensor_msgs__msg__BatteryState__fini(msg: *mut BatteryState);
-    fn sensor_msgs__msg__BatteryState__Sequence__init(msg: *mut BatteryStateSequence, size: usize) -> bool;
-    fn sensor_msgs__msg__BatteryState__Sequence__fini(msg: *mut BatteryStateSequence);
+    fn sensor_msgs__msg__BatteryState__Sequence__init(msg: *mut BatteryStateSeqRaw, size: usize) -> bool;
+    fn sensor_msgs__msg__BatteryState__Sequence__fini(msg: *mut BatteryStateSeqRaw);
     fn rosidl_typesupport_c__get_message_type_support_handle__sensor_msgs__msg__BatteryState() -> *const rcl::rosidl_message_type_support_t;
 }
 
@@ -72,19 +72,37 @@ impl Drop for BatteryState {
     }
 }
 
-#[repr(C)]
-#[derive(Debug)]
-pub struct BatteryStateSequence {
+
+struct BatteryStateSeqRaw {
     data: *mut BatteryState,
     size: usize,
     capacity: usize,
 }
 
-impl BatteryStateSequence {
+/// Sequence of BatteryState.
+/// `N` is the maximum number of elements.
+/// If `N` is `0`, the size is unlimited.
+#[repr(C)]
+#[derive(Debug)]
+pub struct BatteryStateSeq<const N: usize> {
+    data: *mut BatteryState,
+    size: usize,
+    capacity: usize,
+}
+
+impl<const N: usize> BatteryStateSeq<N> {
+    /// Create a sequence of.
+    /// `N` represents the maximum number of elements.
+    /// If `N` is `0`, the sequence is unlimited.
     pub fn new(size: usize) -> Option<Self> {
-        let mut msg: Self = unsafe { std::mem::MaybeUninit::zeroed().assume_init() };
+        if N != 0 && size >= N {
+            // the size exceeds in the maximum number
+            return None;
+        }
+
+        let mut msg: BatteryStateSeqRaw = unsafe { std::mem::MaybeUninit::zeroed().assume_init() };
         if unsafe { sensor_msgs__msg__BatteryState__Sequence__init(&mut msg, size) } {
-            Some(msg)
+            Some(Self {data: msg.data, size: msg.size, capacity: msg.capacity })
         } else {
             None
         }
@@ -109,14 +127,15 @@ impl BatteryStateSequence {
     }
 }
 
-impl Drop for BatteryStateSequence {
+impl<const N: usize> Drop for BatteryStateSeq<N> {
     fn drop(&mut self) {
-        unsafe { sensor_msgs__msg__BatteryState__Sequence__fini(self) };
+        let mut msg = BatteryStateSeqRaw{data: self.data, size: self.size, capacity: self.capacity};
+        unsafe { sensor_msgs__msg__BatteryState__Sequence__fini(&mut msg) };
     }
 }
 
-unsafe impl Send for BatteryStateSequence {}
-unsafe impl Sync for BatteryStateSequence {}
+unsafe impl<const N: usize> Send for BatteryStateSeq<N> {}
+unsafe impl<const N: usize> Sync for BatteryStateSeq<N> {}
 
 
 impl TopicMsg for BatteryState {

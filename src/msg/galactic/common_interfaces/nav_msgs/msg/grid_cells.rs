@@ -7,8 +7,8 @@ use crate::rcl;
 extern "C" {
     fn nav_msgs__msg__GridCells__init(msg: *mut GridCells) -> bool;
     fn nav_msgs__msg__GridCells__fini(msg: *mut GridCells);
-    fn nav_msgs__msg__GridCells__Sequence__init(msg: *mut GridCellsSequence, size: usize) -> bool;
-    fn nav_msgs__msg__GridCells__Sequence__fini(msg: *mut GridCellsSequence);
+    fn nav_msgs__msg__GridCells__Sequence__init(msg: *mut GridCellsSeqRaw, size: usize) -> bool;
+    fn nav_msgs__msg__GridCells__Sequence__fini(msg: *mut GridCellsSeqRaw);
     fn rosidl_typesupport_c__get_message_type_support_handle__nav_msgs__msg__GridCells() -> *const rcl::rosidl_message_type_support_t;
 }
 
@@ -19,7 +19,7 @@ pub struct GridCells {
     pub header: std_msgs::msg::Header,
     pub cell_width: f32,
     pub cell_height: f32,
-    pub cells: geometry_msgs::msg::PointSequence,
+    pub cells: geometry_msgs::msg::PointSeq<0>,
 }
 
 impl GridCells {
@@ -39,19 +39,37 @@ impl Drop for GridCells {
     }
 }
 
-#[repr(C)]
-#[derive(Debug)]
-pub struct GridCellsSequence {
+
+struct GridCellsSeqRaw {
     data: *mut GridCells,
     size: usize,
     capacity: usize,
 }
 
-impl GridCellsSequence {
+/// Sequence of GridCells.
+/// `N` is the maximum number of elements.
+/// If `N` is `0`, the size is unlimited.
+#[repr(C)]
+#[derive(Debug)]
+pub struct GridCellsSeq<const N: usize> {
+    data: *mut GridCells,
+    size: usize,
+    capacity: usize,
+}
+
+impl<const N: usize> GridCellsSeq<N> {
+    /// Create a sequence of.
+    /// `N` represents the maximum number of elements.
+    /// If `N` is `0`, the sequence is unlimited.
     pub fn new(size: usize) -> Option<Self> {
-        let mut msg: Self = unsafe { std::mem::MaybeUninit::zeroed().assume_init() };
+        if N != 0 && size >= N {
+            // the size exceeds in the maximum number
+            return None;
+        }
+
+        let mut msg: GridCellsSeqRaw = unsafe { std::mem::MaybeUninit::zeroed().assume_init() };
         if unsafe { nav_msgs__msg__GridCells__Sequence__init(&mut msg, size) } {
-            Some(msg)
+            Some(Self {data: msg.data, size: msg.size, capacity: msg.capacity })
         } else {
             None
         }
@@ -76,14 +94,15 @@ impl GridCellsSequence {
     }
 }
 
-impl Drop for GridCellsSequence {
+impl<const N: usize> Drop for GridCellsSeq<N> {
     fn drop(&mut self) {
-        unsafe { nav_msgs__msg__GridCells__Sequence__fini(self) };
+        let mut msg = GridCellsSeqRaw{data: self.data, size: self.size, capacity: self.capacity};
+        unsafe { nav_msgs__msg__GridCells__Sequence__fini(&mut msg) };
     }
 }
 
-unsafe impl Send for GridCellsSequence {}
-unsafe impl Sync for GridCellsSequence {}
+unsafe impl<const N: usize> Send for GridCellsSeq<N> {}
+unsafe impl<const N: usize> Sync for GridCellsSeq<N> {}
 
 
 impl TopicMsg for GridCells {

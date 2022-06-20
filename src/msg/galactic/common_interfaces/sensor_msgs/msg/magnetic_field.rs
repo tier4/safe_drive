@@ -7,8 +7,8 @@ use crate::rcl;
 extern "C" {
     fn sensor_msgs__msg__MagneticField__init(msg: *mut MagneticField) -> bool;
     fn sensor_msgs__msg__MagneticField__fini(msg: *mut MagneticField);
-    fn sensor_msgs__msg__MagneticField__Sequence__init(msg: *mut MagneticFieldSequence, size: usize) -> bool;
-    fn sensor_msgs__msg__MagneticField__Sequence__fini(msg: *mut MagneticFieldSequence);
+    fn sensor_msgs__msg__MagneticField__Sequence__init(msg: *mut MagneticFieldSeqRaw, size: usize) -> bool;
+    fn sensor_msgs__msg__MagneticField__Sequence__fini(msg: *mut MagneticFieldSeqRaw);
     fn rosidl_typesupport_c__get_message_type_support_handle__sensor_msgs__msg__MagneticField() -> *const rcl::rosidl_message_type_support_t;
 }
 
@@ -38,19 +38,37 @@ impl Drop for MagneticField {
     }
 }
 
-#[repr(C)]
-#[derive(Debug)]
-pub struct MagneticFieldSequence {
+
+struct MagneticFieldSeqRaw {
     data: *mut MagneticField,
     size: usize,
     capacity: usize,
 }
 
-impl MagneticFieldSequence {
+/// Sequence of MagneticField.
+/// `N` is the maximum number of elements.
+/// If `N` is `0`, the size is unlimited.
+#[repr(C)]
+#[derive(Debug)]
+pub struct MagneticFieldSeq<const N: usize> {
+    data: *mut MagneticField,
+    size: usize,
+    capacity: usize,
+}
+
+impl<const N: usize> MagneticFieldSeq<N> {
+    /// Create a sequence of.
+    /// `N` represents the maximum number of elements.
+    /// If `N` is `0`, the sequence is unlimited.
     pub fn new(size: usize) -> Option<Self> {
-        let mut msg: Self = unsafe { std::mem::MaybeUninit::zeroed().assume_init() };
+        if N != 0 && size >= N {
+            // the size exceeds in the maximum number
+            return None;
+        }
+
+        let mut msg: MagneticFieldSeqRaw = unsafe { std::mem::MaybeUninit::zeroed().assume_init() };
         if unsafe { sensor_msgs__msg__MagneticField__Sequence__init(&mut msg, size) } {
-            Some(msg)
+            Some(Self {data: msg.data, size: msg.size, capacity: msg.capacity })
         } else {
             None
         }
@@ -75,14 +93,15 @@ impl MagneticFieldSequence {
     }
 }
 
-impl Drop for MagneticFieldSequence {
+impl<const N: usize> Drop for MagneticFieldSeq<N> {
     fn drop(&mut self) {
-        unsafe { sensor_msgs__msg__MagneticField__Sequence__fini(self) };
+        let mut msg = MagneticFieldSeqRaw{data: self.data, size: self.size, capacity: self.capacity};
+        unsafe { sensor_msgs__msg__MagneticField__Sequence__fini(&mut msg) };
     }
 }
 
-unsafe impl Send for MagneticFieldSequence {}
-unsafe impl Sync for MagneticFieldSequence {}
+unsafe impl<const N: usize> Send for MagneticFieldSeq<N> {}
+unsafe impl<const N: usize> Sync for MagneticFieldSeq<N> {}
 
 
 impl TopicMsg for MagneticField {

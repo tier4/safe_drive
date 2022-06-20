@@ -7,8 +7,8 @@ use crate::rcl;
 extern "C" {
     fn geometry_msgs__msg__Point32__init(msg: *mut Point32) -> bool;
     fn geometry_msgs__msg__Point32__fini(msg: *mut Point32);
-    fn geometry_msgs__msg__Point32__Sequence__init(msg: *mut Point32Sequence, size: usize) -> bool;
-    fn geometry_msgs__msg__Point32__Sequence__fini(msg: *mut Point32Sequence);
+    fn geometry_msgs__msg__Point32__Sequence__init(msg: *mut Point32SeqRaw, size: usize) -> bool;
+    fn geometry_msgs__msg__Point32__Sequence__fini(msg: *mut Point32SeqRaw);
     fn rosidl_typesupport_c__get_message_type_support_handle__geometry_msgs__msg__Point32() -> *const rcl::rosidl_message_type_support_t;
 }
 
@@ -38,19 +38,37 @@ impl Drop for Point32 {
     }
 }
 
-#[repr(C)]
-#[derive(Debug)]
-pub struct Point32Sequence {
+
+struct Point32SeqRaw {
     data: *mut Point32,
     size: usize,
     capacity: usize,
 }
 
-impl Point32Sequence {
+/// Sequence of Point32.
+/// `N` is the maximum number of elements.
+/// If `N` is `0`, the size is unlimited.
+#[repr(C)]
+#[derive(Debug)]
+pub struct Point32Seq<const N: usize> {
+    data: *mut Point32,
+    size: usize,
+    capacity: usize,
+}
+
+impl<const N: usize> Point32Seq<N> {
+    /// Create a sequence of.
+    /// `N` represents the maximum number of elements.
+    /// If `N` is `0`, the sequence is unlimited.
     pub fn new(size: usize) -> Option<Self> {
-        let mut msg: Self = unsafe { std::mem::MaybeUninit::zeroed().assume_init() };
+        if N != 0 && size >= N {
+            // the size exceeds in the maximum number
+            return None;
+        }
+
+        let mut msg: Point32SeqRaw = unsafe { std::mem::MaybeUninit::zeroed().assume_init() };
         if unsafe { geometry_msgs__msg__Point32__Sequence__init(&mut msg, size) } {
-            Some(msg)
+            Some(Self {data: msg.data, size: msg.size, capacity: msg.capacity })
         } else {
             None
         }
@@ -75,14 +93,15 @@ impl Point32Sequence {
     }
 }
 
-impl Drop for Point32Sequence {
+impl<const N: usize> Drop for Point32Seq<N> {
     fn drop(&mut self) {
-        unsafe { geometry_msgs__msg__Point32__Sequence__fini(self) };
+        let mut msg = Point32SeqRaw{data: self.data, size: self.size, capacity: self.capacity};
+        unsafe { geometry_msgs__msg__Point32__Sequence__fini(&mut msg) };
     }
 }
 
-unsafe impl Send for Point32Sequence {}
-unsafe impl Sync for Point32Sequence {}
+unsafe impl<const N: usize> Send for Point32Seq<N> {}
+unsafe impl<const N: usize> Sync for Point32Seq<N> {}
 
 
 impl TopicMsg for Point32 {

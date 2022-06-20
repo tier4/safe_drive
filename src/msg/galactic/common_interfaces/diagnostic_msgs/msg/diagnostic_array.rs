@@ -7,8 +7,8 @@ use crate::rcl;
 extern "C" {
     fn diagnostic_msgs__msg__DiagnosticArray__init(msg: *mut DiagnosticArray) -> bool;
     fn diagnostic_msgs__msg__DiagnosticArray__fini(msg: *mut DiagnosticArray);
-    fn diagnostic_msgs__msg__DiagnosticArray__Sequence__init(msg: *mut DiagnosticArraySequence, size: usize) -> bool;
-    fn diagnostic_msgs__msg__DiagnosticArray__Sequence__fini(msg: *mut DiagnosticArraySequence);
+    fn diagnostic_msgs__msg__DiagnosticArray__Sequence__init(msg: *mut DiagnosticArraySeqRaw, size: usize) -> bool;
+    fn diagnostic_msgs__msg__DiagnosticArray__Sequence__fini(msg: *mut DiagnosticArraySeqRaw);
     fn rosidl_typesupport_c__get_message_type_support_handle__diagnostic_msgs__msg__DiagnosticArray() -> *const rcl::rosidl_message_type_support_t;
 }
 
@@ -17,7 +17,7 @@ extern "C" {
 #[derive(Debug)]
 pub struct DiagnosticArray {
     pub header: std_msgs::msg::Header,
-    pub status: DiagnosticStatusSequence,
+    pub status: DiagnosticStatusSeq<0>,
 }
 
 impl DiagnosticArray {
@@ -37,19 +37,37 @@ impl Drop for DiagnosticArray {
     }
 }
 
-#[repr(C)]
-#[derive(Debug)]
-pub struct DiagnosticArraySequence {
+
+struct DiagnosticArraySeqRaw {
     data: *mut DiagnosticArray,
     size: usize,
     capacity: usize,
 }
 
-impl DiagnosticArraySequence {
+/// Sequence of DiagnosticArray.
+/// `N` is the maximum number of elements.
+/// If `N` is `0`, the size is unlimited.
+#[repr(C)]
+#[derive(Debug)]
+pub struct DiagnosticArraySeq<const N: usize> {
+    data: *mut DiagnosticArray,
+    size: usize,
+    capacity: usize,
+}
+
+impl<const N: usize> DiagnosticArraySeq<N> {
+    /// Create a sequence of.
+    /// `N` represents the maximum number of elements.
+    /// If `N` is `0`, the sequence is unlimited.
     pub fn new(size: usize) -> Option<Self> {
-        let mut msg: Self = unsafe { std::mem::MaybeUninit::zeroed().assume_init() };
+        if N != 0 && size >= N {
+            // the size exceeds in the maximum number
+            return None;
+        }
+
+        let mut msg: DiagnosticArraySeqRaw = unsafe { std::mem::MaybeUninit::zeroed().assume_init() };
         if unsafe { diagnostic_msgs__msg__DiagnosticArray__Sequence__init(&mut msg, size) } {
-            Some(msg)
+            Some(Self {data: msg.data, size: msg.size, capacity: msg.capacity })
         } else {
             None
         }
@@ -74,14 +92,15 @@ impl DiagnosticArraySequence {
     }
 }
 
-impl Drop for DiagnosticArraySequence {
+impl<const N: usize> Drop for DiagnosticArraySeq<N> {
     fn drop(&mut self) {
-        unsafe { diagnostic_msgs__msg__DiagnosticArray__Sequence__fini(self) };
+        let mut msg = DiagnosticArraySeqRaw{data: self.data, size: self.size, capacity: self.capacity};
+        unsafe { diagnostic_msgs__msg__DiagnosticArray__Sequence__fini(&mut msg) };
     }
 }
 
-unsafe impl Send for DiagnosticArraySequence {}
-unsafe impl Sync for DiagnosticArraySequence {}
+unsafe impl<const N: usize> Send for DiagnosticArraySeq<N> {}
+unsafe impl<const N: usize> Sync for DiagnosticArraySeq<N> {}
 
 
 impl TopicMsg for DiagnosticArray {

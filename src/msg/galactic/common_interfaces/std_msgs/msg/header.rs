@@ -7,8 +7,8 @@ use crate::rcl;
 extern "C" {
     fn std_msgs__msg__Header__init(msg: *mut Header) -> bool;
     fn std_msgs__msg__Header__fini(msg: *mut Header);
-    fn std_msgs__msg__Header__Sequence__init(msg: *mut HeaderSequence, size: usize) -> bool;
-    fn std_msgs__msg__Header__Sequence__fini(msg: *mut HeaderSequence);
+    fn std_msgs__msg__Header__Sequence__init(msg: *mut HeaderSeqRaw, size: usize) -> bool;
+    fn std_msgs__msg__Header__Sequence__fini(msg: *mut HeaderSeqRaw);
     fn rosidl_typesupport_c__get_message_type_support_handle__std_msgs__msg__Header() -> *const rcl::rosidl_message_type_support_t;
 }
 
@@ -37,19 +37,37 @@ impl Drop for Header {
     }
 }
 
-#[repr(C)]
-#[derive(Debug)]
-pub struct HeaderSequence {
+
+struct HeaderSeqRaw {
     data: *mut Header,
     size: usize,
     capacity: usize,
 }
 
-impl HeaderSequence {
+/// Sequence of Header.
+/// `N` is the maximum number of elements.
+/// If `N` is `0`, the size is unlimited.
+#[repr(C)]
+#[derive(Debug)]
+pub struct HeaderSeq<const N: usize> {
+    data: *mut Header,
+    size: usize,
+    capacity: usize,
+}
+
+impl<const N: usize> HeaderSeq<N> {
+    /// Create a sequence of.
+    /// `N` represents the maximum number of elements.
+    /// If `N` is `0`, the sequence is unlimited.
     pub fn new(size: usize) -> Option<Self> {
-        let mut msg: Self = unsafe { std::mem::MaybeUninit::zeroed().assume_init() };
+        if N != 0 && size >= N {
+            // the size exceeds in the maximum number
+            return None;
+        }
+
+        let mut msg: HeaderSeqRaw = unsafe { std::mem::MaybeUninit::zeroed().assume_init() };
         if unsafe { std_msgs__msg__Header__Sequence__init(&mut msg, size) } {
-            Some(msg)
+            Some(Self {data: msg.data, size: msg.size, capacity: msg.capacity })
         } else {
             None
         }
@@ -74,14 +92,15 @@ impl HeaderSequence {
     }
 }
 
-impl Drop for HeaderSequence {
+impl<const N: usize> Drop for HeaderSeq<N> {
     fn drop(&mut self) {
-        unsafe { std_msgs__msg__Header__Sequence__fini(self) };
+        let mut msg = HeaderSeqRaw{data: self.data, size: self.size, capacity: self.capacity};
+        unsafe { std_msgs__msg__Header__Sequence__fini(&mut msg) };
     }
 }
 
-unsafe impl Send for HeaderSequence {}
-unsafe impl Sync for HeaderSequence {}
+unsafe impl<const N: usize> Send for HeaderSeq<N> {}
+unsafe impl<const N: usize> Sync for HeaderSeq<N> {}
 
 
 impl TopicMsg for Header {

@@ -7,8 +7,8 @@ use crate::rcl;
 extern "C" {
     fn geometry_msgs__msg__AccelStamped__init(msg: *mut AccelStamped) -> bool;
     fn geometry_msgs__msg__AccelStamped__fini(msg: *mut AccelStamped);
-    fn geometry_msgs__msg__AccelStamped__Sequence__init(msg: *mut AccelStampedSequence, size: usize) -> bool;
-    fn geometry_msgs__msg__AccelStamped__Sequence__fini(msg: *mut AccelStampedSequence);
+    fn geometry_msgs__msg__AccelStamped__Sequence__init(msg: *mut AccelStampedSeqRaw, size: usize) -> bool;
+    fn geometry_msgs__msg__AccelStamped__Sequence__fini(msg: *mut AccelStampedSeqRaw);
     fn rosidl_typesupport_c__get_message_type_support_handle__geometry_msgs__msg__AccelStamped() -> *const rcl::rosidl_message_type_support_t;
 }
 
@@ -37,19 +37,37 @@ impl Drop for AccelStamped {
     }
 }
 
-#[repr(C)]
-#[derive(Debug)]
-pub struct AccelStampedSequence {
+
+struct AccelStampedSeqRaw {
     data: *mut AccelStamped,
     size: usize,
     capacity: usize,
 }
 
-impl AccelStampedSequence {
+/// Sequence of AccelStamped.
+/// `N` is the maximum number of elements.
+/// If `N` is `0`, the size is unlimited.
+#[repr(C)]
+#[derive(Debug)]
+pub struct AccelStampedSeq<const N: usize> {
+    data: *mut AccelStamped,
+    size: usize,
+    capacity: usize,
+}
+
+impl<const N: usize> AccelStampedSeq<N> {
+    /// Create a sequence of.
+    /// `N` represents the maximum number of elements.
+    /// If `N` is `0`, the sequence is unlimited.
     pub fn new(size: usize) -> Option<Self> {
-        let mut msg: Self = unsafe { std::mem::MaybeUninit::zeroed().assume_init() };
+        if N != 0 && size >= N {
+            // the size exceeds in the maximum number
+            return None;
+        }
+
+        let mut msg: AccelStampedSeqRaw = unsafe { std::mem::MaybeUninit::zeroed().assume_init() };
         if unsafe { geometry_msgs__msg__AccelStamped__Sequence__init(&mut msg, size) } {
-            Some(msg)
+            Some(Self {data: msg.data, size: msg.size, capacity: msg.capacity })
         } else {
             None
         }
@@ -74,14 +92,15 @@ impl AccelStampedSequence {
     }
 }
 
-impl Drop for AccelStampedSequence {
+impl<const N: usize> Drop for AccelStampedSeq<N> {
     fn drop(&mut self) {
-        unsafe { geometry_msgs__msg__AccelStamped__Sequence__fini(self) };
+        let mut msg = AccelStampedSeqRaw{data: self.data, size: self.size, capacity: self.capacity};
+        unsafe { geometry_msgs__msg__AccelStamped__Sequence__fini(&mut msg) };
     }
 }
 
-unsafe impl Send for AccelStampedSequence {}
-unsafe impl Sync for AccelStampedSequence {}
+unsafe impl<const N: usize> Send for AccelStampedSeq<N> {}
+unsafe impl<const N: usize> Sync for AccelStampedSeq<N> {}
 
 
 impl TopicMsg for AccelStamped {

@@ -7,8 +7,8 @@ use crate::rcl;
 extern "C" {
     fn std_msgs__msg__Char__init(msg: *mut Char) -> bool;
     fn std_msgs__msg__Char__fini(msg: *mut Char);
-    fn std_msgs__msg__Char__Sequence__init(msg: *mut CharSequence, size: usize) -> bool;
-    fn std_msgs__msg__Char__Sequence__fini(msg: *mut CharSequence);
+    fn std_msgs__msg__Char__Sequence__init(msg: *mut CharSeqRaw, size: usize) -> bool;
+    fn std_msgs__msg__Char__Sequence__fini(msg: *mut CharSeqRaw);
     fn rosidl_typesupport_c__get_message_type_support_handle__std_msgs__msg__Char() -> *const rcl::rosidl_message_type_support_t;
 }
 
@@ -36,19 +36,37 @@ impl Drop for Char {
     }
 }
 
-#[repr(C)]
-#[derive(Debug)]
-pub struct CharSequence {
+
+struct CharSeqRaw {
     data: *mut Char,
     size: usize,
     capacity: usize,
 }
 
-impl CharSequence {
+/// Sequence of Char.
+/// `N` is the maximum number of elements.
+/// If `N` is `0`, the size is unlimited.
+#[repr(C)]
+#[derive(Debug)]
+pub struct CharSeq<const N: usize> {
+    data: *mut Char,
+    size: usize,
+    capacity: usize,
+}
+
+impl<const N: usize> CharSeq<N> {
+    /// Create a sequence of.
+    /// `N` represents the maximum number of elements.
+    /// If `N` is `0`, the sequence is unlimited.
     pub fn new(size: usize) -> Option<Self> {
-        let mut msg: Self = unsafe { std::mem::MaybeUninit::zeroed().assume_init() };
+        if N != 0 && size >= N {
+            // the size exceeds in the maximum number
+            return None;
+        }
+
+        let mut msg: CharSeqRaw = unsafe { std::mem::MaybeUninit::zeroed().assume_init() };
         if unsafe { std_msgs__msg__Char__Sequence__init(&mut msg, size) } {
-            Some(msg)
+            Some(Self {data: msg.data, size: msg.size, capacity: msg.capacity })
         } else {
             None
         }
@@ -73,14 +91,15 @@ impl CharSequence {
     }
 }
 
-impl Drop for CharSequence {
+impl<const N: usize> Drop for CharSeq<N> {
     fn drop(&mut self) {
-        unsafe { std_msgs__msg__Char__Sequence__fini(self) };
+        let mut msg = CharSeqRaw{data: self.data, size: self.size, capacity: self.capacity};
+        unsafe { std_msgs__msg__Char__Sequence__fini(&mut msg) };
     }
 }
 
-unsafe impl Send for CharSequence {}
-unsafe impl Sync for CharSequence {}
+unsafe impl<const N: usize> Send for CharSeq<N> {}
+unsafe impl<const N: usize> Sync for CharSeq<N> {}
 
 
 impl TopicMsg for Char {

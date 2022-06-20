@@ -11,8 +11,8 @@ pub const COVARIANCE_TYPE_KNOWN: u8 = 3;
 extern "C" {
     fn sensor_msgs__msg__NavSatFix__init(msg: *mut NavSatFix) -> bool;
     fn sensor_msgs__msg__NavSatFix__fini(msg: *mut NavSatFix);
-    fn sensor_msgs__msg__NavSatFix__Sequence__init(msg: *mut NavSatFixSequence, size: usize) -> bool;
-    fn sensor_msgs__msg__NavSatFix__Sequence__fini(msg: *mut NavSatFixSequence);
+    fn sensor_msgs__msg__NavSatFix__Sequence__init(msg: *mut NavSatFixSeqRaw, size: usize) -> bool;
+    fn sensor_msgs__msg__NavSatFix__Sequence__fini(msg: *mut NavSatFixSeqRaw);
     fn rosidl_typesupport_c__get_message_type_support_handle__sensor_msgs__msg__NavSatFix() -> *const rcl::rosidl_message_type_support_t;
 }
 
@@ -46,19 +46,37 @@ impl Drop for NavSatFix {
     }
 }
 
-#[repr(C)]
-#[derive(Debug)]
-pub struct NavSatFixSequence {
+
+struct NavSatFixSeqRaw {
     data: *mut NavSatFix,
     size: usize,
     capacity: usize,
 }
 
-impl NavSatFixSequence {
+/// Sequence of NavSatFix.
+/// `N` is the maximum number of elements.
+/// If `N` is `0`, the size is unlimited.
+#[repr(C)]
+#[derive(Debug)]
+pub struct NavSatFixSeq<const N: usize> {
+    data: *mut NavSatFix,
+    size: usize,
+    capacity: usize,
+}
+
+impl<const N: usize> NavSatFixSeq<N> {
+    /// Create a sequence of.
+    /// `N` represents the maximum number of elements.
+    /// If `N` is `0`, the sequence is unlimited.
     pub fn new(size: usize) -> Option<Self> {
-        let mut msg: Self = unsafe { std::mem::MaybeUninit::zeroed().assume_init() };
+        if N != 0 && size >= N {
+            // the size exceeds in the maximum number
+            return None;
+        }
+
+        let mut msg: NavSatFixSeqRaw = unsafe { std::mem::MaybeUninit::zeroed().assume_init() };
         if unsafe { sensor_msgs__msg__NavSatFix__Sequence__init(&mut msg, size) } {
-            Some(msg)
+            Some(Self {data: msg.data, size: msg.size, capacity: msg.capacity })
         } else {
             None
         }
@@ -83,14 +101,15 @@ impl NavSatFixSequence {
     }
 }
 
-impl Drop for NavSatFixSequence {
+impl<const N: usize> Drop for NavSatFixSeq<N> {
     fn drop(&mut self) {
-        unsafe { sensor_msgs__msg__NavSatFix__Sequence__fini(self) };
+        let mut msg = NavSatFixSeqRaw{data: self.data, size: self.size, capacity: self.capacity};
+        unsafe { sensor_msgs__msg__NavSatFix__Sequence__fini(&mut msg) };
     }
 }
 
-unsafe impl Send for NavSatFixSequence {}
-unsafe impl Sync for NavSatFixSequence {}
+unsafe impl<const N: usize> Send for NavSatFixSeq<N> {}
+unsafe impl<const N: usize> Sync for NavSatFixSeq<N> {}
 
 
 impl TopicMsg for NavSatFix {

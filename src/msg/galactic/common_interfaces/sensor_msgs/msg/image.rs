@@ -7,8 +7,8 @@ use crate::rcl;
 extern "C" {
     fn sensor_msgs__msg__Image__init(msg: *mut Image) -> bool;
     fn sensor_msgs__msg__Image__fini(msg: *mut Image);
-    fn sensor_msgs__msg__Image__Sequence__init(msg: *mut ImageSequence, size: usize) -> bool;
-    fn sensor_msgs__msg__Image__Sequence__fini(msg: *mut ImageSequence);
+    fn sensor_msgs__msg__Image__Sequence__init(msg: *mut ImageSeqRaw, size: usize) -> bool;
+    fn sensor_msgs__msg__Image__Sequence__fini(msg: *mut ImageSeqRaw);
     fn rosidl_typesupport_c__get_message_type_support_handle__sensor_msgs__msg__Image() -> *const rcl::rosidl_message_type_support_t;
 }
 
@@ -42,19 +42,37 @@ impl Drop for Image {
     }
 }
 
-#[repr(C)]
-#[derive(Debug)]
-pub struct ImageSequence {
+
+struct ImageSeqRaw {
     data: *mut Image,
     size: usize,
     capacity: usize,
 }
 
-impl ImageSequence {
+/// Sequence of Image.
+/// `N` is the maximum number of elements.
+/// If `N` is `0`, the size is unlimited.
+#[repr(C)]
+#[derive(Debug)]
+pub struct ImageSeq<const N: usize> {
+    data: *mut Image,
+    size: usize,
+    capacity: usize,
+}
+
+impl<const N: usize> ImageSeq<N> {
+    /// Create a sequence of.
+    /// `N` represents the maximum number of elements.
+    /// If `N` is `0`, the sequence is unlimited.
     pub fn new(size: usize) -> Option<Self> {
-        let mut msg: Self = unsafe { std::mem::MaybeUninit::zeroed().assume_init() };
+        if N != 0 && size >= N {
+            // the size exceeds in the maximum number
+            return None;
+        }
+
+        let mut msg: ImageSeqRaw = unsafe { std::mem::MaybeUninit::zeroed().assume_init() };
         if unsafe { sensor_msgs__msg__Image__Sequence__init(&mut msg, size) } {
-            Some(msg)
+            Some(Self {data: msg.data, size: msg.size, capacity: msg.capacity })
         } else {
             None
         }
@@ -79,14 +97,15 @@ impl ImageSequence {
     }
 }
 
-impl Drop for ImageSequence {
+impl<const N: usize> Drop for ImageSeq<N> {
     fn drop(&mut self) {
-        unsafe { sensor_msgs__msg__Image__Sequence__fini(self) };
+        let mut msg = ImageSeqRaw{data: self.data, size: self.size, capacity: self.capacity};
+        unsafe { sensor_msgs__msg__Image__Sequence__fini(&mut msg) };
     }
 }
 
-unsafe impl Send for ImageSequence {}
-unsafe impl Sync for ImageSequence {}
+unsafe impl<const N: usize> Send for ImageSeq<N> {}
+unsafe impl<const N: usize> Sync for ImageSeq<N> {}
 
 
 impl TopicMsg for Image {

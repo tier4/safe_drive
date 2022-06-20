@@ -26,34 +26,6 @@ pub trait ServiceMsg {
 
 // Definition of Sequence -------------------------------------------------------------------------
 
-#[repr(C)]
-#[derive(Debug)]
-pub struct Sequence<T> {
-    data: *mut T,
-    size: std::os::raw::c_ulong,
-    capacity: std::os::raw::c_ulong,
-}
-
-impl<T> Sequence<T> {
-    pub fn as_slice(&self) -> Option<&[T]> {
-        if self.data.is_null() {
-            None
-        } else {
-            let s = unsafe { std::slice::from_raw_parts(self.data, self.size as usize) };
-            Some(s)
-        }
-    }
-
-    pub fn as_slice_mut(&mut self) -> Option<&mut [T]> {
-        if self.data.is_null() {
-            None
-        } else {
-            let s = unsafe { std::slice::from_raw_parts_mut(self.data, self.size as usize) };
-            Some(s)
-        }
-    }
-}
-
 macro_rules! def_sequence {
     ($ty: ident, $ty_orig:ty, $ty_seq:ty, $init:ident, $fini:ident) => {
         /// A sequence of elements.

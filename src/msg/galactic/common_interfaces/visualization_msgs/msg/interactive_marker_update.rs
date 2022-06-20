@@ -9,8 +9,8 @@ pub const UPDATE: u8 = 1;
 extern "C" {
     fn visualization_msgs__msg__InteractiveMarkerUpdate__init(msg: *mut InteractiveMarkerUpdate) -> bool;
     fn visualization_msgs__msg__InteractiveMarkerUpdate__fini(msg: *mut InteractiveMarkerUpdate);
-    fn visualization_msgs__msg__InteractiveMarkerUpdate__Sequence__init(msg: *mut InteractiveMarkerUpdateSequence, size: usize) -> bool;
-    fn visualization_msgs__msg__InteractiveMarkerUpdate__Sequence__fini(msg: *mut InteractiveMarkerUpdateSequence);
+    fn visualization_msgs__msg__InteractiveMarkerUpdate__Sequence__init(msg: *mut InteractiveMarkerUpdateSeqRaw, size: usize) -> bool;
+    fn visualization_msgs__msg__InteractiveMarkerUpdate__Sequence__fini(msg: *mut InteractiveMarkerUpdateSeqRaw);
     fn rosidl_typesupport_c__get_message_type_support_handle__visualization_msgs__msg__InteractiveMarkerUpdate() -> *const rcl::rosidl_message_type_support_t;
 }
 
@@ -21,8 +21,8 @@ pub struct InteractiveMarkerUpdate {
     pub server_id: crate::msg::RosString<0>,
     pub seq_num: u64,
     pub type_: u8,
-    pub markers: InteractiveMarkerSequence,
-    pub poses: InteractiveMarkerPoseSequence,
+    pub markers: InteractiveMarkerSeq<0>,
+    pub poses: InteractiveMarkerPoseSeq<0>,
     pub erases: crate::msg::RosStringSeq<0, 0>,
 }
 
@@ -43,19 +43,37 @@ impl Drop for InteractiveMarkerUpdate {
     }
 }
 
-#[repr(C)]
-#[derive(Debug)]
-pub struct InteractiveMarkerUpdateSequence {
+
+struct InteractiveMarkerUpdateSeqRaw {
     data: *mut InteractiveMarkerUpdate,
     size: usize,
     capacity: usize,
 }
 
-impl InteractiveMarkerUpdateSequence {
+/// Sequence of InteractiveMarkerUpdate.
+/// `N` is the maximum number of elements.
+/// If `N` is `0`, the size is unlimited.
+#[repr(C)]
+#[derive(Debug)]
+pub struct InteractiveMarkerUpdateSeq<const N: usize> {
+    data: *mut InteractiveMarkerUpdate,
+    size: usize,
+    capacity: usize,
+}
+
+impl<const N: usize> InteractiveMarkerUpdateSeq<N> {
+    /// Create a sequence of.
+    /// `N` represents the maximum number of elements.
+    /// If `N` is `0`, the sequence is unlimited.
     pub fn new(size: usize) -> Option<Self> {
-        let mut msg: Self = unsafe { std::mem::MaybeUninit::zeroed().assume_init() };
+        if N != 0 && size >= N {
+            // the size exceeds in the maximum number
+            return None;
+        }
+
+        let mut msg: InteractiveMarkerUpdateSeqRaw = unsafe { std::mem::MaybeUninit::zeroed().assume_init() };
         if unsafe { visualization_msgs__msg__InteractiveMarkerUpdate__Sequence__init(&mut msg, size) } {
-            Some(msg)
+            Some(Self {data: msg.data, size: msg.size, capacity: msg.capacity })
         } else {
             None
         }
@@ -80,14 +98,15 @@ impl InteractiveMarkerUpdateSequence {
     }
 }
 
-impl Drop for InteractiveMarkerUpdateSequence {
+impl<const N: usize> Drop for InteractiveMarkerUpdateSeq<N> {
     fn drop(&mut self) {
-        unsafe { visualization_msgs__msg__InteractiveMarkerUpdate__Sequence__fini(self) };
+        let mut msg = InteractiveMarkerUpdateSeqRaw{data: self.data, size: self.size, capacity: self.capacity};
+        unsafe { visualization_msgs__msg__InteractiveMarkerUpdate__Sequence__fini(&mut msg) };
     }
 }
 
-unsafe impl Send for InteractiveMarkerUpdateSequence {}
-unsafe impl Sync for InteractiveMarkerUpdateSequence {}
+unsafe impl<const N: usize> Send for InteractiveMarkerUpdateSeq<N> {}
+unsafe impl<const N: usize> Sync for InteractiveMarkerUpdateSeq<N> {}
 
 
 impl TopicMsg for InteractiveMarkerUpdate {

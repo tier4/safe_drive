@@ -7,8 +7,8 @@ use crate::rcl;
 extern "C" {
     fn trajectory_msgs__msg__MultiDOFJointTrajectoryPoint__init(msg: *mut MultiDOFJointTrajectoryPoint) -> bool;
     fn trajectory_msgs__msg__MultiDOFJointTrajectoryPoint__fini(msg: *mut MultiDOFJointTrajectoryPoint);
-    fn trajectory_msgs__msg__MultiDOFJointTrajectoryPoint__Sequence__init(msg: *mut MultiDOFJointTrajectoryPointSequence, size: usize) -> bool;
-    fn trajectory_msgs__msg__MultiDOFJointTrajectoryPoint__Sequence__fini(msg: *mut MultiDOFJointTrajectoryPointSequence);
+    fn trajectory_msgs__msg__MultiDOFJointTrajectoryPoint__Sequence__init(msg: *mut MultiDOFJointTrajectoryPointSeqRaw, size: usize) -> bool;
+    fn trajectory_msgs__msg__MultiDOFJointTrajectoryPoint__Sequence__fini(msg: *mut MultiDOFJointTrajectoryPointSeqRaw);
     fn rosidl_typesupport_c__get_message_type_support_handle__trajectory_msgs__msg__MultiDOFJointTrajectoryPoint() -> *const rcl::rosidl_message_type_support_t;
 }
 
@@ -16,9 +16,9 @@ extern "C" {
 #[repr(C)]
 #[derive(Debug)]
 pub struct MultiDOFJointTrajectoryPoint {
-    pub transforms: geometry_msgs::msg::TransformSequence,
-    pub velocities: geometry_msgs::msg::TwistSequence,
-    pub accelerations: geometry_msgs::msg::TwistSequence,
+    pub transforms: geometry_msgs::msg::TransformSeq<0>,
+    pub velocities: geometry_msgs::msg::TwistSeq<0>,
+    pub accelerations: geometry_msgs::msg::TwistSeq<0>,
     pub time_from_start: builtin_interfaces__msg__Duration,
 }
 
@@ -39,19 +39,37 @@ impl Drop for MultiDOFJointTrajectoryPoint {
     }
 }
 
-#[repr(C)]
-#[derive(Debug)]
-pub struct MultiDOFJointTrajectoryPointSequence {
+
+struct MultiDOFJointTrajectoryPointSeqRaw {
     data: *mut MultiDOFJointTrajectoryPoint,
     size: usize,
     capacity: usize,
 }
 
-impl MultiDOFJointTrajectoryPointSequence {
+/// Sequence of MultiDOFJointTrajectoryPoint.
+/// `N` is the maximum number of elements.
+/// If `N` is `0`, the size is unlimited.
+#[repr(C)]
+#[derive(Debug)]
+pub struct MultiDOFJointTrajectoryPointSeq<const N: usize> {
+    data: *mut MultiDOFJointTrajectoryPoint,
+    size: usize,
+    capacity: usize,
+}
+
+impl<const N: usize> MultiDOFJointTrajectoryPointSeq<N> {
+    /// Create a sequence of.
+    /// `N` represents the maximum number of elements.
+    /// If `N` is `0`, the sequence is unlimited.
     pub fn new(size: usize) -> Option<Self> {
-        let mut msg: Self = unsafe { std::mem::MaybeUninit::zeroed().assume_init() };
+        if N != 0 && size >= N {
+            // the size exceeds in the maximum number
+            return None;
+        }
+
+        let mut msg: MultiDOFJointTrajectoryPointSeqRaw = unsafe { std::mem::MaybeUninit::zeroed().assume_init() };
         if unsafe { trajectory_msgs__msg__MultiDOFJointTrajectoryPoint__Sequence__init(&mut msg, size) } {
-            Some(msg)
+            Some(Self {data: msg.data, size: msg.size, capacity: msg.capacity })
         } else {
             None
         }
@@ -76,14 +94,15 @@ impl MultiDOFJointTrajectoryPointSequence {
     }
 }
 
-impl Drop for MultiDOFJointTrajectoryPointSequence {
+impl<const N: usize> Drop for MultiDOFJointTrajectoryPointSeq<N> {
     fn drop(&mut self) {
-        unsafe { trajectory_msgs__msg__MultiDOFJointTrajectoryPoint__Sequence__fini(self) };
+        let mut msg = MultiDOFJointTrajectoryPointSeqRaw{data: self.data, size: self.size, capacity: self.capacity};
+        unsafe { trajectory_msgs__msg__MultiDOFJointTrajectoryPoint__Sequence__fini(&mut msg) };
     }
 }
 
-unsafe impl Send for MultiDOFJointTrajectoryPointSequence {}
-unsafe impl Sync for MultiDOFJointTrajectoryPointSequence {}
+unsafe impl<const N: usize> Send for MultiDOFJointTrajectoryPointSeq<N> {}
+unsafe impl<const N: usize> Sync for MultiDOFJointTrajectoryPointSeq<N> {}
 
 
 impl TopicMsg for MultiDOFJointTrajectoryPoint {

@@ -8,12 +8,12 @@ use crate::msg::common_interfaces::*;
 extern "C" {
     fn std_srvs__srv__SetBool_Request__init(msg: *mut SetBoolRequest) -> bool;
     fn std_srvs__srv__SetBool_Request__fini(msg: *mut SetBoolRequest);
-    fn std_srvs__srv__SetBool_Request__Sequence__init(msg: *mut SetBoolRequestSequence, size: usize) -> bool;
-    fn std_srvs__srv__SetBool_Request__Sequence__fini(msg: *mut SetBoolRequestSequence);
+    fn std_srvs__srv__SetBool_Request__Sequence__init(msg: *mut SetBoolRequestSeqRaw, size: usize) -> bool;
+    fn std_srvs__srv__SetBool_Request__Sequence__fini(msg: *mut SetBoolRequestSeqRaw);
     fn std_srvs__srv__SetBool_Response__init(msg: *mut SetBoolResponse) -> bool;
     fn std_srvs__srv__SetBool_Response__fini(msg: *mut SetBoolResponse);
-    fn std_srvs__srv__SetBool_Response__Sequence__init(msg: *mut SetBoolResponseSequence, size: usize) -> bool;
-    fn std_srvs__srv__SetBool_Response__Sequence__fini(msg: *mut SetBoolResponseSequence);
+    fn std_srvs__srv__SetBool_Response__Sequence__init(msg: *mut SetBoolResponseSeqRaw, size: usize) -> bool;
+    fn std_srvs__srv__SetBool_Response__Sequence__fini(msg: *mut SetBoolResponseSeqRaw);
     fn rosidl_typesupport_c__get_service_type_support_handle__std_srvs__srv__SetBool() -> *const rcl::rosidl_service_type_support_t;
 }
 
@@ -48,19 +48,37 @@ impl Drop for SetBoolRequest {
     }
 }
 
-#[repr(C)]
-#[derive(Debug)]
-pub struct SetBoolRequestSequence {
+
+struct SetBoolRequestSeqRaw {
     data: *mut SetBoolRequest,
     size: usize,
     capacity: usize,
 }
 
-impl SetBoolRequestSequence {
+/// Sequence of SetBoolRequest.
+/// `N` is the maximum number of elements.
+/// If `N` is `0`, the size is unlimited.
+#[repr(C)]
+#[derive(Debug)]
+pub struct SetBoolRequestSeq<const N: usize> {
+    data: *mut SetBoolRequest,
+    size: usize,
+    capacity: usize,
+}
+
+impl<const N: usize> SetBoolRequestSeq<N> {
+    /// Create a sequence of.
+    /// `N` represents the maximum number of elements.
+    /// If `N` is `0`, the sequence is unlimited.
     pub fn new(size: usize) -> Option<Self> {
-        let mut msg: Self = unsafe { std::mem::MaybeUninit::zeroed().assume_init() };
+        if N != 0 && size >= N {
+            // the size exceeds in the maximum number
+            return None;
+        }
+
+        let mut msg: SetBoolRequestSeqRaw = unsafe { std::mem::MaybeUninit::zeroed().assume_init() };
         if unsafe { std_srvs__srv__SetBool_Request__Sequence__init(&mut msg, size) } {
-            Some(msg)
+            Some(Self {data: msg.data, size: msg.size, capacity: msg.capacity })
         } else {
             None
         }
@@ -85,14 +103,15 @@ impl SetBoolRequestSequence {
     }
 }
 
-impl Drop for SetBoolRequestSequence {
+impl<const N: usize> Drop for SetBoolRequestSeq<N> {
     fn drop(&mut self) {
-        unsafe { std_srvs__srv__SetBool_Request__Sequence__fini(self) };
+        let mut msg = SetBoolRequestSeqRaw{data: self.data, size: self.size, capacity: self.capacity};
+        unsafe { std_srvs__srv__SetBool_Request__Sequence__fini(&mut msg) };
     }
 }
 
-unsafe impl Send for SetBoolRequestSequence {}
-unsafe impl Sync for SetBoolRequestSequence {}
+unsafe impl<const N: usize> Send for SetBoolRequestSeq<N> {}
+unsafe impl<const N: usize> Sync for SetBoolRequestSeq<N> {}
 
 
 impl SetBoolResponse {
@@ -112,19 +131,37 @@ impl Drop for SetBoolResponse {
     }
 }
 
-#[repr(C)]
-#[derive(Debug)]
-pub struct SetBoolResponseSequence {
+
+struct SetBoolResponseSeqRaw {
     data: *mut SetBoolResponse,
     size: usize,
     capacity: usize,
 }
 
-impl SetBoolResponseSequence {
+/// Sequence of SetBoolResponse.
+/// `N` is the maximum number of elements.
+/// If `N` is `0`, the size is unlimited.
+#[repr(C)]
+#[derive(Debug)]
+pub struct SetBoolResponseSeq<const N: usize> {
+    data: *mut SetBoolResponse,
+    size: usize,
+    capacity: usize,
+}
+
+impl<const N: usize> SetBoolResponseSeq<N> {
+    /// Create a sequence of.
+    /// `N` represents the maximum number of elements.
+    /// If `N` is `0`, the sequence is unlimited.
     pub fn new(size: usize) -> Option<Self> {
-        let mut msg: Self = unsafe { std::mem::MaybeUninit::zeroed().assume_init() };
+        if N != 0 && size >= N {
+            // the size exceeds in the maximum number
+            return None;
+        }
+
+        let mut msg: SetBoolResponseSeqRaw = unsafe { std::mem::MaybeUninit::zeroed().assume_init() };
         if unsafe { std_srvs__srv__SetBool_Response__Sequence__init(&mut msg, size) } {
-            Some(msg)
+            Some(Self {data: msg.data, size: msg.size, capacity: msg.capacity })
         } else {
             None
         }
@@ -149,14 +186,15 @@ impl SetBoolResponseSequence {
     }
 }
 
-impl Drop for SetBoolResponseSequence {
+impl<const N: usize> Drop for SetBoolResponseSeq<N> {
     fn drop(&mut self) {
-        unsafe { std_srvs__srv__SetBool_Response__Sequence__fini(self) };
+        let mut msg = SetBoolResponseSeqRaw{data: self.data, size: self.size, capacity: self.capacity};
+        unsafe { std_srvs__srv__SetBool_Response__Sequence__fini(&mut msg) };
     }
 }
 
-unsafe impl Send for SetBoolResponseSequence {}
-unsafe impl Sync for SetBoolResponseSequence {}
+unsafe impl<const N: usize> Send for SetBoolResponseSeq<N> {}
+unsafe impl<const N: usize> Sync for SetBoolResponseSeq<N> {}
 
 
 pub struct SetBool;

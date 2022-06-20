@@ -7,8 +7,8 @@ use crate::rcl;
 extern "C" {
     fn visualization_msgs__msg__InteractiveMarkerInit__init(msg: *mut InteractiveMarkerInit) -> bool;
     fn visualization_msgs__msg__InteractiveMarkerInit__fini(msg: *mut InteractiveMarkerInit);
-    fn visualization_msgs__msg__InteractiveMarkerInit__Sequence__init(msg: *mut InteractiveMarkerInitSequence, size: usize) -> bool;
-    fn visualization_msgs__msg__InteractiveMarkerInit__Sequence__fini(msg: *mut InteractiveMarkerInitSequence);
+    fn visualization_msgs__msg__InteractiveMarkerInit__Sequence__init(msg: *mut InteractiveMarkerInitSeqRaw, size: usize) -> bool;
+    fn visualization_msgs__msg__InteractiveMarkerInit__Sequence__fini(msg: *mut InteractiveMarkerInitSeqRaw);
     fn rosidl_typesupport_c__get_message_type_support_handle__visualization_msgs__msg__InteractiveMarkerInit() -> *const rcl::rosidl_message_type_support_t;
 }
 
@@ -18,7 +18,7 @@ extern "C" {
 pub struct InteractiveMarkerInit {
     pub server_id: crate::msg::RosString<0>,
     pub seq_num: u64,
-    pub markers: InteractiveMarkerSequence,
+    pub markers: InteractiveMarkerSeq<0>,
 }
 
 impl InteractiveMarkerInit {
@@ -38,19 +38,37 @@ impl Drop for InteractiveMarkerInit {
     }
 }
 
-#[repr(C)]
-#[derive(Debug)]
-pub struct InteractiveMarkerInitSequence {
+
+struct InteractiveMarkerInitSeqRaw {
     data: *mut InteractiveMarkerInit,
     size: usize,
     capacity: usize,
 }
 
-impl InteractiveMarkerInitSequence {
+/// Sequence of InteractiveMarkerInit.
+/// `N` is the maximum number of elements.
+/// If `N` is `0`, the size is unlimited.
+#[repr(C)]
+#[derive(Debug)]
+pub struct InteractiveMarkerInitSeq<const N: usize> {
+    data: *mut InteractiveMarkerInit,
+    size: usize,
+    capacity: usize,
+}
+
+impl<const N: usize> InteractiveMarkerInitSeq<N> {
+    /// Create a sequence of.
+    /// `N` represents the maximum number of elements.
+    /// If `N` is `0`, the sequence is unlimited.
     pub fn new(size: usize) -> Option<Self> {
-        let mut msg: Self = unsafe { std::mem::MaybeUninit::zeroed().assume_init() };
+        if N != 0 && size >= N {
+            // the size exceeds in the maximum number
+            return None;
+        }
+
+        let mut msg: InteractiveMarkerInitSeqRaw = unsafe { std::mem::MaybeUninit::zeroed().assume_init() };
         if unsafe { visualization_msgs__msg__InteractiveMarkerInit__Sequence__init(&mut msg, size) } {
-            Some(msg)
+            Some(Self {data: msg.data, size: msg.size, capacity: msg.capacity })
         } else {
             None
         }
@@ -75,14 +93,15 @@ impl InteractiveMarkerInitSequence {
     }
 }
 
-impl Drop for InteractiveMarkerInitSequence {
+impl<const N: usize> Drop for InteractiveMarkerInitSeq<N> {
     fn drop(&mut self) {
-        unsafe { visualization_msgs__msg__InteractiveMarkerInit__Sequence__fini(self) };
+        let mut msg = InteractiveMarkerInitSeqRaw{data: self.data, size: self.size, capacity: self.capacity};
+        unsafe { visualization_msgs__msg__InteractiveMarkerInit__Sequence__fini(&mut msg) };
     }
 }
 
-unsafe impl Send for InteractiveMarkerInitSequence {}
-unsafe impl Sync for InteractiveMarkerInitSequence {}
+unsafe impl<const N: usize> Send for InteractiveMarkerInitSeq<N> {}
+unsafe impl<const N: usize> Sync for InteractiveMarkerInitSeq<N> {}
 
 
 impl TopicMsg for InteractiveMarkerInit {

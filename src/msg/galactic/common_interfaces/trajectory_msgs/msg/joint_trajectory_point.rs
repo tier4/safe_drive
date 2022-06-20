@@ -7,8 +7,8 @@ use crate::rcl;
 extern "C" {
     fn trajectory_msgs__msg__JointTrajectoryPoint__init(msg: *mut JointTrajectoryPoint) -> bool;
     fn trajectory_msgs__msg__JointTrajectoryPoint__fini(msg: *mut JointTrajectoryPoint);
-    fn trajectory_msgs__msg__JointTrajectoryPoint__Sequence__init(msg: *mut JointTrajectoryPointSequence, size: usize) -> bool;
-    fn trajectory_msgs__msg__JointTrajectoryPoint__Sequence__fini(msg: *mut JointTrajectoryPointSequence);
+    fn trajectory_msgs__msg__JointTrajectoryPoint__Sequence__init(msg: *mut JointTrajectoryPointSeqRaw, size: usize) -> bool;
+    fn trajectory_msgs__msg__JointTrajectoryPoint__Sequence__fini(msg: *mut JointTrajectoryPointSeqRaw);
     fn rosidl_typesupport_c__get_message_type_support_handle__trajectory_msgs__msg__JointTrajectoryPoint() -> *const rcl::rosidl_message_type_support_t;
 }
 
@@ -40,19 +40,37 @@ impl Drop for JointTrajectoryPoint {
     }
 }
 
-#[repr(C)]
-#[derive(Debug)]
-pub struct JointTrajectoryPointSequence {
+
+struct JointTrajectoryPointSeqRaw {
     data: *mut JointTrajectoryPoint,
     size: usize,
     capacity: usize,
 }
 
-impl JointTrajectoryPointSequence {
+/// Sequence of JointTrajectoryPoint.
+/// `N` is the maximum number of elements.
+/// If `N` is `0`, the size is unlimited.
+#[repr(C)]
+#[derive(Debug)]
+pub struct JointTrajectoryPointSeq<const N: usize> {
+    data: *mut JointTrajectoryPoint,
+    size: usize,
+    capacity: usize,
+}
+
+impl<const N: usize> JointTrajectoryPointSeq<N> {
+    /// Create a sequence of.
+    /// `N` represents the maximum number of elements.
+    /// If `N` is `0`, the sequence is unlimited.
     pub fn new(size: usize) -> Option<Self> {
-        let mut msg: Self = unsafe { std::mem::MaybeUninit::zeroed().assume_init() };
+        if N != 0 && size >= N {
+            // the size exceeds in the maximum number
+            return None;
+        }
+
+        let mut msg: JointTrajectoryPointSeqRaw = unsafe { std::mem::MaybeUninit::zeroed().assume_init() };
         if unsafe { trajectory_msgs__msg__JointTrajectoryPoint__Sequence__init(&mut msg, size) } {
-            Some(msg)
+            Some(Self {data: msg.data, size: msg.size, capacity: msg.capacity })
         } else {
             None
         }
@@ -77,14 +95,15 @@ impl JointTrajectoryPointSequence {
     }
 }
 
-impl Drop for JointTrajectoryPointSequence {
+impl<const N: usize> Drop for JointTrajectoryPointSeq<N> {
     fn drop(&mut self) {
-        unsafe { trajectory_msgs__msg__JointTrajectoryPoint__Sequence__fini(self) };
+        let mut msg = JointTrajectoryPointSeqRaw{data: self.data, size: self.size, capacity: self.capacity};
+        unsafe { trajectory_msgs__msg__JointTrajectoryPoint__Sequence__fini(&mut msg) };
     }
 }
 
-unsafe impl Send for JointTrajectoryPointSequence {}
-unsafe impl Sync for JointTrajectoryPointSequence {}
+unsafe impl<const N: usize> Send for JointTrajectoryPointSeq<N> {}
+unsafe impl<const N: usize> Sync for JointTrajectoryPointSeq<N> {}
 
 
 impl TopicMsg for JointTrajectoryPoint {

@@ -10,8 +10,8 @@ pub const TYPE_BUZZER: u8 = 2;
 extern "C" {
     fn sensor_msgs__msg__JoyFeedback__init(msg: *mut JoyFeedback) -> bool;
     fn sensor_msgs__msg__JoyFeedback__fini(msg: *mut JoyFeedback);
-    fn sensor_msgs__msg__JoyFeedback__Sequence__init(msg: *mut JoyFeedbackSequence, size: usize) -> bool;
-    fn sensor_msgs__msg__JoyFeedback__Sequence__fini(msg: *mut JoyFeedbackSequence);
+    fn sensor_msgs__msg__JoyFeedback__Sequence__init(msg: *mut JoyFeedbackSeqRaw, size: usize) -> bool;
+    fn sensor_msgs__msg__JoyFeedback__Sequence__fini(msg: *mut JoyFeedbackSeqRaw);
     fn rosidl_typesupport_c__get_message_type_support_handle__sensor_msgs__msg__JoyFeedback() -> *const rcl::rosidl_message_type_support_t;
 }
 
@@ -41,19 +41,37 @@ impl Drop for JoyFeedback {
     }
 }
 
-#[repr(C)]
-#[derive(Debug)]
-pub struct JoyFeedbackSequence {
+
+struct JoyFeedbackSeqRaw {
     data: *mut JoyFeedback,
     size: usize,
     capacity: usize,
 }
 
-impl JoyFeedbackSequence {
+/// Sequence of JoyFeedback.
+/// `N` is the maximum number of elements.
+/// If `N` is `0`, the size is unlimited.
+#[repr(C)]
+#[derive(Debug)]
+pub struct JoyFeedbackSeq<const N: usize> {
+    data: *mut JoyFeedback,
+    size: usize,
+    capacity: usize,
+}
+
+impl<const N: usize> JoyFeedbackSeq<N> {
+    /// Create a sequence of.
+    /// `N` represents the maximum number of elements.
+    /// If `N` is `0`, the sequence is unlimited.
     pub fn new(size: usize) -> Option<Self> {
-        let mut msg: Self = unsafe { std::mem::MaybeUninit::zeroed().assume_init() };
+        if N != 0 && size >= N {
+            // the size exceeds in the maximum number
+            return None;
+        }
+
+        let mut msg: JoyFeedbackSeqRaw = unsafe { std::mem::MaybeUninit::zeroed().assume_init() };
         if unsafe { sensor_msgs__msg__JoyFeedback__Sequence__init(&mut msg, size) } {
-            Some(msg)
+            Some(Self {data: msg.data, size: msg.size, capacity: msg.capacity })
         } else {
             None
         }
@@ -78,14 +96,15 @@ impl JoyFeedbackSequence {
     }
 }
 
-impl Drop for JoyFeedbackSequence {
+impl<const N: usize> Drop for JoyFeedbackSeq<N> {
     fn drop(&mut self) {
-        unsafe { sensor_msgs__msg__JoyFeedback__Sequence__fini(self) };
+        let mut msg = JoyFeedbackSeqRaw{data: self.data, size: self.size, capacity: self.capacity};
+        unsafe { sensor_msgs__msg__JoyFeedback__Sequence__fini(&mut msg) };
     }
 }
 
-unsafe impl Send for JoyFeedbackSequence {}
-unsafe impl Sync for JoyFeedbackSequence {}
+unsafe impl<const N: usize> Send for JoyFeedbackSeq<N> {}
+unsafe impl<const N: usize> Sync for JoyFeedbackSeq<N> {}
 
 
 impl TopicMsg for JoyFeedback {

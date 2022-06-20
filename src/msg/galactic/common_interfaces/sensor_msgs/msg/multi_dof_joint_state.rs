@@ -7,8 +7,8 @@ use crate::rcl;
 extern "C" {
     fn sensor_msgs__msg__MultiDOFJointState__init(msg: *mut MultiDOFJointState) -> bool;
     fn sensor_msgs__msg__MultiDOFJointState__fini(msg: *mut MultiDOFJointState);
-    fn sensor_msgs__msg__MultiDOFJointState__Sequence__init(msg: *mut MultiDOFJointStateSequence, size: usize) -> bool;
-    fn sensor_msgs__msg__MultiDOFJointState__Sequence__fini(msg: *mut MultiDOFJointStateSequence);
+    fn sensor_msgs__msg__MultiDOFJointState__Sequence__init(msg: *mut MultiDOFJointStateSeqRaw, size: usize) -> bool;
+    fn sensor_msgs__msg__MultiDOFJointState__Sequence__fini(msg: *mut MultiDOFJointStateSeqRaw);
     fn rosidl_typesupport_c__get_message_type_support_handle__sensor_msgs__msg__MultiDOFJointState() -> *const rcl::rosidl_message_type_support_t;
 }
 
@@ -18,9 +18,9 @@ extern "C" {
 pub struct MultiDOFJointState {
     pub header: std_msgs::msg::Header,
     pub joint_names: crate::msg::RosStringSeq<0, 0>,
-    pub transforms: geometry_msgs::msg::TransformSequence,
-    pub twist: geometry_msgs::msg::TwistSequence,
-    pub wrench: geometry_msgs::msg::WrenchSequence,
+    pub transforms: geometry_msgs::msg::TransformSeq<0>,
+    pub twist: geometry_msgs::msg::TwistSeq<0>,
+    pub wrench: geometry_msgs::msg::WrenchSeq<0>,
 }
 
 impl MultiDOFJointState {
@@ -40,19 +40,37 @@ impl Drop for MultiDOFJointState {
     }
 }
 
-#[repr(C)]
-#[derive(Debug)]
-pub struct MultiDOFJointStateSequence {
+
+struct MultiDOFJointStateSeqRaw {
     data: *mut MultiDOFJointState,
     size: usize,
     capacity: usize,
 }
 
-impl MultiDOFJointStateSequence {
+/// Sequence of MultiDOFJointState.
+/// `N` is the maximum number of elements.
+/// If `N` is `0`, the size is unlimited.
+#[repr(C)]
+#[derive(Debug)]
+pub struct MultiDOFJointStateSeq<const N: usize> {
+    data: *mut MultiDOFJointState,
+    size: usize,
+    capacity: usize,
+}
+
+impl<const N: usize> MultiDOFJointStateSeq<N> {
+    /// Create a sequence of.
+    /// `N` represents the maximum number of elements.
+    /// If `N` is `0`, the sequence is unlimited.
     pub fn new(size: usize) -> Option<Self> {
-        let mut msg: Self = unsafe { std::mem::MaybeUninit::zeroed().assume_init() };
+        if N != 0 && size >= N {
+            // the size exceeds in the maximum number
+            return None;
+        }
+
+        let mut msg: MultiDOFJointStateSeqRaw = unsafe { std::mem::MaybeUninit::zeroed().assume_init() };
         if unsafe { sensor_msgs__msg__MultiDOFJointState__Sequence__init(&mut msg, size) } {
-            Some(msg)
+            Some(Self {data: msg.data, size: msg.size, capacity: msg.capacity })
         } else {
             None
         }
@@ -77,14 +95,15 @@ impl MultiDOFJointStateSequence {
     }
 }
 
-impl Drop for MultiDOFJointStateSequence {
+impl<const N: usize> Drop for MultiDOFJointStateSeq<N> {
     fn drop(&mut self) {
-        unsafe { sensor_msgs__msg__MultiDOFJointState__Sequence__fini(self) };
+        let mut msg = MultiDOFJointStateSeqRaw{data: self.data, size: self.size, capacity: self.capacity};
+        unsafe { sensor_msgs__msg__MultiDOFJointState__Sequence__fini(&mut msg) };
     }
 }
 
-unsafe impl Send for MultiDOFJointStateSequence {}
-unsafe impl Sync for MultiDOFJointStateSequence {}
+unsafe impl<const N: usize> Send for MultiDOFJointStateSeq<N> {}
+unsafe impl<const N: usize> Sync for MultiDOFJointStateSeq<N> {}
 
 
 impl TopicMsg for MultiDOFJointState {

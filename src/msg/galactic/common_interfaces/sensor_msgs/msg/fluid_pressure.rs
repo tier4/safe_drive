@@ -7,8 +7,8 @@ use crate::rcl;
 extern "C" {
     fn sensor_msgs__msg__FluidPressure__init(msg: *mut FluidPressure) -> bool;
     fn sensor_msgs__msg__FluidPressure__fini(msg: *mut FluidPressure);
-    fn sensor_msgs__msg__FluidPressure__Sequence__init(msg: *mut FluidPressureSequence, size: usize) -> bool;
-    fn sensor_msgs__msg__FluidPressure__Sequence__fini(msg: *mut FluidPressureSequence);
+    fn sensor_msgs__msg__FluidPressure__Sequence__init(msg: *mut FluidPressureSeqRaw, size: usize) -> bool;
+    fn sensor_msgs__msg__FluidPressure__Sequence__fini(msg: *mut FluidPressureSeqRaw);
     fn rosidl_typesupport_c__get_message_type_support_handle__sensor_msgs__msg__FluidPressure() -> *const rcl::rosidl_message_type_support_t;
 }
 
@@ -38,19 +38,37 @@ impl Drop for FluidPressure {
     }
 }
 
-#[repr(C)]
-#[derive(Debug)]
-pub struct FluidPressureSequence {
+
+struct FluidPressureSeqRaw {
     data: *mut FluidPressure,
     size: usize,
     capacity: usize,
 }
 
-impl FluidPressureSequence {
+/// Sequence of FluidPressure.
+/// `N` is the maximum number of elements.
+/// If `N` is `0`, the size is unlimited.
+#[repr(C)]
+#[derive(Debug)]
+pub struct FluidPressureSeq<const N: usize> {
+    data: *mut FluidPressure,
+    size: usize,
+    capacity: usize,
+}
+
+impl<const N: usize> FluidPressureSeq<N> {
+    /// Create a sequence of.
+    /// `N` represents the maximum number of elements.
+    /// If `N` is `0`, the sequence is unlimited.
     pub fn new(size: usize) -> Option<Self> {
-        let mut msg: Self = unsafe { std::mem::MaybeUninit::zeroed().assume_init() };
+        if N != 0 && size >= N {
+            // the size exceeds in the maximum number
+            return None;
+        }
+
+        let mut msg: FluidPressureSeqRaw = unsafe { std::mem::MaybeUninit::zeroed().assume_init() };
         if unsafe { sensor_msgs__msg__FluidPressure__Sequence__init(&mut msg, size) } {
-            Some(msg)
+            Some(Self {data: msg.data, size: msg.size, capacity: msg.capacity })
         } else {
             None
         }
@@ -75,14 +93,15 @@ impl FluidPressureSequence {
     }
 }
 
-impl Drop for FluidPressureSequence {
+impl<const N: usize> Drop for FluidPressureSeq<N> {
     fn drop(&mut self) {
-        unsafe { sensor_msgs__msg__FluidPressure__Sequence__fini(self) };
+        let mut msg = FluidPressureSeqRaw{data: self.data, size: self.size, capacity: self.capacity};
+        unsafe { sensor_msgs__msg__FluidPressure__Sequence__fini(&mut msg) };
     }
 }
 
-unsafe impl Send for FluidPressureSequence {}
-unsafe impl Sync for FluidPressureSequence {}
+unsafe impl<const N: usize> Send for FluidPressureSeq<N> {}
+unsafe impl<const N: usize> Sync for FluidPressureSeq<N> {}
 
 
 impl TopicMsg for FluidPressure {

@@ -8,12 +8,12 @@ use crate::msg::common_interfaces::*;
 extern "C" {
     fn sensor_msgs__srv__SetCameraInfo_Request__init(msg: *mut SetCameraInfoRequest) -> bool;
     fn sensor_msgs__srv__SetCameraInfo_Request__fini(msg: *mut SetCameraInfoRequest);
-    fn sensor_msgs__srv__SetCameraInfo_Request__Sequence__init(msg: *mut SetCameraInfoRequestSequence, size: usize) -> bool;
-    fn sensor_msgs__srv__SetCameraInfo_Request__Sequence__fini(msg: *mut SetCameraInfoRequestSequence);
+    fn sensor_msgs__srv__SetCameraInfo_Request__Sequence__init(msg: *mut SetCameraInfoRequestSeqRaw, size: usize) -> bool;
+    fn sensor_msgs__srv__SetCameraInfo_Request__Sequence__fini(msg: *mut SetCameraInfoRequestSeqRaw);
     fn sensor_msgs__srv__SetCameraInfo_Response__init(msg: *mut SetCameraInfoResponse) -> bool;
     fn sensor_msgs__srv__SetCameraInfo_Response__fini(msg: *mut SetCameraInfoResponse);
-    fn sensor_msgs__srv__SetCameraInfo_Response__Sequence__init(msg: *mut SetCameraInfoResponseSequence, size: usize) -> bool;
-    fn sensor_msgs__srv__SetCameraInfo_Response__Sequence__fini(msg: *mut SetCameraInfoResponseSequence);
+    fn sensor_msgs__srv__SetCameraInfo_Response__Sequence__init(msg: *mut SetCameraInfoResponseSeqRaw, size: usize) -> bool;
+    fn sensor_msgs__srv__SetCameraInfo_Response__Sequence__fini(msg: *mut SetCameraInfoResponseSeqRaw);
     fn rosidl_typesupport_c__get_service_type_support_handle__sensor_msgs__srv__SetCameraInfo() -> *const rcl::rosidl_service_type_support_t;
 }
 
@@ -48,19 +48,37 @@ impl Drop for SetCameraInfoRequest {
     }
 }
 
-#[repr(C)]
-#[derive(Debug)]
-pub struct SetCameraInfoRequestSequence {
+
+struct SetCameraInfoRequestSeqRaw {
     data: *mut SetCameraInfoRequest,
     size: usize,
     capacity: usize,
 }
 
-impl SetCameraInfoRequestSequence {
+/// Sequence of SetCameraInfoRequest.
+/// `N` is the maximum number of elements.
+/// If `N` is `0`, the size is unlimited.
+#[repr(C)]
+#[derive(Debug)]
+pub struct SetCameraInfoRequestSeq<const N: usize> {
+    data: *mut SetCameraInfoRequest,
+    size: usize,
+    capacity: usize,
+}
+
+impl<const N: usize> SetCameraInfoRequestSeq<N> {
+    /// Create a sequence of.
+    /// `N` represents the maximum number of elements.
+    /// If `N` is `0`, the sequence is unlimited.
     pub fn new(size: usize) -> Option<Self> {
-        let mut msg: Self = unsafe { std::mem::MaybeUninit::zeroed().assume_init() };
+        if N != 0 && size >= N {
+            // the size exceeds in the maximum number
+            return None;
+        }
+
+        let mut msg: SetCameraInfoRequestSeqRaw = unsafe { std::mem::MaybeUninit::zeroed().assume_init() };
         if unsafe { sensor_msgs__srv__SetCameraInfo_Request__Sequence__init(&mut msg, size) } {
-            Some(msg)
+            Some(Self {data: msg.data, size: msg.size, capacity: msg.capacity })
         } else {
             None
         }
@@ -85,14 +103,15 @@ impl SetCameraInfoRequestSequence {
     }
 }
 
-impl Drop for SetCameraInfoRequestSequence {
+impl<const N: usize> Drop for SetCameraInfoRequestSeq<N> {
     fn drop(&mut self) {
-        unsafe { sensor_msgs__srv__SetCameraInfo_Request__Sequence__fini(self) };
+        let mut msg = SetCameraInfoRequestSeqRaw{data: self.data, size: self.size, capacity: self.capacity};
+        unsafe { sensor_msgs__srv__SetCameraInfo_Request__Sequence__fini(&mut msg) };
     }
 }
 
-unsafe impl Send for SetCameraInfoRequestSequence {}
-unsafe impl Sync for SetCameraInfoRequestSequence {}
+unsafe impl<const N: usize> Send for SetCameraInfoRequestSeq<N> {}
+unsafe impl<const N: usize> Sync for SetCameraInfoRequestSeq<N> {}
 
 
 impl SetCameraInfoResponse {
@@ -112,19 +131,37 @@ impl Drop for SetCameraInfoResponse {
     }
 }
 
-#[repr(C)]
-#[derive(Debug)]
-pub struct SetCameraInfoResponseSequence {
+
+struct SetCameraInfoResponseSeqRaw {
     data: *mut SetCameraInfoResponse,
     size: usize,
     capacity: usize,
 }
 
-impl SetCameraInfoResponseSequence {
+/// Sequence of SetCameraInfoResponse.
+/// `N` is the maximum number of elements.
+/// If `N` is `0`, the size is unlimited.
+#[repr(C)]
+#[derive(Debug)]
+pub struct SetCameraInfoResponseSeq<const N: usize> {
+    data: *mut SetCameraInfoResponse,
+    size: usize,
+    capacity: usize,
+}
+
+impl<const N: usize> SetCameraInfoResponseSeq<N> {
+    /// Create a sequence of.
+    /// `N` represents the maximum number of elements.
+    /// If `N` is `0`, the sequence is unlimited.
     pub fn new(size: usize) -> Option<Self> {
-        let mut msg: Self = unsafe { std::mem::MaybeUninit::zeroed().assume_init() };
+        if N != 0 && size >= N {
+            // the size exceeds in the maximum number
+            return None;
+        }
+
+        let mut msg: SetCameraInfoResponseSeqRaw = unsafe { std::mem::MaybeUninit::zeroed().assume_init() };
         if unsafe { sensor_msgs__srv__SetCameraInfo_Response__Sequence__init(&mut msg, size) } {
-            Some(msg)
+            Some(Self {data: msg.data, size: msg.size, capacity: msg.capacity })
         } else {
             None
         }
@@ -149,14 +186,15 @@ impl SetCameraInfoResponseSequence {
     }
 }
 
-impl Drop for SetCameraInfoResponseSequence {
+impl<const N: usize> Drop for SetCameraInfoResponseSeq<N> {
     fn drop(&mut self) {
-        unsafe { sensor_msgs__srv__SetCameraInfo_Response__Sequence__fini(self) };
+        let mut msg = SetCameraInfoResponseSeqRaw{data: self.data, size: self.size, capacity: self.capacity};
+        unsafe { sensor_msgs__srv__SetCameraInfo_Response__Sequence__fini(&mut msg) };
     }
 }
 
-unsafe impl Send for SetCameraInfoResponseSequence {}
-unsafe impl Sync for SetCameraInfoResponseSequence {}
+unsafe impl<const N: usize> Send for SetCameraInfoResponseSeq<N> {}
+unsafe impl<const N: usize> Sync for SetCameraInfoResponseSeq<N> {}
 
 
 pub struct SetCameraInfo;
