@@ -1,7 +1,7 @@
 pub mod common;
 
-use safe_drive::{self, error::RCLError, node::Node};
-use std::{error::Error, rc::Rc, sync::Arc, thread, time::Duration};
+use safe_drive::{self, node::Node, selector::CallbackResult};
+use std::{error::Error, sync::Arc, thread, time::Duration};
 
 const TOPIC_NAME_1: &str = "test_select_1";
 const TOPIC_NAME_2: &str = "test_select_2";
@@ -34,34 +34,34 @@ fn test_select_subscriptions() -> Result<(), Box<dyn Error + Sync + Send + 'stat
     let s2 = common::create_subscriber(node_sub2, TOPIC_NAME_2).unwrap();
 
     let mut selector = ctx.create_selector()?;
-    selector.add_subscriber(&s1, None, false);
-    selector.add_subscriber(&s2, None, false);
 
-    let mut cnt1 = INIT_1;
-    let mut cnt2 = INIT_2;
+    // 1st subscriber
+    let mut cnt1 = Box::new(INIT_1);
+    selector.add_subscriber(
+        s1,
+        Box::new(move |msg| {
+            assert_eq!(msg.num, *cnt1);
+            *cnt1 += 1;
+            CallbackResult::Ok
+        }),
+        false,
+    );
+
+    // 2nd subscriber
+    let mut cnt2 = Box::new(INIT_2);
+    selector.add_subscriber(
+        s2,
+        Box::new(move |msg| {
+            assert_eq!(msg.num, *cnt2);
+            *cnt2 += 1;
+            CallbackResult::Ok
+        }),
+        false,
+    );
+
     for _ in 0..COUNT {
         // wait messages
         selector.wait()?;
-
-        // s1 receives a message
-        match s1.try_recv() {
-            Ok(msg) => {
-                assert_eq!(msg.num, cnt1);
-                cnt1 += 1;
-            }
-            Err(RCLError::SubscriptionTakeFailed) => (),
-            _ => panic!(),
-        }
-
-        // s2 receives a message
-        match s2.try_recv() {
-            Ok(msg) => {
-                assert_eq!(msg.num, cnt2);
-                cnt2 += 1;
-            }
-            Err(RCLError::SubscriptionTakeFailed) => (),
-            _ => panic!(),
-        }
     }
 
     p1.join().unwrap();
@@ -97,18 +97,16 @@ fn test_callback() -> Result<(), Box<dyn Error + Sync + Send + 'static>> {
         pub_thread(node_pub, TOPIC_NAME_3, Duration::from_millis(40), INIT_1)
     });
 
-    // create a subscriber
-    let s = Rc::new(common::create_subscriber(node_sub, TOPIC_NAME_3).unwrap());
-    let s2 = s.clone();
+    let subscriber = common::create_subscriber(node_sub, TOPIC_NAME_3).unwrap();
 
     // register callback
     let mut selector = ctx.create_selector()?;
     selector.add_subscriber(
-        &s2,
-        Some(Box::new(move || {
-            let n = s.try_recv().unwrap();
-            println!("callback: num = {}", n.num);
-        })),
+        subscriber,
+        Box::new(move |msg| {
+            println!("callback: num = {}", msg.num);
+            CallbackResult::Ok
+        }),
         false,
     );
 

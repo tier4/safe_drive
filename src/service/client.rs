@@ -6,7 +6,10 @@ use crate::{
     node::Node,
     qos::Profile,
     rcl,
-    selector::async_selector::{self, SELECTOR},
+    selector::{
+        async_selector::{self, SELECTOR},
+        CallbackResult,
+    },
     PhantomUnsync,
 };
 use std::{
@@ -251,7 +254,10 @@ impl<T: ServiceMsg> Future for AsyncReceiver<T> {
                     &client.data.node.context,
                     async_selector::Command::Client(
                         client.data.clone(),
-                        Box::new(move || waker.clone().wake()),
+                        Box::new(move || {
+                            waker.clone().wake();
+                            CallbackResult::Ok
+                        }),
                     ),
                 ) {
                     return Poll::Ready(Err(e));

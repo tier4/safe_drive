@@ -44,16 +44,6 @@ macro_rules! pr_warn {
     }}
 }
 
-#[cfg(test)]
-macro_rules! pr_warn_in {
-    ($logger:expr, $($arg:tt)*) => {{
-        let res = std::format!($($arg)*);
-        let _ = $logger.write_warn(&res, crate::function!(), std::file!(), std::line!() as u64);
-    }}
-}
-#[cfg(test)]
-pub(crate) use pr_warn_in;
-
 #[macro_export]
 macro_rules! pr_error {
     ($logger:expr, $($arg:tt)*) => {{
@@ -62,14 +52,12 @@ macro_rules! pr_error {
     }}
 }
 
-#[cfg(test)]
 macro_rules! pr_error_in {
     ($logger:expr, $($arg:tt)*) => {{
         let res = std::format!($($arg)*);
         let _ = $logger.write_error(&res, crate::function!(), std::file!(), std::line!() as u64);
     }}
 }
-#[cfg(test)]
 pub(crate) use pr_error_in;
 
 #[macro_export]

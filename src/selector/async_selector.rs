@@ -1,4 +1,4 @@
-use super::guard_condition::GuardCondition;
+use super::{guard_condition::GuardCondition, CallbackResult};
 use crate::{
     context::Context,
     error::DynError,
@@ -21,12 +21,18 @@ pub(crate) static SELECTOR: Lazy<Mutex<AsyncSelector>> =
 pub(crate) enum Command {
     Subscription(
         Arc<RCLSubscription>,
-        Box<dyn FnMut() + Send + Sync + 'static>,
+        Box<dyn FnMut() -> CallbackResult + Send + Sync + 'static>,
     ),
     RemoveSubscription(Arc<RCLSubscription>),
-    Server(Arc<ServerData>, Box<dyn FnMut() + Send + Sync + 'static>),
+    Server(
+        Arc<ServerData>,
+        Box<dyn FnMut() -> CallbackResult + Send + Sync + 'static>,
+    ),
     RemoveServer(Arc<ServerData>),
-    Client(Arc<ClientData>, Box<dyn FnMut() + Send + Sync + 'static>),
+    Client(
+        Arc<ClientData>,
+        Box<dyn FnMut() -> CallbackResult + Send + Sync + 'static>,
+    ),
     RemoveClient(Arc<ClientData>),
     Halt,
 }

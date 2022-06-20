@@ -69,8 +69,11 @@ use crate::{
     msg::TopicMsg,
     node::Node,
     qos, rcl,
-    selector::async_selector::{self, SELECTOR},
-    PhantomUnsync,
+    selector::{
+        async_selector::{self, SELECTOR},
+        CallbackResult,
+    },
+    PhantomUnsync, RecvResult,
 };
 use std::{
     ffi::CString,
@@ -109,9 +112,10 @@ unsafe impl Send for RCLSubscription {}
 ///
 /// ```
 /// use safe_drive::{
-///     context::Context, error::RCLError, logger::Logger, msg::common_interfaces::std_msgs,
-///     pr_error, pr_info,
+///     context::Context, logger::Logger, msg::common_interfaces::std_msgs, pr_error, pr_info,
+///     RecvResult,
 /// };
+///
 ///
 /// let ctx = Context::new().unwrap();
 /// let node = ctx
@@ -126,11 +130,11 @@ unsafe impl Send for RCLSubscription {}
 ///
 /// // Non-blocking receive.
 /// match subscriber.try_recv() {
-///     Ok(msg) => pr_info!(logger, "Receive: msg = {}", msg.data),
-///     Err(RCLError::SubscriptionTakeFailed) => {
+///     RecvResult::Ok(msg) => pr_info!(logger, "Receive: msg = {}", msg.data),
+///     RecvResult::RetryLater => {
 ///         pr_info!(logger, "Receive: No available Data")
 ///     }
-///     Err(e) => {
+///     RecvResult::Err(e) => {
 ///         pr_error!(logger, "Receive: Error = {e}")
 ///     }
 /// }
@@ -174,72 +178,44 @@ impl<T: TopicMsg> Subscriber<T> {
     /// Non-blocking receive.
     ///
     /// Because `rcl::rcl_take` is non-blocking,
-    /// `try_recv()` returns `Err(RCLError::SubscriberTakeFailed)` if
+    /// `try_recv()` returns `RecvResult::RetryLater` if
     /// data is not available.
-    /// So, please retry later if `Err(RCLError::SubscriberTakeFailed)` is returned.
     ///
     /// # Example
     ///
     /// ```
-    /// use std::{cell::RefCell, rc::Rc, time::Duration};
     /// use safe_drive::{
-    ///     context::Context, error::RCLError, logger::Logger, msg::common_interfaces::std_msgs,
-    ///     pr_error, pr_info,
+    ///     context::Context, logger::Logger, msg::common_interfaces::std_msgs, pr_error, pr_info,
+    ///     RecvResult,
     /// };
     ///
     /// let ctx = Context::new().unwrap();
     /// let node = ctx
     ///     .create_node("subscriber_rs_try_recv", None, Default::default())
     ///     .unwrap();
-    /// let logger = Logger::new("subscriber_rs_try_recv");
-    /// let mut selector = ctx.create_selector().unwrap();
     ///
     /// // Create a subscriber.
     /// let subscriber = node
     ///     .create_subscriber::<std_msgs::msg::UInt32>("subscriber_rs_try_recv_topic", None)
     ///     .unwrap();
     ///
-    /// let sub1 = Rc::new(RefCell::new(subscriber));
-    /// let sub2 = sub1.clone();
+    /// // Create a publisher.
+    /// let publisher = node
+    ///     .create_publisher::<std_msgs::msg::UInt32>("subscriber_rs_try_recv_topic", None)
+    ///     .unwrap();
     ///
-    /// let logger1 = Rc::new(RefCell::new(logger));
-    /// let logger2 = logger1.clone();
+    /// let logger = Logger::new("subscriber_rs");
     ///
-    /// // Register the subscriber to the selector.
-    /// selector.add_subscriber(
-    ///     &sub1.borrow(),
-    ///     Some(Box::new(move || {
-    ///         let sub = sub2.borrow();
-    ///         let logger = logger1.borrow();
-    ///         loop {
-    ///             match sub.try_recv() {
-    ///                 Ok(msg) => pr_info!(logger, "Receive: msg = {}", msg.data),
-    ///                 Err(RCLError::SubscriptionTakeFailed) => {
-    ///                     pr_info!(logger, "Receive: No available Data");
-    ///                     break;
-    ///                 }
-    ///                 Err(e) => {
-    ///                     pr_error!(logger, "Receive: Error = {e}");
-    ///                     break;
-    ///                 }
-    ///             }
-    ///         }
-    ///     })),
-    ///     false,
-    /// );
+    /// // Send a message.
+    /// let mut msg = std_msgs::msg::UInt32::new().unwrap();
+    /// msg.data = 10;
+    /// publisher.send(msg).unwrap();
     ///
-    /// // Add a wall timer.
-    /// selector.add_wall_timer(
-    ///     Duration::from_millis(100),
-    ///     Box::new(move || {
-    ///         let logger = logger2.borrow();
-    ///         pr_info!(logger, "Receive: Timeout")
-    ///     }),
-    /// );
-    ///
-    /// // Spin.
-    /// for _ in 0..3 {
-    ///     selector.wait().unwrap();
+    /// // Receive the message.
+    /// match subscriber.try_recv() {
+    ///     RecvResult::Ok(msg) => pr_info!(logger, "msg = {}", msg.data),
+    ///     RecvResult::RetryLater => pr_info!(logger, "retry later"),
+    ///     RecvResult::Err(e) => pr_error!(logger, "error = {}", e),
     /// }
     /// ```
     ///
@@ -248,10 +224,14 @@ impl<T: TopicMsg> Subscriber<T> {
     /// - `RCLError::InvalidArgument` if any arguments are invalid, or
     /// - `RCLError::SubscriptionInvalid` if the subscription is invalid, or
     /// - `RCLError::BadAlloc if allocating` memory failed, or
-    /// - `RCLError::SubscriptionTakeFailed` if take failed but *no error* occurred in the middleware, or
     /// - `RCLError::Error` if an unspecified error occurs.
-    pub fn try_recv(&self) -> RCLResult<T> {
-        rcl_take::<T>(self.subscription.subscription.as_ref())
+    #[must_use]
+    pub fn try_recv(&self) -> RecvResult<T> {
+        match rcl_take::<T>(self.subscription.subscription.as_ref()) {
+            Ok(n) => RecvResult::Ok(n),
+            Err(RCLError::SubscriptionTakeFailed) => RecvResult::RetryLater,
+            Err(e) => RecvResult::Err(e),
+        }
     }
 
     /// Receive a message asynchronously.
@@ -363,7 +343,10 @@ impl<'a, T> Future for AsyncReceiver<'a, T> {
                     &subscription.node.context,
                     async_selector::Command::Subscription(
                         (*subscription).clone(),
-                        Box::new(move || waker.clone().wake()),
+                        Box::new(move || {
+                            waker.clone().wake();
+                            CallbackResult::Ok
+                        }),
                     ),
                 )?;
 

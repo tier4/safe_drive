@@ -1,6 +1,8 @@
 pub mod common;
 
-use safe_drive::{self, context::Context, msg::common_interfaces::std_msgs};
+use safe_drive::{
+    self, context::Context, msg::common_interfaces::std_msgs, selector::CallbackResult,
+};
 use std::error::Error;
 
 const TOPIC_NAME: &str = "test_pubsub";
@@ -27,17 +29,17 @@ fn test_pubsub() -> Result<(), Box<dyn Error + Sync + Send + 'static>> {
 
     // wait messages
     let mut selector = ctx.create_selector()?;
-    selector.add_subscriber(&subscriber, None, false);
+    selector.add_subscriber(
+        subscriber,
+        Box::new(move |msg| {
+            assert_eq!(msg.num, n);
+            CallbackResult::Ok
+        }),
+        false,
+    );
     selector.wait()?;
 
-    // receive the message
-    match subscriber.try_recv() {
-        Ok(msg) => {
-            assert_eq!(msg.num, n);
-            Ok(())
-        }
-        _ => panic!(),
-    }
+    Ok(())
 }
 
 const PUBSUB_MSG: &str = "Hello, World!";
@@ -66,17 +68,17 @@ fn test_pubsub_string() -> Result<(), Box<dyn Error + Sync + Send + 'static>> {
 
     // wait messages
     let mut selector = ctx.create_selector()?;
-    selector.add_subscriber(&subscriber, None, false);
-    selector.wait()?;
-
-    // receive the message
-    match subscriber.try_recv() {
-        Ok(msg) => {
+    selector.add_subscriber(
+        subscriber,
+        Box::new(|msg| {
             let s = msg.data.to_string();
             println!("{s}");
             assert_eq!(&s, PUBSUB_MSG);
-            Ok(())
-        }
-        _ => panic!(),
-    }
+            CallbackResult::Ok
+        }),
+        false,
+    );
+    selector.wait()?;
+
+    Ok(())
 }

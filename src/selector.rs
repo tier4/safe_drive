@@ -3,6 +3,8 @@ use crate::{
     context::Context,
     delta_list::DeltaList,
     error::{DynError, RCLError, RCLResult},
+    logger::{pr_error_in, Logger},
+    msg::TopicMsg,
     rcl,
     service::{
         client::{ClientData, ClientRecv},
@@ -10,7 +12,7 @@ use crate::{
     },
     signal_handler,
     topic::subscriber::{RCLSubscription, Subscriber},
-    PhantomUnsend, PhantomUnsync,
+    PhantomUnsend, PhantomUnsync, RecvResult,
 };
 use std::{
     collections::BTreeMap,
@@ -23,10 +25,16 @@ use std::{
 pub(crate) mod async_selector;
 pub(crate) mod guard_condition;
 
+#[derive(Debug, Eq, PartialEq)]
+pub enum CallbackResult {
+    Ok,
+    Remove,
+}
+
 struct ConditionHandler<T> {
     is_once: bool,
     event: T,
-    handler: Option<Box<dyn FnMut()>>,
+    handler: Option<Box<dyn FnMut() -> CallbackResult>>,
 }
 
 enum TimerType {
@@ -86,14 +94,44 @@ impl Selector {
         Ok(selector)
     }
 
-    pub fn add_subscriber<T>(
+    pub fn add_subscriber<T: TopicMsg + 'static>(
         &mut self,
-        subscriber: &Subscriber<T>,
-        handler: Option<Box<dyn FnMut()>>,
+        subscriber: Subscriber<T>,
+        mut handler: Box<dyn FnMut(T) -> CallbackResult>,
         is_once: bool,
     ) -> bool {
-        if self.context.as_ptr() == subscriber.subscription.node.context.as_ptr() {
-            self.add_rcl_subscription(subscriber.subscription.clone(), handler, is_once);
+        let sub = subscriber.subscription.clone();
+        let context_ptr = subscriber.subscription.node.context.as_ptr();
+
+        let f = move || {
+            let start = SystemTime::now();
+            let dur = Duration::from_millis(10);
+
+            loop {
+                match subscriber.try_recv() {
+                    RecvResult::Ok(n) => {
+                        handler(n);
+                    }
+                    RecvResult::RetryLater => return CallbackResult::Ok,
+                    RecvResult::Err(e) => {
+                        let logger = Logger::new("safe_drive");
+                        pr_error_in!(logger, "failed try_recv() of subscriber: {}", e);
+                        return CallbackResult::Remove;
+                    }
+                }
+
+                if let Ok(t) = start.elapsed() {
+                    if t > dur {
+                        return CallbackResult::Ok;
+                    }
+                } else {
+                    return CallbackResult::Ok;
+                }
+            }
+        };
+
+        if self.context.as_ptr() == context_ptr {
+            self.add_rcl_subscription(sub, Some(Box::new(f)), is_once);
             true
         } else {
             false
@@ -103,7 +141,7 @@ impl Selector {
     pub(crate) fn add_rcl_subscription(
         &mut self,
         subscription: Arc<RCLSubscription>,
-        handler: Option<Box<dyn FnMut()>>,
+        handler: Option<Box<dyn FnMut() -> CallbackResult>>,
         is_once: bool,
     ) {
         self.subscriptions.insert(
@@ -119,7 +157,7 @@ impl Selector {
     pub fn add_server<T>(
         &mut self,
         server: &Server<T>,
-        handler: Option<Box<dyn FnMut()>>,
+        handler: Option<Box<dyn FnMut() -> CallbackResult>>,
         is_once: bool,
     ) -> bool {
         if self.context.as_ptr() == server.data.node.context.as_ptr() {
@@ -133,7 +171,7 @@ impl Selector {
     pub(crate) fn add_server_data(
         &mut self,
         server: Arc<ServerData>,
-        handler: Option<Box<dyn FnMut()>>,
+        handler: Option<Box<dyn FnMut() -> CallbackResult>>,
         is_once: bool,
     ) {
         if self.context.as_ptr() == server.node.context.as_ptr() {
@@ -151,7 +189,7 @@ impl Selector {
     pub fn add_client<T>(
         &mut self,
         client: &ClientRecv<T>,
-        handler: Option<Box<dyn FnMut()>>,
+        handler: Option<Box<dyn FnMut() -> CallbackResult>>,
         is_once: bool,
     ) -> bool {
         if self.context.as_ptr() == client.data.node.context.as_ptr() {
@@ -165,7 +203,7 @@ impl Selector {
     pub(crate) fn add_client_data(
         &mut self,
         client: Arc<ClientData>,
-        handler: Option<Box<dyn FnMut()>>,
+        handler: Option<Box<dyn FnMut() -> CallbackResult>>,
         is_once: bool,
     ) {
         self.clients.insert(
@@ -178,7 +216,11 @@ impl Selector {
         );
     }
 
-    fn add_guard_condition(&mut self, cond: &GuardCondition, handler: Option<Box<dyn FnMut()>>) {
+    fn add_guard_condition(
+        &mut self,
+        cond: &GuardCondition,
+        handler: Option<Box<dyn FnMut() -> CallbackResult>>,
+    ) {
         self.cond.insert(
             cond.cond.cond.as_ref(),
             ConditionHandler {
@@ -209,18 +251,23 @@ impl Selector {
 
     /// Insert timer.
     /// `handler` is called after `t` seconds later.
-    pub fn add_timer(&mut self, t: Duration, handler: Box<dyn FnMut()>) {
+    pub fn add_timer(&mut self, t: Duration, handler: Box<dyn FnMut() -> CallbackResult>) {
         self.add_timer_inner(t, handler, TimerType::OneShot);
     }
 
     /// Insert timer.
     /// `handler` is called after `t` seconds later.
     /// The `handler` will be automatically reloaded after calling it.
-    pub fn add_wall_timer(&mut self, t: Duration, handler: Box<dyn FnMut()>) {
+    pub fn add_wall_timer(&mut self, t: Duration, handler: Box<dyn FnMut() -> CallbackResult>) {
         self.add_timer_inner(t, handler, TimerType::WallTimer(t));
     }
 
-    fn add_timer_inner(&mut self, t: Duration, handler: Box<dyn FnMut()>, timer_type: TimerType) {
+    fn add_timer_inner(
+        &mut self,
+        t: Duration,
+        handler: Box<dyn FnMut() -> CallbackResult>,
+        timer_type: TimerType,
+    ) {
         let now_time = SystemTime::now();
 
         if self.timer.is_empty() {
@@ -408,10 +455,13 @@ fn notify<K, V>(m: &mut BTreeMap<*const K, ConditionHandler<V>>, array: *const *
             if !p.is_null() {
                 debug_assert!(m.contains_key(&p));
                 if let Some(h) = m.get_mut(&p) {
+                    let mut is_rm = false;
                     if let Some(hdl) = &mut h.handler {
-                        hdl()
+                        if hdl() == CallbackResult::Remove {
+                            is_rm = true;
+                        }
                     }
-                    if h.is_once {
+                    if h.is_once || is_rm {
                         m.remove(&p);
                     }
                 }
@@ -422,7 +472,7 @@ fn notify<K, V>(m: &mut BTreeMap<*const K, ConditionHandler<V>>, array: *const *
 
 #[cfg(test)]
 mod test {
-    use crate::{context::Context, error::DynError};
+    use crate::{context::Context, error::DynError, selector::CallbackResult};
     use std::thread;
 
     #[test]
@@ -435,7 +485,13 @@ mod test {
 
         let w = thread::spawn(move || {
             let mut selector = super::Selector::new(ctx2).unwrap();
-            selector.add_guard_condition(&cond2, Some(Box::new(|| println!("triggerd!"))));
+            selector.add_guard_condition(
+                &cond2,
+                Some(Box::new(|| {
+                    println!("triggerd!");
+                    CallbackResult::Ok
+                })),
+            );
             selector.wait().unwrap();
         });
 

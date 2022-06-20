@@ -11,7 +11,7 @@ Original ROS2's executor (rclcpp) is suffering from starvation.
 In contrast, the starvation freedom of our executor has been validated by not only dynamic analysis but also
 formal verification.
 
-See [Specifications](./specifications/).
+See [specifications](./specifications/).
 
 We specified and tested as follows.
 

@@ -1,3 +1,5 @@
+//! Server receiving a request and replying to the it.
+
 use super::Header;
 use crate::{
     error::{DynError, RCLError, RCLResult},
@@ -6,7 +8,10 @@ use crate::{
     node::Node,
     qos::Profile,
     rcl::{self, rmw_request_id_t},
-    selector::async_selector::{self, SELECTOR},
+    selector::{
+        async_selector::{self, SELECTOR},
+        CallbackResult,
+    },
     PhantomUnsync,
 };
 use std::{
@@ -274,7 +279,10 @@ impl<T: ServiceMsg> Future for AsyncReceiver<T> {
                     &server.data.node.context,
                     async_selector::Command::Server(
                         server.data.clone(),
-                        Box::new(move || waker.clone().wake()),
+                        Box::new(move || {
+                            waker.clone().wake();
+                            CallbackResult::Ok
+                        }),
                     ),
                 ) {
                     return Poll::Ready(Err(e));
