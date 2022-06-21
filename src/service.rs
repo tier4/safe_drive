@@ -1,9 +1,12 @@
+//! Service (Client-server model).
+
 use crate::{rcl, time::rcl_time_to_system_time};
 use std::time::SystemTime;
 
 pub mod client;
 pub mod server;
 
+/// `Header` contains information about timestamps of source and destination, a sequence number, and a guid.
 #[derive(Debug)]
 pub struct Header {
     header: rcl::rmw_service_info_t,

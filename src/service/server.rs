@@ -1,4 +1,4 @@
-//! Server receiving a request and replying to the it.
+//! Server to receive a request and send the reply.
 //!
 //! # Examples
 //!
@@ -89,7 +89,7 @@
 //!     }
 //! }
 //!
-//! async_std::task::block_on(server_task(server, logger)); // Invoke the asynchronous task.
+//! async_std::task::block_on(server_task(server, logger)); // Spawn an asynchronous task.
 //! ```
 
 use super::Header;

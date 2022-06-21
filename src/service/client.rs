@@ -1,3 +1,58 @@
+//! Client to send a request and receive the reply.
+//!
+//! The callback execution is not suitable for request and response based communications.
+//! So, use async/await to use `Client`.
+//!
+//! # Example
+//!
+//! ```
+//! use safe_drive::{
+//!     context::Context, logger::Logger, msg::common_interfaces::std_srvs, pr_error, pr_info,
+//!     service::client::Client,
+//! };
+//! use std::time::Duration;
+//!
+//! // Create a context.
+//! let ctx = Context::new().unwrap();
+//!
+//! // Create a server node.
+//! let node = ctx
+//!     .create_node("service_client_rs", None, Default::default())
+//!     .unwrap();
+//!
+//! // Create a client.
+//! let client = node
+//!     .create_client::<std_srvs::srv::Empty>("service_name1", None)
+//!     .unwrap();
+//!
+//! // Create a logger.
+//! let logger = Logger::new("client_rs");
+//!
+//! async fn run_client(mut client: Client<std_srvs::srv::Empty>, logger: Logger) {
+//!     let dur = Duration::from_millis(100);
+//!
+//!     loop {
+//!         let request = std_srvs::srv::EmptyRequest::new().unwrap();
+//!         let receiver = client.send(request).unwrap();
+//!         match async_std::future::timeout(dur, receiver.recv()).await {
+//!             Ok(Ok((c, response))) => {
+//!                 client = c;
+//!             }
+//!             Ok(Err(e)) => {
+//!                 pr_error!(logger, "error: {e}");
+//!                 break;
+//!             }
+//!             Err(_) => {
+//!                 pr_info!(logger, "timeout");
+//!                 break;
+//!             }
+//!         }
+//!     }
+//! }
+//!
+//! async_std::task::block_on(run_client(client, logger)); // Spawn an asynchronous task.
+//! ```
+
 use super::Header;
 use crate::{
     error::{DynError, RCLError, RCLResult},
@@ -34,6 +89,7 @@ impl Drop for ClientData {
 unsafe impl Sync for ClientData {}
 unsafe impl Send for ClientData {}
 
+/// Client.
 pub struct Client<T> {
     data: Arc<ClientData>,
     _phantom: PhantomData<T>,
@@ -70,6 +126,39 @@ impl<T: ServiceMsg> Client<T> {
         })
     }
 
+    /// Send a request.
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// use safe_drive::{
+    ///     logger::Logger, msg::common_interfaces::std_srvs, pr_error, pr_info, service::client::Client,
+    /// };
+    /// use std::time::Duration;
+    ///
+    /// async fn run_client(mut client: Client<std_srvs::srv::Empty>, logger: Logger) {
+    ///     let dur = Duration::from_millis(100);
+    ///
+    ///     loop {
+    ///         let request = std_srvs::srv::EmptyRequest::new().unwrap();
+    ///         let receiver = client.send(request).unwrap();
+    ///         match async_std::future::timeout(dur, receiver.recv()).await {
+    ///             Ok(Ok((c, response))) => {
+    ///                 client = c;
+    ///             }
+    ///             Ok(Err(e)) => {
+    ///                 pr_error!(logger, "error: {e}");
+    ///                 break;
+    ///             }
+    ///             Err(_) => {
+    ///                 pr_info!(logger, "timeout");
+    ///                 break;
+    ///             }
+    ///         }
+    ///     }
+    /// }
+    /// ```
+    ///
     /// # Errors
     ///
     /// - `RCLError::InvalidArgument` if any arguments are invalid, or
@@ -82,6 +171,44 @@ impl<T: ServiceMsg> Client<T> {
 
     /// `send_with_seq` is equivalent to `send`, but this returns
     /// the sequence number together.
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// use safe_drive::{
+    ///     logger::Logger, msg::common_interfaces::std_srvs, pr_error, pr_info, service::client::Client,
+    /// };
+    /// use std::time::Duration;
+    ///
+    /// async fn run_client(mut client: Client<std_srvs::srv::Empty>, logger: Logger) {
+    ///     let dur = Duration::from_millis(100);
+    ///
+    ///     loop {
+    ///         let request = std_srvs::srv::EmptyRequest::new().unwrap();
+    ///         let (receiver, sequence) = client.send_with_seq(request).unwrap();
+    ///         pr_info!(logger, "sent: sequence = {sequence}");
+    ///         match async_std::future::timeout(dur, receiver.recv()).await {
+    ///             Ok(Ok((c, response))) => {
+    ///                 client = c;
+    ///             }
+    ///             Ok(Err(e)) => {
+    ///                 pr_error!(logger, "error: {e}");
+    ///                 break;
+    ///             }
+    ///             Err(_) => {
+    ///                 pr_info!(logger, "timeout");
+    ///                 break;
+    ///             }
+    ///         }
+    ///     }
+    /// }
+    /// ```
+    ///
+    /// # Errors
+    ///
+    /// - `RCLError::InvalidArgument` if any arguments are invalid, or
+    /// - `RCLError::ClientInvalid` if the client is invalid, or
+    /// - `RCLError::Error` if an unspecified error occurs.
     pub fn send_with_seq(
         self,
         data: <T as ServiceMsg>::Request,
@@ -107,6 +234,7 @@ impl<T: ServiceMsg> Client<T> {
     }
 }
 
+/// Receiver to receive a response.
 #[derive(Clone)]
 pub struct ClientRecv<T> {
     pub(crate) data: Arc<ClientData>,
@@ -168,6 +296,38 @@ impl<T: ServiceMsg> ClientRecv<T> {
     /// Receive a response asynchronously.
     /// this returns `super::Header` including some information together.
     ///
+    /// # Example
+    ///
+    /// ```
+    /// use safe_drive::{
+    ///     logger::Logger, msg::common_interfaces::std_srvs, pr_error, pr_info, service::client::Client,
+    /// };
+    /// use std::time::Duration;
+    ///
+    /// async fn run_client(mut client: Client<std_srvs::srv::Empty>, logger: Logger) {
+    ///     let dur = Duration::from_millis(100);
+    ///
+    ///     loop {
+    ///         let request = std_srvs::srv::EmptyRequest::new().unwrap();
+    ///         let receiver = client.send(request).unwrap();
+    ///         match async_std::future::timeout(dur, receiver.recv_with_header()).await {
+    ///             Ok(Ok((c, response, header))) => {
+    ///                 pr_info!(logger, "received: header = {:?}", header);
+    ///                 client = c;
+    ///             }
+    ///             Ok(Err(e)) => {
+    ///                 pr_error!(logger, "error: {e}");
+    ///                 break;
+    ///             }
+    ///             Err(_) => {
+    ///                 pr_info!(logger, "timeout");
+    ///                 break;
+    ///             }
+    ///         }
+    ///     }
+    /// }
+    /// ```
+    ///
     /// # Errors
     ///
     /// - `RCLError::InvalidArgument` if any arguments are invalid, or
@@ -184,6 +344,37 @@ impl<T: ServiceMsg> ClientRecv<T> {
     }
 
     /// Receive a message asynchronously.
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// use safe_drive::{
+    ///     logger::Logger, msg::common_interfaces::std_srvs, pr_error, pr_info, service::client::Client,
+    /// };
+    /// use std::time::Duration;
+    ///
+    /// async fn run_client(mut client: Client<std_srvs::srv::Empty>, logger: Logger) {
+    ///     let dur = Duration::from_millis(100);
+    ///
+    ///     loop {
+    ///         let request = std_srvs::srv::EmptyRequest::new().unwrap();
+    ///         let receiver = client.send(request).unwrap();
+    ///         match async_std::future::timeout(dur, receiver.recv()).await {
+    ///             Ok(Ok((c, response))) => {
+    ///                 client = c;
+    ///             }
+    ///             Ok(Err(e)) => {
+    ///                 pr_error!(logger, "error: {e}");
+    ///                 break;
+    ///             }
+    ///             Err(_) => {
+    ///                 pr_info!(logger, "timeout");
+    ///                 break;
+    ///             }
+    ///         }
+    ///     }
+    /// }
+    /// ```
     ///
     /// # Errors
     ///
@@ -215,6 +406,7 @@ fn rcl_take_response_with_info<T>(
     Ok((ros_response, header))
 }
 
+/// Receiver to receive a response asynchronously.
 pub struct AsyncReceiver<T> {
     client: ClientRecv<T>,
     is_waiting: bool,
