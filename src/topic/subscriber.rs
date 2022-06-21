@@ -13,9 +13,95 @@
 //!
 //! # Examples
 //!
-//! ## Single and Multi Threaded Execution
+//! ## Single Threaded Execution
 //!
-//! See [Subscriber].
+//! ```
+//! use safe_drive::{
+//!     context::Context, logger::Logger, msg::common_interfaces::std_msgs, pr_error, pr_info,
+//!     RecvResult,
+//! };
+//!
+//! let ctx = Context::new().unwrap();
+//! let node = ctx
+//!     .create_node("subscriber_rs_try_recv", None, Default::default())
+//!     .unwrap();
+//!
+//! // Create a subscriber.
+//! let subscriber = node
+//!     .create_subscriber::<std_msgs::msg::UInt32>("subscriber_rs_try_recv_topic", None)
+//!     .unwrap();
+//!
+//! // Create a publisher.
+//! let publisher = node
+//!     .create_publisher::<std_msgs::msg::UInt32>("subscriber_rs_try_recv_topic", None)
+//!     .unwrap();
+//!
+//! let logger = Logger::new("subscriber_rs");
+//!
+//! // Send a message.
+//! let mut msg = std_msgs::msg::UInt32::new().unwrap();
+//! msg.data = 10;
+//! publisher.send(msg).unwrap();
+//!
+//! // Receive the message.
+//! match subscriber.try_recv() {
+//!     RecvResult::Ok(msg) => pr_info!(logger, "msg = {}", msg.data),
+//!     RecvResult::RetryLater => pr_info!(logger, "retry later"),
+//!     RecvResult::Err(e) => pr_error!(logger, "error = {}", e),
+//! }
+//! ```
+//!
+//! ## Multi Threaded Execution
+//!
+//! ```
+//! #[allow(unused_imports)]
+//! use async_std::{future, prelude::*};
+//! use safe_drive::{
+//!     context::Context, logger::Logger, msg::common_interfaces::std_msgs, pr_info, pr_warn,
+//!     topic::subscriber::Subscriber,
+//! };
+//! use std::time::Duration;
+//!
+//! // Create a context.
+//! let ctx = Context::new().unwrap();
+//!
+//! // Create nodes.
+//! let node_sub = ctx
+//!     .create_node("subscriber_rs_recv", None, Default::default())
+//!     .unwrap();
+//!
+//! // Create a subscriber.
+//! let subscriber = node_sub
+//!     .create_subscriber::<std_msgs::msg::String>("subscriber_rs_recv_topic", None)
+//!     .unwrap();
+//!
+//! // Create tasks.
+//! async_std::task::block_on(async {
+//!     let s = async_std::task::spawn(run_subscriber(subscriber));
+//!     s.await;
+//! });
+//!
+//! /// The subscriber.
+//! async fn run_subscriber(mut s: Subscriber<std_msgs::msg::String>) {
+//!     let dur = Duration::from_millis(100);
+//!     let logger = Logger::new("subscriber_rs_recv");
+//!     for _ in 0..3 {
+//!         // receive a message specifying timeout of 100ms
+//!         match future::timeout(dur, s.recv()).await {
+//!             Ok(Ok(msg)) => {
+//!                 // received a message
+//!                 pr_info!(logger, "Received (async): msg = {}", msg.data);
+//!             }
+//!             Ok(Err(e)) => panic!("{}", e), // fatal error
+//!             Err(_) => {
+//!                 // timeout
+//!                 pr_warn!(logger, "Subscribe (async): timeout");
+//!                 break;
+//!             }
+//!         }
+//!     }
+//! }
+//! ```
 //!
 //! ## Default QoS Profile
 //!
@@ -107,38 +193,6 @@ unsafe impl Sync for RCLSubscription {}
 unsafe impl Send for RCLSubscription {}
 
 /// Subscriber.
-///
-/// # Example
-///
-/// ```
-/// use safe_drive::{
-///     context::Context, logger::Logger, msg::common_interfaces::std_msgs, pr_error, pr_info,
-///     RecvResult,
-/// };
-///
-///
-/// let ctx = Context::new().unwrap();
-/// let node = ctx
-///     .create_node("subscriber_rs", None, Default::default())
-///     .unwrap();
-/// let logger = Logger::new("subscriber_rs");
-///
-/// // Create a subscriber.
-/// let subscriber = node
-///     .create_subscriber::<std_msgs::msg::UInt32>("subscriber_rs_topic", None)
-///     .unwrap();
-///
-/// // Non-blocking receive.
-/// match subscriber.try_recv() {
-///     RecvResult::Ok(msg) => pr_info!(logger, "Receive: msg = {}", msg.data),
-///     RecvResult::RetryLater => {
-///         pr_info!(logger, "Receive: No available Data")
-///     }
-///     RecvResult::Err(e) => {
-///         pr_error!(logger, "Receive: Error = {e}")
-///     }
-/// }
-/// ```
 pub struct Subscriber<T> {
     pub(crate) subscription: Arc<RCLSubscription>,
     _phantom: PhantomData<T>,
@@ -185,37 +239,17 @@ impl<T: TopicMsg> Subscriber<T> {
     ///
     /// ```
     /// use safe_drive::{
-    ///     context::Context, logger::Logger, msg::common_interfaces::std_msgs, pr_error, pr_info,
-    ///     RecvResult,
+    ///     logger::Logger, msg::common_interfaces::std_msgs, pr_error, pr_info,
+    ///     topic::subscriber::Subscriber, RecvResult,
     /// };
     ///
-    /// let ctx = Context::new().unwrap();
-    /// let node = ctx
-    ///     .create_node("subscriber_rs_try_recv", None, Default::default())
-    ///     .unwrap();
-    ///
-    /// // Create a subscriber.
-    /// let subscriber = node
-    ///     .create_subscriber::<std_msgs::msg::UInt32>("subscriber_rs_try_recv_topic", None)
-    ///     .unwrap();
-    ///
-    /// // Create a publisher.
-    /// let publisher = node
-    ///     .create_publisher::<std_msgs::msg::UInt32>("subscriber_rs_try_recv_topic", None)
-    ///     .unwrap();
-    ///
-    /// let logger = Logger::new("subscriber_rs");
-    ///
-    /// // Send a message.
-    /// let mut msg = std_msgs::msg::UInt32::new().unwrap();
-    /// msg.data = 10;
-    /// publisher.send(msg).unwrap();
-    ///
-    /// // Receive the message.
-    /// match subscriber.try_recv() {
-    ///     RecvResult::Ok(msg) => pr_info!(logger, "msg = {}", msg.data),
-    ///     RecvResult::RetryLater => pr_info!(logger, "retry later"),
-    ///     RecvResult::Err(e) => pr_error!(logger, "error = {}", e),
+    /// fn pubsub(subscriber: Subscriber<std_msgs::msg::UInt32>, logger: Logger) {
+    ///     // Receive the message.
+    ///     match subscriber.try_recv() {
+    ///         RecvResult::Ok(msg) => pr_info!(logger, "msg = {}", msg.data),
+    ///         RecvResult::RetryLater => pr_info!(logger, "retry later"),
+    ///         RecvResult::Err(e) => pr_error!(logger, "error = {}", e),
+    ///     }
     /// }
     /// ```
     ///
@@ -247,31 +281,11 @@ impl<T: TopicMsg> Subscriber<T> {
     /// #[allow(unused_imports)]
     /// use async_std::{future, prelude::*};
     /// use safe_drive::{
-    ///     context::Context, logger::Logger, msg::common_interfaces::std_msgs, pr_info, pr_warn,
+    ///     logger::Logger, msg::common_interfaces::std_msgs, pr_info, pr_warn,
     ///     topic::subscriber::Subscriber,
     /// };
     /// use std::time::Duration;
     ///
-    /// // Create a context.
-    /// let ctx = Context::new().unwrap();
-    ///
-    /// // Create nodes.
-    /// let node_sub = ctx
-    ///     .create_node("subscriber_rs_recv", None, Default::default())
-    ///     .unwrap();
-    ///
-    /// // Create a subscriber.
-    /// let subscriber = node_sub
-    ///     .create_subscriber::<std_msgs::msg::String>("subscriber_rs_recv_topic", None)
-    ///     .unwrap();
-    ///
-    /// // Create tasks.
-    /// async_std::task::block_on(async {
-    ///     let s = async_std::task::spawn(run_subscriber(subscriber));
-    ///     s.await;
-    /// });
-    ///
-    /// /// The subscriber.
     /// async fn run_subscriber(mut s: Subscriber<std_msgs::msg::String>) {
     ///     let dur = Duration::from_millis(100);
     ///     let logger = Logger::new("subscriber_rs_recv");
