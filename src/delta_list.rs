@@ -1,7 +1,7 @@
 //! The delta list was originally introduced by [Operating System Design, The Xinu Approach](https://xinu.cs.purdue.edu/)'s
 //! Chapter 13.
 //!
-//! We specify the delta list by using TLA+.
+//! We specified the delta list by using TLA+.
 //! See [the specification](https://github.com/tier4/safe_drive/tree/main/specifications/callback).
 
 use std::{cell::UnsafeCell, time::Duration};
@@ -21,6 +21,11 @@ pub enum DeltaList<T> {
 }
 
 impl<T> DeltaList<T> {
+    /// Insert a data which will be invoked after `delta` duration.
+    ///
+    /// For example, if a delta list is `10 -> 20 -> 5`,
+    /// and a delta of `15` is inserted,
+    /// the list is updated to `10 -> 5 -> 5 -> 5`.
     pub fn insert(&mut self, delta: Duration, data: T) {
         insert_delta(self, delta, data);
     }

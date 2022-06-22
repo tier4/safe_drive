@@ -1,3 +1,23 @@
+//! Context of ROS2.
+//! A context can create `Node` and `Selector`.
+//!
+//! # Example
+//!
+//! ```
+//! use safe_drive::context::Context;
+//!
+//! // Create a context.
+//! let ctx = Context::new().unwrap();
+//!
+//! // Create a node.
+//! let node = ctx
+//!     .create_node("context_rs", None, Default::default())
+//!     .unwrap();
+//!
+//! // Create a selector.
+//! let selector = ctx.create_selector().unwrap();
+//! ```
+
 use crate::{
     error::*,
     node::{Node, NodeOptions},
@@ -11,12 +31,23 @@ use std::{collections::BTreeSet, env, ffi::CString, sync::Arc};
 
 pub static ID_CONTEXT: Lazy<Mutex<BTreeSet<usize>>> = Lazy::new(|| Mutex::new(BTreeSet::new()));
 
+/// Context of ROS2.
 pub struct Context {
     context: rcl::rcl_context_t,
     pub(crate) id: usize,
 }
 
 impl Context {
+    /// Create a new context.
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// use safe_drive::context::Context;
+    ///
+    /// // Create a context.
+    /// let ctx = Context::new().unwrap();
+    /// ```
     pub fn new() -> Result<Arc<Self>, DynError> {
         // allocate context
         let mut context = rcl::MTSafeFn::rcl_get_zero_initialized_context();
@@ -56,6 +87,31 @@ impl Context {
         Ok(Arc::new(Context { context, id }))
     }
 
+    /// Create a new node of ROS2.
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// use safe_drive::context::Context;
+    ///
+    /// // Create a context.
+    /// let ctx = Context::new().unwrap();
+    ///
+    /// // Create a node.
+    /// let node = ctx
+    ///     .create_node("context_rs", None, Default::default())
+    ///     .unwrap();
+    /// ```
+    ///
+    /// # Errors
+    ///
+    /// - `RCLError::AlreadyInit` if the node has already be initialized, or
+    /// - `RCLError::NotInit` if the given context is invalid, or
+    /// - `RCLError::InvalidArgument` if any arguments are invalid, or
+    /// - `RCLError::BadAlloc` if allocating memory failed, or
+    /// - `RCLError::NodeInvalidName` if the name is invalid, or
+    /// - `RCLError::NodeInvalidNamespace` if the namespace_ is invalid, or
+    /// - `RCLError::Error` if an unspecified error occurs.
     pub fn create_node(
         self: &Arc<Self>,
         name: &str,
@@ -65,6 +121,29 @@ impl Context {
         Node::new(self.clone(), name, namespace, options)
     }
 
+    /// Create a new selector.
+    /// The selector is used to wait event and invoke callback for single threaded execution.
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// use safe_drive::context::Context;
+    ///
+    /// // Create a context.
+    /// let ctx = Context::new().unwrap();
+    ///
+    /// // Create a selector.
+    /// let selector = ctx.create_selector().unwrap();
+    /// ```
+    ///
+    /// # Errors
+    ///
+    /// - `RCLError::AlreadyInit` if the wait set is not zero initialized, or
+    /// - `RCLError::NotInit` if the given context is invalid, or
+    /// - `RCLError::InvalidArgument` if any arguments are invalid, or
+    /// - `RCLError::BadAlloc` if allocating memory failed, or
+    /// - `RCLError::WaitSetInvalid` if the wait set is not destroyed properly, or
+    /// - `RCLError::Error` if an unspecified error occurs.
     pub fn create_selector(self: &Arc<Self>) -> RCLResult<Selector> {
         Selector::new(self.clone())
     }
@@ -98,7 +177,7 @@ impl Drop for Context {
 }
 
 /// Options for the initialization of the context.
-pub struct InitOptions {
+pub(crate) struct InitOptions {
     options: rcl::rcl_init_options_t,
 }
 

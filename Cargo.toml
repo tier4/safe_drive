@@ -10,7 +10,7 @@ authors = ["Yuuki Takano <yuuki.takano@tier4.com>"]
 num-traits = "0.2"
 num-derive = "0.3"
 once_cell = "1.10.0"
-flume = "0.10.12"
+crossbeam-channel = "0.5.5"
 parking_lot = "0.12.0"
 signal-hook = "0.3.14"
 

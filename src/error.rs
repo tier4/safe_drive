@@ -1,7 +1,8 @@
-use num_derive::{FromPrimitive, ToPrimitive};
-use num_traits::FromPrimitive;
+//! Errors returned by ROS2.
 
 use crate::rcl;
+use num_derive::{FromPrimitive, ToPrimitive};
+use num_traits::FromPrimitive;
 use std::{
     error::Error,
     fmt::{self, Debug},
@@ -58,7 +59,10 @@ impl fmt::Display for RCLError {
 
 impl Error for RCLError {}
 
+/// Result type to RCLError when encountering error.
 pub type RCLResult<T> = Result<T, RCLError>;
+
+/// Dynamic type which can be sent and shared between threads.
 pub type DynError = Box<dyn Error + Send + Sync + 'static>;
 
 /// Convert a rcl-style, C-style, return value to a Rust-style value.

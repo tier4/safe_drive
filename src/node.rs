@@ -1,3 +1,20 @@
+//! Node of ROS2.
+//! Nodes can be create by `Context::create_node`.
+//!
+//! # Example
+//!
+//! ```
+//! use safe_drive::context::Context;
+//!
+//! // Create a context.
+//! let ctx = Context::new().unwrap();
+//!
+//! // Create a node.
+//! let node = ctx
+//!     .create_node("node_rs", Some("namespace"), Default::default())
+//!     .unwrap();
+//! ```
+
 use crate::{
     context::Context,
     error::RCLResult,
@@ -9,6 +26,7 @@ use crate::{
 };
 use std::{ffi::CString, sync::Arc};
 
+/// Node of ROS2.
 pub struct Node {
     node: rcl::rcl_node_t,
     pub(crate) context: Arc<Context>,
@@ -48,6 +66,22 @@ impl Node {
         &self.node as *const _ as *mut _
     }
 
+    /// Create a publisher.
+    /// If `qos` is specified `None`,
+    /// the default profile is used.
+    ///
+    /// `T` is the type of messages the created publisher send.
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// use safe_drive::{msg::common_interfaces::std_msgs, node::Node, topic::publisher::Publisher};
+    /// use std::sync::Arc;
+    ///
+    /// fn create_new_publisher(node: Arc<Node>) -> Publisher<std_msgs::msg::Bool> {
+    ///     node.create_publisher("topic_name", None).unwrap()
+    /// }
+    /// ```
     pub fn create_publisher<T: TopicMsg>(
         self: &Arc<Self>,
         topic_name: &str,
@@ -56,6 +90,22 @@ impl Node {
         Publisher::new(self.clone(), topic_name, qos)
     }
 
+    /// Create a subscriber.
+    /// If `qos` is specified `None`,
+    /// the default profile is used.
+    ///
+    /// `T` is the type of messages the created subscriber receive.
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// use safe_drive::{msg::common_interfaces::std_msgs, node::Node, topic::subscriber::Subscriber};
+    /// use std::sync::Arc;
+    ///
+    /// fn create_new_subscriber(node: Arc<Node>) -> Subscriber<std_msgs::msg::Bool> {
+    ///     node.create_subscriber("topic_name", None).unwrap()
+    /// }
+    /// ```
     pub fn create_subscriber<T: TopicMsg>(
         self: &Arc<Self>,
         topic_name: &str,
@@ -64,6 +114,22 @@ impl Node {
         Subscriber::new(self.clone(), topic_name, qos)
     }
 
+    /// Create a server.
+    /// If `qos` is specified `None`,
+    /// the default profile is used.
+    ///
+    /// A server must receive `ServiceMsg::Request` and send `ServiceMsg::Response`.
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// use safe_drive::{msg::common_interfaces::std_srvs, node::Node, service::server::Server};
+    /// use std::sync::Arc;
+    ///
+    /// fn create_new_server(node: Arc<Node>) -> Server<std_srvs::srv::Empty> {
+    ///     node.create_server("service_name", None).unwrap()
+    /// }
+    /// ```
     pub fn create_server<T: ServiceMsg>(
         self: &Arc<Self>,
         service_name: &str,
@@ -72,6 +138,22 @@ impl Node {
         Server::new(self.clone(), service_name, qos)
     }
 
+    /// Create a client.
+    /// If `qos` is specified `None`,
+    /// the default profile is used.
+    ///
+    /// A client must send `ServiceMsg::Request` and receive `ServiceMsg::Response`.
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// use safe_drive::{msg::common_interfaces::std_srvs, node::Node, service::client::Client};
+    /// use std::sync::Arc;
+    ///
+    /// fn create_new_client(node: Arc<Node>) -> Client<std_srvs::srv::Empty> {
+    ///     node.create_client("service_name", None).unwrap()
+    /// }
+    /// ```
     pub fn create_client<T: ServiceMsg>(
         self: &Arc<Self>,
         service_name: &str,

@@ -28,9 +28,20 @@
 //!
 //! # Important Types
 //!
+//! - Context
+//!   - [`context::Context`]
+//! - Node
+//!   - [`node::Node`]
+//! - Selector
+//!   - [`selector::Selector`]
 //! - Topic
 //!   - [`topic::publisher::Publisher`]
 //!   - [`topic::subscriber::Subscriber`]
+//! - Service
+//!   - [`service::client::Client`]
+//!   - [`service::client::ClientRecv`]
+//!   - [`service::server::Server`]
+//!   - [`service::server::ServerSend`]
 //!
 //! ## Examples
 //!
@@ -48,7 +59,6 @@
 //! ```
 //! use safe_drive::{
 //!     context::Context, logger::Logger, msg::common_interfaces::std_msgs, pr_info,
-//!     selector::CallbackResult,
 //! };
 //! use std::time::Duration;
 //!

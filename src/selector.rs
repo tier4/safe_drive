@@ -1,3 +1,61 @@
+//! Selector provides functions like `select` or `epoll`.
+//! This is used to single threaded execution.
+//! For multi threaded execution, this is used internally.
+//!
+//! # Example
+//!
+//! ```
+//! use safe_drive::{
+//!     context::Context, logger::Logger, msg::common_interfaces::std_msgs, pr_info,
+//! };
+//! use std::time::Duration;
+//!
+//! // First of all, you need create a context.
+//! let ctx = Context::new().unwrap();
+//!
+//! // Create a subscribe node.
+//! let node_sub = ctx
+//!     .create_node("selector_rs", None, Default::default())
+//!     .unwrap();
+//!
+//! // Create a subscriber.
+//! let subscriber = node_sub
+//!     .create_subscriber::<std_msgs::msg::String>("selector_topic", None)
+//!     .unwrap();
+//!
+//! // Create a selector, which is for IO multiplexing.
+//! let mut selector = ctx.create_selector().unwrap();
+//!
+//! // Create a logger.
+//! let logger_sub = Logger::new("selector_rs");
+//!
+//! // Add subscriber to the selector.
+//! // The 2nd argument is a callback function.
+//! // If data arrive, the callback will be invoked.
+//! // The 3rd argument is used to specify the callback will be invoked only once or infinitely.
+//! // If the 3rd argument is `true`, the callback function is invoked once and unregistered.
+//! selector.add_subscriber(
+//!     subscriber,
+//!     Box::new(move |msg| {
+//!         // Print the message
+//!         pr_info!(logger_sub, "Received: msg = {}", msg.data); // Print a message.
+//!     }),
+//!     false,
+//! );
+//!
+//! // Create a wall timer, which invoke the callback periodically.
+//! selector.add_wall_timer(
+//!     Duration::from_millis(100),
+//!     Box::new(move || ()),
+//! );
+//!
+//! // Spin.
+//! for _ in 0..10 {
+//!     selector.wait().unwrap();
+//! }
+//! ```
+//!
+
 use self::guard_condition::{GuardCondition, RCLGuardCondition};
 use crate::{
     context::Context,
@@ -27,7 +85,7 @@ pub(crate) mod async_selector;
 pub(crate) mod guard_condition;
 
 #[derive(Debug, Eq, PartialEq)]
-pub enum CallbackResult {
+pub(crate) enum CallbackResult {
     Ok,
     Remove,
 }
@@ -43,6 +101,18 @@ enum TimerType {
     OneShot,
 }
 
+/// Selector invokes callback functions associated with subscribers, services, timers, or condition variables.
+/// Selector cannot send and shared between threads.
+/// So, use this for single threaded execution.
+///
+/// # Example
+///
+/// ```
+/// use safe_drive::context::Context;
+///
+/// let ctx = Context::new().unwrap();
+/// let mut selector = ctx.create_selector(); // Create a new selector.
+/// ```
 pub struct Selector {
     timer: DeltaList<ConditionHandler<TimerType>>,
     base_time: SystemTime,
@@ -95,6 +165,32 @@ impl Selector {
         Ok(selector)
     }
 
+    /// Register a subscriber with callback function.
+    /// The callback function will be invoked when arriving data.
+    ///
+    /// # Error
+    ///
+    /// If a selector takes a subscriber created by a different context,
+    /// `add_subscriber()` must fail.
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// use safe_drive::{msg::common_interfaces::std_msgs, node::Node, selector::Selector};
+    /// use std::sync::Arc;
+    ///
+    /// fn add_new_subscriber(selector: &mut Selector, node: Arc<Node>) {
+    ///     // Create a subscriber.
+    ///     let subscriber = node.create_subscriber("node_name", None).unwrap();
+    ///
+    ///     // Add the subscriber with a callback function.
+    ///     selector.add_subscriber(
+    ///         subscriber,
+    ///         Box::new(|msg: std_msgs::msg::Bool| /* some tasks */ ()), // Callback function.
+    ///         true,
+    ///     );
+    /// }
+    /// ```
     pub fn add_subscriber<T: TopicMsg + 'static>(
         &mut self,
         subscriber: Subscriber<T>,
@@ -155,6 +251,41 @@ impl Selector {
         );
     }
 
+    /// Register the subscriber with callback function.
+    /// The callback function will be invoked when arriving data.
+    ///
+    /// The callback function must take `ServiceMsg::Request` and `Header` and
+    /// return `ServiceMsg::Response`.
+    ///
+    /// # Error
+    ///
+    /// If a selector takes a server created by a different context,
+    /// `add_server()` must fail.
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// use safe_drive::{msg::{common_interfaces::std_srvs, ServiceMsg}, node::Node, selector::Selector};
+    /// use std::sync::Arc;
+    ///
+    /// fn add_new_server(selector: &mut Selector, node: Arc<Node>) {
+    ///     // Create a server.
+    ///     let server = node
+    ///         .create_server::<std_srvs::srv::Empty>("select_rs_service", None)
+    ///         .unwrap();
+    ///
+    ///     // Add the server with a callback function.
+    ///     selector.add_server(
+    ///         server,
+    ///         Box::new(|request: <std_srvs::srv::Empty as ServiceMsg>::Request, header| {
+    ///             // Return the response.
+    ///             let response = std_srvs::srv::EmptyResponse::new().unwrap();
+    ///             response
+    ///         }), // Callback function.
+    ///         true,
+    ///     );
+    /// }
+    /// ```
     pub fn add_server<T: ServiceMsg + 'static>(
         &mut self,
         server: Server<T>,
@@ -260,11 +391,6 @@ impl Selector {
         );
     }
 
-    pub fn remove_subscriber<T>(&mut self, subscriber: &Subscriber<T>) {
-        self.subscriptions
-            .remove(&(subscriber.subscription.subscription.as_ref() as *const _));
-    }
-
     pub(crate) fn remove_rcl_subscription(&mut self, subscription: &Arc<RCLSubscription>) {
         self.subscriptions
             .remove(&(subscription.subscription.as_ref() as *const _));
@@ -278,8 +404,24 @@ impl Selector {
         self.clients.remove(&(&client.client as *const _));
     }
 
-    /// Insert timer.
-    /// `handler` is called after `t` seconds later.
+    /// Add a timer.
+    /// The `handler` is called after `t` seconds later.
+    /// The `handler` is called just once.
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// use safe_drive::selector::Selector;
+    /// use std::time::Duration;
+    ///
+    /// fn add_new_timer(selector: &mut Selector) {
+    ///     // Add a timer.
+    ///     selector.add_timer(
+    ///         Duration::from_millis(100),
+    ///         Box::new(|| /* some tasks */ ()), // Callback function.
+    ///     );
+    /// }
+    /// ```
     pub fn add_timer(&mut self, t: Duration, mut handler: Box<dyn FnMut()>) {
         self.add_timer_inner(
             t,
@@ -291,9 +433,25 @@ impl Selector {
         );
     }
 
-    /// Insert timer.
-    /// `handler` is called after `t` seconds later.
+    /// Add a wall timer.
+    /// The `handler` is called after `t` seconds later.
     /// The `handler` will be automatically reloaded after calling it.
+    /// It means the `handler` is called periodically.
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// use safe_drive::selector::Selector;
+    /// use std::time::Duration;
+    ///
+    /// fn add_new_wall_timer(selector: &mut Selector) {
+    ///     // Add a timer.
+    ///     selector.add_wall_timer(
+    ///         Duration::from_millis(100),
+    ///         Box::new(|| /* some tasks */ ()), // Callback function.
+    ///     );
+    /// }
+    /// ```
     pub fn add_wall_timer(&mut self, t: Duration, mut handler: Box<dyn FnMut()>) {
         self.add_timer_inner(
             t,
@@ -343,6 +501,22 @@ impl Selector {
         );
     }
 
+    /// Wait events and invoke registered callback functions.
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// use safe_drive::{error::DynError, selector::Selector};
+    ///
+    /// fn wait_events(selector: &mut Selector) -> Result<(), DynError> {
+    ///     // Add subscribers, servers, etc.
+    ///
+    ///     // Spin.
+    ///     loop {
+    ///         selector.wait()?;
+    ///     }
+    /// }
+    /// ```
     pub fn wait(&mut self) -> Result<(), DynError> {
         {
             let guard = rcl::MT_UNSAFE_FN.lock();

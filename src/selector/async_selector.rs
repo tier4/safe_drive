@@ -6,7 +6,7 @@ use crate::{
     signal_handler,
     topic::subscriber::RCLSubscription,
 };
-use flume::{self, Receiver, Sender};
+use crossbeam_channel::{self, Receiver, Sender};
 use once_cell::sync::Lazy;
 use parking_lot::Mutex;
 use std::{
@@ -83,7 +83,7 @@ impl AsyncSelector {
                     return Ok(());
                 }
 
-                let (tx, rx) = flume::bounded(256);
+                let (tx, rx) = crossbeam_channel::bounded(256);
                 let guard = super::guard_condition::GuardCondition::new(context.clone())?;
                 let ctx = context.clone();
                 let guard2 = guard.clone();
