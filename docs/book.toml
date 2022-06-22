@@ -1,0 +1,6 @@
+[book]
+authors = ["Yuuki Takano"]
+language = "en"
+multilingual = false
+src = "src"
+title = "safe_drive: Formally Specified Rust Bindings for ROS2"
