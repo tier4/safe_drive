@@ -24,6 +24,10 @@ check:
 clippy:
 	cargo clippy
 
+doc:
+	$(MAKE) -C mdbook
+	cargo doc
+
 clean:
 	cargo clean
 	rm -rf supplements/ros2/build supplements/ros2/install supplements/ros2/log

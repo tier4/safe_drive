@@ -22,7 +22,7 @@ RUN apt-get -y update && \
     apt-get -y install ros-galactic-desktop python3-colcon-common-extensions python3-rosdep libclang-dev python3-pip python3-vcstool ros-foxy-rmw-cyclonedds-cpp
 
 RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
-RUN . /root/.cargo/env && cargo install bindgen && cargo install --debug cargo-ament-build
+RUN . /root/.cargo/env && cargo install bindgen && cargo install --debug cargo-ament-build && cargo install mdbook
 RUN pip install git+https://github.com/colcon/colcon-cargo.git && \
     pip install git+https://github.com/colcon/colcon-ros-cargo.git
 

@@ -3,8 +3,7 @@
     <head>
         <!-- Book generated using mdBook -->
         <meta charset="UTF-8">
-        <title>Page not found - safe_drive: Formally Specified Rust Bindings for ROS2</title>
-        <base href="/">
+        <title>Setting-up - safe_drive: Formally Specified Rust Bindings for ROS2</title>
 
 
         <!-- Custom HTML head -->
@@ -82,7 +81,7 @@
 
         <nav id="sidebar" class="sidebar" aria-label="Table of contents">
             <div class="sidebar-scrollbox">
-                <ol class="chapter"><li class="chapter-item expanded "><a href="index.html"><strong aria-hidden="true">1.</strong> Top</a></li><li class="chapter-item expanded "><a href="tutorial.html"><strong aria-hidden="true">2.</strong> Tutorial</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="setup.html"><strong aria-hidden="true">2.1.</strong> Setting-up</a></li><li class="chapter-item expanded "><a href="pubsub.html"><strong aria-hidden="true">2.2.</strong> Publish and Subscribe</a></li></ol></li></ol>
+                <ol class="chapter"><li class="chapter-item expanded "><a href="index.html"><strong aria-hidden="true">1.</strong> Top</a></li><li class="chapter-item expanded "><a href="tutorial.html"><strong aria-hidden="true">2.</strong> Tutorial</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="setup.html" class="active"><strong aria-hidden="true">2.1.</strong> Setting-up</a></li><li class="chapter-item expanded "><a href="pubsub.html"><strong aria-hidden="true">2.2.</strong> Publish and Subscribe</a></li></ol></li></ol>
             </div>
             <div id="sidebar-resize-handle" class="sidebar-resize-handle"></div>
         </nav>
@@ -143,14 +142,44 @@
 
                 <div id="content" class="content">
                     <main>
-                        <h1 id="document-not-found-404"><a class="header" href="#document-not-found-404">Document not found (404)</a></h1>
-<p>This URL is invalid, sorry. Please use the navigation bar or search to continue.</p>
+                        <h1 id="setting-up"><a class="header" href="#setting-up">Setting-up</a></h1>
+<h2 id="install-dependencies"><a class="header" href="#install-dependencies">Install Dependencies</a></h2>
+<pre><code class="language-shell">$ sudo apt install curl gnupg2 lsb-release python3-pip git
+</code></pre>
+<h2 id="install-rust"><a class="header" href="#install-rust">Install Rust</a></h2>
+<pre><code class="language-shell">$ sudo curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
+$ source $HOME/.cargo/env
+</code></pre>
+<p>Choose <code>Default</code> when installing Rust.</p>
+<h2 id="install-ros2"><a class="header" href="#install-ros2">Install ROS2</a></h2>
+<pre><code class="language-shell">$curl -s https://raw.githubusercontent.com/ros/rosdistro/master/ros.asc | sudo apt-key add -
+$ sudo sh -c 'echo &quot;deb [arch=$(dpkg --print-architecture)] http://packages.ros.org/ros2/ubuntu $(lsb_release -cs) main&quot; &gt; /etc/apt/sources.list.d/ros2-latest.list'
+$ sudo curl -sSL https://raw.githubusercontent.com/ros/rosdistro/master/ros.key -o /usr/share/keyrings/ros-archive-keyring.gpg
+</code></pre>
+<pre><code class="language-shell">$ sudo apt update
+$ sudp apt install ros-galactic-desktop python3-colcon-common-extensions
+</code></pre>
+<h2 id="install-colcon-cargo"><a class="header" href="#install-colcon-cargo">Install Colcon-Cargo</a></h2>
+<pre><code class="language-shell">$ cargo install --debug cargo-ament-build
+$ pip install git+https://github.com/colcon/colcon-cargo.git
+$ pip install git+https://github.com/colcon/colcon-ros-cargo.git
+</code></pre>
+<h2 id="get-safe_drive"><a class="header" href="#get-safe_drive">Get safe_drive</a></h2>
+<p>This is required because safe_drive is private currently.</p>
+<pre><code>$ git clone git@github.com:tier4/safe_drive.git
+</code></pre>
 
                     </main>
 
                     <nav class="nav-wrapper" aria-label="Page navigation">
                         <!-- Mobile navigation buttons -->
+                            <a rel="prev" href="tutorial.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <i class="fa fa-angle-left"></i>
+                            </a>
 
+                            <a rel="next" href="pubsub.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <i class="fa fa-angle-right"></i>
+                            </a>
 
                         <div style="clear: both"></div>
                     </nav>
@@ -158,7 +187,13 @@
             </div>
 
             <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                    <a rel="prev" href="tutorial.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
 
+                    <a rel="next" href="pubsub.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <i class="fa fa-angle-right"></i>
+                    </a>
             </nav>
 
         </div>

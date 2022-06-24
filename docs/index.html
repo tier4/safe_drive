@@ -81,7 +81,7 @@
 
         <nav id="sidebar" class="sidebar" aria-label="Table of contents">
             <div class="sidebar-scrollbox">
-                <ol class="chapter"><li class="chapter-item expanded "><a href="index.html" class="active"><strong aria-hidden="true">1.</strong> Top</a></li><li class="chapter-item expanded "><a href="tutorial.html"><strong aria-hidden="true">2.</strong> Tutorial</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="pubsub.html"><strong aria-hidden="true">2.1.</strong> Publish and Subscribe</a></li></ol></li></ol>
+                <ol class="chapter"><li class="chapter-item expanded "><a href="index.html" class="active"><strong aria-hidden="true">1.</strong> Top</a></li><li class="chapter-item expanded "><a href="tutorial.html"><strong aria-hidden="true">2.</strong> Tutorial</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="setup.html"><strong aria-hidden="true">2.1.</strong> Setting-up</a></li><li class="chapter-item expanded "><a href="pubsub.html"><strong aria-hidden="true">2.2.</strong> Publish and Subscribe</a></li></ol></li></ol>
             </div>
             <div id="sidebar-resize-handle" class="sidebar-resize-handle"></div>
         </nav>
@@ -142,7 +142,38 @@
 
                 <div id="content" class="content">
                     <main>
-                        <h1 id="safe_drive"><a class="header" href="#safe_drive">safe_drive</a></h1>
+                        <h1 id="safe_drive-formally-specified-rust-bindings-for-ros2"><a class="header" href="#safe_drive-formally-specified-rust-bindings-for-ros2">safe_drive: Formally Specified Rust Bindings for ROS2</a></h1>
+<p><code>safe_drive</code> is a Rust bindings for ROS2.
+This library provides formal specifications and tested the specifications by using a model checker.
+Therefore, you can clearly understand how the scheduler work and the safeness of it.</p>
+<h2 id="specifications"><a class="header" href="#specifications">Specifications</a></h2>
+<p>Some algorithms we adopted are formally specified and tested the safeness by using TLA+.
+Original ROS2's executor (rclcpp) is suffering from starvation.
+In contrast, the starvation freedom of our executor has been validated by not only dynamic analysis but also
+formal verification.</p>
+<p>See <a href="https://github.com/tier4/safe_drive/tree/main/specifications">specifications</a>.</p>
+<p>We specified and tested as follows.</p>
+<ul>
+<li>Async/await Scheduler
+<ul>
+<li>Deadlock freedom</li>
+<li>Starvation freedom</li>
+</ul>
+</li>
+<li>Single Threaded Callback Execution
+<ul>
+<li>Deadlock freedom</li>
+<li>Starvation freedom</li>
+</ul>
+</li>
+<li>Initialize Once
+<ul>
+<li>Deadlock freedom</li>
+<li>Termination</li>
+<li>Initialization is performed just once</li>
+</ul>
+</li>
+</ul>
 
                     </main>
 

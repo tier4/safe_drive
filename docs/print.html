@@ -82,7 +82,7 @@
 
         <nav id="sidebar" class="sidebar" aria-label="Table of contents">
             <div class="sidebar-scrollbox">
-                <ol class="chapter"><li class="chapter-item expanded "><a href="index.html"><strong aria-hidden="true">1.</strong> Top</a></li><li class="chapter-item expanded "><a href="tutorial.html"><strong aria-hidden="true">2.</strong> Tutorial</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="pubsub.html"><strong aria-hidden="true">2.1.</strong> Publish and Subscribe</a></li></ol></li></ol>
+                <ol class="chapter"><li class="chapter-item expanded "><a href="index.html"><strong aria-hidden="true">1.</strong> Top</a></li><li class="chapter-item expanded "><a href="tutorial.html"><strong aria-hidden="true">2.</strong> Tutorial</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="setup.html"><strong aria-hidden="true">2.1.</strong> Setting-up</a></li><li class="chapter-item expanded "><a href="pubsub.html"><strong aria-hidden="true">2.2.</strong> Publish and Subscribe</a></li></ol></li></ol>
             </div>
             <div id="sidebar-resize-handle" class="sidebar-resize-handle"></div>
         </nav>
@@ -143,14 +143,275 @@
 
                 <div id="content" class="content">
                     <main>
-                        <h1 id="safe_drive"><a class="header" href="#safe_drive">safe_drive</a></h1>
+                        <h1 id="safe_drive-formally-specified-rust-bindings-for-ros2"><a class="header" href="#safe_drive-formally-specified-rust-bindings-for-ros2">safe_drive: Formally Specified Rust Bindings for ROS2</a></h1>
+<p><code>safe_drive</code> is a Rust bindings for ROS2.
+This library provides formal specifications and tested the specifications by using a model checker.
+Therefore, you can clearly understand how the scheduler work and the safeness of it.</p>
+<h2 id="specifications"><a class="header" href="#specifications">Specifications</a></h2>
+<p>Some algorithms we adopted are formally specified and tested the safeness by using TLA+.
+Original ROS2's executor (rclcpp) is suffering from starvation.
+In contrast, the starvation freedom of our executor has been validated by not only dynamic analysis but also
+formal verification.</p>
+<p>See <a href="https://github.com/tier4/safe_drive/tree/main/specifications">specifications</a>.</p>
+<p>We specified and tested as follows.</p>
+<ul>
+<li>Async/await Scheduler
+<ul>
+<li>Deadlock freedom</li>
+<li>Starvation freedom</li>
+</ul>
+</li>
+<li>Single Threaded Callback Execution
+<ul>
+<li>Deadlock freedom</li>
+<li>Starvation freedom</li>
+</ul>
+</li>
+<li>Initialize Once
+<ul>
+<li>Deadlock freedom</li>
+<li>Termination</li>
+<li>Initialization is performed just once</li>
+</ul>
+</li>
+</ul>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="tutorial"><a class="header" href="#tutorial">Tutorial</a></h1>
 <p>This chapter explain how to use <code>safe_drive</code> and
 interoperability of existing ROS2's project written in C++ or Python
 by using <code>colcon</code>.</p>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="setting-up"><a class="header" href="#setting-up">Setting-up</a></h1>
+<h2 id="install-dependencies"><a class="header" href="#install-dependencies">Install Dependencies</a></h2>
+<pre><code class="language-shell">$ sudo apt install curl gnupg2 lsb-release python3-pip git
+</code></pre>
+<h2 id="install-rust"><a class="header" href="#install-rust">Install Rust</a></h2>
+<pre><code class="language-shell">$ sudo curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
+$ source $HOME/.cargo/env
+</code></pre>
+<p>Choose <code>Default</code> when installing Rust.</p>
+<h2 id="install-ros2"><a class="header" href="#install-ros2">Install ROS2</a></h2>
+<pre><code class="language-shell">$curl -s https://raw.githubusercontent.com/ros/rosdistro/master/ros.asc | sudo apt-key add -
+$ sudo sh -c 'echo &quot;deb [arch=$(dpkg --print-architecture)] http://packages.ros.org/ros2/ubuntu $(lsb_release -cs) main&quot; &gt; /etc/apt/sources.list.d/ros2-latest.list'
+$ sudo curl -sSL https://raw.githubusercontent.com/ros/rosdistro/master/ros.key -o /usr/share/keyrings/ros-archive-keyring.gpg
+</code></pre>
+<pre><code class="language-shell">$ sudo apt update
+$ sudp apt install ros-galactic-desktop python3-colcon-common-extensions
+</code></pre>
+<h2 id="install-colcon-cargo"><a class="header" href="#install-colcon-cargo">Install Colcon-Cargo</a></h2>
+<pre><code class="language-shell">$ cargo install --debug cargo-ament-build
+$ pip install git+https://github.com/colcon/colcon-cargo.git
+$ pip install git+https://github.com/colcon/colcon-ros-cargo.git
+</code></pre>
+<h2 id="get-safe_drive"><a class="header" href="#get-safe_drive">Get safe_drive</a></h2>
+<p>This is required because safe_drive is private currently.</p>
+<pre><code>$ git clone git@github.com:tier4/safe_drive.git
+</code></pre>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="publish-and-subscribe"><a class="header" href="#publish-and-subscribe">Publish and Subscribe</a></h1>
-<h2 id="create-a-crate"><a class="header" href="#create-a-crate">Create a Crate</a></h2>
-<pre><code>$ cargo new my_pubsub
+<p>This chapter introduces a simple example of publish and subscribe communication.
+This communication is so-called topic by ROS2.
+There are <code>N</code> senders and <code>M</code> receivers in a topic.
+This tutorial implements 1 sender (in Rust) and 2 receivers (in Rust and C++).</p>
+<h2 id="directories"><a class="header" href="#directories">Directories</a></h2>
+<p>First of all, create working directories as follows.</p>
+<pre><code class="language-text">$ mkdir ros2rust
+$ mkdir ros2rust/src
+</code></pre>
+<p>Following directories are important directories
+we will create throughout this tutorial.</p>
+<table><thead><tr><th>Directories</th><th>What?</th></tr></thead><tbody>
+<tr><td>ros2rust/src/my_talker</td><td>sender in Rust</td></tr>
+<tr><td>ros2rust/src/my_listener</td><td>receiver in Rust</td></tr>
+<tr><td>ros2rust/install</td><td>created by colcon</td></tr>
+</tbody></table>
+<h2 id="talker-in-rust"><a class="header" href="#talker-in-rust">Talker in Rust</a></h2>
+<pre><code class="language-text">$ cd ros2rust/src
+$ cargo new my_talker
+</code></pre>
+<p>We create and edit files as follows.</p>
+<table><thead><tr><th>Files</th><th>What?</th></tr></thead><tbody>
+<tr><td>my_talker/Cargo.toml</td><td>for Cargo</td></tr>
+<tr><td>my_talker/build.rs</td><td>to specify library path for a linker</td></tr>
+<tr><td>my_talker/package.xml</td><td>for ROS2</td></tr>
+<tr><td>my_talker/src/main.rs</td><td>source code</td></tr>
+</tbody></table>
+<h3 id="edit-my_talkercargotoml"><a class="header" href="#edit-my_talkercargotoml">Edit <code>my_talker/Cargo.toml</code></a></h3>
+<p>Add safe_drive to the dependencies.</p>
+<pre><code class="language-toml"># ros2rust/src/my_talker/Cargo.toml
+[dependencies]
+safe_drive = { path = &quot;path_to/safe_drive&quot; }
+</code></pre>
+<h3 id="edit-my_talkersrcmainrs"><a class="header" href="#edit-my_talkersrcmainrs">Edit <code>my_talker/src/main.rs</code></a></h3>
+<pre><pre class="playground"><code class="language-rust">// ros2rust/src/my_talker/src/main.rs
+use safe_drive::{
+    context::Context, error::DynError, logger::Logger,
+    msg::common_interfaces::std_msgs, pr_info
+};
+use std::time::Duration;
+
+fn main() -&gt; Result&lt;(), DynError&gt; {
+    // Create a context.
+    let ctx = Context::new()?;
+
+    // Create a node.
+    let node = ctx.create_node(&quot;my_talker&quot;, None, Default::default())?;
+
+    // Create a publisher.
+    let publisher = node.create_publisher::&lt;std_msgs::msg::String&gt;(&quot;my_topic&quot;, None)?;
+
+    // Create a logger.
+    let logger = Logger::new(&quot;my_talker&quot;);
+
+    let mut cnt = 0; // Counter.
+    loop {
+        // Create a message to be sent.
+        let data = format!(&quot;Hello, World!: cnt = {cnt}&quot;);
+        let mut msg = std_msgs::msg::String::new().unwrap();
+        msg.data.assign(&amp;data);
+
+        pr_info!(logger, &quot;send: {}&quot;, msg.data); // Print log.
+
+        // Send a message.
+        publisher.send(msg)?;
+
+        // Sleep 1s.
+        cnt += 1;
+        std::thread::sleep(Duration::from_secs(1));
+    }
+}
+</code></pre></pre>
+<h3 id="create-my_talkerbuildrs"><a class="header" href="#create-my_talkerbuildrs">Create <code>my_talker/build.rs</code></a></h3>
+<pre><pre class="playground"><code class="language-rust">// ros2rust/src/my_talker/build.rs
+fn main() {
+    if let Some(e) = std::env::var_os(&quot;AMENT_PREFIX_PATH&quot;) {
+        let env = e.to_str().unwrap();
+        for path in env.split(&quot;:&quot;) {
+            println!(&quot;cargo:rustc-link-search={path}/lib&quot;);
+        }
+    }
+}
+</code></pre></pre>
+<h3 id="create-my_talkerpackagexml"><a class="header" href="#create-my_talkerpackagexml">Create <code>my_talker/package.xml</code></a></h3>
+<pre><code class="language-xml">&lt;!-- ros2rust/src/my_talker/package.xml --&gt;
+&lt;?xml version=&quot;1.0&quot;?&gt;
+&lt;?xml-model href=&quot;http://download.ros.org/schema/package_format3.xsd&quot; schematypens=&quot;http://www.w3.org/2001/XMLSchema&quot;?&gt;
+&lt;package format=&quot;3&quot;&gt;
+  &lt;name&gt;my_talker&lt;/name&gt;
+  &lt;version&gt;0.0.0&lt;/version&gt;
+  &lt;description&gt;My Talker in Rust&lt;/description&gt;
+  &lt;maintainer email=&quot;yuuki.takano@tier4.jp&quot;&gt;Yuuki Takano&lt;/maintainer&gt;
+  &lt;license&gt;TODO: License declaration&lt;/license&gt;
+
+  &lt;test_depend&gt;ament_lint_auto&lt;/test_depend&gt;
+  &lt;test_depend&gt;ament_lint_common&lt;/test_depend&gt;
+
+  &lt;export&gt;
+    &lt;build_type&gt;ament_cargo&lt;/build_type&gt;
+  &lt;/export&gt;
+&lt;/package&gt;
+</code></pre>
+<h3 id="execute-the-talker"><a class="header" href="#execute-the-talker">Execute The Talker</a></h3>
+<pre><code class="language-text">$ . /opt/ros/galactic/setup.bash
+</code></pre>
+<pre><code class="language-text">$ cd ros2rust
+$ colcon build --cargo-args --release
+</code></pre>
+<pre><code class="language-text">$ . ./install/setup.bash
+$ ros2 run my_talker my_talker
+[INFO] [1656048392.368568500] [my_talker]: send: Hello, World!: cnt = 0
+[INFO] [1656048393.368787500] [my_talker]: send: Hello, World!: cnt = 1
+[INFO] [1656048394.368994200] [my_talker]: send: Hello, World!: cnt = 2
+</code></pre>
+<h2 id="listener-in-rust"><a class="header" href="#listener-in-rust">Listener in Rust</a></h2>
+<pre><code class="language-text">$ cd ros2rust/src
+$ cargo new my_listener
+</code></pre>
+<table><thead><tr><th>Files</th><th>What?</th></tr></thead><tbody>
+<tr><td>my_listener/Cargo.toml</td><td>for Cargo</td></tr>
+<tr><td>my_listener/build.rs</td><td>to specify library path for a linker</td></tr>
+<tr><td>my_listener/package.xml</td><td>for ROS2</td></tr>
+<tr><td>my_listener/src/main.rs</td><td>source code</td></tr>
+</tbody></table>
+<h3 id="edit-my_listenercargotoml"><a class="header" href="#edit-my_listenercargotoml">Edit <code>my_listener/Cargo.toml</code></a></h3>
+<pre><code class="language-toml"># ros2rust/src/my_listener/Cargo.toml
+[dependencies]
+safe_drive = { path = &quot;path_to/safe_drive&quot; }
+</code></pre>
+<h3 id="edit-my_listenersrcmainrs"><a class="header" href="#edit-my_listenersrcmainrs">Edit <code>my_listener/src/main.rs</code></a></h3>
+<pre><pre class="playground"><code class="language-rust">// ros2rust/src/my_listener/src/main.rs
+use safe_drive::{
+    context::Context, error::DynError, logger::Logger,
+    msg::common_interfaces::std_msgs, pr_info,
+};
+
+fn main() -&gt; Result&lt;(), DynError&gt; {
+    // Create a context.
+    let ctx = Context::new()?;
+
+    // Create a node.
+    let node = ctx.create_node(&quot;my_listener&quot;, None, Default::default())?;
+
+    // Create a subscriber.
+    let subscriber = node.create_subscriber::&lt;std_msgs::msg::String&gt;(&quot;my_topic&quot;, None)?;
+
+    // Create a logger.
+    let logger = Logger::new(&quot;my_listener&quot;);
+
+    // Create a selector.
+    let mut selector = ctx.create_selector()?;
+
+    // Add a callback function.
+    selector.add_subscriber(
+        subscriber,
+        Box::new(move |msg| {
+            pr_info!(logger, &quot;receive: {}&quot;, msg.data);
+        }),
+        false,
+    );
+
+    // Spin.
+    loop {
+        selector.wait()?;
+    }
+}
+</code></pre></pre>
+<h3 id="create-my_listenerbuildrs"><a class="header" href="#create-my_listenerbuildrs">Create <code>my_listener/build.rs</code></a></h3>
+<pre><pre class="playground"><code class="language-rust">// ros2rust/src/my_talker/build.rs
+fn main() {
+    if let Some(e) = std::env::var_os(&quot;AMENT_PREFIX_PATH&quot;) {
+        let env = e.to_str().unwrap();
+        for path in env.split(&quot;:&quot;) {
+            println!(&quot;cargo:rustc-link-search={path}/lib&quot;);
+        }
+    }
+}
+</code></pre></pre>
+<h3 id="create-my_listenerpackagexml"><a class="header" href="#create-my_listenerpackagexml">Create <code>my_listener/package.xml</code></a></h3>
+<pre><code class="language-xml">&lt;!-- ros2rust/src/my_listener/package.xml --&gt;
+&lt;?xml version=&quot;1.0&quot;?&gt;
+&lt;?xml-model href=&quot;http://download.ros.org/schema/package_format3.xsd&quot; schematypens=&quot;http://www.w3.org/2001/XMLSchema&quot;?&gt;
+&lt;package format=&quot;3&quot;&gt;
+  &lt;name&gt;my_listener&lt;/name&gt;
+  &lt;version&gt;0.0.0&lt;/version&gt;
+  &lt;description&gt;My Listener in Rust&lt;/description&gt;
+  &lt;maintainer email=&quot;yuuki.takano@tier4.jp&quot;&gt;Yuuki Takano&lt;/maintainer&gt;
+  &lt;license&gt;TODO: License declaration&lt;/license&gt;
+
+  &lt;test_depend&gt;ament_lint_auto&lt;/test_depend&gt;
+  &lt;test_depend&gt;ament_lint_common&lt;/test_depend&gt;
+
+  &lt;export&gt;
+    &lt;build_type&gt;ament_cargo&lt;/build_type&gt;
+  &lt;/export&gt;
+&lt;/package&gt;
+</code></pre>
+<h3 id="execute-the-listener"><a class="header" href="#execute-the-listener">Execute The Listener</a></h3>
+<pre><code class="language-text">$ cd ros2rust
+$ colcon build --cargo-args --release
+</code></pre>
+<pre><code class="language-text">$ . ./install/setup.bash
+$ ros2 run my_talker my_talker
+[INFO] [1656050459.231579900] [my_listener]: receive: Hello, World!: cnt = 4
+[INFO] [1656050460.231831200] [my_listener]: receive: Hello, World!: cnt = 5
+[INFO] [1656050461.232120000] [my_listener]: receive: Hello, World!: cnt = 6
 </code></pre>
 
                     </main>
