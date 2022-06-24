@@ -47,7 +47,12 @@
 //!
 //! `None` of the 2nd argument of `create_publisher` is equivalent to `Some(Profile::default())`.
 
-use crate::{error::RCLResult, msg::TopicMsg, node::Node, qos, rcl};
+use crate::{
+    error::{DynError, RCLResult},
+    msg::TopicMsg,
+    node::Node,
+    qos, rcl,
+};
 use std::{ffi::CString, marker::PhantomData, ptr::null_mut, sync::Arc};
 
 /// Publisher.
@@ -132,7 +137,10 @@ impl<T: TopicMsg> Publisher<T> {
     /// - `RCLError::InvalidArgument` if any arguments are invalid, or
     /// - `RCLError::PublisherInvalid` if the publisher is invalid, or
     /// - `RCLError::Error` if an unspecified error occurs.
-    pub fn send(&self, msg: T) -> RCLResult<()> {
+    pub fn send(&self, msg: T) -> Result<(), DynError> {
+        if crate::is_halt() {
+            return Err("Signaled".into());
+        }
         rcl::MTSafeFn::rcl_publish(&self.publisher, &msg as *const T as _, null_mut())?;
         Ok(())
     }

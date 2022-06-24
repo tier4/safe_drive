@@ -35,7 +35,7 @@ static SIGHDL: Lazy<Mutex<Option<Handle>>> = Lazy::new(|| Mutex::new(None));
 static THREAD: Lazy<Mutex<Option<JoinHandle<()>>>> = Lazy::new(|| Mutex::new(None));
 static IS_HALT: AtomicBool = AtomicBool::new(false);
 
-fn init() {
+pub(crate) fn init() {
     INITIALIZER.init(
         || {
             let signals = Signals::new(&[SIGHUP, SIGTERM, SIGINT, SIGQUIT]).unwrap();

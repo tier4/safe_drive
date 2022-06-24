@@ -49,6 +49,8 @@ impl Context {
     /// let ctx = Context::new().unwrap();
     /// ```
     pub fn new() -> Result<Arc<Self>, DynError> {
+        signal_handler::init();
+
         // allocate context
         let mut context = rcl::MTSafeFn::rcl_get_zero_initialized_context();
 
