@@ -35,4 +35,11 @@ fn main() {
         println!("cargo:rustc-link-lib=example_msg__rosidl_typesupport_c");
         println!("cargo:rustc-link-search=supplements/ros2/install/example_msg/lib");
     }
+
+    if let Some(e) = std::env::var_os("AMENT_PREFIX_PATH") {
+        let env = e.to_str().unwrap();
+        for path in env.split(":") {
+            println!("cargo:rustc-link-search={path}/lib");
+        }
+    }
 }

@@ -1,4 +1,5 @@
 FROM nvidia/cuda:11.7.0-runtime-ubuntu20.04
+# FROM ubuntu:20.04
 
 ENV TZ=Asia/Tokyo
 RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
@@ -18,11 +19,12 @@ RUN echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/r
     tee /etc/apt/sources.list.d/ros2.list > /dev/null
 
 RUN apt-get -y update && \
-    apt-get -y install ros-galactic-desktop python3-colcon-common-extensions python3-rosdep
+    apt-get -y install ros-galactic-desktop python3-colcon-common-extensions python3-rosdep libclang-dev python3-pip python3-vcstool ros-foxy-rmw-cyclonedds-cpp
 
 RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
-
-RUN apt-get -y install language-pack-ja
+RUN . /root/.cargo/env && cargo install bindgen && cargo install --debug cargo-ament-build
+RUN pip install git+https://github.com/colcon/colcon-cargo.git && \
+    pip install git+https://github.com/colcon/colcon-ros-cargo.git
 
 COPY zshenv /root/.zshenv
 COPY zshrc /root/.zshrc
