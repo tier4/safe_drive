@@ -235,6 +235,7 @@ type PhantomUnsend = PhantomData<MutexGuard<'static, ()>>;
 use error::RCLError;
 pub use signal_handler::is_halt;
 
+/// A type of return values of some receive functions.
 #[derive(Debug)]
 pub enum RecvResult<T> {
     Ok(T),

@@ -1,3 +1,66 @@
+//! Logger of ROS2.
+//!
+//! # Examples
+//!
+//! ## Basics
+//!
+//! ```
+//! use safe_drive::{logger::Logger, pr_debug, pr_error, pr_fatal, pr_info, pr_warn};
+//!
+//! let logger = Logger::new("my_logger");
+//! let some_value = 100;
+//!
+//! pr_debug!(logger, "debug: {some_value}");
+//! pr_info!(logger, "information: {some_value}");
+//! pr_warn!(logger, "warning: {some_value}");
+//! pr_error!(logger, "error: {some_value}");
+//! pr_fatal!(logger, "fatal: {some_value}");
+//! ```
+//!
+//! ## Callback Functions of Single Threaded Execution
+//!
+//! ```
+//! use std::{rc::Rc, time::Duration};
+//! use safe_drive::{context::Context, logger::Logger, pr_error, pr_info};
+//!
+//! let ctx = Context::new().unwrap();
+//! let mut selector = ctx.create_selector().unwrap();
+//!
+//! // Use Rc to share the logger by multiple callback functions.
+//! let logger = Logger::new("my_logger");
+//! let logger = Rc::new(logger);
+//! let logger1 = logger.clone();
+//!
+//! selector.add_wall_timer(
+//!     Duration::from_millis(100),
+//!     Box::new(move || pr_info!(logger1, "some information")),
+//! );
+//!
+//! selector.add_wall_timer(
+//!     Duration::from_millis(150),
+//!     Box::new(move || pr_error!(logger, "some error")),
+//! );
+//! ```
+//!
+//! ## Multi Threaded
+//!
+//! ```
+//! use safe_drive::{logger::Logger, pr_info, pr_warn};
+//! use std::sync::Arc;
+//!
+//! let logger = Logger::new("my_logger");
+//!
+//! // Use Arc to share a logger by multiple threads.
+//! let logger = Arc::new(logger);
+//! let logger1 = logger.clone();
+//!
+//! let th1 = std::thread::spawn(move || pr_info!(logger1, "some information"));
+//! let th2 = std::thread::spawn(move || pr_warn!(logger, "some warning"));
+//!
+//! th1.join().unwrap();
+//! th2.join().unwrap();
+//! ```
+
 use crate::{
     error::{DynError, RCLResult},
     helper::InitOnce,
@@ -8,6 +71,7 @@ use std::ffi::CString;
 
 static INITIALIZER: InitOnce = InitOnce::new();
 
+/// Get the function name called this macro.
 #[macro_export]
 macro_rules! function {
     () => {{
@@ -20,6 +84,7 @@ macro_rules! function {
     }};
 }
 
+/// Print information.
 #[macro_export]
 macro_rules! pr_info {
     ($logger:expr, $($arg:tt)*) => {{
@@ -36,6 +101,7 @@ macro_rules! pr_info_in {
 }
 pub(crate) use pr_info_in;
 
+/// Print warning.
 #[macro_export]
 macro_rules! pr_warn {
     ($logger:expr, $($arg:tt)*) => {{
@@ -44,6 +110,7 @@ macro_rules! pr_warn {
     }}
 }
 
+/// Print error.
 #[macro_export]
 macro_rules! pr_error {
     ($logger:expr, $($arg:tt)*) => {{
@@ -60,6 +127,7 @@ macro_rules! pr_error_in {
 }
 pub(crate) use pr_error_in;
 
+/// Print fatal.
 #[macro_export]
 macro_rules! pr_fatal {
     ($logger:expr, $($arg:tt)*) => {{
@@ -68,6 +136,13 @@ macro_rules! pr_fatal {
     }}
 }
 
+/// Print debug.
+/// Debug messages is not printed by default.
+/// To enable debug print, type as follows.
+///
+/// ```text
+/// ros2 run logging_demo logging_demo_main --ros-args --log-level debug
+/// ```
 #[macro_export]
 macro_rules! pr_debug {
     ($logger:expr, $($arg:tt)*) => {{
@@ -78,7 +153,7 @@ macro_rules! pr_debug {
 
 #[repr(u32)]
 #[derive(Debug, Clone, Copy, PartialEq, Eq, FromPrimitive, ToPrimitive)]
-pub enum Severity {
+enum Severity {
     Debug = rcl::RCUTILS_LOG_SEVERITY_RCUTILS_LOG_SEVERITY_DEBUG,
     Info = rcl::RCUTILS_LOG_SEVERITY_RCUTILS_LOG_SEVERITY_INFO,
     Warn = rcl::RCUTILS_LOG_SEVERITY_RCUTILS_LOG_SEVERITY_WARN,
@@ -86,19 +161,23 @@ pub enum Severity {
     Fatal = rcl::RCUTILS_LOG_SEVERITY_RCUTILS_LOG_SEVERITY_FATAL,
 }
 
+/// Logger of ROS2.
+/// The methods of Logger are called by pr_* macros.
+/// Use these macros instead of the methods.
 #[derive(Debug)]
 pub struct Logger {
     name: CString,
 }
 
 impl Logger {
+    /// Create a new logger.
     pub fn new(name: &str) -> Self {
         Logger {
             name: CString::new(name).unwrap(),
         }
     }
 
-    pub fn write(
+    fn write(
         &self,
         msg: &str,
         severity: Severity,
@@ -137,6 +216,8 @@ impl Logger {
         Ok(())
     }
 
+    /// Print information.
+    /// Use `pr_info!` macro instead of this.
     pub fn write_info(
         &self,
         msg: &str,
@@ -147,6 +228,8 @@ impl Logger {
         self.write(msg, Severity::Info, function_name, file_name, line_number)
     }
 
+    /// Print warning.
+    /// Use `pr_warn!` macro instead of this.
     pub fn write_warn(
         &self,
         msg: &str,
@@ -157,6 +240,8 @@ impl Logger {
         self.write(msg, Severity::Warn, function_name, file_name, line_number)
     }
 
+    /// Print error.
+    /// Use `pr_error!` macro instead of this.
     pub fn write_error(
         &self,
         msg: &str,
@@ -167,6 +252,8 @@ impl Logger {
         self.write(msg, Severity::Error, function_name, file_name, line_number)
     }
 
+    /// Print fatal.
+    /// Use `pr_fatal!` macro instead of this.
     pub fn write_fatal(
         &self,
         msg: &str,
@@ -177,6 +264,8 @@ impl Logger {
         self.write(msg, Severity::Fatal, function_name, file_name, line_number)
     }
 
+    /// Print debug.
+    /// Use `pr_debug!` macro instead of this.
     pub fn write_debug(
         &self,
         msg: &str,
@@ -187,7 +276,7 @@ impl Logger {
         self.write(msg, Severity::Debug, function_name, file_name, line_number)
     }
 
-    pub fn is_enable_for(&self, severity: Severity) -> bool {
+    fn is_enable_for(&self, severity: Severity) -> bool {
         let guard = rcl::MT_UNSAFE_LOG_FN.lock();
         guard.rcutils_logging_logger_is_enabled_for(self.name.as_ptr(), severity as i32)
     }

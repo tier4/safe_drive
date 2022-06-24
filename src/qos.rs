@@ -1,3 +1,5 @@
+//! QoS of ROS2.
+
 pub mod policy;
 
 use crate::rcl;
@@ -5,8 +7,11 @@ use num_traits::{FromPrimitive, ToPrimitive};
 use policy::*;
 use std::time::Duration;
 
+/// Represent QoS profile.
 #[derive(Debug, Clone)]
 pub struct Profile {
+    /// Keep last: only store up to N samples, configurable via the queue depth option.
+    /// Keep all: store all samples, subject to the configured resource limits of the underlying middleware.
     pub history: HistoryPolicy,
 
     /// Size of the message queue.
@@ -99,6 +104,46 @@ impl Profile {
         Self {
             history: HistoryPolicy::KeepLast,
             depth: 10,
+            reliability: ReliabilityPolicy::Reliable,
+            durability: DurabilityPolicy::Volatile,
+            ..Self::common()
+        }
+    }
+
+    /// Sensor Data QoS class
+    /// - History: Keep last,
+    /// - Depth: 5,
+    /// - Reliability: Best effort,
+    /// - Durability: Volatile,
+    /// - Deadline: Default,
+    /// - Lifespan: Default,
+    /// - Liveliness: System default,
+    /// - Liveliness lease duration: Default,
+    /// - avoid ros namespace conventions: false
+    pub const fn sensor_data() -> Self {
+        Self {
+            history: HistoryPolicy::KeepLast,
+            depth: 5,
+            reliability: ReliabilityPolicy::BestEffort,
+            durability: DurabilityPolicy::Volatile,
+            ..Self::common()
+        }
+    }
+
+    /// Parameters QoS class
+    /// - History: Keep last,
+    /// - Depth: 1000,
+    /// - Reliability: Reliable,
+    /// - Durability: Volatile,
+    /// - Deadline: Default,
+    /// - Lifespan: Default,
+    /// - Liveliness: System default,
+    /// - Liveliness lease duration: Default,
+    /// - Avoid ros namespace conventions: false
+    pub const fn parameters() -> Self {
+        Self {
+            history: HistoryPolicy::KeepLast,
+            depth: 1000,
             reliability: ReliabilityPolicy::Reliable,
             durability: DurabilityPolicy::Volatile,
             ..Self::common()

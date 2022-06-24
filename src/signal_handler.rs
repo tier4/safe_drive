@@ -1,3 +1,5 @@
+//! Receive signals on a thread for graceful shutdown.
+
 use crate::{
     helper::InitOnce,
     logger::{pr_info_in, Logger},
@@ -59,6 +61,8 @@ pub(crate) fn unregister_guard_condition(cond: &GuardCondition) {
     guard.remove(&KeyCond(cond.cond.as_ptr()));
 }
 
+/// After receiving SIGINT, SIGTERM, SIGQUIT, or SIGHUP, this function return `true`.
+/// If `is_halt()` is `true`, some functions to receive or wait returns error to halt the process.
 pub fn is_halt() -> bool {
     IS_HALT.load(Ordering::Relaxed)
 }

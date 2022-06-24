@@ -1,8 +1,10 @@
+//! Policies of QoS.
+
 use crate::rcl;
 use num_derive::{FromPrimitive, ToPrimitive};
 
-#[repr(u32)]
 /// QoS history enumerations describing how samples endure
+#[repr(u32)]
 #[derive(Debug, Copy, Clone, PartialEq, Eq, FromPrimitive, ToPrimitive)]
 pub enum HistoryPolicy {
     /// Implementation default for history policy
@@ -15,6 +17,7 @@ pub enum HistoryPolicy {
     Unknown = rcl::rmw_qos_history_policy_t_RMW_QOS_POLICY_HISTORY_UNKNOWN,
 }
 
+/// QoS Reliability enumerations describing how messages are delivered
 #[repr(u32)]
 #[derive(Debug, Clone, PartialEq, Eq, FromPrimitive, ToPrimitive)]
 pub enum ReliabilityPolicy {
@@ -28,8 +31,8 @@ pub enum ReliabilityPolicy {
     Unknown = rcl::rmw_qos_reliability_policy_t_RMW_QOS_POLICY_RELIABILITY_UNKNOWN,
 }
 
-#[repr(u32)]
 /// QoS durability enumerations describing how samples persist
+#[repr(u32)]
 #[derive(Debug, Clone, PartialEq, Eq, FromPrimitive, ToPrimitive)]
 pub enum DurabilityPolicy {
     /// Impplementation specific default
@@ -42,9 +45,9 @@ pub enum DurabilityPolicy {
     Unknown = rcl::rmw_qos_durability_policy_t_RMW_QOS_POLICY_DURABILITY_UNKNOWN,
 }
 
-#[repr(u32)]
 /// QoS liveliness enumerations that describe a publisher's reporting policy for its alive status.
 /// For a subscriber, these are its requirements for its topic's publishers.
+#[repr(u32)]
 #[derive(Debug, Clone, PartialEq, Eq, FromPrimitive, ToPrimitive)]
 pub enum LivelinessPolicy {
     /// Implementation specific default

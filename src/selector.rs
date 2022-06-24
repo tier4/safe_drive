@@ -102,7 +102,7 @@ enum TimerType {
 }
 
 /// Selector invokes callback functions associated with subscribers, services, timers, or condition variables.
-/// Selector cannot send and shared between threads.
+/// Selector cannot send to another thread and shared by multiple threads.
 /// So, use this for single threaded execution.
 ///
 /// # Example

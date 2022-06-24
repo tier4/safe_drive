@@ -68,7 +68,7 @@ pub type DynError = Box<dyn Error + Send + Sync + 'static>;
 /// Convert a rcl-style, C-style, return value to a Rust-style value.
 /// If `n` indicates successful, this returns Ok(()),
 /// otherwise returns Err(_).
-pub fn ret_val_to_err(n: rcl::rcl_ret_t) -> RCLResult<()> {
+pub(crate) fn ret_val_to_err(n: rcl::rcl_ret_t) -> RCLResult<()> {
     let n = n as u32;
     if n == rcl::RCL_RET_OK {
         Ok(())
