@@ -73,16 +73,16 @@ fn main() -> Result<(), DynError> {
     let logger = Logger::new("my_talker");
 
     let mut cnt = 0; // Counter.
+    let mut msg = std_msgs::msg::String::new().unwrap();
     loop {
         // Create a message to be sent.
         let data = format!("Hello, World!: cnt = {cnt}");
-        let mut msg = std_msgs::msg::String::new().unwrap();
         msg.data.assign(&data);
 
         pr_info!(logger, "send: {}", msg.data); // Print log.
 
         // Send a message.
-        publisher.send(msg)?;
+        publisher.send(&msg)?;
 
         // Sleep 1s.
         cnt += 1;

@@ -115,7 +115,7 @@
 //!         let mut msg = std_msgs::msg::String::new().unwrap();
 //!         msg.data.assign("Hello, World!");
 //!         pr_info!(logger_pub, "Send: msg = {}", msg.data); // Print a message.
-//!         publisher.send(msg).unwrap();
+//!         publisher.send(&msg).unwrap();
 //!     }),
 //! );
 //!
@@ -176,13 +176,13 @@
 //! async fn run_publisher(publisher: Publisher<std_msgs::msg::String>) {
 //!     let dur = Duration::from_millis(100);
 //!     let logger = Logger::new("example_publisher_async");
+//!     let mut msg = std_msgs::msg::String::new().unwrap();
 //!     for _ in 0..10 {
 //!         // Publish a message periodically.
-//!         let mut msg = std_msgs::msg::String::new().unwrap();
 //!         msg.data.assign("Hello, World!");
 //!
 //!         pr_info!(logger, "Send (async): msg = {}", msg.data);
-//!         publisher.send(msg).unwrap();
+//!         publisher.send(&msg).unwrap();
 //!
 //!         // Sleep 100[ms].
 //!         async_std::task::sleep(dur).await;

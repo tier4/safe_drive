@@ -33,7 +33,7 @@
 //!
 //!     loop {
 //!         let request = std_srvs::srv::EmptyRequest::new().unwrap();
-//!         let receiver = client.send(request).unwrap();
+//!         let receiver = client.send(&request).unwrap();
 //!         match async_std::future::timeout(dur, receiver.recv()).await {
 //!             Ok(Ok((c, response))) => {
 //!                 client = c;
@@ -141,7 +141,7 @@ impl<T: ServiceMsg> Client<T> {
     ///
     ///     loop {
     ///         let request = std_srvs::srv::EmptyRequest::new().unwrap();
-    ///         let receiver = client.send(request).unwrap();
+    ///         let receiver = client.send(&request).unwrap();
     ///         match async_std::future::timeout(dur, receiver.recv()).await {
     ///             Ok(Ok((c, response))) => {
     ///                 client = c;
@@ -164,12 +164,12 @@ impl<T: ServiceMsg> Client<T> {
     /// - `RCLError::InvalidArgument` if any arguments are invalid, or
     /// - `RCLError::ClientInvalid` if the client is invalid, or
     /// - `RCLError::Error` if an unspecified error occurs.
-    pub fn send(self, data: <T as ServiceMsg>::Request) -> RCLResult<ClientRecv<T>> {
-        let (s, _) = self.send_with_seq(data)?;
+    pub fn send(self, data: &<T as ServiceMsg>::Request) -> RCLResult<ClientRecv<T>> {
+        let (s, _) = self.send_ret_seq(data)?;
         Ok(s)
     }
 
-    /// `send_with_seq` is equivalent to `send`, but this returns
+    /// `send_ret_seq` is equivalent to `send`, but this returns
     /// the sequence number together.
     ///
     /// # Example
@@ -185,7 +185,7 @@ impl<T: ServiceMsg> Client<T> {
     ///
     ///     loop {
     ///         let request = std_srvs::srv::EmptyRequest::new().unwrap();
-    ///         let (receiver, sequence) = client.send_with_seq(request).unwrap();
+    ///         let (receiver, sequence) = client.send_ret_seq(&request).unwrap();
     ///         pr_info!(logger, "sent: sequence = {sequence}");
     ///         match async_std::future::timeout(dur, receiver.recv()).await {
     ///             Ok(Ok((c, response))) => {
@@ -209,14 +209,14 @@ impl<T: ServiceMsg> Client<T> {
     /// - `RCLError::InvalidArgument` if any arguments are invalid, or
     /// - `RCLError::ClientInvalid` if the client is invalid, or
     /// - `RCLError::Error` if an unspecified error occurs.
-    pub fn send_with_seq(
+    pub fn send_ret_seq(
         self,
-        data: <T as ServiceMsg>::Request,
+        data: &<T as ServiceMsg>::Request,
     ) -> RCLResult<(ClientRecv<T>, i64)> {
         let mut seq: i64 = 0;
         if let Err(e) = rcl::MTSafeFn::rcl_send_request(
             &self.data.client,
-            &data as *const _ as *const c_void,
+            data as *const _ as *const c_void,
             &mut seq,
         ) {
             return Err(e);
@@ -309,7 +309,7 @@ impl<T: ServiceMsg> ClientRecv<T> {
     ///
     ///     loop {
     ///         let request = std_srvs::srv::EmptyRequest::new().unwrap();
-    ///         let receiver = client.send(request).unwrap();
+    ///         let receiver = client.send(&request).unwrap();
     ///         match async_std::future::timeout(dur, receiver.recv_with_header()).await {
     ///             Ok(Ok((c, response, header))) => {
     ///                 pr_info!(logger, "received: header = {:?}", header);
@@ -358,7 +358,7 @@ impl<T: ServiceMsg> ClientRecv<T> {
     ///
     ///     loop {
     ///         let request = std_srvs::srv::EmptyRequest::new().unwrap();
-    ///         let receiver = client.send(request).unwrap();
+    ///         let receiver = client.send(&request).unwrap();
     ///         match async_std::future::timeout(dur, receiver.recv()).await {
     ///             Ok(Ok((c, response))) => {
     ///                 client = c;

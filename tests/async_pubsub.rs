@@ -43,7 +43,7 @@ async fn run_publisher(p: Publisher<common::num::example_msg__msg__Num>) {
     for n in 0..3 {
         // publish a message periodically
         let msg = common::num::example_msg__msg__Num { num: n };
-        p.send(msg).unwrap();
+        p.send(&msg).unwrap();
 
         // sleep 100[ms]
         async_std::task::sleep(dur).await;

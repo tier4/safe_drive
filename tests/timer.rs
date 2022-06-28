@@ -62,7 +62,7 @@ fn test_wall_timer() -> Result<(), Box<dyn Error + Sync + Send + 'static>> {
             println!("short timer: 200[ms]");
             let mut msg = std_msgs::msg::String::new().unwrap();
             msg.data.assign("Hello, World!");
-            publisher.send(msg).unwrap();
+            publisher.send(&msg).unwrap();
             std::thread::sleep(Duration::from_millis(100));
         }),
     );

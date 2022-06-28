@@ -52,7 +52,7 @@ async fn run_server(mut server: Server<common::ServiceType>) -> Result<(), DynEr
         // send a response
         // send returns a new server to receive the next request
         println!("Server: response = {:?}", response);
-        server = sender.send(response)?;
+        server = sender.send(&response)?;
     }
 
     Ok(())
@@ -70,7 +70,7 @@ async fn run_client(mut client: Client<common::ServiceType>) -> Result<(), DynEr
 
         // send a request
         println!("Client: request = {:?}", data);
-        let receiver = client.send(data)?;
+        let receiver = client.send(&data)?;
 
         // receive a response
         let (c, response) = receiver.recv().await?;

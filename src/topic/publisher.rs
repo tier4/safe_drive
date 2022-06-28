@@ -22,7 +22,7 @@
 //! // Send a message.
 //! let mut msg = std_msgs::msg::UInt32::new().unwrap();
 //! msg.data = 1234;
-//! publisher.send(msg).unwrap();
+//! publisher.send(&msg).unwrap();
 //! ```
 //!
 //! ## Specifying QoS Profile
@@ -75,7 +75,7 @@ use std::{ffi::CString, marker::PhantomData, ptr::null_mut, sync::Arc};
 /// // Send a message.
 /// let mut msg = std_msgs::msg::UInt32::new().unwrap();
 /// msg.data = 1234;
-/// publisher.send(msg).unwrap();
+/// publisher.send(&msg).unwrap();
 /// ```
 pub struct Publisher<T> {
     publisher: rcl::rcl_publisher_t,
@@ -129,7 +129,7 @@ impl<T: TopicMsg> Publisher<T> {
     ///
     /// // Send a message.
     /// let msg = std_msgs::msg::Empty::new().unwrap();
-    /// publisher.send(msg).unwrap();
+    /// publisher.send(&msg).unwrap();
     /// ```
     ///
     /// # Errors
@@ -137,11 +137,11 @@ impl<T: TopicMsg> Publisher<T> {
     /// - `RCLError::InvalidArgument` if any arguments are invalid, or
     /// - `RCLError::PublisherInvalid` if the publisher is invalid, or
     /// - `RCLError::Error` if an unspecified error occurs.
-    pub fn send(&self, msg: T) -> Result<(), DynError> {
+    pub fn send(&self, msg: &T) -> Result<(), DynError> {
         if crate::is_halt() {
             return Err("Signaled".into());
         }
-        rcl::MTSafeFn::rcl_publish(&self.publisher, &msg as *const T as _, null_mut())?;
+        rcl::MTSafeFn::rcl_publish(&self.publisher, msg as *const T as _, null_mut())?;
         Ok(())
     }
 }

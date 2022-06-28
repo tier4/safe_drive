@@ -305,7 +305,7 @@ impl Selector {
                 match s.try_recv_with_header() {
                     RecvResult::Ok((server_send, request, header)) => {
                         let result = handler(request, header);
-                        match server_send.send(result) {
+                        match server_send.send(&result) {
                             Ok(s) => {
                                 server = Some(s);
                             }

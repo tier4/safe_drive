@@ -74,7 +74,7 @@
 //!             match result {
 //!                 Ok((sender, request)) => {
 //!                     let response = std_srvs::srv::EmptyResponse::new().unwrap();
-//!                     let s = sender.send(response).unwrap();
+//!                     let s = sender.send(&response).unwrap();
 //!                     server = s; // Get a new server to handle next request.
 //!                 }
 //!                 Err(e) => {
@@ -191,7 +191,7 @@ impl<T: ServiceMsg> Server<T> {
     ///         match server.try_recv() {
     ///             RecvResult::Ok((sender, request)) => {
     ///                 let msg = std_srvs::srv::EmptyResponse::new().unwrap();
-    ///                 server = sender.send(msg).unwrap();
+    ///                 server = sender.send(&msg).unwrap();
     ///             }
     ///             RecvResult::RetryLater => {
     ///                 pr_info!(logger, "retry later");
@@ -257,7 +257,7 @@ impl<T: ServiceMsg> Server<T> {
     ///             RecvResult::Ok((sender, request, header)) => {
     ///                 pr_info!(logger, "received: header = {:?}", header);
     ///                 let msg = std_srvs::srv::EmptyResponse::new().unwrap();
-    ///                 server = sender.send(msg).unwrap();
+    ///                 server = sender.send(&msg).unwrap();
     ///             }
     ///             RecvResult::RetryLater => {
     ///                 pr_info!(logger, "retry later");
@@ -329,7 +329,7 @@ impl<T: ServiceMsg> Server<T> {
     ///                 Ok((sender, request, header)) => {
     ///                     pr_info!(logger, "recv: header = {:?}", header);
     ///                     let response = std_srvs::srv::EmptyResponse::new().unwrap();
-    ///                     let s = sender.send(response).unwrap();
+    ///                     let s = sender.send(&response).unwrap();
     ///                     server = s; // Get a new server to handle next request.
     ///                 }
     ///                 Err(e) => {
@@ -386,7 +386,7 @@ impl<T: ServiceMsg> Server<T> {
     ///             match result {
     ///                 Ok((sender, request)) => {
     ///                     let response = std_srvs::srv::EmptyResponse::new().unwrap();
-    ///                     let s = sender.send(response).unwrap();
+    ///                     let s = sender.send(&response).unwrap();
     ///                     server = s; // Get a new server to handle next request.
     ///                 }
     ///                 Err(e) => {
@@ -452,7 +452,7 @@ impl<T: ServiceMsg> ServerSend<T> {
     ///             match result {
     ///                 Ok((sender, request)) => {
     ///                     let response = std_srvs::srv::EmptyResponse::new().unwrap();
-    ///                     let s = sender.send(response).unwrap();
+    ///                     let s = sender.send(&response).unwrap();
     ///                     server = s; // Get a new server to handle next request.
     ///                 }
     ///                 Err(e) => {
@@ -473,11 +473,11 @@ impl<T: ServiceMsg> ServerSend<T> {
     /// `data` should be immutable, but `rcl_send_response` provided
     /// by ROS2 takes normal pointers instead of `const` pointers.
     /// So, currently, `send` takes `data` as mutable.
-    pub fn send(mut self, mut data: <T as ServiceMsg>::Response) -> RCLResult<Server<T>> {
+    pub fn send(mut self, data: &<T as ServiceMsg>::Response) -> RCLResult<Server<T>> {
         if let Err(e) = rcl::MTSafeFn::rcl_send_response(
             &self.data.service,
             &mut self.request_id,
-            &mut data as *mut _ as *mut c_void,
+            data as *const _ as *mut c_void,
         ) {
             return Err(e);
         }

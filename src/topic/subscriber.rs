@@ -41,7 +41,7 @@
 //! // Send a message.
 //! let mut msg = std_msgs::msg::UInt32::new().unwrap();
 //! msg.data = 10;
-//! publisher.send(msg).unwrap();
+//! publisher.send(&msg).unwrap();
 //!
 //! // Receive the message.
 //! match subscriber.try_recv() {

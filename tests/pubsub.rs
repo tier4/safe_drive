@@ -23,7 +23,7 @@ fn test_pubsub() -> Result<(), Box<dyn Error + Sync + Send + 'static>> {
     // publish a message
     let n = 100;
     let msg = common::num::example_msg__msg__Num { num: n };
-    publisher.send(msg)?; // send message
+    publisher.send(&msg)?; // send message
 
     // wait messages
     let mut selector = ctx.create_selector()?;
@@ -61,7 +61,7 @@ fn test_pubsub_string() -> Result<(), Box<dyn Error + Sync + Send + 'static>> {
     // publish a message
     let mut msg = std_msgs::msg::String::new().unwrap();
     msg.data.assign(PUBSUB_MSG);
-    publisher.send(msg)?; // send message
+    publisher.send(&msg)?; // send message
 
     // wait messages
     let mut selector = ctx.create_selector()?;

@@ -25,7 +25,7 @@ fn test_service() -> Result<(), Box<dyn Error + Sync + Send + 'static>> {
 
     // Client: send a request
     let req = common::Request { a: 1, b: 2, c: 5 };
-    let rcv_client = match client.send_with_seq(req) {
+    let rcv_client = match client.send_ret_seq(&req) {
         Ok((c, seq)) => {
             println!("Client: seq = {seq}");
             c

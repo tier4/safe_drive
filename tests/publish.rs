@@ -16,7 +16,7 @@ fn test_publish() -> Result<(), Box<dyn Error + Sync + Send + 'static>> {
     )?;
 
     let msg = common::num::example_msg__msg__Num { num: 100 };
-    publisher.send(msg)?;
+    publisher.send(&msg)?;
 
     Ok(())
 }
