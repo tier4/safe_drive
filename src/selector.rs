@@ -61,6 +61,7 @@ use crate::{
     context::Context,
     delta_list::DeltaList,
     error::{DynError, RCLError, RCLResult},
+    helper::{SerializableTimeMeasure, TimeMeasure},
     logger::{pr_error_in, Logger},
     msg::{ServiceMsg, TopicMsg},
     rcl,
@@ -73,6 +74,7 @@ use crate::{
     topic::subscriber::{RCLSubscription, Subscriber},
     PhantomUnsend, PhantomUnsync, RecvResult,
 };
+use serde::Serialize;
 use std::{
     collections::BTreeMap,
     mem::replace,
@@ -101,6 +103,16 @@ enum TimerType {
     OneShot,
 }
 
+#[derive(Debug)]
+struct Measure {
+    rcl_wait: TimeMeasure<4096>,
+}
+
+#[derive(Serialize, Debug)]
+struct MeasurementResult {
+    rcl_wait: SerializableTimeMeasure,
+}
+
 /// Selector invokes callback functions associated with subscribers, services, timers, or condition variables.
 /// Selector cannot send to another thread and shared by multiple threads.
 /// So, use this for single threaded execution.
@@ -123,6 +135,7 @@ pub struct Selector {
     subscriptions: BTreeMap<*const rcl::rcl_subscription_t, ConditionHandler<Arc<RCLSubscription>>>,
     cond: BTreeMap<*const rcl::rcl_guard_condition_t, ConditionHandler<Arc<RCLGuardCondition>>>,
     context: Arc<Context>,
+    measure: Measure,
     _unused: (PhantomUnsync, PhantomUnsend),
 }
 
@@ -145,6 +158,10 @@ impl Selector {
             )?;
         }
 
+        let measure = Measure {
+            rcl_wait: TimeMeasure::new(),
+        };
+
         let signal_cond = GuardCondition::new(context.clone())?;
         let mut selector = Selector {
             timer: DeltaList::Nil,
@@ -156,6 +173,7 @@ impl Selector {
             clients: Default::default(),
             cond: Default::default(),
             context,
+            measure,
             _unused: (Default::default(), Default::default()),
         };
 
@@ -163,6 +181,13 @@ impl Selector {
         signal_handler::register_guard_condition(signal_cond);
 
         Ok(selector)
+    }
+
+    pub fn measurement_result(&self) -> serde_json::Result<String> {
+        let result = MeasurementResult {
+            rcl_wait: self.measure.rcl_wait.to_serializable(),
+        };
+        serde_json::to_string(&result)
     }
 
     /// Register a subscriber with callback function.
@@ -202,7 +227,7 @@ impl Selector {
 
         let f = move || {
             let start = SystemTime::now();
-            let dur = Duration::from_millis(10);
+            let dur = Duration::from_millis(1);
 
             loop {
                 match subscriber.try_recv() {
@@ -298,7 +323,7 @@ impl Selector {
 
         let f = move || {
             let start = SystemTime::now();
-            let dur = Duration::from_millis(10);
+            let dur = Duration::from_millis(1);
 
             loop {
                 let s = server.take().unwrap();
@@ -588,7 +613,10 @@ impl Selector {
 
         if self.timer.is_empty() {
             // wait forever until arriving events
+            let wait_start = SystemTime::now();
             rcl::MTSafeFn::rcl_wait(&mut self.wait_set, -1)?;
+            let wait_time = wait_start.elapsed().unwrap();
+            self.measure.rcl_wait.add(wait_time);
         } else {
             // insert timer
             let now_time = SystemTime::now();
@@ -612,10 +640,15 @@ impl Selector {
                 timeout_nanos as i64
             };
 
+            let wait_start = SystemTime::now();
             match rcl::MTSafeFn::rcl_wait(&mut self.wait_set, timeout_nanos) {
                 Err(RCLError::Timeout) => (),
                 Err(e) => return Err(e.into()),
-                _ => (),
+                _ => {
+                    let wait_time = wait_start.elapsed().unwrap();
+                    self.measure.rcl_wait.add(wait_time);
+                    ()
+                }
             }
         }
 

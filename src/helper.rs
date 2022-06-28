@@ -1,4 +1,8 @@
-use std::sync::atomic::{AtomicBool, Ordering};
+use serde::Serialize;
+use std::{
+    sync::atomic::{AtomicBool, Ordering},
+    time::Duration,
+};
 
 pub struct InitOnce {
     lock: AtomicBool,
@@ -31,6 +35,77 @@ impl InitOnce {
         }
 
         default
+    }
+}
+
+#[derive(Serialize, Debug)]
+pub struct SerializableTimeMeasure {
+    min: Option<Duration>,
+    max: Option<Duration>,
+    data: Vec<f64>,
+}
+
+#[derive(Debug)]
+pub struct TimeMeasure<const N: usize> {
+    min: Option<Duration>,
+    max: Option<Duration>,
+    data: Box<[Option<Duration>; N]>,
+    idx: usize,
+    mask: usize,
+}
+
+impl<const N: usize> TimeMeasure<N> {
+    pub fn new() -> Self {
+        assert_ne!(N, 0);
+
+        // N must be 2^m where m >= 0.
+        let mask = (1 << (0 as usize).leading_zeros() - N.leading_zeros() - 1) - 1;
+        assert_eq!(N & mask, 0);
+
+        Self {
+            min: None,
+            max: None,
+            data: Box::new([None; N]),
+            idx: 0,
+            mask,
+        }
+    }
+
+    pub fn add(&mut self, dur: Duration) {
+        if let Some(min) = self.min {
+            if dur < min {
+                self.min = Some(dur);
+            }
+        } else {
+            self.min = Some(dur);
+        }
+
+        if let Some(max) = self.max {
+            if dur > max {
+                self.max = Some(dur);
+            }
+        } else {
+            self.max = Some(dur);
+        }
+
+        self.data[self.idx] = Some(dur);
+        self.idx += 1;
+        self.idx &= self.mask;
+    }
+
+    pub fn to_serializable(&self) -> SerializableTimeMeasure {
+        let mut data = Vec::new();
+        for d in self.data.iter() {
+            if let Some(dur) = d {
+                data.push(dur.as_secs_f64());
+            }
+        }
+
+        SerializableTimeMeasure {
+            min: self.min,
+            max: self.max,
+            data,
+        }
     }
 }
 
