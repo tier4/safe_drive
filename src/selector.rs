@@ -61,7 +61,6 @@ use crate::{
     context::Context,
     delta_list::DeltaList,
     error::{DynError, RCLError, RCLResult},
-    helper::{SerializableTimeMeasure, TimeMeasure},
     logger::{pr_error_in, Logger},
     msg::{ServiceMsg, TopicMsg},
     rcl,
@@ -74,7 +73,6 @@ use crate::{
     topic::subscriber::{RCLSubscription, Subscriber},
     PhantomUnsend, PhantomUnsync, RecvResult,
 };
-use serde::Serialize;
 use std::{
     collections::BTreeMap,
     mem::replace,
@@ -82,6 +80,12 @@ use std::{
     sync::Arc,
     time::{Duration, SystemTime},
 };
+
+#[cfg(feature = "statistics")]
+use serde::Serialize;
+
+#[cfg(feature = "statistics")]
+use crate::helper::statistics::{SerializableTimeStat, TimeStatistics};
 
 pub(crate) mod async_selector;
 pub(crate) mod guard_condition;
@@ -103,14 +107,25 @@ enum TimerType {
     OneShot,
 }
 
+#[cfg(feature = "statistics")]
 #[derive(Debug)]
-struct Measure {
-    rcl_wait: TimeMeasure<4096>,
+struct TimeStat {
+    #[cfg(feature = "rcl_stat")]
+    rcl_wait: TimeStatistics<4096>,
+
+    callback: BTreeMap<*const (), (String, TimeStatistics<4096>)>,
 }
 
+#[cfg(feature = "statistics")]
 #[derive(Serialize, Debug)]
-struct MeasurementResult {
-    rcl_wait: SerializableTimeMeasure,
+pub struct Statistics {
+    #[cfg(feature = "rcl_stat")]
+    rcl_wait: SerializableTimeStat,
+
+    #[cfg(feature = "rcl_stat")]
+    rcl_take: Vec<SerializableTimeStat>,
+
+    callback: BTreeMap<String, SerializableTimeStat>,
 }
 
 /// Selector invokes callback functions associated with subscribers, services, timers, or condition variables.
@@ -135,7 +150,10 @@ pub struct Selector {
     subscriptions: BTreeMap<*const rcl::rcl_subscription_t, ConditionHandler<Arc<RCLSubscription>>>,
     cond: BTreeMap<*const rcl::rcl_guard_condition_t, ConditionHandler<Arc<RCLGuardCondition>>>,
     context: Arc<Context>,
-    measure: Measure,
+
+    #[cfg(feature = "statistics")]
+    time_stat: TimeStat,
+
     _unused: (PhantomUnsync, PhantomUnsend),
 }
 
@@ -158,8 +176,12 @@ impl Selector {
             )?;
         }
 
-        let measure = Measure {
-            rcl_wait: TimeMeasure::new(),
+        #[cfg(feature = "statistics")]
+        let time_stat = TimeStat {
+            #[cfg(feature = "rcl_stat")]
+            rcl_wait: TimeStatistics::new(),
+
+            callback: BTreeMap::new(),
         };
 
         let signal_cond = GuardCondition::new(context.clone())?;
@@ -173,7 +195,10 @@ impl Selector {
             clients: Default::default(),
             cond: Default::default(),
             context,
-            measure,
+
+            #[cfg(feature = "statistics")]
+            time_stat,
+
             _unused: (Default::default(), Default::default()),
         };
 
@@ -183,11 +208,34 @@ impl Selector {
         Ok(selector)
     }
 
-    pub fn measurement_result(&self) -> serde_json::Result<String> {
-        let result = MeasurementResult {
-            rcl_wait: self.measure.rcl_wait.to_serializable(),
-        };
-        serde_json::to_string(&result)
+    #[cfg(feature = "statistics")]
+    pub fn statistics(&self) -> Statistics {
+        let callback = self
+            .time_stat
+            .callback
+            .iter()
+            .map(|(_, (k, v))| (k.clone(), v.to_serializable()))
+            .collect();
+
+        #[cfg(feature = "rcl_stat")]
+        let mut rcl_take = Vec::new();
+
+        #[cfg(feature = "rcl_stat")]
+        for (_, v) in self.subscriptions.iter() {
+            let guard = v.event.latency_take.lock();
+            let s = guard.to_serializable();
+            rcl_take.push(s);
+        }
+
+        Statistics {
+            #[cfg(feature = "rcl_stat")]
+            rcl_wait: self.time_stat.rcl_wait.to_serializable(),
+
+            #[cfg(feature = "rcl_stat")]
+            rcl_take,
+
+            callback,
+        }
     }
 
     /// Register a subscriber with callback function.
@@ -253,6 +301,36 @@ impl Selector {
         };
 
         if self.context.as_ptr() == context_ptr {
+            #[cfg(feature = "statistics")]
+            {
+                if let Some(symbol) = crate::helper::statistics::previous_symbol(1) {
+                    let name = if let Some(s) = symbol.name() {
+                        s.as_str().unwrap_or("unknown")
+                    } else {
+                        "unknown"
+                    };
+
+                    let filename = if let Some(s) = symbol.filename() {
+                        s.to_str().unwrap_or("unknown")
+                    } else {
+                        "unknown"
+                    };
+
+                    let line = if let Some(s) = symbol.lineno() {
+                        format!("{s}")
+                    } else {
+                        "unknown".to_string()
+                    };
+
+                    let symbol = format!("{filename}:{line}:{name}");
+
+                    self.time_stat.callback.insert(
+                        sub.subscription.as_ref() as *const _ as *const (),
+                        (symbol, TimeStatistics::new()),
+                    );
+                }
+            }
+
             self.add_rcl_subscription(sub, Some(Box::new(f)), is_once);
             true
         } else {
@@ -591,17 +669,39 @@ impl Selector {
         // notify timers
         self.notify_timer();
 
-        // notify subscriptions
-        notify(&mut self.subscriptions, self.wait_set.subscriptions);
+        #[cfg(feature = "statistics")]
+        {
+            // notify subscriptions
+            let (target, time_stat) = (&mut self.subscriptions, &mut self.time_stat);
+            notify(target, self.wait_set.subscriptions, time_stat);
 
-        // notify services
-        notify(&mut self.services, self.wait_set.services);
+            // notify services
+            let (target, time_stat) = (&mut self.services, &mut self.time_stat);
+            notify(target, self.wait_set.services, time_stat);
 
-        // notify clients
-        notify(&mut self.clients, self.wait_set.clients);
+            // notify clients
+            let (target, time_stat) = (&mut self.clients, &mut self.time_stat);
+            notify(target, self.wait_set.clients, time_stat);
 
-        // notify guard conditions
-        notify(&mut self.cond, self.wait_set.guard_conditions);
+            // notify guard conditions
+            let (target, time_stat) = (&mut self.cond, &mut self.time_stat);
+            notify(target, self.wait_set.guard_conditions, time_stat);
+        }
+
+        #[cfg(not(feature = "statistics"))]
+        {
+            // notify subscriptions
+            notify(&mut self.subscriptions, self.wait_set.subscriptions);
+
+            // notify services
+            notify(&mut self.services, self.wait_set.services);
+
+            // notify clients
+            notify(&mut self.clients, self.wait_set.clients);
+
+            // notify guard conditions
+            notify(&mut self.cond, self.wait_set.guard_conditions);
+        }
 
         Ok(())
     }
@@ -612,11 +712,18 @@ impl Selector {
         }
 
         if self.timer.is_empty() {
-            // wait forever until arriving events
+            #[cfg(feature = "rcl_stat")]
             let wait_start = SystemTime::now();
+
+            // wait forever until arriving events
             rcl::MTSafeFn::rcl_wait(&mut self.wait_set, -1)?;
-            let wait_time = wait_start.elapsed().unwrap();
-            self.measure.rcl_wait.add(wait_time);
+
+            #[cfg(feature = "rcl_stat")]
+            {
+                if let Ok(wait_time) = wait_start.elapsed() {
+                    self.time_stat.rcl_wait.add(wait_time);
+                }
+            }
         } else {
             // insert timer
             let now_time = SystemTime::now();
@@ -640,13 +747,20 @@ impl Selector {
                 timeout_nanos as i64
             };
 
+            #[cfg(feature = "rcl_stat")]
             let wait_start = SystemTime::now();
+
             match rcl::MTSafeFn::rcl_wait(&mut self.wait_set, timeout_nanos) {
                 Err(RCLError::Timeout) => (),
                 Err(e) => return Err(e.into()),
                 _ => {
-                    let wait_time = wait_start.elapsed().unwrap();
-                    self.measure.rcl_wait.add(wait_time);
+                    #[cfg(feature = "rcl_stat")]
+                    {
+                        if let Ok(wait_time) = wait_start.elapsed() {
+                            self.time_stat.rcl_wait.add(wait_time);
+                        }
+                    }
+
                     ()
                 }
             }
@@ -698,6 +812,44 @@ impl Drop for Selector {
     }
 }
 
+#[cfg(feature = "statistics")]
+fn notify<K, V>(
+    m: &mut BTreeMap<*const K, ConditionHandler<V>>,
+    array: *const *const K,
+    time_stat: &mut TimeStat,
+) {
+    for i in 0..m.len() {
+        unsafe {
+            let p = *array.add(i);
+            if !p.is_null() {
+                debug_assert!(m.contains_key(&p));
+                if let Some(h) = m.get_mut(&p) {
+                    let mut is_rm = false;
+                    if let Some(hdl) = &mut h.handler {
+                        let start = std::time::SystemTime::now();
+
+                        let result = hdl();
+                        if let Ok(dur) = start.elapsed() {
+                            if let Some((_, t)) = time_stat.callback.get_mut(&(p as *const ())) {
+                                t.add(dur);
+                            }
+                        }
+
+                        if result == CallbackResult::Remove {
+                            is_rm = true;
+                        }
+                    }
+                    if h.is_once || is_rm {
+                        m.remove(&p);
+                        time_stat.callback.remove(&(p as *const ()));
+                    }
+                }
+            }
+        }
+    }
+}
+
+#[cfg(not(feature = "statistics"))]
 fn notify<K, V>(m: &mut BTreeMap<*const K, ConditionHandler<V>>, array: *const *const K) {
     for i in 0..m.len() {
         unsafe {

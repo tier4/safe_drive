@@ -1,14 +1,14 @@
 pub mod common;
 
 use safe_drive::{self, node::Node};
-use std::{error::Error, sync::Arc, thread, time::Duration};
+use std::{cell::Cell, error::Error, rc::Rc, sync::Arc, thread, time::Duration};
 
 const TOPIC_NAME_1: &str = "test_select_1";
 const TOPIC_NAME_2: &str = "test_select_2";
 const TOPIC_NAME_3: &str = "test_select_3";
 const INIT_1: i64 = 0;
 const INIT_2: i64 = 100;
-const COUNT: usize = 5;
+const COUNT: i64 = 5;
 
 #[test]
 fn test_select_subscriptions() -> Result<(), Box<dyn Error + Sync + Send + 'static>> {
@@ -36,28 +36,30 @@ fn test_select_subscriptions() -> Result<(), Box<dyn Error + Sync + Send + 'stat
     let mut selector = ctx.create_selector()?;
 
     // 1st subscriber
-    let mut cnt1 = Box::new(INIT_1);
+    let cnt1 = Rc::new(Cell::new(INIT_1));
+    let cnt1_m = cnt1.clone();
     selector.add_subscriber(
         s1,
         Box::new(move |msg| {
-            assert_eq!(msg.num, *cnt1);
-            *cnt1 += 1;
+            assert_eq!(msg.num, cnt1_m.get());
+            cnt1_m.set(cnt1_m.get() + 1);
         }),
         false,
     );
 
     // 2nd subscriber
-    let mut cnt2 = Box::new(INIT_2);
+    let cnt2 = Rc::new(Cell::new(INIT_2));
+    let cnt2_m = cnt2.clone();
     selector.add_subscriber(
         s2,
         Box::new(move |msg| {
-            assert_eq!(msg.num, *cnt2);
-            *cnt2 += 1;
+            assert_eq!(msg.num, cnt2_m.get());
+            cnt2_m.set(cnt2_m.get() + 1);
         }),
         false,
     );
 
-    for _ in 0..COUNT {
+    while cnt1.get() < INIT_1 + COUNT && cnt2.get() < INIT_2 + COUNT {
         // wait messages
         selector.wait()?;
     }
@@ -97,17 +99,22 @@ fn test_callback() -> Result<(), Box<dyn Error + Sync + Send + 'static>> {
 
     let subscriber = common::create_subscriber(node_sub, TOPIC_NAME_3).unwrap();
 
+    let cnt = Rc::new(Cell::new(0));
+
     // register callback
     let mut selector = ctx.create_selector()?;
+
+    let cnt1 = cnt.clone();
     selector.add_subscriber(
         subscriber,
         Box::new(move |msg| {
             println!("callback: num = {}", msg.num);
+            cnt1.set(cnt1.get() + 1);
         }),
         false,
     );
 
-    for _ in 0..COUNT {
+    while cnt.get() < COUNT {
         selector.wait()?;
     }
 

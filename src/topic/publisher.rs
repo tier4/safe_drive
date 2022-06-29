@@ -55,6 +55,12 @@ use crate::{
 };
 use std::{ffi::CString, marker::PhantomData, ptr::null_mut, sync::Arc};
 
+#[cfg(feature = "rcl_stat")]
+use crate::helper::statistics::{SerializableTimeStat, TimeStatistics};
+
+#[cfg(feature = "rcl_stat")]
+use parking_lot::Mutex;
+
 /// Publisher.
 ///
 /// # Example
@@ -80,6 +86,10 @@ use std::{ffi::CString, marker::PhantomData, ptr::null_mut, sync::Arc};
 pub struct Publisher<T> {
     publisher: rcl::rcl_publisher_t,
     node: Arc<Node>,
+
+    #[cfg(feature = "rcl_stat")]
+    latency_publish: Mutex<TimeStatistics<4096>>,
+
     _phantom: PhantomData<T>,
 }
 
@@ -108,6 +118,10 @@ impl<T: TopicMsg> Publisher<T> {
         Ok(Publisher {
             publisher,
             node,
+
+            #[cfg(feature = "rcl_stat")]
+            latency_publish: Mutex::new(TimeStatistics::new()),
+
             _phantom: Default::default(),
         })
     }
@@ -141,8 +155,28 @@ impl<T: TopicMsg> Publisher<T> {
         if crate::is_halt() {
             return Err("Signaled".into());
         }
+
+        #[cfg(feature = "rcl_stat")]
+        let start = std::time::SystemTime::now();
+
         rcl::MTSafeFn::rcl_publish(&self.publisher, msg as *const T as _, null_mut())?;
+
+        #[cfg(feature = "rcl_stat")]
+        {
+            if let Ok(dur) = start.elapsed() {
+                let mut guard = self.latency_publish.lock();
+                guard.add(dur);
+            }
+        }
+
         Ok(())
+    }
+
+    /// Get latency statistics information of `rcl_publish()`.
+    #[cfg(feature = "rcl_stat")]
+    pub fn statistics(&self) -> SerializableTimeStat {
+        let guard = self.latency_publish.lock();
+        guard.to_serializable()
     }
 }
 

@@ -173,9 +173,28 @@ use std::{
     task::{self, Poll},
 };
 
+#[cfg(feature = "rcl_stat")]
+use crate::helper::statistics::{SerializableTimeStat, TimeStatistics};
+
+#[cfg(feature = "rcl_stat")]
+use parking_lot::Mutex;
+
 pub(crate) struct RCLSubscription {
     pub subscription: Box<rcl::rcl_subscription_t>,
     pub node: Arc<Node>,
+
+    #[cfg(feature = "rcl_stat")]
+    pub latency_take: Mutex<TimeStatistics<4096>>,
+}
+
+#[cfg(feature = "rcl_stat")]
+impl RCLSubscription {
+    fn measure_latency(&self, start: std::time::SystemTime) {
+        if let Ok(dur) = start.elapsed() {
+            let mut guard = self.latency_take.lock();
+            guard.add(dur);
+        }
+    }
 }
 
 impl Drop for RCLSubscription {
@@ -223,7 +242,13 @@ impl<T: TopicMsg> Subscriber<T> {
         }
 
         Ok(Subscriber {
-            subscription: Arc::new(RCLSubscription { subscription, node }),
+            subscription: Arc::new(RCLSubscription {
+                subscription,
+                node,
+
+                #[cfg(feature = "rcl_stat")]
+                latency_take: Mutex::new(TimeStatistics::new()),
+            }),
             _phantom: Default::default(),
             _unsync: Default::default(),
         })
@@ -261,9 +286,22 @@ impl<T: TopicMsg> Subscriber<T> {
     /// - `RCLError::Error` if an unspecified error occurs.
     #[must_use]
     pub fn try_recv(&self) -> RecvResult<T> {
+        #[cfg(feature = "rcl_stat")]
+        let start = std::time::SystemTime::now();
+
         match rcl_take::<T>(self.subscription.subscription.as_ref()) {
-            Ok(n) => RecvResult::Ok(n),
-            Err(RCLError::SubscriptionTakeFailed) => RecvResult::RetryLater,
+            Ok(n) => {
+                #[cfg(feature = "rcl_stat")]
+                self.subscription.measure_latency(start);
+
+                RecvResult::Ok(n)
+            }
+            Err(RCLError::SubscriptionTakeFailed) => {
+                #[cfg(feature = "rcl_stat")]
+                self.subscription.measure_latency(start);
+
+                RecvResult::RetryLater
+            }
             Err(e) => RecvResult::Err(e),
         }
     }
@@ -321,6 +359,14 @@ impl<T: TopicMsg> Subscriber<T> {
         }
         .await
     }
+
+    /// Get latency statistics information of `Mutex` and `rcl_take()`.
+    /// Because `rcl_take()` is MT-UNSAFE, a latency includes not only `rcl_take` but also `Mutex`.
+    #[cfg(feature = "rcl_stat")]
+    pub fn statistics(&self) -> SerializableTimeStat {
+        let guard = self.subscription.latency_take.lock();
+        guard.to_serializable()
+    }
 }
 
 /// Asynchronous receiver of subscribers.
@@ -346,10 +392,21 @@ impl<'a, T> Future for AsyncReceiver<'a, T> {
 
         let s = subscription.subscription.as_ref();
 
+        #[cfg(feature = "rcl_stat")]
+        let start = std::time::SystemTime::now();
+
         // try to take 1 message
         match rcl_take::<T>(s) {
-            Ok(value) => Poll::Ready(Ok(value)), // got
+            Ok(value) => {
+                #[cfg(feature = "rcl_stat")]
+                subscription.measure_latency(start);
+
+                Poll::Ready(Ok(value))
+            } // got
             Err(RCLError::SubscriptionTakeFailed) => {
+                #[cfg(feature = "rcl_stat")]
+                subscription.measure_latency(start);
+
                 let mut guard = SELECTOR.lock();
                 let waker = cx.waker().clone();
 
