@@ -1,4 +1,4 @@
-all: msg.rs builtin_interfaces.rs
+all: msg.rs
 
 .SUFFIXES: .rs .c
 

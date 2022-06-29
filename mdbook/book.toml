@@ -4,3 +4,13 @@ language = "en"
 multilingual = false
 src = "src"
 title = "safe_drive: Formally Specified Rust Bindings for ROS2"
+
+[preprocessor]
+
+[preprocessor.mermaid]
+command = "mdbook-mermaid"
+
+[output]
+
+[output.html]
+additional-js = ["mermaid.min.js", "mermaid-init.js"]
