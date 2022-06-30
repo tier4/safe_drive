@@ -110,6 +110,7 @@
 //!
 //! // Create a wall timer, which invoke the callback periodically.
 //! selector.add_wall_timer(
+//!     "timer_name", // name of the timer
 //!     Duration::from_millis(100),
 //!     Box::new(move || {
 //!         let mut msg = std_msgs::msg::String::new().unwrap();

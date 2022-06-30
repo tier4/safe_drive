@@ -45,6 +45,7 @@
 //!
 //! // Create a wall timer, which invoke the callback periodically.
 //! selector.add_wall_timer(
+//!     "timer_name", // name of the timer
 //!     Duration::from_millis(100),
 //!     Box::new(move || ()),
 //! );
@@ -76,6 +77,7 @@ use std::{
     collections::BTreeMap,
     mem::replace,
     ptr::null_mut,
+    rc::Rc,
     sync::Arc,
     time::{Duration, SystemTime},
 };
@@ -102,7 +104,7 @@ struct ConditionHandler<T> {
 }
 
 enum TimerType {
-    WallTimer(Duration),
+    WallTimer(Rc<String>, Duration),
     OneShot,
 }
 
@@ -113,18 +115,20 @@ struct TimeStat {
     rcl_wait: TimeStatistics<4096>,
 
     callback: BTreeMap<*const (), (String, TimeStatistics<4096>)>,
+    wall_timer: BTreeMap<String, TimeStatistics<4096>>,
 }
 
 #[cfg(feature = "statistics")]
 #[derive(Serialize, Debug)]
 pub struct Statistics {
     #[cfg(feature = "rcl_stat")]
-    rcl_wait: SerializableTimeStat,
+    pub rcl_wait: SerializableTimeStat,
 
     #[cfg(feature = "rcl_stat")]
-    rcl_take: Vec<SerializableTimeStat>,
+    pub rcl_take: Vec<SerializableTimeStat>,
 
-    callback: BTreeMap<String, SerializableTimeStat>,
+    pub callback: BTreeMap<String, SerializableTimeStat>, // callback functions of subscribers and servers
+    pub wall_timer: BTreeMap<String, SerializableTimeStat>, // wall timers
 }
 
 /// Selector invokes callback functions associated with subscribers, services, timers, or condition variables.
@@ -181,6 +185,7 @@ impl Selector {
             rcl_wait: TimeStatistics::new(),
 
             callback: BTreeMap::new(),
+            wall_timer: BTreeMap::new(),
         };
 
         let signal_cond = GuardCondition::new(context.clone())?;
@@ -216,6 +221,13 @@ impl Selector {
             .map(|(_, (k, v))| (k.clone(), v.to_serializable()))
             .collect();
 
+        let wall_timer = self
+            .time_stat
+            .wall_timer
+            .iter()
+            .map(|(k, v)| (k.clone(), v.to_serializable()))
+            .collect();
+
         #[cfg(feature = "rcl_stat")]
         let mut rcl_take = Vec::new();
 
@@ -234,6 +246,7 @@ impl Selector {
             rcl_take,
 
             callback,
+            wall_timer,
         }
     }
 
@@ -540,19 +553,24 @@ impl Selector {
     /// fn add_new_wall_timer(selector: &mut Selector) {
     ///     // Add a timer.
     ///     selector.add_wall_timer(
+    ///         "tinmer_name",
     ///         Duration::from_millis(100),
     ///         Box::new(|| /* some tasks */ ()), // Callback function.
     ///     );
     /// }
     /// ```
-    pub fn add_wall_timer(&mut self, t: Duration, mut handler: Box<dyn FnMut()>) {
+    pub fn add_wall_timer(&mut self, name: &str, t: Duration, mut handler: Box<dyn FnMut()>) {
+        self.time_stat
+            .wall_timer
+            .insert(name.to_string(), TimeStatistics::new());
+
         self.add_timer_inner(
             t,
             Box::new(move || {
                 handler();
                 CallbackResult::Ok
             }),
-            TimerType::WallTimer(t),
+            TimerType::WallTimer(Rc::new(name.to_string()), t),
         );
     }
 
@@ -780,9 +798,23 @@ impl Selector {
 
                     let handler = replace(&mut head.1.handler, None);
                     if let Some(mut handler) = handler {
+                        #[cfg(feature = "statistics")]
+                        let start = std::time::SystemTime::now();
+
                         handler();
-                        if let TimerType::WallTimer(dur) = head.1.event {
-                            reload.push((dur, handler));
+                        if let TimerType::WallTimer(name, dur) = &head.1.event {
+                            reload.push((name.clone(), *dur, handler));
+
+                            #[cfg(feature = "statistics")]
+                            {
+                                if let Ok(dur) = start.elapsed() {
+                                    if let Some(v) =
+                                        self.time_stat.wall_timer.get_mut(name.as_ref())
+                                    {
+                                        v.add(dur);
+                                    }
+                                }
+                            }
                         }
                     }
                 } else {
@@ -792,8 +824,8 @@ impl Selector {
         }
 
         // reload wall timers
-        for (dur, handler) in reload {
-            self.add_timer_inner(dur, handler, TimerType::WallTimer(dur));
+        for (name, dur, handler) in reload {
+            self.add_timer_inner(dur, handler, TimerType::WallTimer(name, dur));
         }
     }
 }

@@ -32,11 +32,13 @@
 //! let logger1 = logger.clone();
 //!
 //! selector.add_wall_timer(
+//!     "timer1", // name of the timer
 //!     Duration::from_millis(100),
 //!     Box::new(move || pr_info!(logger1, "some information")),
 //! );
 //!
 //! selector.add_wall_timer(
+//!     "timer2", // name of the timer
 //!     Duration::from_millis(150),
 //!     Box::new(move || pr_error!(logger, "some error")),
 //! );

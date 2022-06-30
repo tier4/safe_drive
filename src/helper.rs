@@ -41,9 +41,9 @@ pub mod statistics {
 
     #[derive(Serialize, Debug)]
     pub struct SerializableTimeStat {
-        min: Option<Duration>,
-        max: Option<Duration>,
-        data: Vec<f64>,
+        pub min: Option<Duration>,
+        pub max: Option<Duration>,
+        pub data: Vec<f64>,
     }
 
     #[derive(Debug)]

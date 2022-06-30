@@ -49,6 +49,7 @@ fn test_wall_timer() -> Result<(), Box<dyn Error + Sync + Send + 'static>> {
 
     // create wall timers
     selector.add_wall_timer(
+        "timer1",
         Duration::from_millis(1000),
         Box::new(|| {
             println!("long timer: 1000[ms]");
@@ -57,6 +58,7 @@ fn test_wall_timer() -> Result<(), Box<dyn Error + Sync + Send + 'static>> {
     );
 
     selector.add_wall_timer(
+        "timer2",
         Duration::from_millis(200),
         Box::new(move || {
             println!("short timer: 200[ms]");

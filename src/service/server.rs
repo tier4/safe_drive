@@ -25,7 +25,7 @@
 //! let mut selector = ctx.create_selector().unwrap();
 //!
 //! // Add a wall timer.
-//! selector.add_wall_timer(Duration::from_millis(100), Box::new(|| ()));
+//! selector.add_wall_timer("timer_name", Duration::from_millis(100), Box::new(|| ()));
 //!
 //! // Add a callback of the server.
 //! selector.add_server(
