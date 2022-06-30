@@ -560,6 +560,7 @@ impl Selector {
     /// }
     /// ```
     pub fn add_wall_timer(&mut self, name: &str, t: Duration, mut handler: Box<dyn FnMut()>) {
+        #[cfg(feature = "statistics")]
         self.time_stat
             .wall_timer
             .insert(name.to_string(), TimeStatistics::new());
