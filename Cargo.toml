@@ -23,10 +23,6 @@ optional = true
 version = "1"
 optional = true
 
-[dependencies.backtrace]
-version = "0.3"
-optional = true
-
 [dev-dependencies]
 futures = "0.3.21"
 
@@ -35,6 +31,6 @@ version = "1.11.0"
 features = ["attributes"]
 
 [features]
-default = ["rcl_stat"]
-statistics = ["serde", "serde_json", "backtrace"]
+default = []
+statistics = ["serde", "serde_json"]
 rcl_stat = ["statistics"]

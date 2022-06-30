@@ -29,6 +29,8 @@ use std::{ffi::CString, sync::Arc};
 /// Node of ROS2.
 pub struct Node {
     node: rcl::rcl_node_t,
+    name: String,
+    namespace: Option<String>,
     pub(crate) context: Arc<Context>,
 }
 
@@ -41,21 +43,26 @@ impl Node {
     ) -> RCLResult<Arc<Self>> {
         let mut node = rcl::MTSafeFn::rcl_get_zero_initialized_node();
 
-        let name = CString::new(name).unwrap();
-        let namespace = CString::new(namespace.unwrap_or_default()).unwrap();
+        let name_c = CString::new(name).unwrap();
+        let namespace_c = CString::new(namespace.unwrap_or_default()).unwrap();
 
         {
             let guard = rcl::MT_UNSAFE_FN.lock();
             guard.rcl_node_init(
                 &mut node,
-                name.as_ptr(),
-                namespace.as_ptr(),
+                name_c.as_ptr(),
+                namespace_c.as_ptr(),
                 unsafe { context.as_ptr_mut() },
                 options.as_ptr(),
             )?;
         }
 
-        Ok(Arc::new(Node { node, context }))
+        Ok(Arc::new(Node {
+            node,
+            name: name.to_string(),
+            namespace: namespace.map_or_else(|| None, |v| Some(v.to_string())),
+            context,
+        }))
     }
 
     pub(crate) fn as_ptr(&self) -> *const rcl::rcl_node_t {
@@ -64,6 +71,14 @@ impl Node {
 
     pub(crate) unsafe fn as_ptr_mut(&self) -> *mut rcl::rcl_node_t {
         &self.node as *const _ as *mut _
+    }
+
+    pub fn get_name(&self) -> &str {
+        &self.name
+    }
+
+    pub fn get_namespace(&self) -> &Option<String> {
+        &self.namespace
     }
 
     /// Create a publisher.

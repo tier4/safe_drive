@@ -541,14 +541,15 @@ impl<T: ServiceMsg> Future for AsyncReceiver<T> {
                 Header { header },
             ))),
             Err(RCLError::ServiceTakeFailed) => {
-                let waker = cx.waker().clone();
+                let mut waker = Some(cx.waker().clone());
                 let mut guard = SELECTOR.lock();
                 if let Err(e) = guard.send_command(
                     &server.data.node.context,
                     async_selector::Command::Server(
                         server.data.clone(),
                         Box::new(move || {
-                            waker.clone().wake();
+                            let w = waker.take().unwrap();
+                            w.wake();
                             CallbackResult::Ok
                         }),
                     ),

@@ -183,6 +183,8 @@ pub(crate) struct RCLSubscription {
     pub subscription: Box<rcl::rcl_subscription_t>,
     pub node: Arc<Node>,
 
+    topic_name: String,
+
     #[cfg(feature = "rcl_stat")]
     pub latency_take: Mutex<TimeStatistics<4096>>,
 }
@@ -226,7 +228,7 @@ impl<T: TopicMsg> Subscriber<T> {
     ) -> RCLResult<Self> {
         let mut subscription = Box::new(rcl::MTSafeFn::rcl_get_zero_initialized_subscription());
 
-        let topic_name = CString::new(topic_name).unwrap_or_default();
+        let topic_name_c = CString::new(topic_name).unwrap_or_default();
         let options = Options::new(&qos.unwrap_or_default());
 
         {
@@ -236,7 +238,7 @@ impl<T: TopicMsg> Subscriber<T> {
                 subscription.as_mut(),
                 node.as_ptr(),
                 T::type_support(),
-                topic_name.as_ptr(),
+                topic_name_c.as_ptr(),
                 options.as_ptr(),
             )?;
         }
@@ -245,6 +247,7 @@ impl<T: TopicMsg> Subscriber<T> {
             subscription: Arc::new(RCLSubscription {
                 subscription,
                 node,
+                topic_name: topic_name.to_string(),
 
                 #[cfg(feature = "rcl_stat")]
                 latency_take: Mutex::new(TimeStatistics::new()),
@@ -252,6 +255,10 @@ impl<T: TopicMsg> Subscriber<T> {
             _phantom: Default::default(),
             _unsync: Default::default(),
         })
+    }
+
+    pub fn get_topic_name(&self) -> &str {
+        &self.subscription.topic_name
     }
 
     /// Non-blocking receive.
@@ -408,14 +415,15 @@ impl<'a, T> Future for AsyncReceiver<'a, T> {
                 subscription.measure_latency(start);
 
                 let mut guard = SELECTOR.lock();
-                let waker = cx.waker().clone();
+                let mut waker = Some(cx.waker().clone());
 
                 guard.send_command(
                     &subscription.node.context,
                     async_selector::Command::Subscription(
                         (*subscription).clone(),
                         Box::new(move || {
-                            waker.clone().wake();
+                            let w = waker.take();
+                            w.unwrap().wake();
                             CallbackResult::Ok
                         }),
                     ),

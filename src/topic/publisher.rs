@@ -86,6 +86,7 @@ use parking_lot::Mutex;
 pub struct Publisher<T> {
     publisher: rcl::rcl_publisher_t,
     node: Arc<Node>,
+    topic_name: String,
 
     #[cfg(feature = "rcl_stat")]
     latency_publish: Mutex<TimeStatistics<4096>>,
@@ -101,7 +102,7 @@ impl<T: TopicMsg> Publisher<T> {
     ) -> RCLResult<Self> {
         let mut publisher = rcl::MTSafeFn::rcl_get_zero_initialized_publisher();
 
-        let topic_name = CString::new(topic_name).unwrap_or_default();
+        let topic_name_c = CString::new(topic_name).unwrap_or_default();
         let options = Options::new(&qos.unwrap_or_default());
 
         {
@@ -110,7 +111,7 @@ impl<T: TopicMsg> Publisher<T> {
                 &mut publisher,
                 node.as_ptr(),
                 T::type_support(),
-                topic_name.as_ptr(),
+                topic_name_c.as_ptr(),
                 options.as_ptr(),
             )?;
         }
@@ -118,12 +119,17 @@ impl<T: TopicMsg> Publisher<T> {
         Ok(Publisher {
             publisher,
             node,
+            topic_name: topic_name.to_string(),
 
             #[cfg(feature = "rcl_stat")]
             latency_publish: Mutex::new(TimeStatistics::new()),
 
             _phantom: Default::default(),
         })
+    }
+
+    pub fn get_topic_name(&self) -> &str {
+        &self.topic_name
     }
 
     /// Send a message.

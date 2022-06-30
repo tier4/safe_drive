@@ -54,7 +54,6 @@
 //!     selector.wait().unwrap();
 //! }
 //! ```
-//!
 
 use self::guard_condition::{GuardCondition, RCLGuardCondition};
 use crate::{
@@ -273,6 +272,19 @@ impl Selector {
         let sub = subscriber.subscription.clone();
         let context_ptr = subscriber.subscription.node.context.as_ptr();
 
+        #[cfg(feature = "statistics")]
+        let symbol = {
+            let node_name = subscriber.subscription.node.get_name();
+            let node_namespace =
+                if let Some(namespace) = subscriber.subscription.node.get_namespace() {
+                    namespace.as_str()
+                } else {
+                    ""
+                };
+            let topic_name = subscriber.get_topic_name();
+            format!("{node_namespace}:{node_name}:subscriber:{topic_name}")
+        };
+
         let f = move || {
             let start = SystemTime::now();
             let dur = Duration::from_millis(1);
@@ -303,32 +315,10 @@ impl Selector {
         if self.context.as_ptr() == context_ptr {
             #[cfg(feature = "statistics")]
             {
-                if let Some(symbol) = crate::helper::statistics::previous_symbol(1) {
-                    let name = if let Some(s) = symbol.name() {
-                        s.as_str().unwrap_or("unknown")
-                    } else {
-                        "unknown"
-                    };
-
-                    let filename = if let Some(s) = symbol.filename() {
-                        s.to_str().unwrap_or("unknown")
-                    } else {
-                        "unknown"
-                    };
-
-                    let line = if let Some(s) = symbol.lineno() {
-                        format!("{s}")
-                    } else {
-                        "unknown".to_string()
-                    };
-
-                    let symbol = format!("{filename}:{line}:{name}");
-
-                    self.time_stat.callback.insert(
-                        sub.subscription.as_ref() as *const _ as *const (),
-                        (symbol, TimeStatistics::new()),
-                    );
-                }
+                self.time_stat.callback.insert(
+                    sub.subscription.as_ref() as *const _ as *const (),
+                    (symbol, TimeStatistics::new()),
+                );
             }
 
             self.add_rcl_subscription(sub, Some(Box::new(f)), is_once);
@@ -741,7 +731,11 @@ impl Selector {
 
             let timeout_nanos = timeout.as_nanos();
             let timeout_nanos = if timeout_nanos > i64::max_value() as u128 {
-                eprintln!("timeout value became too big (overflow): timeout = {timeout_nanos}");
+                let logger = Logger::new("safe_drive");
+                pr_error_in!(
+                    logger,
+                    "timeout value became too big (overflow): timeout = {timeout_nanos}"
+                );
                 i64::max_value()
             } else {
                 timeout_nanos as i64

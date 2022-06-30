@@ -36,7 +36,6 @@ impl InitOnce {
 
 #[cfg(feature = "statistics")]
 pub mod statistics {
-    use backtrace::{Backtrace, BacktraceFrame, BacktraceSymbol};
     use serde::Serialize;
     use std::time::Duration;
 
@@ -109,22 +108,6 @@ pub mod statistics {
                 data,
             }
         }
-    }
-
-    pub fn previous_symbol(level: u32) -> Option<BacktraceSymbol> {
-        let (trace, curr_file, curr_line) = (Backtrace::new(), file!(), line!());
-        let frames = trace.frames();
-        frames
-            .iter()
-            .flat_map(BacktraceFrame::symbols)
-            .skip_while(|s| {
-                s.filename()
-                    .map(|p| !p.ends_with(curr_file))
-                    .unwrap_or(true)
-                    || s.lineno() != Some(curr_line)
-            })
-            .nth(1 + level as usize)
-            .cloned()
     }
 }
 
