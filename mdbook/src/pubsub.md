@@ -236,7 +236,7 @@ So, we have to tell link paths to the compiler as follows.
 fn main() {
     if let Some(e) = std::env::var_os("AMENT_PREFIX_PATH") {
         let env = e.to_str().unwrap();
-        for path in env.split(":") {
+        for path in env.split(':') {
             println!("cargo:rustc-link-search={path}/lib");
         }
     }
@@ -439,7 +439,7 @@ Just copy and paste this.
 fn main() {
     if let Some(e) = std::env::var_os("AMENT_PREFIX_PATH") {
         let env = e.to_str().unwrap();
-        for path in env.split(":") {
+        for path in env.split(':') {
             println!("cargo:rustc-link-search={path}/lib");
         }
     }

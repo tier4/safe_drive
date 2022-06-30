@@ -31,6 +31,6 @@ version = "1.11.0"
 features = ["attributes"]
 
 [features]
-default = ["statistics"]
+default = ["rcl_stat"]
 statistics = ["serde", "serde_json"]
 rcl_stat = ["statistics"]

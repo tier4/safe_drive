@@ -772,8 +772,6 @@ impl Selector {
                             self.time_stat.rcl_wait.add(wait_time);
                         }
                     }
-
-                    ()
                 }
             }
         }

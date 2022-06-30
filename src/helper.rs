@@ -60,7 +60,7 @@ pub mod statistics {
             assert_ne!(N, 0);
 
             // N must be 2^m where m >= 0.
-            let mask = (1 << (0 as usize).leading_zeros() - N.leading_zeros() - 1) - 1;
+            let mask = (1 << ((0_usize).leading_zeros() - N.leading_zeros() - 1)) - 1;
             assert_eq!(N & mask, 0);
 
             Self {
@@ -96,10 +96,8 @@ pub mod statistics {
 
         pub fn to_serializable(&self) -> SerializableTimeStat {
             let mut data = Vec::new();
-            for d in self.data.iter() {
-                if let Some(dur) = d {
-                    data.push(dur.as_secs_f64());
-                }
+            for dur in self.data.iter().flatten() {
+                data.push(dur.as_secs_f64());
             }
 
             SerializableTimeStat {
