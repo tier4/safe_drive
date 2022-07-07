@@ -148,6 +148,9 @@ We use only <code>cargo</code>, which is a Rust's standard build system.
 Before starting this tutorial, please set the library path of ROS2 to a variable environment as follows.</p>
 <pre><code class="language-text">$ export LIBRARY_PATH=/opt/ros/galactic/lib:$LIBRARY_PATH
 </code></pre>
+<p>Don't forget</p>
+<pre><code class="language-text">$ . /opt/ros/galactic/setup.bash
+</code></pre>
 <h2 id="wall-timer"><a class="header" href="#wall-timer">Wall-timer</a></h2>
 <p>A wall-timer is a timer which periodically invoked.
 This section describes how to use a wall-timer.</p>
@@ -278,10 +281,12 @@ pub fn main() -&gt; Result&lt;(), DynError&gt; {
 
     // Spin.
     loop {
-        // Set timers.
-        let mut q = queue.borrow_mut();
-        while let Some((dur, f)) = q.pop_front() {
-            selector.add_timer(dur, f);
+        {
+            // Set timers.
+            let mut q = queue.borrow_mut();
+            while let Some((dur, f)) = q.pop_front() {
+                selector.add_timer(dur, f);
+            }
         }
 
         selector.wait()?;
@@ -311,16 +316,25 @@ timers in the <code>queue</code> is reenabled in the spin as follows.</p>
 </span><span class="boring">fn main() {
 </span>// Spin.
 loop {
-    // Set timers.
-    let mut q = queue.borrow_mut();
-    while let Some((dur, f)) = q.pop_front() {
-        selector.add_timer(dur, f);
+    {
+        // Set timers.
+        let mut q = queue.borrow_mut();
+        while let Some((dur, f)) = q.pop_front() {
+            selector.add_timer(dur, f);
+        }
     }
 
     selector.wait()?;
 }
 <span class="boring">}
 </span></code></pre></pre>
+<p>The important thing is that the borrowed resources must be released.
+To release definitely, the code fraction borrowing the <code>queue</code> is surrounded by braces.</p>
+<p>The following is a execution result of this code.</p>
+<pre><code>$ cargo run
+[INFO] [1657070943.324438900] [one-shot timer example]: fired!
+[INFO] [1657070945.324675600] [one-shot timer example]: fired! again!
+</code></pre>
 
                     </main>
 

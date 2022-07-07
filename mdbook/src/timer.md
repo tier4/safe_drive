@@ -8,6 +8,12 @@ Before starting this tutorial, please set the library path of ROS2 to a variable
 $ export LIBRARY_PATH=/opt/ros/galactic/lib:$LIBRARY_PATH
 ```
 
+Don't forget
+
+```text
+$ . /opt/ros/galactic/setup.bash
+```
+
 ## Wall-timer
 
 A wall-timer is a timer which periodically invoked.
@@ -153,10 +159,12 @@ pub fn main() -> Result<(), DynError> {
 
     // Spin.
     loop {
-        // Set timers.
-        let mut q = queue.borrow_mut();
-        while let Some((dur, f)) = q.pop_front() {
-            selector.add_timer(dur, f);
+        {
+            // Set timers.
+            let mut q = queue.borrow_mut();
+            while let Some((dur, f)) = q.pop_front() {
+                selector.add_timer(dur, f);
+            }
         }
 
         selector.wait()?;
@@ -184,12 +192,25 @@ timers in the `queue` is reenabled in the spin as follows.
 ```rust
 // Spin.
 loop {
-    // Set timers.
-    let mut q = queue.borrow_mut();
-    while let Some((dur, f)) = q.pop_front() {
-        selector.add_timer(dur, f);
+    {
+        // Set timers.
+        let mut q = queue.borrow_mut();
+        while let Some((dur, f)) = q.pop_front() {
+            selector.add_timer(dur, f);
+        }
     }
 
     selector.wait()?;
 }
+```
+
+The important thing is that the borrowed resources must be released.
+To release definitely, the code fraction borrowing the `queue` is surrounded by braces.
+
+The following is a execution result of this code.
+
+```
+$ cargo run
+[INFO] [1657070943.324438900] [one-shot timer example]: fired!
+[INFO] [1657070945.324675600] [one-shot timer example]: fired! again!
 ```

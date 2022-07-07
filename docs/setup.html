@@ -144,29 +144,31 @@
                     <main>
                         <h1 id="setting-up"><a class="header" href="#setting-up">Setting-up</a></h1>
 <h2 id="install-dependencies"><a class="header" href="#install-dependencies">Install Dependencies</a></h2>
-<pre><code class="language-shell">$ sudo apt install curl gnupg2 lsb-release python3-pip git
+<pre><code class="language-text">$ sudo apt install curl gnupg2 lsb-release python3-pip git
 </code></pre>
 <h2 id="install-rust"><a class="header" href="#install-rust">Install Rust</a></h2>
-<pre><code class="language-shell">$ sudo curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
+<pre><code class="language-text">$ sudo curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
 $ source $HOME/.cargo/env
 </code></pre>
 <p>Choose <code>Default</code> when installing Rust.</p>
 <h2 id="install-ros2"><a class="header" href="#install-ros2">Install ROS2</a></h2>
-<pre><code class="language-shell">$curl -s https://raw.githubusercontent.com/ros/rosdistro/master/ros.asc | sudo apt-key add -
+<pre><code class="language-text">$curl -s https://raw.githubusercontent.com/ros/rosdistro/master/ros.asc | sudo apt-key add -
 $ sudo sh -c 'echo &quot;deb [arch=$(dpkg --print-architecture)] http://packages.ros.org/ros2/ubuntu $(lsb_release -cs) main&quot; &gt; /etc/apt/sources.list.d/ros2-latest.list'
 $ sudo curl -sSL https://raw.githubusercontent.com/ros/rosdistro/master/ros.key -o /usr/share/keyrings/ros-archive-keyring.gpg
 </code></pre>
-<pre><code class="language-shell">$ sudo apt update
+<pre><code class="language-text">$ sudo apt update
 $ sudp apt install ros-galactic-desktop python3-colcon-common-extensions
 </code></pre>
+<pre><code class="language-text">$ . /opt/ros/galactic/setup.bash
+</code></pre>
 <h2 id="install-colcon-cargo"><a class="header" href="#install-colcon-cargo">Install Colcon-Cargo</a></h2>
-<pre><code class="language-shell">$ cargo install --debug cargo-ament-build
+<pre><code class="language-text">$ cargo install --debug cargo-ament-build
 $ pip install git+https://github.com/colcon/colcon-cargo.git
 $ pip install git+https://github.com/colcon/colcon-ros-cargo.git
 </code></pre>
 <h2 id="get-safe_drive"><a class="header" href="#get-safe_drive">Get safe_drive</a></h2>
 <p>This is required because safe_drive is private currently.</p>
-<pre><code>$ git clone git@github.com:tier4/safe_drive.git
+<pre><code class="language-text">$ git clone git@github.com:tier4/safe_drive.git
 </code></pre>
 
                     </main>
