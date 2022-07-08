@@ -65,7 +65,7 @@ use crate::{
         async_selector::{self, SELECTOR},
         CallbackResult,
     },
-    PhantomUnsync,
+    PhantomUnsync, RecvResult,
 };
 use std::{
     ffi::CString, future::Future, marker::PhantomData, mem::MaybeUninit, os::raw::c_void,
@@ -246,43 +246,42 @@ pub struct ClientRecv<T> {
 impl<T: ServiceMsg> ClientRecv<T> {
     /// Receive a message.
     /// `try_recv` is a non-blocking function, and this
-    /// returns `Err(RCLError::ClientTakeFailed)`.
-    /// So, please retry later if this error is returned.
+    /// returns `RecvResult::RetryLater(self)`.
+    /// So, please retry later if this value is returned.
     ///
     /// # Errors
     ///
     /// - `RCLError::InvalidArgument` if any arguments are invalid, or
     /// - `RCLError::ClientInvalid` if the client is invalid, or
-    /// - `RCLError::ClientTakeFailed` if take failed but no error occurred in the middleware, or
     /// - `RCLError::Error` if an unspecified error occurs.
-    pub fn try_recv(self) -> RCLResult<(Client<T>, <T as ServiceMsg>::Response)> {
-        let (s, d, _) = self.try_recv_with_header()?;
-        Ok((s, d))
+    pub fn try_recv(self) -> RecvResult<(Client<T>, <T as ServiceMsg>::Response), Self> {
+        match self.try_recv_with_header() {
+            RecvResult::Ok((s, d, _)) => RecvResult::Ok((s, d)),
+            RecvResult::RetryLater(r) => RecvResult::RetryLater(r),
+            RecvResult::Err(e) => RecvResult::Err(e),
+        }
     }
 
-    /// `try_recv_with_header` is equivalent to `try_recv`, but
-    /// this returns `super::Header` including some information together.
-    /// `Err(RCLError::ClientTakeFailed)` is returned if there is no available response.
-    /// So, please retry later if this error is returned.
+    /// `try_recv_with_header` is equivalent to `try_recv`.
     ///
     /// # Errors
     ///
     /// - `RCLError::InvalidArgument` if any arguments are invalid, or
     /// - `RCLError::ClientInvalid` if the client is invalid, or
-    /// - `RCLError::ClientTakeFailed` if take failed but no error occurred in the middleware, or
     /// - `RCLError::Error` if an unspecified error occurs.
     pub fn try_recv_with_header(
         self,
-    ) -> RCLResult<(Client<T>, <T as ServiceMsg>::Response, Header)> {
+    ) -> RecvResult<(Client<T>, <T as ServiceMsg>::Response, Header), Self> {
         let (response, header) = match rcl_take_response_with_info::<<T as ServiceMsg>::Response>(
             &self.data.client,
             self.seq,
         ) {
             Ok(data) => data,
-            Err(e) => return Err(e),
+            Err(RCLError::ClientTakeFailed) => return RecvResult::RetryLater(self),
+            Err(e) => return RecvResult::Err(e),
         };
 
-        Ok((
+        RecvResult::Ok((
             Client {
                 data: self.data,
                 _phantom: Default::default(),

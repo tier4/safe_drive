@@ -15,7 +15,7 @@ fn test_subscription() -> Result<(), Box<dyn Error + Sync + Send + 'static>> {
     )?;
 
     match subscription.try_recv() {
-        RecvResult::RetryLater => Ok(()), // must fail because there is no publisher
+        RecvResult::RetryLater(_) => Ok(()), // must fail because there is no publisher
         _ => panic!(),
     }
 }

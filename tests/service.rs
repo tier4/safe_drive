@@ -1,12 +1,13 @@
 pub mod common;
 
-use safe_drive::{self, context::Context};
-use std::{error::Error, time::Duration};
+use safe_drive::{self, context::Context, error::DynError, RecvResult, ST};
+use std::time::Duration;
 
-const SERVICE_NAME: &str = "test_service";
+const SERVICE_NAME1: &str = "test_service1";
+const SERVICE_NAME2: &str = "test_service2";
 
 #[test]
-fn test_service() -> Result<(), Box<dyn Error + Sync + Send + 'static>> {
+fn test_service() -> Result<(), DynError> {
     // create a context
     let ctx = Context::new()?;
 
@@ -17,8 +18,8 @@ fn test_service() -> Result<(), Box<dyn Error + Sync + Send + 'static>> {
     let node_client = ctx.create_node("test_service_client_node", None, Default::default())?;
 
     // create a server and a client
-    let server = common::create_server(node_server, SERVICE_NAME)?;
-    let client = common::create_client(node_client, SERVICE_NAME)?;
+    let server = common::create_server(node_server, SERVICE_NAME1)?;
+    let client = common::create_client(node_client, SERVICE_NAME1)?;
 
     // create a selector
     let mut selector = ctx.create_selector()?;
@@ -55,11 +56,84 @@ fn test_service() -> Result<(), Box<dyn Error + Sync + Send + 'static>> {
 
     // Client: receive the response
     match rcv_client.try_recv_with_header() {
-        Ok((_, data, header)) => {
+        RecvResult::Ok((_, data, header)) => {
             println!("Client: sum = {}, header = {:?}", data.sum, header);
             assert_eq!(data.sum, 8);
             Ok(())
         }
-        Err(e) => Err(e.into()),
+        RecvResult::RetryLater(_) => {
+            println!("should retry");
+            Ok(())
+        }
+        RecvResult::Err(e) => Err(e.into()),
+    }
+}
+
+#[test]
+fn test_client_wait() -> Result<(), DynError> {
+    // create a context
+    let ctx = Context::new()?;
+
+    // create a server node
+    let node_server = ctx.create_node("test_client_wait_server_node", None, Default::default())?;
+
+    // create a client node
+    let node_client = ctx.create_node("test_client_wait_client_node", None, Default::default())?;
+
+    // create a server and a client
+    let server = common::create_server(node_server, SERVICE_NAME2)?;
+    let client = common::create_client(node_client, SERVICE_NAME2)?;
+
+    // create a selector
+    let mut selector = ctx.create_selector()?;
+
+    // Client: send a request
+    let req = common::Request { a: 1, b: 2, c: 5 };
+    let rcv_client = match client.send_ret_seq(&req) {
+        Ok((c, seq)) => {
+            println!("Client: seq = {seq}");
+            c
+        }
+        Err(e) => {
+            return Err(e.into());
+        }
+    };
+
+    // Make the client a single-threaded data.
+    let rcv_client = ST::new(rcv_client);
+
+    // Register the client
+    selector.add_client_recv(&rcv_client);
+
+    // Server: wait the request
+    selector.add_server(
+        server,
+        Box::new(move |request, header| {
+            println!(
+                "Server: received: data = {:?}, header = {:?}",
+                request, header
+            );
+            common::Response {
+                sum: request.a + request.b + request.c,
+            }
+        }),
+        true,
+    );
+    selector.wait()?; // Wait the request.
+
+    std::thread::sleep(Duration::from_millis(1));
+
+    selector.wait()?; // Wait the response.
+
+    match rcv_client.try_recv() {
+        RecvResult::Ok((_client, response)) => {
+            println!("received: {}", response.sum);
+            Ok(())
+        }
+        RecvResult::RetryLater(_rcv) => {
+            println!("retry later");
+            Ok(())
+        }
+        RecvResult::Err(e) => Err(e.into()),
     }
 }

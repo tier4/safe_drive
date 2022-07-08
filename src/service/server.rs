@@ -169,7 +169,7 @@ impl<T: ServiceMsg> Server<T> {
 
     /// Receive a request.
     /// `try_recv` is a non-blocking function, and
-    /// this returns `RecvResult::RetryLater` if there is no available data.
+    /// this returns `RecvResult::RetryLater(self)` if there is no available data.
     /// So, please retry later if this error is returned.
     ///
     /// # Return value
@@ -193,9 +193,9 @@ impl<T: ServiceMsg> Server<T> {
     ///                 let msg = std_srvs::srv::EmptyResponse::new().unwrap();
     ///                 server = sender.send(&msg).unwrap();
     ///             }
-    ///             RecvResult::RetryLater => {
+    ///             RecvResult::RetryLater(s) => {
     ///                 pr_info!(logger, "retry later");
-    ///                 break;
+    ///                 server = s;
     ///             }
     ///             RecvResult::Err(e) => {
     ///                 pr_error!(logger, "error: {e}");
@@ -213,11 +213,11 @@ impl<T: ServiceMsg> Server<T> {
     /// - `RCLError::BadAlloc` if allocating memory failed, or
     /// - `RCLError::Error` if an unspecified error occurs.
     #[must_use]
-    pub fn try_recv(self) -> RecvResult<(ServerSend<T>, <T as ServiceMsg>::Request)> {
+    pub fn try_recv(self) -> RecvResult<(ServerSend<T>, <T as ServiceMsg>::Request), Self> {
         let (request, header) =
             match rcl_take_request_with_info::<<T as ServiceMsg>::Request>(&self.data.service) {
                 Ok(data) => data,
-                Err(RCLError::ServiceTakeFailed) => return RecvResult::RetryLater,
+                Err(RCLError::ServiceTakeFailed) => return RecvResult::RetryLater(self),
                 Err(e) => return RecvResult::Err(e),
             };
 
@@ -234,7 +234,7 @@ impl<T: ServiceMsg> Server<T> {
 
     /// `try_recv_with_header` is equivalent to `try_recv`, but
     /// this function returns `super::Header` including some information together.
-    /// `RecvResult::RetryLater` is returned if there is no available data.
+    /// `RecvResult::RetryLater(self)` is returned if there is no available data.
     /// So, please retry later if this error is returned.
     ///
     /// # Return value
@@ -259,9 +259,9 @@ impl<T: ServiceMsg> Server<T> {
     ///                 let msg = std_srvs::srv::EmptyResponse::new().unwrap();
     ///                 server = sender.send(&msg).unwrap();
     ///             }
-    ///             RecvResult::RetryLater => {
+    ///             RecvResult::RetryLater(s) => {
     ///                 pr_info!(logger, "retry later");
-    ///                 break;
+    ///                 server = s;
     ///             }
     ///             RecvResult::Err(e) => {
     ///                 pr_error!(logger, "error: {e}");
@@ -281,11 +281,11 @@ impl<T: ServiceMsg> Server<T> {
     #[must_use]
     pub fn try_recv_with_header(
         self,
-    ) -> RecvResult<(ServerSend<T>, <T as ServiceMsg>::Request, Header)> {
+    ) -> RecvResult<(ServerSend<T>, <T as ServiceMsg>::Request, Header), Self> {
         let (request, header) =
             match rcl_take_request_with_info::<<T as ServiceMsg>::Request>(&self.data.service) {
                 Ok(data) => data,
-                Err(RCLError::ServiceTakeFailed) => return RecvResult::RetryLater,
+                Err(RCLError::ServiceTakeFailed) => return RecvResult::RetryLater(self),
                 Err(e) => return RecvResult::Err(e),
             };
 

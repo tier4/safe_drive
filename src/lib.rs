@@ -212,7 +212,12 @@
 //! }
 //! ```
 
-use std::{cell::Cell, marker::PhantomData, sync::MutexGuard};
+use std::{
+    cell::Cell,
+    marker::PhantomData,
+    ops::{Deref, DerefMut},
+    sync::MutexGuard,
+};
 
 pub mod context;
 pub mod error;
@@ -234,12 +239,72 @@ type PhantomUnsync = PhantomData<Cell<()>>;
 type PhantomUnsend = PhantomData<MutexGuard<'static, ()>>;
 
 use error::RCLError;
+use msg::ServiceMsg;
+use service::{
+    client::{Client, ClientRecv},
+    Header,
+};
 pub use signal_handler::is_halt;
 
 /// A type of return values of some receive functions.
 #[derive(Debug)]
-pub enum RecvResult<T> {
+pub enum RecvResult<T, U> {
     Ok(T),
-    RetryLater,
+    RetryLater(U),
     Err(RCLError),
+}
+
+/// Single-threaded container.
+/// `ST<T>` cannot be send to another thread and shared by multiple threads.
+pub struct ST<T> {
+    data: T,
+    _phantom: (PhantomUnsync, PhantomUnsend),
+}
+
+impl<T> ST<T> {
+    pub fn new(data: T) -> Self {
+        ST {
+            data,
+            _phantom: Default::default(),
+        }
+    }
+}
+
+impl<T> Deref for ST<T> {
+    type Target = T;
+    fn deref(&self) -> &Self::Target {
+        &self.data
+    }
+}
+
+impl<T> DerefMut for ST<T> {
+    fn deref_mut(&mut self) -> &mut Self::Target {
+        &mut self.data
+    }
+}
+
+impl<T: msg::ServiceMsg> ST<ClientRecv<T>> {
+    /// This function calls `ClientRecv::try_recv_with_header` internally,
+    /// but `RecvResult::RetryLater` includes `ST<CleintRecv<T>>` instead of `ClientRecv<T>`.
+    pub fn try_recv_with_header(
+        self,
+    ) -> RecvResult<(Client<T>, <T as ServiceMsg>::Response, Header), Self> {
+        match self.data.try_recv_with_header() {
+            RecvResult::Ok((client, response, header)) => {
+                RecvResult::Ok((client, response, header))
+            }
+            RecvResult::RetryLater(rcv) => RecvResult::RetryLater(ST::new(rcv)),
+            RecvResult::Err(e) => RecvResult::Err(e),
+        }
+    }
+
+    /// This function calls `ClientRecv::try_recv` internally,
+    /// but `RecvResult::RetryLater` includes `ST<CleintRecv<T>>` instead of `ClientRecv<T>`.
+    pub fn try_recv(self) -> RecvResult<(Client<T>, <T as ServiceMsg>::Response), Self> {
+        match self.data.try_recv() {
+            RecvResult::Ok((client, response)) => RecvResult::Ok((client, response)),
+            RecvResult::RetryLater(rcv) => RecvResult::RetryLater(ST::new(rcv)),
+            RecvResult::Err(e) => RecvResult::Err(e),
+        }
+    }
 }

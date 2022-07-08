@@ -65,13 +65,13 @@ use crate::{
     msg::{ServiceMsg, TopicMsg},
     rcl,
     service::{
-        client::ClientData,
+        client::{ClientData, ClientRecv},
         server::{Server, ServerData},
         Header,
     },
     signal_handler,
     topic::subscriber::{RCLSubscription, Subscriber},
-    PhantomUnsend, PhantomUnsync, RecvResult,
+    PhantomUnsend, PhantomUnsync, RecvResult, ST,
 };
 use std::{
     collections::BTreeMap,
@@ -307,7 +307,7 @@ impl Selector {
                     RecvResult::Ok(n) => {
                         handler(n);
                     }
-                    RecvResult::RetryLater => return CallbackResult::Ok,
+                    RecvResult::RetryLater(()) => return CallbackResult::Ok,
                     RecvResult::Err(e) => {
                         let logger = Logger::new("safe_drive");
                         pr_error_in!(logger, "failed try_recv() of subscriber: {}", e);
@@ -422,7 +422,10 @@ impl Selector {
                             }
                         }
                     }
-                    RecvResult::RetryLater => return CallbackResult::Ok,
+                    RecvResult::RetryLater(srv) => {
+                        server = Some(srv);
+                        return CallbackResult::Ok;
+                    }
                     RecvResult::Err(e) => {
                         let logger = Logger::new("safe_drive");
                         pr_error_in!(logger, "failed try_recv() of server: {}", e);
@@ -464,6 +467,17 @@ impl Selector {
                 },
             );
         }
+    }
+
+    /// Wait a response from a server.
+    ///
+    /// # Example
+    ///
+    /// ```
+    ///
+    /// ```
+    pub fn add_client_recv<T>(&mut self, client: &ST<ClientRecv<T>>) {
+        self.add_client_data(client.data.data.clone(), None, true);
     }
 
     pub(crate) fn add_client_data(
