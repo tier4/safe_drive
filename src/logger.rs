@@ -138,6 +138,14 @@ macro_rules! pr_fatal {
     }}
 }
 
+macro_rules! pr_fatal_in {
+    ($logger:expr, $($arg:tt)*) => {{
+        let res = std::format!($($arg)*);
+        let _ = $logger.write_error(&res, crate::function!(), std::file!(), std::line!() as u64);
+    }}
+}
+pub(crate) use pr_fatal_in;
+
 /// Print debug.
 /// Debug messages is not printed by default.
 /// To enable debug print, type as follows.
