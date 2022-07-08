@@ -474,7 +474,43 @@ impl Selector {
     /// # Example
     ///
     /// ```
+    /// use safe_drive::{
+    ///     error::DynError, msg::common_interfaces::std_srvs, selector::Selector, service::client::Client,
+    ///     RecvResult, ST,
+    /// };
     ///
+    /// fn worker(
+    ///     mut selector: Selector,
+    ///     mut sender: Client<std_srvs::srv::Empty>,
+    /// ) -> Result<(), DynError> {
+    ///     let msg = std_srvs::srv::EmptyRequest::new().unwrap();
+    ///     loop {
+    ///         // Send a request.
+    ///         let receiver = sender.send(&msg)?;
+    ///
+    ///         // Make it single-threaded data.
+    ///         let mut receiver = ST::new(receiver);
+    ///
+    ///         // Register the receiver to wait a response.
+    ///         selector.add_client_recv(&receiver);
+    ///
+    ///         loop {
+    ///             selector.wait()?; // Wait a response.
+    ///
+    ///             // Receive a message
+    ///             match receiver.try_recv() {
+    ///                 RecvResult::Ok((s, _response)) => {
+    ///                     sender = s;
+    ///                     break;
+    ///                 }
+    ///                 RecvResult::RetryLater(r) => {
+    ///                     receiver = r;
+    ///                 }
+    ///                 RecvResult::Err(e) => return Err(e.into()),
+    ///             }
+    ///         }
+    ///     }
+    /// }
     /// ```
     pub fn add_client_recv<T>(&mut self, client: &ST<ClientRecv<T>>) {
         self.add_client_data(client.data.data.clone(), None, true);
@@ -801,6 +837,7 @@ impl Selector {
     fn notify_timer(&mut self) {
         let now_time = SystemTime::now();
         let mut reload = Vec::new(); // wall timer to be reloaded
+
         while let Some(head) = self.timer.front() {
             if let Some(head_time) = self.base_time.checked_add(*head.0) {
                 if head_time < now_time {
@@ -814,18 +851,22 @@ impl Selector {
                         #[cfg(feature = "statistics")]
                         let start = std::time::SystemTime::now();
 
-                        handler();
+                        handler(); // invoke the callback function
+
+                        // register the wall timer again.
                         if let TimerType::WallTimer(name, dur) = &head.1.event {
-                            reload.push((name.clone(), *dur, handler));
+                            let elapsed = now_time.elapsed().unwrap();
+
+                            if let Some(dur) = dur.checked_sub(elapsed) {
+                                reload.push((name.clone(), dur, handler));
+                            } else {
+                                reload.push((name.clone(), Duration::ZERO, handler));
+                            }
 
                             #[cfg(feature = "statistics")]
-                            {
-                                if let Ok(dur) = start.elapsed() {
-                                    if let Some(v) =
-                                        self.time_stat.wall_timer.get_mut(name.as_ref())
-                                    {
-                                        v.add(dur);
-                                    }
+                            if let Ok(elapsed) = start.elapsed() {
+                                if let Some(v) = self.time_stat.wall_timer.get_mut(name.as_ref()) {
+                                    v.add(elapsed);
                                 }
                             }
                         }

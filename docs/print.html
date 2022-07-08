@@ -824,28 +824,41 @@ To release definitely, the code fraction borrowing the <code>queue</code> is sur
 </code></pre>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="user-defined-data-structure"><a class="header" href="#user-defined-data-structure">User Defined Data Structure</a></h1>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="multi-threaded-publish-and-subscribe"><a class="header" href="#multi-threaded-publish-and-subscribe">Multi-threaded Publish and Subscribe</a></h1>
-<h2 id=""><a class="header" href="#"></a></h2>
+<p>Previous chapters use a selector to wait messages.
+A selector can be used by only a single thread.
+This means previous implementation is single-threaded.</p>
+<p>To execute tasks concurrently, we can use the async/await feature of Rust.
+By using this, we can implement multi-threaded applications.
+In this chapter, we will describe how to use <code>safe_drive</code> with async/await.
+We use <code>async_std</code> as a asynchronous library,
+but you can use <code>Tokio</code> instead.</p>
+<h2 id="creating-projects"><a class="header" href="#creating-projects">Creating Projects</a></h2>
+<p>Before implementing, we need to prepare projects as follows.</p>
 <pre><code class="language-text">$ mkdir -p mt_pubsub/src
 $ cd mt_pubsub/src
 $ cargo new publishers
 $ cargo new subscribers
 </code></pre>
+<p>The <code>mt_pubsub</code> is the root directory of this project,
+and we created <code>publishers</code> and <code>subscribers</code> of Rust's projects.
+At the moment, the following directories is present.</p>
 <table><thead><tr><th>Directories</th><th>What?</th></tr></thead><tbody>
 <tr><td>mt_pubsub/src/publishers</td><td>publishers in Rust</td></tr>
 <tr><td>mt_pubsub/src/subscribers</td><td>subscribers in Rust</td></tr>
-<tr><td>mt_pubsub/install</td><td>created by colcon</td></tr>
 </tbody></table>
 <h2 id="common-configuration"><a class="header" href="#common-configuration">Common Configuration</a></h2>
+<p>Then, we have to create or edit the following files for basic configurations.</p>
 <table><thead><tr><th>Files</th><th>What?</th></tr></thead><tbody>
 <tr><td>mt_pubsub/src/publishers/Cargo.toml</td><td>for Cargo</td></tr>
 <tr><td>mt_pubsub/src/publishers/package.xml</td><td>for ROS2</td></tr>
 <tr><td>mt_pubsub/src/publishers/build.rs</td><td>for rustc</td></tr>
-<tr><td>mt_pubsub/src/publishers/src/main.rs</td><td>main</td></tr>
 <tr><td>mt_pubsub/src/subscribers/Cargo.toml</td><td>for Cargo</td></tr>
 <tr><td>mt_pubsub/src/subscribers/package.xml</td><td>for ROS2</td></tr>
 <tr><td>mt_pubsub/src/subscribers/build.rs</td><td>for rustc</td></tr>
-<tr><td>mt_pubsub/src/subscribers/src/main</td><td>main</td></tr>
 </tbody></table>
+<p><code>package.xml</code> and <code>build.rs</code> are almost same as <a href="./pubsub.html">Publish and Subscribe</a>.
+If you cannot understand what these files do,
+please go back to the previous chapter.</p>
 <pre><pre class="playground"><code class="language-rust">// build.rs
 fn main() {
     if let Some(e) = std::env::var_os(&quot;AMENT_PREFIX_PATH&quot;) {
@@ -856,12 +869,7 @@ fn main() {
     }
 }
 </code></pre></pre>
-<pre><code class="language-toml"># Cargo.toml
-[dependencies]
-async-std = { version = &quot;1.12.0&quot;, features = [&quot;attributes&quot;] }
-safe_drive = { path = &quot;../../../safe_drive&quot; }
-</code></pre>
-<pre><code class="language-xml">&lt;!-- package.xml --&gt;
+<pre><code class="language-xml">&lt;!-- publishers/package.xml --&gt;
 &lt;?xml version=&quot;1.0&quot;?&gt;
 &lt;?xml-model href=&quot;http://download.ros.org/schema/package_format3.xsd&quot; schematypens=&quot;http://www.w3.org/2001/XMLSchema&quot;?&gt;
 &lt;package format=&quot;3&quot;&gt;
@@ -879,11 +887,25 @@ safe_drive = { path = &quot;../../../safe_drive&quot; }
   &lt;/export&gt;
 &lt;/package&gt;
 </code></pre>
-<pre><code class="language-xml">  &lt;name&gt;subscribers&lt;/name&gt;
+<pre><code class="language-xml">&lt;!-- subscribers/package.xml --&gt;
+&lt;!-- other entries are omitted --&gt;
+  &lt;name&gt;subscribers&lt;/name&gt;
   &lt;description&gt;MT-Subscribers&lt;/description&gt;
 </code></pre>
+<p>To use <code>async_std</code>, we have to update <code>Cargo.toml</code> as follows.</p>
+<pre><code class="language-toml"># Cargo.toml
+[dependencies]
+async-std = { version = &quot;1.12.0&quot;, features = [&quot;attributes&quot;] }
+safe_drive = { path = &quot;../../../safe_drive&quot; }
+</code></pre>
 <h2 id="publishers"><a class="header" href="#publishers">Publishers</a></h2>
-<pre><pre class="playground"><code class="language-rust">use safe_drive::{context::Context, error::DynError, msg::common_interfaces::std_msgs};
+<p>The <code>publishers</code> publishes messages to 2 topics periodically.
+This create 2 tasks.
+One is send a message every 500ms,
+and another is send a message every 250ms.
+The code of the <code>publishers</code> is as follows.</p>
+<pre><pre class="playground"><code class="language-rust">// mt_pubsub/src/publishers/src/main.rs
+use safe_drive::{context::Context, error::DynError, msg::common_interfaces::std_msgs};
 use std::time::Duration;
 
 #[async_std::main]
@@ -922,8 +944,33 @@ async fn main() -&gt; Result&lt;(), DynError&gt; {
     Ok(())
 }
 </code></pre></pre>
+<p>The <code>async_std::task::spawn</code> creates a asynchronous task,
+which is similar to a thread.
+The following is a excerpt creating a task which sends &quot;Hello, World!&quot;
+to &quot;topic1&quot; every 500ms.</p>
+<pre><pre class="playground"><code class="language-rust">
+<span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>// Create a task which sends &quot;Hello, World!&quot;.
+let task1 = async_std::task::spawn(async move {
+    let mut msg = std_msgs::msg::String::new().unwrap();
+    msg.data.assign(&quot;Hello, World!&quot;);
+    for _ in 0..50 {
+        publisher1.send(&amp;msg).unwrap(); // Send a message.
+        async_std::task::sleep(Duration::from_millis(500)).await; // Sleep 500ms.
+    }
+});
+<span class="boring">}
+</span></code></pre></pre>
+<p>This excerpt sends a message by <code>Publisher::send</code> and sleep by <code>async_std::task::sleep</code>.
+Note that this uses <code>async_std::task::sleep</code> instead of <code>std::thread::sleep</code>,
+because the former is non-blocking but the the latter is blocking.
+Calling blocking functions should be avoided in asynchronous tasks.</p>
 <h2 id="subscribers"><a class="header" href="#subscribers">Subscribers</a></h2>
-<pre><pre class="playground"><code class="language-rust">use async_std::future::timeout;
+<p>Then, let's implement the <code>subscribers</code>.
+The main function is almost same as previous one.</p>
+<pre><pre class="playground"><code class="language-rust">// mt_pubsub/src/subscribers/src/main
+use async_std::future::timeout;
 use safe_drive::{
     context::Context, error::DynError, logger::Logger, msg::common_interfaces::std_msgs, pr_info,
     pr_warn, topic::subscriber::Subscriber,
@@ -941,8 +988,8 @@ async fn main() -&gt; Result&lt;(), DynError&gt; {
     let subscriber2 = node.create_subscriber::&lt;std_msgs::msg::String&gt;(&quot;topic2&quot;, None)?;
 
     // Receive messages.
-    let task1 = async_std::task::spawn(async move { receiver(subscriber1).await });
-    let task2 = async_std::task::spawn(async move { receiver(subscriber2).await });
+    let task1 = async_std::task::spawn(receiver(subscriber1));
+    let task2 = async_std::task::spawn(receiver(subscriber2));
 
     task1.await?;
     task2.await?;
@@ -960,6 +1007,14 @@ async fn receiver(mut subscriber: Subscriber&lt;std_msgs::msg::String&gt;) -&gt;
     }
 }
 </code></pre></pre>
+<p><code>Subscriber::recv</code> is an asynchronous function to receive a message.
+To receive asynchronously, use the <code>.await</code> keyword.
+If there is a message to be received, <code>recv().await</code> returns the message immediately.
+Otherwise, it yields the execution to another task and sleeps until arriving a message.</p>
+<h3 id="modification-for-timeout"><a class="header" href="#modification-for-timeout">Modification for Timeout</a></h3>
+<p>By using a timeout mechanism provided by asynchronous libraries,
+we can implement receiving with timeout.
+Timeout can be implemented as follows.</p>
 <pre><pre class="playground"><code class="language-rust">
 <span class="boring">#![allow(unused)]
 </span><span class="boring">fn main() {
@@ -984,12 +1039,18 @@ async fn receiver(mut subscriber: Subscriber&lt;std_msgs::msg::String&gt;) -&gt;
 }
 <span class="boring">}
 </span></code></pre></pre>
+<p><code>async_std::timeout</code> is a function to represent timeout.
+<code>timeout(Duration::from_secs(3), subscriber.recv()).await</code> calls <code>subscriber.recv()</code> asynchronously,
+but it will be timed out after 3s later.</p>
 <h2 id="execution"><a class="header" href="#execution">Execution</a></h2>
+<p>First, execute <code>publishers</code> in a terminal application window as follows.</p>
 <pre><code class="language-text">$ cd mt_pubsub
 $ colcon build --cargo-args --release
 $ . ./install/setup.bash
 $ ros2 run publishers publishers
 </code></pre>
+<p>Then, execute <code>subscribers</code> in another terminal application window as follows.
+This uses timeout for receiving.</p>
 <pre><code class="language-text">$ cd mt_pubsub.
 $ . ./install/setup.bash
 $ ros2 run subscribers subscribers
@@ -1001,6 +1062,9 @@ $ ros2 run subscribers subscribers
 [WARN] [1657076050.448393200] [topic1]: timeout
 [WARN] [1657076050.722433800] [topic2]: timeout
 </code></pre>
+<p>Nicely done!
+We are sending and receiving messages asynchronously.
+In addition to that, the timeouts work correctly.</p>
 
                     </main>
 

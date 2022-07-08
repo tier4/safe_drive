@@ -1,6 +1,18 @@
 # Multi-threaded Publish and Subscribe
 
-##
+Previous chapters use a selector to wait messages.
+A selector can be used by only a single thread.
+This means previous implementation is single-threaded.
+
+To execute tasks concurrently, we can use the async/await feature of Rust.
+By using this, we can implement multi-threaded applications.
+In this chapter, we will describe how to use `safe_drive` with async/await.
+We use `async_std` as a asynchronous library,
+but you can use `Tokio` instead.
+
+## Creating Projects
+
+Before implementing, we need to prepare projects as follows.
 
 ```text
 $ mkdir -p mt_pubsub/src
@@ -9,24 +21,31 @@ $ cargo new publishers
 $ cargo new subscribers
 ```
 
+The `mt_pubsub` is the root directory of this project,
+and we created `publishers` and `subscribers` of Rust's projects.
+At the moment, the following directories is present.
+
 | Directories               | What?               |
 |---------------------------|---------------------|
 | mt_pubsub/src/publishers  | publishers in Rust  |
 | mt_pubsub/src/subscribers | subscribers in Rust |
-| mt_pubsub/install         | created by colcon   |
 
 ## Common Configuration
+
+Then, we have to create or edit the following files for basic configurations.
 
 | Files                                 | What?     |
 |---------------------------------------|-----------|
 | mt_pubsub/src/publishers/Cargo.toml   | for Cargo |
 | mt_pubsub/src/publishers/package.xml  | for ROS2  |
 | mt_pubsub/src/publishers/build.rs     | for rustc |
-| mt_pubsub/src/publishers/src/main.rs  | main      |
 | mt_pubsub/src/subscribers/Cargo.toml  | for Cargo |
 | mt_pubsub/src/subscribers/package.xml | for ROS2  |
 | mt_pubsub/src/subscribers/build.rs    | for rustc |
-| mt_pubsub/src/subscribers/src/main    | main      |
+
+`package.xml` and `build.rs` are almost same as [Publish and Subscribe](./pubsub.md).
+If you cannot understand what these files do,
+please go back to the previous chapter.
 
 ```rust
 // build.rs
@@ -40,15 +59,8 @@ fn main() {
 }
 ```
 
-```toml
-# Cargo.toml
-[dependencies]
-async-std = { version = "1.12.0", features = ["attributes"] }
-safe_drive = { path = "../../../safe_drive" }
-```
-
 ```xml
-<!-- package.xml -->
+<!-- publishers/package.xml -->
 <?xml version="1.0"?>
 <?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
 <package format="3">
@@ -68,13 +80,31 @@ safe_drive = { path = "../../../safe_drive" }
 ```
 
 ```xml
+<!-- subscribers/package.xml -->
+<!-- other entries are omitted -->
   <name>subscribers</name>
   <description>MT-Subscribers</description>
 ```
 
+To use `async_std`, we have to update `Cargo.toml` as follows.
+
+```toml
+# Cargo.toml
+[dependencies]
+async-std = { version = "1.12.0", features = ["attributes"] }
+safe_drive = { path = "../../../safe_drive" }
+```
+
 ## Publishers
 
+The `publishers` publishes messages to 2 topics periodically.
+This create 2 tasks.
+One is send a message every 500ms,
+and another is send a message every 250ms.
+The code of the `publishers` is as follows.
+
 ```rust
+// mt_pubsub/src/publishers/src/main.rs
 use safe_drive::{context::Context, error::DynError, msg::common_interfaces::std_msgs};
 use std::time::Duration;
 
@@ -115,9 +145,35 @@ async fn main() -> Result<(), DynError> {
 }
 ```
 
-## Subscribers
+The `async_std::task::spawn` creates a asynchronous task,
+which is similar to a thread.
+The following is a excerpt creating a task which sends "Hello, World!"
+to "topic1" every 500ms.
 
 ```rust
+// Create a task which sends "Hello, World!".
+let task1 = async_std::task::spawn(async move {
+    let mut msg = std_msgs::msg::String::new().unwrap();
+    msg.data.assign("Hello, World!");
+    for _ in 0..50 {
+        publisher1.send(&msg).unwrap(); // Send a message.
+        async_std::task::sleep(Duration::from_millis(500)).await; // Sleep 500ms.
+    }
+});
+```
+
+This excerpt sends a message by `Publisher::send` and sleep by `async_std::task::sleep`.
+Note that this uses `async_std::task::sleep` instead of `std::thread::sleep`,
+because the former is non-blocking but the the latter is blocking.
+Calling blocking functions should be avoided in asynchronous tasks.
+
+## Subscribers
+
+Then, let's implement the `subscribers`.
+The main function is almost same as previous one.
+
+```rust
+// mt_pubsub/src/subscribers/src/main
 use async_std::future::timeout;
 use safe_drive::{
     context::Context, error::DynError, logger::Logger, msg::common_interfaces::std_msgs, pr_info,
@@ -136,8 +192,8 @@ async fn main() -> Result<(), DynError> {
     let subscriber2 = node.create_subscriber::<std_msgs::msg::String>("topic2", None)?;
 
     // Receive messages.
-    let task1 = async_std::task::spawn(async move { receiver(subscriber1).await });
-    let task2 = async_std::task::spawn(async move { receiver(subscriber2).await });
+    let task1 = async_std::task::spawn(receiver(subscriber1));
+    let task2 = async_std::task::spawn(receiver(subscriber2));
 
     task1.await?;
     task2.await?;
@@ -155,6 +211,17 @@ async fn receiver(mut subscriber: Subscriber<std_msgs::msg::String>) -> Result<(
     }
 }
 ```
+
+`Subscriber::recv` is an asynchronous function to receive a message.
+To receive asynchronously, use the `.await` keyword.
+If there is a message to be received, `recv().await` returns the message immediately.
+Otherwise, it yields the execution to another task and sleeps until arriving a message.
+
+### Modification for Timeout
+
+By using a timeout mechanism provided by asynchronous libraries,
+we can implement receiving with timeout.
+Timeout can be implemented as follows.
 
 ```rust
 async fn receiver(
@@ -178,7 +245,13 @@ async fn receiver(
 }
 ```
 
+`async_std::timeout` is a function to represent timeout.
+`timeout(Duration::from_secs(3), subscriber.recv()).await` calls `subscriber.recv()` asynchronously,
+but it will be timed out after 3s later.
+
 ## Execution
+
+First, execute `publishers` in a terminal application window as follows.
 
 ```text
 $ cd mt_pubsub
@@ -186,6 +259,9 @@ $ colcon build --cargo-args --release
 $ . ./install/setup.bash
 $ ros2 run publishers publishers
 ```
+
+Then, execute `subscribers` in another terminal application window as follows.
+This uses timeout for receiving.
 
 ```text
 $ cd mt_pubsub.
@@ -199,3 +275,7 @@ $ ros2 run subscribers subscribers
 [WARN] [1657076050.448393200] [topic1]: timeout
 [WARN] [1657076050.722433800] [topic2]: timeout
 ```
+
+Nicely done!
+We are sending and receiving messages asynchronously.
+In addition to that, the timeouts work correctly.
