@@ -324,7 +324,9 @@ unsafe impl<const STRLEN: usize, const SEQLEN: usize> Send for RosStringSeq<STRL
 pub mod builtin_interfaces {
     use super::*;
 
-    impl TopicMsg for builtin_interfaces__msg__Duration {
+    pub type Duration = builtin_interfaces__msg__Duration;
+
+    impl TopicMsg for Duration {
         fn type_support() -> *const rcl::rosidl_message_type_support_t {
             unsafe {
                 rosidl_typesupport_c__get_message_type_support_handle__builtin_interfaces__msg__Duration()
@@ -334,13 +336,15 @@ pub mod builtin_interfaces {
 
     def_sequence!(
         DurationSeq,
-        builtin_interfaces__msg__Duration,
+        Duration,
         builtin_interfaces__msg__Duration__Sequence,
         builtin_interfaces__msg__Duration__Sequence__init,
         builtin_interfaces__msg__Duration__Sequence__fini
     );
 
-    impl TopicMsg for builtin_interfaces__msg__Time {
+    pub type Time = builtin_interfaces__msg__Time;
+
+    impl TopicMsg for Time {
         fn type_support() -> *const rcl::rosidl_message_type_support_t {
             unsafe {
                 rosidl_typesupport_c__get_message_type_support_handle__builtin_interfaces__msg__Time(
@@ -351,7 +355,7 @@ pub mod builtin_interfaces {
 
     def_sequence!(
         TimeSeq,
-        builtin_interfaces__msg__Time,
+        Time,
         builtin_interfaces__msg__Time__Sequence,
         builtin_interfaces__msg__Time__Sequence__init,
         builtin_interfaces__msg__Time__Sequence__fini
