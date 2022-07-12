@@ -48,7 +48,8 @@ impl Drop for SetBoolRequest {
     }
 }
 
-
+#[repr(C)]
+#[derive(Debug)]
 struct SetBoolRequestSeqRaw {
     data: *mut SetBoolRequest,
     size: usize,
@@ -131,7 +132,8 @@ impl Drop for SetBoolResponse {
     }
 }
 
-
+#[repr(C)]
+#[derive(Debug)]
 struct SetBoolResponseSeqRaw {
     data: *mut SetBoolResponse,
     size: usize,

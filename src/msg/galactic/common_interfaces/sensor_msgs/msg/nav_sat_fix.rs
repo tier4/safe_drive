@@ -46,7 +46,8 @@ impl Drop for NavSatFix {
     }
 }
 
-
+#[repr(C)]
+#[derive(Debug)]
 struct NavSatFixSeqRaw {
     data: *mut NavSatFix,
     size: usize,

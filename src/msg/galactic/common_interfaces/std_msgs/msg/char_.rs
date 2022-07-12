@@ -36,7 +36,8 @@ impl Drop for Char {
     }
 }
 
-
+#[repr(C)]
+#[derive(Debug)]
 struct CharSeqRaw {
     data: *mut Char,
     size: usize,

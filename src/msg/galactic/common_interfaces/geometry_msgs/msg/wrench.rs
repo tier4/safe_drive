@@ -37,7 +37,8 @@ impl Drop for Wrench {
     }
 }
 
-
+#[repr(C)]
+#[derive(Debug)]
 struct WrenchSeqRaw {
     data: *mut Wrench,
     size: usize,

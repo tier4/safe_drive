@@ -16,7 +16,7 @@ extern "C" {
 #[repr(C)]
 #[derive(Debug)]
 pub struct MapMetaData {
-    pub map_load_time: builtin_interfaces__msg__Time,
+    pub map_load_time: builtin_interfaces::UnsafeTime,
     pub resolution: f32,
     pub width: u32,
     pub height: u32,
@@ -40,7 +40,8 @@ impl Drop for MapMetaData {
     }
 }
 
-
+#[repr(C)]
+#[derive(Debug)]
 struct MapMetaDataSeqRaw {
     data: *mut MapMetaData,
     size: usize,

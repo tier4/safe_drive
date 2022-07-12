@@ -47,7 +47,8 @@ impl Drop for PointField {
     }
 }
 
-
+#[repr(C)]
+#[derive(Debug)]
 struct PointFieldSeqRaw {
     data: *mut PointField,
     size: usize,

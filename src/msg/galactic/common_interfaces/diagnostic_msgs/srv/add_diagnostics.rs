@@ -48,7 +48,8 @@ impl Drop for AddDiagnosticsRequest {
     }
 }
 
-
+#[repr(C)]
+#[derive(Debug)]
 struct AddDiagnosticsRequestSeqRaw {
     data: *mut AddDiagnosticsRequest,
     size: usize,
@@ -131,7 +132,8 @@ impl Drop for AddDiagnosticsResponse {
     }
 }
 
-
+#[repr(C)]
+#[derive(Debug)]
 struct AddDiagnosticsResponseSeqRaw {
     data: *mut AddDiagnosticsResponse,
     size: usize,

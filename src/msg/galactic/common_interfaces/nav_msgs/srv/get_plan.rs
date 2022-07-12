@@ -49,7 +49,8 @@ impl Drop for GetPlanRequest {
     }
 }
 
-
+#[repr(C)]
+#[derive(Debug)]
 struct GetPlanRequestSeqRaw {
     data: *mut GetPlanRequest,
     size: usize,
@@ -132,7 +133,8 @@ impl Drop for GetPlanResponse {
     }
 }
 
-
+#[repr(C)]
+#[derive(Debug)]
 struct GetPlanResponseSeqRaw {
     data: *mut GetPlanResponse,
     size: usize,

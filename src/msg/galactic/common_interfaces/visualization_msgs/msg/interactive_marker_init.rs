@@ -38,7 +38,8 @@ impl Drop for InteractiveMarkerInit {
     }
 }
 
-
+#[repr(C)]
+#[derive(Debug)]
 struct InteractiveMarkerInitSeqRaw {
     data: *mut InteractiveMarkerInit,
     size: usize,

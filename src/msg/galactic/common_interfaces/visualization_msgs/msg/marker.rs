@@ -40,7 +40,7 @@ pub struct Marker {
     pub pose: geometry_msgs::msg::Pose,
     pub scale: geometry_msgs::msg::Vector3,
     pub color: std_msgs::msg::ColorRGBA,
-    pub lifetime: builtin_interfaces__msg__Duration,
+    pub lifetime: builtin_interfaces::UnsafeDuration,
     pub frame_locked: bool,
     pub points: geometry_msgs::msg::PointSeq<0>,
     pub colors: std_msgs::msg::ColorRGBASeq<0>,
@@ -66,7 +66,8 @@ impl Drop for Marker {
     }
 }
 
-
+#[repr(C)]
+#[derive(Debug)]
 struct MarkerSeqRaw {
     data: *mut Marker,
     size: usize,

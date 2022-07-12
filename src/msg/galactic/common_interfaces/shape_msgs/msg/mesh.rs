@@ -37,7 +37,8 @@ impl Drop for Mesh {
     }
 }
 
-
+#[repr(C)]
+#[derive(Debug)]
 struct MeshSeqRaw {
     data: *mut Mesh,
     size: usize,

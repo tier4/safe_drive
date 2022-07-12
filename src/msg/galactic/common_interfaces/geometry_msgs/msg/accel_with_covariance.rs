@@ -37,7 +37,8 @@ impl Drop for AccelWithCovariance {
     }
 }
 
-
+#[repr(C)]
+#[derive(Debug)]
 struct AccelWithCovarianceSeqRaw {
     data: *mut AccelWithCovariance,
     size: usize,

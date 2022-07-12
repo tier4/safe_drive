@@ -36,7 +36,8 @@ impl Drop for Plane {
     }
 }
 
-
+#[repr(C)]
+#[derive(Debug)]
 struct PlaneSeqRaw {
     data: *mut Plane,
     size: usize,

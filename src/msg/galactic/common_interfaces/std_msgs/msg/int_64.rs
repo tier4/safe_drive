@@ -36,7 +36,8 @@ impl Drop for Int64 {
     }
 }
 
-
+#[repr(C)]
+#[derive(Debug)]
 struct Int64SeqRaw {
     data: *mut Int64,
     size: usize,

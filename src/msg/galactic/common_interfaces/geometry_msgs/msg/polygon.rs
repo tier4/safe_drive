@@ -36,7 +36,8 @@ impl Drop for Polygon {
     }
 }
 
-
+#[repr(C)]
+#[derive(Debug)]
 struct PolygonSeqRaw {
     data: *mut Polygon,
     size: usize,

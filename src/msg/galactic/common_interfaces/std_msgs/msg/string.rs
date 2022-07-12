@@ -36,7 +36,8 @@ impl Drop for String {
     }
 }
 
-
+#[repr(C)]
+#[derive(Debug)]
 struct StringSeqRaw {
     data: *mut String,
     size: usize,

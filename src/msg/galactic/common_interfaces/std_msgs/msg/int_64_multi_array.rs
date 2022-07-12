@@ -37,7 +37,8 @@ impl Drop for Int64MultiArray {
     }
 }
 
-
+#[repr(C)]
+#[derive(Debug)]
 struct Int64MultiArraySeqRaw {
     data: *mut Int64MultiArray,
     size: usize,

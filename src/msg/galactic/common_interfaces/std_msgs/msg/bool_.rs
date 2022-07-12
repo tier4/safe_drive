@@ -36,7 +36,8 @@ impl Drop for Bool {
     }
 }
 
-
+#[repr(C)]
+#[derive(Debug)]
 struct BoolSeqRaw {
     data: *mut Bool,
     size: usize,

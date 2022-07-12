@@ -37,7 +37,8 @@ impl Drop for Int8MultiArray {
     }
 }
 
-
+#[repr(C)]
+#[derive(Debug)]
 struct Int8MultiArraySeqRaw {
     data: *mut Int8MultiArray,
     size: usize,

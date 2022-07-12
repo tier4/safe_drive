@@ -37,7 +37,8 @@ impl Drop for DiagnosticArray {
     }
 }
 
-
+#[repr(C)]
+#[derive(Debug)]
 struct DiagnosticArraySeqRaw {
     data: *mut DiagnosticArray,
     size: usize,

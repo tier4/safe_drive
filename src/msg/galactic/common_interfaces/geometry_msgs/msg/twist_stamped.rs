@@ -37,7 +37,8 @@ impl Drop for TwistStamped {
     }
 }
 
-
+#[repr(C)]
+#[derive(Debug)]
 struct TwistStampedSeqRaw {
     data: *mut TwistStamped,
     size: usize,

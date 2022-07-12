@@ -47,7 +47,8 @@ impl Drop for EmptyRequest {
     }
 }
 
-
+#[repr(C)]
+#[derive(Debug)]
 struct EmptyRequestSeqRaw {
     data: *mut EmptyRequest,
     size: usize,
@@ -130,7 +131,8 @@ impl Drop for EmptyResponse {
     }
 }
 
-
+#[repr(C)]
+#[derive(Debug)]
 struct EmptyResponseSeqRaw {
     data: *mut EmptyResponse,
     size: usize,

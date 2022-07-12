@@ -42,7 +42,8 @@ impl Drop for Imu {
     }
 }
 
-
+#[repr(C)]
+#[derive(Debug)]
 struct ImuSeqRaw {
     data: *mut Imu,
     size: usize,

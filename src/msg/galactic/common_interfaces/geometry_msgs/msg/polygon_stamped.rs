@@ -37,7 +37,8 @@ impl Drop for PolygonStamped {
     }
 }
 
-
+#[repr(C)]
+#[derive(Debug)]
 struct PolygonStampedSeqRaw {
     data: *mut PolygonStamped,
     size: usize,

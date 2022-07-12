@@ -38,7 +38,8 @@ impl Drop for MagneticField {
     }
 }
 
-
+#[repr(C)]
+#[derive(Debug)]
 struct MagneticFieldSeqRaw {
     data: *mut MagneticField,
     size: usize,

@@ -37,7 +37,8 @@ impl Drop for Path {
     }
 }
 
-
+#[repr(C)]
+#[derive(Debug)]
 struct PathSeqRaw {
     data: *mut Path,
     size: usize,

@@ -36,7 +36,8 @@ impl Drop for MarkerArray {
     }
 }
 
-
+#[repr(C)]
+#[derive(Debug)]
 struct MarkerArraySeqRaw {
     data: *mut MarkerArray,
     size: usize,

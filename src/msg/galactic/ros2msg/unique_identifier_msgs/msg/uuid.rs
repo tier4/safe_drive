@@ -36,7 +36,8 @@ impl Drop for UUID {
     }
 }
 
-
+#[repr(C)]
+#[derive(Debug)]
 struct UUIDSeqRaw {
     data: *mut UUID,
     size: usize,

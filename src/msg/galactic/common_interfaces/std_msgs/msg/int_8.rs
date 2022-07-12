@@ -36,7 +36,8 @@ impl Drop for Int8 {
     }
 }
 
-
+#[repr(C)]
+#[derive(Debug)]
 struct Int8SeqRaw {
     data: *mut Int8,
     size: usize,

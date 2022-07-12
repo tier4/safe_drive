@@ -39,7 +39,8 @@ impl Drop for ColorRGBA {
     }
 }
 
-
+#[repr(C)]
+#[derive(Debug)]
 struct ColorRGBASeqRaw {
     data: *mut ColorRGBA,
     size: usize,

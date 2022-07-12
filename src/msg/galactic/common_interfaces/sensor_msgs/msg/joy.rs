@@ -38,7 +38,8 @@ impl Drop for Joy {
     }
 }
 
-
+#[repr(C)]
+#[derive(Debug)]
 struct JoySeqRaw {
     data: *mut Joy,
     size: usize,

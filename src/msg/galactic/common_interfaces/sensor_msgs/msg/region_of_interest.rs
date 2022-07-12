@@ -40,7 +40,8 @@ impl Drop for RegionOfInterest {
     }
 }
 
-
+#[repr(C)]
+#[derive(Debug)]
 struct RegionOfInterestSeqRaw {
     data: *mut RegionOfInterest,
     size: usize,

@@ -38,7 +38,8 @@ impl Drop for CompressedImage {
     }
 }
 
-
+#[repr(C)]
+#[derive(Debug)]
 struct CompressedImageSeqRaw {
     data: *mut CompressedImage,
     size: usize,

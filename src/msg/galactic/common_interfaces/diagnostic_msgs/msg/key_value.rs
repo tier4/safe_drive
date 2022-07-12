@@ -37,7 +37,8 @@ impl Drop for KeyValue {
     }
 }
 
-
+#[repr(C)]
+#[derive(Debug)]
 struct KeyValueSeqRaw {
     data: *mut KeyValue,
     size: usize,

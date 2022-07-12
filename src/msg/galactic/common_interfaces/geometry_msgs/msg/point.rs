@@ -38,7 +38,8 @@ impl Drop for Point {
     }
 }
 
-
+#[repr(C)]
+#[derive(Debug)]
 struct PointSeqRaw {
     data: *mut Point,
     size: usize,

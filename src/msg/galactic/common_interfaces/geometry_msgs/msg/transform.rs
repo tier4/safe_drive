@@ -37,7 +37,8 @@ impl Drop for Transform {
     }
 }
 
-
+#[repr(C)]
+#[derive(Debug)]
 struct TransformSeqRaw {
     data: *mut Transform,
     size: usize,

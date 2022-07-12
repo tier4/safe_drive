@@ -43,7 +43,8 @@ impl Drop for MenuEntry {
     }
 }
 
-
+#[repr(C)]
+#[derive(Debug)]
 struct MenuEntrySeqRaw {
     data: *mut MenuEntry,
     size: usize,

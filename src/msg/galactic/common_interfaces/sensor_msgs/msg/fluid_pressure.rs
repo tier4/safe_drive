@@ -38,7 +38,8 @@ impl Drop for FluidPressure {
     }
 }
 
-
+#[repr(C)]
+#[derive(Debug)]
 struct FluidPressureSeqRaw {
     data: *mut FluidPressure,
     size: usize,

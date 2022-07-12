@@ -40,7 +40,8 @@ impl Drop for MultiDOFJointState {
     }
 }
 
-
+#[repr(C)]
+#[derive(Debug)]
 struct MultiDOFJointStateSeqRaw {
     data: *mut MultiDOFJointState,
     size: usize,

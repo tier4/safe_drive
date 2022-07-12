@@ -33,7 +33,7 @@ pub struct ImageMarker {
     pub outline_color: std_msgs::msg::ColorRGBA,
     pub filled: u8,
     pub fill_color: std_msgs::msg::ColorRGBA,
-    pub lifetime: builtin_interfaces__msg__Duration,
+    pub lifetime: builtin_interfaces::UnsafeDuration,
     pub points: geometry_msgs::msg::PointSeq<0>,
     pub outline_colors: std_msgs::msg::ColorRGBASeq<0>,
 }
@@ -55,7 +55,8 @@ impl Drop for ImageMarker {
     }
 }
 
-
+#[repr(C)]
+#[derive(Debug)]
 struct ImageMarkerSeqRaw {
     data: *mut ImageMarker,
     size: usize,

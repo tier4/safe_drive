@@ -37,7 +37,8 @@ impl Drop for QuaternionStamped {
     }
 }
 
-
+#[repr(C)]
+#[derive(Debug)]
 struct QuaternionStampedSeqRaw {
     data: *mut QuaternionStamped,
     size: usize,

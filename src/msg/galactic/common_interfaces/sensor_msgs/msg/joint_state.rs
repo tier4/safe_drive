@@ -40,7 +40,8 @@ impl Drop for JointState {
     }
 }
 
-
+#[repr(C)]
+#[derive(Debug)]
 struct JointStateSeqRaw {
     data: *mut JointState,
     size: usize,

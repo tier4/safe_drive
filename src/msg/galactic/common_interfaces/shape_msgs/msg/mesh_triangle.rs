@@ -36,7 +36,8 @@ impl Drop for MeshTriangle {
     }
 }
 
-
+#[repr(C)]
+#[derive(Debug)]
 struct MeshTriangleSeqRaw {
     data: *mut MeshTriangle,
     size: usize,

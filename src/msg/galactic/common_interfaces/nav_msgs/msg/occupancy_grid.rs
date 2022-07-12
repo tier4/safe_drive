@@ -38,7 +38,8 @@ impl Drop for OccupancyGrid {
     }
 }
 
-
+#[repr(C)]
+#[derive(Debug)]
 struct OccupancyGridSeqRaw {
     data: *mut OccupancyGrid,
     size: usize,

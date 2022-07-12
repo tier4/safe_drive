@@ -48,7 +48,8 @@ impl Drop for SetCameraInfoRequest {
     }
 }
 
-
+#[repr(C)]
+#[derive(Debug)]
 struct SetCameraInfoRequestSeqRaw {
     data: *mut SetCameraInfoRequest,
     size: usize,
@@ -131,7 +132,8 @@ impl Drop for SetCameraInfoResponse {
     }
 }
 
-
+#[repr(C)]
+#[derive(Debug)]
 struct SetCameraInfoResponseSeqRaw {
     data: *mut SetCameraInfoResponse,
     size: usize,

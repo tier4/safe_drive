@@ -143,6 +143,144 @@
                 <div id="content" class="content">
                     <main>
                         <h1 id="user-defined-data-structure"><a class="header" href="#user-defined-data-structure">User Defined Data Structure</a></h1>
+<h2 id="installing-ros2msg_to_rs"><a class="header" href="#installing-ros2msg_to_rs">Installing <code>ros2msg_to_rs</code></a></h2>
+<pre><code class="language-text">$ git clone https://github.com/tier4/ros2msg_to_rs.git
+$ cd ros2msg_to_rs
+$ cargo build --release
+$ cargo instal --path .
+</code></pre>
+<pre><code class="language-text">$ mkdir -p msgtest/src
+</code></pre>
+<h2 id="defining-user-defined-type"><a class="header" href="#defining-user-defined-type">Defining User Defined Type</a></h2>
+<pre><code class="language-text">$ cd msgtest/src
+$ ros2 pkg create --build-type ament_cmake my_interfaces
+$ cd my_interfaces
+$ mkdir msg
+$ cd msg
+</code></pre>
+<p><code>msgtest/src/my_interfaces/msg</code></p>
+<p><code>msgtest/src/my_interfaces/msg/MyMsg.msg</code></p>
+<pre><code class="language-text">string message
+string[2] static_array_str
+string[] dynamic_array_str
+string[&lt;=3] bounded_array_str
+
+string&lt;=10 bounded_str
+string&lt;=10[2] static_array_bounded_str
+string&lt;=10[] dynamic_array_bounded_str
+string&lt;=10[&lt;=3] bounded_array_bounded_str
+</code></pre>
+<p><code>msgtest/src/my_interfaces/msg/MyMsgs.msg</code></p>
+<pre><code class="language-text">MyMsg msg1
+MyMsg msg2
+</code></pre>
+<pre><code class="language-text">$ cd msgtest/src
+$ cargo new --lib my_interfaces_rs
+$ ros2msg_to_rs -o my_interfaces_rs/src -i my_interfaces
+$ generating: my_interfaces_rs/src/msg/msg/my_msg.rs
+$ generating: my_interfaces_rs/src/msg/msg.rs
+$ generating: my_interfaces_rs/src/mod.rs
+$ generating: my_interfaces_rs/src/msg/mod.rs
+</code></pre>
+<pre><code class="language-cmake"># msgtest/src/my_interfaces/CMakeLists.txt
+find_package(rosidl_default_generators REQUIRED)
+
+rosidl_generate_interfaces(${PROJECT_NAME}
+  &quot;msg/MyMsg.msg&quot;
+)
+</code></pre>
+<pre><code class="language-xml">&lt;!-- msgtest/src/my_interfaces/package.xml --&gt;
+&lt;build_depend&gt;rosidl_default_generators&lt;/build_depend&gt;
+
+&lt;exec_depend&gt;rosidl_default_runtime&lt;/exec_depend&gt;
+
+&lt;member_of_group&gt;rosidl_interface_packages&lt;/member_of_group&gt;
+</code></pre>
+<h2 id="user-defined-type-in-rust"><a class="header" href="#user-defined-type-in-rust">User Defined Type in Rust</a></h2>
+<pre><code class="language-text">$ cd msgtest/src
+$ create new --lib my_interfaces_rs
+$ ros2msg_to_rs -o ./my_interfaces_rs/src -i ./
+</code></pre>
+<pre><pre class="playground"><code class="language-rust">
+<span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>// msgtest/src/my_interfaces_rs/src/my_interfaces/msg/my_msg.rs
+#[repr(C)]
+#[derive(Debug)]
+pub struct MyMsg {
+    pub message: safe_drive::msg::RosString&lt;0&gt;,
+    pub static_array_str: [safe_drive::msg::RosString&lt;0&gt;; 2],
+    pub dynamic_array_str: safe_drive::msg::RosStringSeq&lt;0, 0&gt;,
+    pub bounded_array_str: safe_drive::msg::RosStringSeq&lt;0, 3&gt;,
+    pub bounded_str: safe_drive::msg::RosString&lt;10&gt;,
+    pub static_array_bounded_str: [safe_drive::msg::RosString&lt;10&gt;; 2],
+    pub dynamic_array_bounded_str: safe_drive::msg::RosStringSeq&lt;10, 0&gt;,
+    pub bounded_array_bounded_str: safe_drive::msg::RosStringSeq&lt;10, 3&gt;,
+}
+<span class="boring">}
+</span></code></pre></pre>
+<pre><pre class="playground"><code class="language-rust">
+<span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>// msgtest/src/my_interfaces_rs/src/my_interfaces/msg/my_msgs.rs
+#[repr(C)]
+#[derive(Debug)]
+pub struct MyMsgs {
+    pub msg1: MyMsg,
+    pub msg2: MyMsg,
+}
+<span class="boring">}
+</span></code></pre></pre>
+<pre><pre class="playground"><code class="language-rust">
+<span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>// msgtest/src/my_interfaces_rs/src/lib.rs
+#![allow(dead_code)]
+#![allow(non_upper_case_globals)]
+#![allow(non_camel_case_types)]
+#![allow(deref_nullptr)]
+#![allow(non_snake_case)]
+#![allow(improper_ctypes)]
+#![allow(unused_imports)]
+#![allow(clippy::upper_case_acronyms)]
+#![allow(clippy::too_many_arguments)]
+
+pub mod my_interfaces;
+<span class="boring">}
+</span></code></pre></pre>
+<pre><code class="language-xml">&lt;!-- msgtest/src/my_interfaces_rs/package.xml --&gt;
+&lt;?xml version=&quot;1.0&quot;?&gt;
+&lt;?xml-model href=&quot;http://download.ros.org/schema/package_format3.xsd&quot; schematypens=&quot;http://www.w3.org/2001/XMLSchema&quot;?&gt;
+&lt;package format=&quot;3&quot;&gt;
+  &lt;name&gt;my_interfaces_rs&lt;/name&gt;
+  &lt;version&gt;0.0.0&lt;/version&gt;
+  &lt;description&gt;My Interfaces in Rust&lt;/description&gt;
+  &lt;maintainer email=&quot;yuuki.takano@tier4.jp&quot;&gt;Yuuki Takano&lt;/maintainer&gt;
+  &lt;license&gt;TODO: License declaration&lt;/license&gt;
+
+  &lt;test_depend&gt;ament_lint_auto&lt;/test_depend&gt;
+  &lt;test_depend&gt;ament_lint_common&lt;/test_depend&gt;
+
+  &lt;export&gt;
+    &lt;build_type&gt;ament_cargo&lt;/build_type&gt;
+  &lt;/export&gt;
+&lt;/package&gt;
+</code></pre>
+<pre><pre class="playground"><code class="language-rust">// msgtest/src/my_interfaces_rs/build.rs
+fn main() {
+    println!(&quot;cargo:rustc-link-lib=my_interfaces__rosidl_generator_c&quot;);
+    println!(&quot;cargo:rustc-link-lib=my_interfaces__rosidl_typesupport_c&quot;);
+    println!(&quot;cargo:rustc-link-lib=my_interfaces__rosidl_typesupport_introspection_c&quot;);
+    println!(&quot;cargo:rustc-link-lib=my_interfaces__rosidl_typesupport_fastrtps_c&quot;);
+
+    if let Some(e) = std::env::var_os(&quot;AMENT_PREFIX_PATH&quot;) {
+        let env = e.to_str().unwrap();
+        for path in env.split(':') {
+            println!(&quot;cargo:rustc-link-search={path}/lib&quot;);
+        }
+    }
+}
+</code></pre></pre>
 
                     </main>
 

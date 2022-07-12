@@ -37,7 +37,8 @@ impl Drop for PoseWithCovarianceStamped {
     }
 }
 
-
+#[repr(C)]
+#[derive(Debug)]
 struct PoseWithCovarianceStampedSeqRaw {
     data: *mut PoseWithCovarianceStamped,
     size: usize,

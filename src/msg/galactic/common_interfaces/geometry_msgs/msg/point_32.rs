@@ -38,7 +38,8 @@ impl Drop for Point32 {
     }
 }
 
-
+#[repr(C)]
+#[derive(Debug)]
 struct Point32SeqRaw {
     data: *mut Point32,
     size: usize,

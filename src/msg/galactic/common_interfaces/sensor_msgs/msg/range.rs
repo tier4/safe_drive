@@ -43,7 +43,8 @@ impl Drop for Range {
     }
 }
 
-
+#[repr(C)]
+#[derive(Debug)]
 struct RangeSeqRaw {
     data: *mut Range,
     size: usize,

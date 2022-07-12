@@ -46,7 +46,8 @@ impl Drop for CameraInfo {
     }
 }
 
-
+#[repr(C)]
+#[derive(Debug)]
 struct CameraInfoSeqRaw {
     data: *mut CameraInfo,
     size: usize,

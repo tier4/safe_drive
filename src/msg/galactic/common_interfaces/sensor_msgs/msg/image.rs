@@ -42,7 +42,8 @@ impl Drop for Image {
     }
 }
 
-
+#[repr(C)]
+#[derive(Debug)]
 struct ImageSeqRaw {
     data: *mut Image,
     size: usize,

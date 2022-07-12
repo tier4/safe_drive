@@ -37,7 +37,8 @@ impl Drop for Vector3Stamped {
     }
 }
 
-
+#[repr(C)]
+#[derive(Debug)]
 struct Vector3StampedSeqRaw {
     data: *mut Vector3Stamped,
     size: usize,

@@ -48,7 +48,8 @@ impl Drop for TriggerRequest {
     }
 }
 
-
+#[repr(C)]
+#[derive(Debug)]
 struct TriggerRequestSeqRaw {
     data: *mut TriggerRequest,
     size: usize,
@@ -131,7 +132,8 @@ impl Drop for TriggerResponse {
     }
 }
 
-
+#[repr(C)]
+#[derive(Debug)]
 struct TriggerResponseSeqRaw {
     data: *mut TriggerResponse,
     size: usize,

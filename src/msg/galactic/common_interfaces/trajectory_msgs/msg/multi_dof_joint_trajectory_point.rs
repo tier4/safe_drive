@@ -19,7 +19,7 @@ pub struct MultiDOFJointTrajectoryPoint {
     pub transforms: geometry_msgs::msg::TransformSeq<0>,
     pub velocities: geometry_msgs::msg::TwistSeq<0>,
     pub accelerations: geometry_msgs::msg::TwistSeq<0>,
-    pub time_from_start: builtin_interfaces__msg__Duration,
+    pub time_from_start: builtin_interfaces::UnsafeDuration,
 }
 
 impl MultiDOFJointTrajectoryPoint {
@@ -39,7 +39,8 @@ impl Drop for MultiDOFJointTrajectoryPoint {
     }
 }
 
-
+#[repr(C)]
+#[derive(Debug)]
 struct MultiDOFJointTrajectoryPointSeqRaw {
     data: *mut MultiDOFJointTrajectoryPoint,
     size: usize,

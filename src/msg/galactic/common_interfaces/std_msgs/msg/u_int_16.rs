@@ -36,7 +36,8 @@ impl Drop for UInt16 {
     }
 }
 
-
+#[repr(C)]
+#[derive(Debug)]
 struct UInt16SeqRaw {
     data: *mut UInt16,
     size: usize,

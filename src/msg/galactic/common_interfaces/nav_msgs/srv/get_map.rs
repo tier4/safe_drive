@@ -47,7 +47,8 @@ impl Drop for GetMapRequest {
     }
 }
 
-
+#[repr(C)]
+#[derive(Debug)]
 struct GetMapRequestSeqRaw {
     data: *mut GetMapRequest,
     size: usize,
@@ -130,7 +131,8 @@ impl Drop for GetMapResponse {
     }
 }
 
-
+#[repr(C)]
+#[derive(Debug)]
 struct GetMapResponseSeqRaw {
     data: *mut GetMapResponse,
     size: usize,

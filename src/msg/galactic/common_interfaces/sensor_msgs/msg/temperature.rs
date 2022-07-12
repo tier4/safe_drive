@@ -38,7 +38,8 @@ impl Drop for Temperature {
     }
 }
 
-
+#[repr(C)]
+#[derive(Debug)]
 struct TemperatureSeqRaw {
     data: *mut Temperature,
     size: usize,

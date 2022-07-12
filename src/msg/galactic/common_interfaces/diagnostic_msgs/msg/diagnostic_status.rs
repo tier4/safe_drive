@@ -44,7 +44,8 @@ impl Drop for DiagnosticStatus {
     }
 }
 
-
+#[repr(C)]
+#[derive(Debug)]
 struct DiagnosticStatusSeqRaw {
     data: *mut DiagnosticStatus,
     size: usize,

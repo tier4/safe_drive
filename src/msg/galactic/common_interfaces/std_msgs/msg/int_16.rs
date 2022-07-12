@@ -36,7 +36,8 @@ impl Drop for Int16 {
     }
 }
 
-
+#[repr(C)]
+#[derive(Debug)]
 struct Int16SeqRaw {
     data: *mut Int16,
     size: usize,

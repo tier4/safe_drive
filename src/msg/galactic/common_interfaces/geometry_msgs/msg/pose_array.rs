@@ -37,7 +37,8 @@ impl Drop for PoseArray {
     }
 }
 
-
+#[repr(C)]
+#[derive(Debug)]
 struct PoseArraySeqRaw {
     data: *mut PoseArray,
     size: usize,

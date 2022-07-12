@@ -56,7 +56,8 @@ impl Drop for InteractiveMarkerControl {
     }
 }
 
-
+#[repr(C)]
+#[derive(Debug)]
 struct InteractiveMarkerControlSeqRaw {
     data: *mut InteractiveMarkerControl,
     size: usize,

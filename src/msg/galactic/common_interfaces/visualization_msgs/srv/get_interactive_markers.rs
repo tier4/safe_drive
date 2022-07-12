@@ -48,7 +48,8 @@ impl Drop for GetInteractiveMarkersRequest {
     }
 }
 
-
+#[repr(C)]
+#[derive(Debug)]
 struct GetInteractiveMarkersRequestSeqRaw {
     data: *mut GetInteractiveMarkersRequest,
     size: usize,
@@ -131,7 +132,8 @@ impl Drop for GetInteractiveMarkersResponse {
     }
 }
 
-
+#[repr(C)]
+#[derive(Debug)]
 struct GetInteractiveMarkersResponseSeqRaw {
     data: *mut GetInteractiveMarkersResponse,
     size: usize,

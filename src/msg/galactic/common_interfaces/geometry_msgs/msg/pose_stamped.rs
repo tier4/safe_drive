@@ -37,7 +37,8 @@ impl Drop for PoseStamped {
     }
 }
 
-
+#[repr(C)]
+#[derive(Debug)]
 struct PoseStampedSeqRaw {
     data: *mut PoseStamped,
     size: usize,

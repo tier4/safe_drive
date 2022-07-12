@@ -39,7 +39,8 @@ impl Drop for GridCells {
     }
 }
 
-
+#[repr(C)]
+#[derive(Debug)]
 struct GridCellsSeqRaw {
     data: *mut GridCells,
     size: usize,

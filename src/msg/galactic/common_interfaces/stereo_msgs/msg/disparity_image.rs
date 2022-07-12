@@ -43,7 +43,8 @@ impl Drop for DisparityImage {
     }
 }
 
-
+#[repr(C)]
+#[derive(Debug)]
 struct DisparityImageSeqRaw {
     data: *mut DisparityImage,
     size: usize,

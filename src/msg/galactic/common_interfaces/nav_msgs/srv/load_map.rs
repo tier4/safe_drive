@@ -53,7 +53,8 @@ impl Drop for LoadMapRequest {
     }
 }
 
-
+#[repr(C)]
+#[derive(Debug)]
 struct LoadMapRequestSeqRaw {
     data: *mut LoadMapRequest,
     size: usize,
@@ -136,7 +137,8 @@ impl Drop for LoadMapResponse {
     }
 }
 
-
+#[repr(C)]
+#[derive(Debug)]
 struct LoadMapResponseSeqRaw {
     data: *mut LoadMapResponse,
     size: usize,

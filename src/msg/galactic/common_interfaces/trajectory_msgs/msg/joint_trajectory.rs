@@ -38,7 +38,8 @@ impl Drop for JointTrajectory {
     }
 }
 
-
+#[repr(C)]
+#[derive(Debug)]
 struct JointTrajectorySeqRaw {
     data: *mut JointTrajectory,
     size: usize,

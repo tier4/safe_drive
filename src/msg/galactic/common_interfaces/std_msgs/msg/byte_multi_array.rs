@@ -37,7 +37,8 @@ impl Drop for ByteMultiArray {
     }
 }
 
-
+#[repr(C)]
+#[derive(Debug)]
 struct ByteMultiArraySeqRaw {
     data: *mut ByteMultiArray,
     size: usize,

@@ -37,7 +37,8 @@ impl Drop for AccelStamped {
     }
 }
 
-
+#[repr(C)]
+#[derive(Debug)]
 struct AccelStampedSeqRaw {
     data: *mut AccelStamped,
     size: usize,

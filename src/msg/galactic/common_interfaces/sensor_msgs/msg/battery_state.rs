@@ -72,7 +72,8 @@ impl Drop for BatteryState {
     }
 }
 
-
+#[repr(C)]
+#[derive(Debug)]
 struct BatteryStateSeqRaw {
     data: *mut BatteryState,
     size: usize,

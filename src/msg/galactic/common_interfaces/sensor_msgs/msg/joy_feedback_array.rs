@@ -36,7 +36,8 @@ impl Drop for JoyFeedbackArray {
     }
 }
 
-
+#[repr(C)]
+#[derive(Debug)]
 struct JoyFeedbackArraySeqRaw {
     data: *mut JoyFeedbackArray,
     size: usize,

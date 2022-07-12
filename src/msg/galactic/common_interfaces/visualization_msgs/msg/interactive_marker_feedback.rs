@@ -50,7 +50,8 @@ impl Drop for InteractiveMarkerFeedback {
     }
 }
 
-
+#[repr(C)]
+#[derive(Debug)]
 struct InteractiveMarkerFeedbackSeqRaw {
     data: *mut InteractiveMarkerFeedback,
     size: usize,

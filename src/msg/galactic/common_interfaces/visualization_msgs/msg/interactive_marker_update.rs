@@ -43,7 +43,8 @@ impl Drop for InteractiveMarkerUpdate {
     }
 }
 
-
+#[repr(C)]
+#[derive(Debug)]
 struct InteractiveMarkerUpdateSeqRaw {
     data: *mut InteractiveMarkerUpdate,
     size: usize,

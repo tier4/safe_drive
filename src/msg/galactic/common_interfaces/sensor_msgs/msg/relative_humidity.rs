@@ -38,7 +38,8 @@ impl Drop for RelativeHumidity {
     }
 }
 
-
+#[repr(C)]
+#[derive(Debug)]
 struct RelativeHumiditySeqRaw {
     data: *mut RelativeHumidity,
     size: usize,

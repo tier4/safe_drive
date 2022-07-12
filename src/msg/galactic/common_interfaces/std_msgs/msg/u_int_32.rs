@@ -36,7 +36,8 @@ impl Drop for UInt32 {
     }
 }
 
-
+#[repr(C)]
+#[derive(Debug)]
 struct UInt32SeqRaw {
     data: *mut UInt32,
     size: usize,

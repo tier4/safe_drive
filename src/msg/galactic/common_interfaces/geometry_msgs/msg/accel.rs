@@ -37,7 +37,8 @@ impl Drop for Accel {
     }
 }
 
-
+#[repr(C)]
+#[derive(Debug)]
 struct AccelSeqRaw {
     data: *mut Accel,
     size: usize,

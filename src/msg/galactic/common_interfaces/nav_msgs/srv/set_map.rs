@@ -48,7 +48,8 @@ impl Drop for SetMapRequest {
     }
 }
 
-
+#[repr(C)]
+#[derive(Debug)]
 struct SetMapRequestSeqRaw {
     data: *mut SetMapRequest,
     size: usize,
@@ -131,7 +132,8 @@ impl Drop for SetMapResponse {
     }
 }
 
-
+#[repr(C)]
+#[derive(Debug)]
 struct SetMapResponseSeqRaw {
     data: *mut SetMapResponse,
     size: usize,

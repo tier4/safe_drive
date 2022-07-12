@@ -38,7 +38,8 @@ impl Drop for Vector3 {
     }
 }
 
-
+#[repr(C)]
+#[derive(Debug)]
 struct Vector3SeqRaw {
     data: *mut Vector3,
     size: usize,

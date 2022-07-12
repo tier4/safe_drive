@@ -37,7 +37,8 @@ impl Drop for InertiaStamped {
     }
 }
 
-
+#[repr(C)]
+#[derive(Debug)]
 struct InertiaStampedSeqRaw {
     data: *mut InertiaStamped,
     size: usize,

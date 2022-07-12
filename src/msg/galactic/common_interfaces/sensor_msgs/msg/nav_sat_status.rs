@@ -45,7 +45,8 @@ impl Drop for NavSatStatus {
     }
 }
 
-
+#[repr(C)]
+#[derive(Debug)]
 struct NavSatStatusSeqRaw {
     data: *mut NavSatStatus,
     size: usize,

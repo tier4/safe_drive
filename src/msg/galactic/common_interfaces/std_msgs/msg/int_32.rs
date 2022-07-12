@@ -36,7 +36,8 @@ impl Drop for Int32 {
     }
 }
 
-
+#[repr(C)]
+#[derive(Debug)]
 struct Int32SeqRaw {
     data: *mut Int32,
     size: usize,

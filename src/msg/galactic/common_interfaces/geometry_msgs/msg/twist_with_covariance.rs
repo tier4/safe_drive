@@ -37,7 +37,8 @@ impl Drop for TwistWithCovariance {
     }
 }
 
-
+#[repr(C)]
+#[derive(Debug)]
 struct TwistWithCovarianceSeqRaw {
     data: *mut TwistWithCovariance,
     size: usize,

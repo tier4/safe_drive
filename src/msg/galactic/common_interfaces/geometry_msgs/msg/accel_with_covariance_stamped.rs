@@ -37,7 +37,8 @@ impl Drop for AccelWithCovarianceStamped {
     }
 }
 
-
+#[repr(C)]
+#[derive(Debug)]
 struct AccelWithCovarianceStampedSeqRaw {
     data: *mut AccelWithCovarianceStamped,
     size: usize,

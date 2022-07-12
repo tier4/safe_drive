@@ -38,7 +38,8 @@ impl Drop for PointCloud {
     }
 }
 
-
+#[repr(C)]
+#[derive(Debug)]
 struct PointCloudSeqRaw {
     data: *mut PointCloud,
     size: usize,

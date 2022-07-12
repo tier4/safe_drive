@@ -39,7 +39,8 @@ impl Drop for Quaternion {
     }
 }
 
-
+#[repr(C)]
+#[derive(Debug)]
 struct QuaternionSeqRaw {
     data: *mut Quaternion,
     size: usize,

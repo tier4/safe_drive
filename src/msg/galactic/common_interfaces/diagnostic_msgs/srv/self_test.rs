@@ -49,7 +49,8 @@ impl Drop for SelfTestRequest {
     }
 }
 
-
+#[repr(C)]
+#[derive(Debug)]
 struct SelfTestRequestSeqRaw {
     data: *mut SelfTestRequest,
     size: usize,
@@ -132,7 +133,8 @@ impl Drop for SelfTestResponse {
     }
 }
 
-
+#[repr(C)]
+#[derive(Debug)]
 struct SelfTestResponseSeqRaw {
     data: *mut SelfTestResponse,
     size: usize,

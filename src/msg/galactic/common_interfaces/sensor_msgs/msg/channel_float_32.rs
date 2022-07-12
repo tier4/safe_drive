@@ -37,7 +37,8 @@ impl Drop for ChannelFloat32 {
     }
 }
 
-
+#[repr(C)]
+#[derive(Debug)]
 struct ChannelFloat32SeqRaw {
     data: *mut ChannelFloat32,
     size: usize,

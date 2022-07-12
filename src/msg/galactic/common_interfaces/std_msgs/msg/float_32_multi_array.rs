@@ -37,7 +37,8 @@ impl Drop for Float32MultiArray {
     }
 }
 
-
+#[repr(C)]
+#[derive(Debug)]
 struct Float32MultiArraySeqRaw {
     data: *mut Float32MultiArray,
     size: usize,

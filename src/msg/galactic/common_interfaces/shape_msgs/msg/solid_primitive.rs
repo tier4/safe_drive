@@ -49,7 +49,8 @@ impl Drop for SolidPrimitive {
     }
 }
 
-
+#[repr(C)]
+#[derive(Debug)]
 struct SolidPrimitiveSeqRaw {
     data: *mut SolidPrimitive,
     size: usize,

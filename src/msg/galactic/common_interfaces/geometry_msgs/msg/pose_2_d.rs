@@ -38,7 +38,8 @@ impl Drop for Pose2D {
     }
 }
 
-
+#[repr(C)]
+#[derive(Debug)]
 struct Pose2DSeqRaw {
     data: *mut Pose2D,
     size: usize,

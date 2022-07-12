@@ -16,7 +16,7 @@ extern "C" {
 #[repr(C)]
 #[derive(Debug)]
 pub struct GoalID {
-    pub stamp: builtin_interfaces__msg__Time,
+    pub stamp: builtin_interfaces::UnsafeTime,
     pub id: crate::msg::RosString<0>,
 }
 
@@ -37,7 +37,8 @@ impl Drop for GoalID {
     }
 }
 
-
+#[repr(C)]
+#[derive(Debug)]
 struct GoalIDSeqRaw {
     data: *mut GoalID,
     size: usize,

@@ -38,7 +38,8 @@ impl Drop for MultiArrayDimension {
     }
 }
 
-
+#[repr(C)]
+#[derive(Debug)]
 struct MultiArrayDimensionSeqRaw {
     data: *mut MultiArrayDimension,
     size: usize,

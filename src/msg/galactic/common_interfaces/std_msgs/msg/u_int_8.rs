@@ -36,7 +36,8 @@ impl Drop for UInt8 {
     }
 }
 
-
+#[repr(C)]
+#[derive(Debug)]
 struct UInt8SeqRaw {
     data: *mut UInt8,
     size: usize,

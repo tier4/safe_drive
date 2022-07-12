@@ -20,7 +20,7 @@ pub struct JointTrajectoryPoint {
     pub velocities: crate::msg::F64Seq<0>,
     pub accelerations: crate::msg::F64Seq<0>,
     pub effort: crate::msg::F64Seq<0>,
-    pub time_from_start: builtin_interfaces__msg__Duration,
+    pub time_from_start: builtin_interfaces::UnsafeDuration,
 }
 
 impl JointTrajectoryPoint {
@@ -40,7 +40,8 @@ impl Drop for JointTrajectoryPoint {
     }
 }
 
-
+#[repr(C)]
+#[derive(Debug)]
 struct JointTrajectoryPointSeqRaw {
     data: *mut JointTrajectoryPoint,
     size: usize,

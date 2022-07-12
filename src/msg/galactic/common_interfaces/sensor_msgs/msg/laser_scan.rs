@@ -45,7 +45,8 @@ impl Drop for LaserScan {
     }
 }
 
-
+#[repr(C)]
+#[derive(Debug)]
 struct LaserScanSeqRaw {
     data: *mut LaserScan,
     size: usize,

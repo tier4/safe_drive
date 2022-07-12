@@ -39,7 +39,8 @@ impl Drop for Odometry {
     }
 }
 
-
+#[repr(C)]
+#[derive(Debug)]
 struct OdometrySeqRaw {
     data: *mut Odometry,
     size: usize,

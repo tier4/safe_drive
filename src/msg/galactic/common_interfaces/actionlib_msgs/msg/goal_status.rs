@@ -48,7 +48,8 @@ impl Drop for GoalStatus {
     }
 }
 
-
+#[repr(C)]
+#[derive(Debug)]
 struct GoalStatusSeqRaw {
     data: *mut GoalStatus,
     size: usize,

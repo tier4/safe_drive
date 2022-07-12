@@ -43,7 +43,8 @@ impl Drop for Inertia {
     }
 }
 
-
+#[repr(C)]
+#[derive(Debug)]
 struct InertiaSeqRaw {
     data: *mut Inertia,
     size: usize,

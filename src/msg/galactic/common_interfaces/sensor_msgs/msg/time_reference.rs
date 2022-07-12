@@ -17,7 +17,7 @@ extern "C" {
 #[derive(Debug)]
 pub struct TimeReference {
     pub header: std_msgs::msg::Header,
-    pub time_ref: builtin_interfaces__msg__Time,
+    pub time_ref: builtin_interfaces::UnsafeTime,
     pub source: crate::msg::RosString<0>,
 }
 
@@ -38,7 +38,8 @@ impl Drop for TimeReference {
     }
 }
 
-
+#[repr(C)]
+#[derive(Debug)]
 struct TimeReferenceSeqRaw {
     data: *mut TimeReference,
     size: usize,

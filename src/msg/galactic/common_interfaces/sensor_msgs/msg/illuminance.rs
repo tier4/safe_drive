@@ -38,7 +38,8 @@ impl Drop for Illuminance {
     }
 }
 
-
+#[repr(C)]
+#[derive(Debug)]
 struct IlluminanceSeqRaw {
     data: *mut Illuminance,
     size: usize,

@@ -37,7 +37,8 @@ impl Drop for PoseWithCovariance {
     }
 }
 
-
+#[repr(C)]
+#[derive(Debug)]
 struct PoseWithCovarianceSeqRaw {
     data: *mut PoseWithCovariance,
     size: usize,

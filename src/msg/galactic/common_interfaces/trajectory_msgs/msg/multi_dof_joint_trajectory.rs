@@ -38,7 +38,8 @@ impl Drop for MultiDOFJointTrajectory {
     }
 }
 
-
+#[repr(C)]
+#[derive(Debug)]
 struct MultiDOFJointTrajectorySeqRaw {
     data: *mut MultiDOFJointTrajectory,
     size: usize,

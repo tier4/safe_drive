@@ -45,7 +45,8 @@ impl Drop for MultiEchoLaserScan {
     }
 }
 
-
+#[repr(C)]
+#[derive(Debug)]
 struct MultiEchoLaserScanSeqRaw {
     data: *mut MultiEchoLaserScan,
     size: usize,

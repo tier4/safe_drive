@@ -37,7 +37,8 @@ impl Drop for MultiArrayLayout {
     }
 }
 
-
+#[repr(C)]
+#[derive(Debug)]
 struct MultiArrayLayoutSeqRaw {
     data: *mut MultiArrayLayout,
     size: usize,

@@ -36,7 +36,8 @@ impl Drop for Byte {
     }
 }
 
-
+#[repr(C)]
+#[derive(Debug)]
 struct ByteSeqRaw {
     data: *mut Byte,
     size: usize,

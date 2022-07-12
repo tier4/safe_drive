@@ -16,7 +16,7 @@ extern "C" {
 #[repr(C)]
 #[derive(Debug)]
 pub struct Header {
-    pub stamp: builtin_interfaces__msg__Time,
+    pub stamp: builtin_interfaces::UnsafeTime,
     pub frame_id: crate::msg::RosString<0>,
 }
 
@@ -37,7 +37,8 @@ impl Drop for Header {
     }
 }
 
-
+#[repr(C)]
+#[derive(Debug)]
 struct HeaderSeqRaw {
     data: *mut Header,
     size: usize,

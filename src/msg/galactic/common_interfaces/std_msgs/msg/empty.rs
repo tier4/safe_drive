@@ -36,7 +36,8 @@ impl Drop for Empty {
     }
 }
 
-
+#[repr(C)]
+#[derive(Debug)]
 struct EmptySeqRaw {
     data: *mut Empty,
     size: usize,

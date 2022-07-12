@@ -38,7 +38,8 @@ impl Drop for TransformStamped {
     }
 }
 
-
+#[repr(C)]
+#[derive(Debug)]
 struct TransformStampedSeqRaw {
     data: *mut TransformStamped,
     size: usize,

@@ -36,7 +36,8 @@ impl Drop for LaserEcho {
     }
 }
 
-
+#[repr(C)]
+#[derive(Debug)]
 struct LaserEchoSeqRaw {
     data: *mut LaserEcho,
     size: usize,

@@ -37,7 +37,8 @@ impl Drop for PointStamped {
     }
 }
 
-
+#[repr(C)]
+#[derive(Debug)]
 struct PointStampedSeqRaw {
     data: *mut PointStamped,
     size: usize,

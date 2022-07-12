@@ -1,3 +1,3 @@
 pub mod msg;
-use msg::*;
+pub use msg::*;
 pub mod srv;
