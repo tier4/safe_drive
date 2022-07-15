@@ -10,7 +10,7 @@
 //!
 //! $ mkdir ros2msg && cd ros2msg
 //! $ git clone https://github.com/ros2/unique_identifier_msgs.git -b galactic
-//! $ ros2msg_to_rs --disable-common-interfaces -s crate -i ./ -o {safe_drive}/src/msg/galactic/ros2msg
+//! $ ros2msg_to_rs --disable-common-interfaces -s crate -i . -o {safe_drive}/src/msg/galactic/ros2msg
 //! ```
 //!
 //! ## runtime_c.rs
