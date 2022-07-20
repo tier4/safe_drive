@@ -143,7 +143,7 @@
                 <div id="content" class="content">
                     <main>
                         <h1 id="user-defined-data-structure"><a class="header" href="#user-defined-data-structure">User Defined Data Structure</a></h1>
-<h2 id="installing-ros2msg_to_rs"><a class="header" href="#installing-ros2msg_to_rs">Installing <code>ros2msg_to_rs</code></a></h2>
+<h2 id="install-ros2msg_to_rs"><a class="header" href="#install-ros2msg_to_rs">Install <code>ros2msg_to_rs</code></a></h2>
 <pre><code class="language-text">$ git clone https://github.com/tier4/ros2msg_to_rs.git
 $ cd ros2msg_to_rs
 $ cargo build --release
@@ -151,7 +151,7 @@ $ cargo instal --path .
 </code></pre>
 <pre><code class="language-text">$ mkdir -p msgtest/src
 </code></pre>
-<h2 id="defining-user-defined-type"><a class="header" href="#defining-user-defined-type">Defining User Defined Type</a></h2>
+<h2 id="define-user-defined-type"><a class="header" href="#define-user-defined-type">Define User Defined Type</a></h2>
 <pre><code class="language-text">$ cd msgtest/src
 $ ros2 pkg create --build-type ament_cmake my_interfaces
 $ cd my_interfaces
@@ -159,7 +159,17 @@ $ mkdir msg
 $ cd msg
 </code></pre>
 <p><code>msgtest/src/my_interfaces/msg</code></p>
-<p><code>msgtest/src/my_interfaces/msg/MyMsg.msg</code></p>
+<h3 id="primitive-type-msgtestsrcmy_interfacesmsgmymsgmsg"><a class="header" href="#primitive-type-msgtestsrcmy_interfacesmsgmymsgmsg">Primitive Type: <code>msgtest/src/my_interfaces/msg/MyMsg.msg</code></a></h3>
+<pre><code class="language-text">int32 integer_value
+int32[] unbounded_integer_array
+int32[5] five_integers_array
+int32[&lt;=5] up_to_five_integers_array
+</code></pre>
+<h3 id="using-user-defiend-type-msgtestsrcmy_interfacesmsgmymsgsmsg"><a class="header" href="#using-user-defiend-type-msgtestsrcmy_interfacesmsgmymsgsmsg">Using User Defiend Type: <code>msgtest/src/my_interfaces/msg/MyMsgs.msg</code></a></h3>
+<pre><code class="language-text">MyMsg msg1
+MyMsg msg2
+</code></pre>
+<h3 id="string-type-msgtestsrcmy_interfacesmsgmymsgstrmsg"><a class="header" href="#string-type-msgtestsrcmy_interfacesmsgmymsgstrmsg">String Type: <code>msgtest/src/my_interfaces/msg/MyMsgStr.msg</code></a></h3>
 <pre><code class="language-text">string message
 string[2] static_array_str
 string[] dynamic_array_str
@@ -170,25 +180,17 @@ string&lt;=10[2] static_array_bounded_str
 string&lt;=10[] dynamic_array_bounded_str
 string&lt;=10[&lt;=3] bounded_array_bounded_str
 </code></pre>
-<p><code>msgtest/src/my_interfaces/msg/MyMsgs.msg</code></p>
-<pre><code class="language-text">MyMsg msg1
-MyMsg msg2
-</code></pre>
-<pre><code class="language-text">$ cd msgtest/src
-$ cargo new --lib my_interfaces_rs
-$ ros2msg_to_rs -o my_interfaces_rs/src -i my_interfaces
-$ generating: my_interfaces_rs/src/msg/msg/my_msg.rs
-$ generating: my_interfaces_rs/src/msg/msg.rs
-$ generating: my_interfaces_rs/src/mod.rs
-$ generating: my_interfaces_rs/src/msg/mod.rs
-</code></pre>
+<h3 id="edit-my_interfacescmakeliststxt"><a class="header" href="#edit-my_interfacescmakeliststxt">Edit <code>my_interfaces/CMakeLists.txt</code></a></h3>
 <pre><code class="language-cmake"># msgtest/src/my_interfaces/CMakeLists.txt
 find_package(rosidl_default_generators REQUIRED)
 
 rosidl_generate_interfaces(${PROJECT_NAME}
   &quot;msg/MyMsg.msg&quot;
+  &quot;msg/MyMsgs.msg&quot;
+  &quot;msg/MyMsgStr.msg&quot;
 )
 </code></pre>
+<h3 id="edit-my_interfacespackagexml"><a class="header" href="#edit-my_interfacespackagexml">Edit <code>my_interfaces/package.xml</code></a></h3>
 <pre><code class="language-xml">&lt;!-- msgtest/src/my_interfaces/package.xml --&gt;
 &lt;build_depend&gt;rosidl_default_generators&lt;/build_depend&gt;
 
@@ -197,17 +199,47 @@ rosidl_generate_interfaces(${PROJECT_NAME}
 &lt;member_of_group&gt;rosidl_interface_packages&lt;/member_of_group&gt;
 </code></pre>
 <h2 id="user-defined-type-in-rust"><a class="header" href="#user-defined-type-in-rust">User Defined Type in Rust</a></h2>
+<h3 id="generate-rusts-files"><a class="header" href="#generate-rusts-files">Generate Rust's Files</a></h3>
 <pre><code class="language-text">$ cd msgtest/src
 $ create new --lib my_interfaces_rs
-$ ros2msg_to_rs -o ./my_interfaces_rs/src -i ./
+$ ros2msg_to_rs  -i ./ -o ./my_interfaces_rs/src
+$ generating: my_interfaces_rs/src/msg/msg/my_msg.rs
+$ generating: my_interfaces_rs/src/msg/msg/my_msg_str.rs
+$ generating: my_interfaces_rs/src/msg/msg.rs
+$ generating: my_interfaces_rs/src/mod.rs
+$ generating: my_interfaces_rs/src/msg/mod.rs
 </code></pre>
-<pre><pre class="playground"><code class="language-rust">
-<span class="boring">#![allow(unused)]
+<h3 id="generated-types"><a class="header" href="#generated-types">Generated Types</a></h3>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
 </span><span class="boring">fn main() {
 </span>// msgtest/src/my_interfaces_rs/src/my_interfaces/msg/my_msg.rs
 #[repr(C)]
 #[derive(Debug)]
 pub struct MyMsg {
+    pub integer_value: i32,
+    pub unbounded_integer_array: safe_drive::msg::I32Seq&lt;0&gt;,
+    pub five_integers_array: [i32; 5],
+    pub up_to_five_integers_array: safe_drive::msg::I32Seq&lt;5&gt;,
+}
+<span class="boring">}
+</span></code></pre></pre>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>// msgtest/src/my_interfaces_rs/src/my_interfaces/msg/my_msgs.rs
+#[repr(C)]
+#[derive(Debug)]
+pub struct MyMsgs {
+    pub msg1: MyMsg,
+    pub msg2: MyMsg,
+}
+<span class="boring">}
+</span></code></pre></pre>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>// msgtest/src/my_interfaces_rs/src/my_interfaces/msg/my_msg_str.rs
+#[repr(C)]
+#[derive(Debug)]
+pub struct MyMsgStr {
     pub message: safe_drive::msg::RosString&lt;0&gt;,
     pub static_array_str: [safe_drive::msg::RosString&lt;0&gt;; 2],
     pub dynamic_array_str: safe_drive::msg::RosStringSeq&lt;0, 0&gt;,
@@ -219,20 +251,8 @@ pub struct MyMsg {
 }
 <span class="boring">}
 </span></code></pre></pre>
-<pre><pre class="playground"><code class="language-rust">
-<span class="boring">#![allow(unused)]
-</span><span class="boring">fn main() {
-</span>// msgtest/src/my_interfaces_rs/src/my_interfaces/msg/my_msgs.rs
-#[repr(C)]
-#[derive(Debug)]
-pub struct MyMsgs {
-    pub msg1: MyMsg,
-    pub msg2: MyMsg,
-}
-<span class="boring">}
-</span></code></pre></pre>
-<pre><pre class="playground"><code class="language-rust">
-<span class="boring">#![allow(unused)]
+<h3 id="edit-my_interfaces_rssrclibrs"><a class="header" href="#edit-my_interfaces_rssrclibrs">Edit <code>my_interfaces_rs/src/lib.rs</code></a></h3>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
 </span><span class="boring">fn main() {
 </span>// msgtest/src/my_interfaces_rs/src/lib.rs
 #![allow(dead_code)]
@@ -248,6 +268,7 @@ pub struct MyMsgs {
 pub mod my_interfaces;
 <span class="boring">}
 </span></code></pre></pre>
+<h3 id="create-my_interfaces_rspackagexml"><a class="header" href="#create-my_interfaces_rspackagexml">Create <code>my_interfaces_rs/package.xml</code></a></h3>
 <pre><code class="language-xml">&lt;!-- msgtest/src/my_interfaces_rs/package.xml --&gt;
 &lt;?xml version=&quot;1.0&quot;?&gt;
 &lt;?xml-model href=&quot;http://download.ros.org/schema/package_format3.xsd&quot; schematypens=&quot;http://www.w3.org/2001/XMLSchema&quot;?&gt;
@@ -266,12 +287,11 @@ pub mod my_interfaces;
   &lt;/export&gt;
 &lt;/package&gt;
 </code></pre>
+<h3 id="my_interfaces_rsbuildrs"><a class="header" href="#my_interfaces_rsbuildrs"><code>my_interfaces_rs/build.rs</code></a></h3>
 <pre><pre class="playground"><code class="language-rust">// msgtest/src/my_interfaces_rs/build.rs
 fn main() {
     println!(&quot;cargo:rustc-link-lib=my_interfaces__rosidl_generator_c&quot;);
     println!(&quot;cargo:rustc-link-lib=my_interfaces__rosidl_typesupport_c&quot;);
-    println!(&quot;cargo:rustc-link-lib=my_interfaces__rosidl_typesupport_introspection_c&quot;);
-    println!(&quot;cargo:rustc-link-lib=my_interfaces__rosidl_typesupport_fastrtps_c&quot;);
 
     if let Some(e) = std::env::var_os(&quot;AMENT_PREFIX_PATH&quot;) {
         let env = e.to_str().unwrap();
@@ -281,6 +301,301 @@ fn main() {
     }
 }
 </code></pre></pre>
+<h2 id="talker"><a class="header" href="#talker">Talker</a></h2>
+<h3 id="edit-talkersrcmainrs"><a class="header" href="#edit-talkersrcmainrs">Edit <code>talker/src/main.rs</code></a></h3>
+<pre><pre class="playground"><code class="language-rust">// msgtest/src/talker/src/main.rs
+use my_interfaces_rs::my_interfaces;
+use safe_drive::{
+    context::Context,
+    error::DynError,
+    logger::Logger,
+    msg::{I32Seq, RosStringSeq},
+    pr_info,
+};
+use std::time::Duration;
+
+fn main() -&gt; Result&lt;(), DynError&gt; {
+    // Create a context.
+    let ctx = Context::new()?;
+
+    // Create a node.
+    let node = ctx.create_node(&quot;talker&quot;, None, Default::default())?;
+
+    // Create a publisher.
+    let publisher = node.create_publisher::&lt;my_interfaces::msg::MyMsgs&gt;(&quot;my_topic&quot;, None)?;
+
+    // Create a logger.
+    let logger = Logger::new(&quot;talker&quot;);
+
+    // Create a message
+    let my_msg1 = create_message()?;
+    let my_msg2 = create_message()?;
+
+    let mut my_msgs = my_interfaces::msg::MyMsgs::new().ok_or(&quot;failed to create MyMsgs&quot;)?;
+    my_msgs.msg1 = my_msg1;
+    my_msgs.msg2 = my_msg2;
+
+    loop {
+        pr_info!(logger, &quot;send: {:?}&quot;, my_msgs); // Print log.
+
+        // Send a message.
+        publisher.send(&amp;my_msgs)?;
+
+        std::thread::sleep(Duration::from_secs(1));
+    }
+}
+
+fn create_message() -&gt; Result&lt;my_interfaces::msg::MyMsg, DynError&gt; {
+    let mut my_msg = my_interfaces::msg::MyMsg::new().unwrap();
+
+    my_msg.integer_value = 10;
+
+    // int32[5] five_integers_array
+    my_msg.five_integers_array[0] = 11;
+    my_msg.five_integers_array[1] = 13;
+    my_msg.five_integers_array[2] = 49;
+    my_msg.five_integers_array[3] = 55;
+    my_msg.five_integers_array[4] = 19;
+
+    // int32[] unbounded_integer_array
+    let mut msgs = I32Seq::new(3).unwrap();
+    let ref_msgs = msgs.as_slice_mut().unwrap();
+    ref_msgs[0] = 6;
+    ref_msgs[1] = 7;
+    ref_msgs[2] = 8;
+    my_msg.unbounded_integer_array = msgs;
+
+    // int32[&lt;=5] up_to_five_integers_array
+    let mut msgs = I32Seq::new(2).unwrap();
+    let ref_msgs = msgs.as_slice_mut().unwrap();
+    ref_msgs[0] = 2;
+    ref_msgs[1] = 3;
+    my_msg.up_to_five_integers_array = msgs;
+
+    Ok(my_msg)
+}
+</code></pre></pre>
+<h3 id="edit-talkercargotoml"><a class="header" href="#edit-talkercargotoml">Edit <code>talker/Cargo.toml</code></a></h3>
+<pre><code class="language-toml"># msgtest/src/talker/Cargo.toml
+[dependencies]
+safe_drive = { path = &quot;/root/safe_drive&quot; }
+my_interfaces_rs = { path = &quot;../my_interfaces_rs&quot; }
+</code></pre>
+<h3 id="create-talkerpackagexml"><a class="header" href="#create-talkerpackagexml">Create <code>talker/package.xml</code></a></h3>
+<pre><code class="language-xml">&lt;!-- msgtest/src/talker/package.xml --&gt;
+&lt;?xml version=&quot;1.0&quot;?&gt;
+&lt;?xml-model href=&quot;http://download.ros.org/schema/package_format3.xsd&quot; schematypens=&quot;http://www.w3.org/2001/XMLSchema&quot;?&gt;
+&lt;package format=&quot;3&quot;&gt;
+  &lt;name&gt;talker&lt;/name&gt;
+  &lt;version&gt;0.0.0&lt;/version&gt;
+  &lt;description&gt;Talker in Rust&lt;/description&gt;
+  &lt;maintainer email=&quot;yuuki.takano@tier4.jp&quot;&gt;Yuuki Takano&lt;/maintainer&gt;
+  &lt;license&gt;TODO: License declaration&lt;/license&gt;
+
+  &lt;test_depend&gt;ament_lint_auto&lt;/test_depend&gt;
+  &lt;test_depend&gt;ament_lint_common&lt;/test_depend&gt;
+
+  &lt;depend&gt;my_interfaces&lt;/depend&gt;
+
+  &lt;export&gt;
+    &lt;build_type&gt;ament_cargo&lt;/build_type&gt;
+  &lt;/export&gt;
+&lt;/package&gt;
+</code></pre>
+<h2 id="listener"><a class="header" href="#listener">Listener</a></h2>
+<h3 id="edit-listenersrcmainrs"><a class="header" href="#edit-listenersrcmainrs">Edit <code>listener/src/main.rs</code></a></h3>
+<pre><pre class="playground"><code class="language-rust">// msgtest/src/listener/src/main.rs
+use my_interfaces_rs::my_interfaces;
+use safe_drive::{context::Context, error::DynError, logger::Logger, pr_info};
+
+fn main() -&gt; Result&lt;(), DynError&gt; {
+    // Create a context.
+    let ctx = Context::new()?;
+
+    // Create a node.
+    let node = ctx.create_node(&quot;listener&quot;, None, Default::default())?;
+
+    // Create a subscriber.
+    let subscriber = node.create_subscriber::&lt;my_interfaces::msg::MyMsgs&gt;(&quot;my_topic&quot;, None)?;
+
+    // Create a logger.
+    let logger = Logger::new(&quot;listener&quot;);
+
+    // Create a selector.
+    let mut selector = ctx.create_selector()?;
+
+    pr_info!(logger, &quot;listening&quot;);
+
+    // Add a callback function.
+    selector.add_subscriber(
+        subscriber,
+        Box::new(move |msg| {
+            let msg = &amp;msg.msg1;
+
+            pr_info!(logger, &quot;message: {}&quot;, msg.integer_value);
+
+            for msg in msg.five_integers_array.iter() {
+                pr_info!(logger, &quot;five_integers_array: {}&quot;, msg);
+            }
+
+            if let Some(slice) = msg.unbounded_integer_array.as_slice() {
+                for msg in slice {
+                    pr_info!(logger, &quot;unbounded_integer_array: {}&quot;, msg);
+                }
+            }
+
+            if let Some(slice) = msg.up_to_five_integers_array.as_slice() {
+                for msg in slice {
+                    pr_info!(logger, &quot;up_to_five_integers_array: {}&quot;, msg);
+                }
+            }
+        }),
+        false,
+    );
+
+    // Spin.
+    loop {
+        selector.wait()?;
+    }
+}
+</code></pre></pre>
+<h3 id="edit-listenercargotoml"><a class="header" href="#edit-listenercargotoml">Edit <code>listener/Cargo.toml</code></a></h3>
+<pre><code class="language-toml"># msgtest/src/listener/Cargo.toml
+[dependencies]
+safe_drive = { path = &quot;/root/safe_drive&quot; }
+my_interfaces_rs = { path = &quot;../my_interfaces_rs&quot; }
+</code></pre>
+<h3 id="create-listenerpackagexml"><a class="header" href="#create-listenerpackagexml">Create <code>listener/package.xml</code></a></h3>
+<pre><code class="language-xml">&lt;!-- msgtest/src/listener/package.xml --&gt;
+&lt;?xml version=&quot;1.0&quot;?&gt;
+&lt;?xml-model href=&quot;http://download.ros.org/schema/package_format3.xsd&quot; schematypens=&quot;http://www.w3.org/2001/XMLSchema&quot;?&gt;
+&lt;package format=&quot;3&quot;&gt;
+  &lt;name&gt;listener&lt;/name&gt;
+  &lt;version&gt;0.0.0&lt;/version&gt;
+  &lt;description&gt;Listener in Rust&lt;/description&gt;
+  &lt;maintainer email=&quot;yuuki.takano@tier4.jp&quot;&gt;Yuuki Takano&lt;/maintainer&gt;
+  &lt;license&gt;TODO: License declaration&lt;/license&gt;
+
+  &lt;test_depend&gt;ament_lint_auto&lt;/test_depend&gt;
+  &lt;test_depend&gt;ament_lint_common&lt;/test_depend&gt;
+
+  &lt;depend&gt;my_interfaces&lt;/depend&gt;
+
+  &lt;export&gt;
+    &lt;build_type&gt;ament_cargo&lt;/build_type&gt;
+  &lt;/export&gt;
+&lt;/package&gt;
+</code></pre>
+<h2 id="compilation-and-execution"><a class="header" href="#compilation-and-execution">Compilation and Execution</a></h2>
+<h3 id="compile"><a class="header" href="#compile">Compile</a></h3>
+<pre><code class="language-text">$ cd msgtest
+$ colcon build --cargo-args --release
+</code></pre>
+<h3 id="execute-listener"><a class="header" href="#execute-listener">Execute Listener</a></h3>
+<pre><code class="language-text">$ cd msgtest
+$ . ./install/setup.bash
+$ ros2 run listener listener
+[INFO] [1658305910.013449534] [listener]: listening
+[INFO] [1658305914.359791460] [listener]: message: 10
+[INFO] [1658305914.359839382] [listener]: five_integers_array: 11
+[INFO] [1658305914.359867532] [listener]: five_integers_array: 13
+[INFO] [1658305914.359880763] [listener]: five_integers_array: 49
+[INFO] [1658305914.359889731] [listener]: five_integers_array: 55
+[INFO] [1658305914.359900913] [listener]: five_integers_array: 19
+[INFO] [1658305914.359912534] [listener]: unbounded_integer_array: 6
+[INFO] [1658305914.359924084] [listener]: unbounded_integer_array: 7
+[INFO] [1658305914.359936971] [listener]: unbounded_integer_array: 8
+[INFO] [1658305914.359946479] [listener]: up_to_five_integers_array: 2
+[INFO] [1658305914.359959422] [listener]: up_to_five_integers_array: 3
+</code></pre>
+<h3 id="execute"><a class="header" href="#execute">Execute</a></h3>
+<pre><code class="language-text">$ cd msgtest
+$ . ./install/setup.bash
+$ ros2 run talker talker
+[INFO] [1658305913.359250753] [talker]: send: MyMsgs { msg1: MyMsg { integer_value: 10, unbounded_integer_array: I32Seq(rosidl_runtime_c__int32__Sequence { data: 0x55a0653f7aa0, size: 3, capacity: 3 }), five_integers_array: [11, 13, 49, 55, 19], up_to_five_integers_array: I32Seq(rosidl_runtime_c__int32__Sequence { data: 0x55a0653efaa0, size: 2, capacity: 2 }) }, msg2: MyMsg { integer_value: 10, unbounded_integer_array: I32Seq(rosidl_runtime_c__int32__Sequence { data: 0x55a0653f7e30, size: 3, capacity: 3 }), five_integers_array: [11, 13, 49, 55, 19], up_to_five_integers_array: I32Seq(rosidl_runtime_c__int32__Sequence { data: 0x55a0653f7e50, size: 2, capacity: 2 }) }
+</code></pre>
+<h2 id="string-type"><a class="header" href="#string-type">String Type</a></h2>
+<pre><code class="language-text">string message
+string[2] static_array_str
+string[] dynamic_array_str
+string[&lt;=3] bounded_array_str
+
+string&lt;=10 bounded_str
+string&lt;=10[2] static_array_bounded_str
+string&lt;=10[] dynamic_array_bounded_str
+string&lt;=10[&lt;=3] bounded_array_bounded_str
+</code></pre>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>// msgtest/src/my_interfaces_rs/src/my_interfaces/msg/my_msg_str.rs
+#[repr(C)]
+#[derive(Debug)]
+pub struct MyMsgStr {
+    pub message: safe_drive::msg::RosString&lt;0&gt;,
+    pub static_array_str: [safe_drive::msg::RosString&lt;0&gt;; 2],
+    pub dynamic_array_str: safe_drive::msg::RosStringSeq&lt;0, 0&gt;,
+    pub bounded_array_str: safe_drive::msg::RosStringSeq&lt;0, 3&gt;,
+    pub bounded_str: safe_drive::msg::RosString&lt;10&gt;,
+    pub static_array_bounded_str: [safe_drive::msg::RosString&lt;10&gt;; 2],
+    pub dynamic_array_bounded_str: safe_drive::msg::RosStringSeq&lt;10, 0&gt;,
+    pub bounded_array_bounded_str: safe_drive::msg::RosStringSeq&lt;10, 3&gt;,
+}
+<span class="boring">}
+</span></code></pre></pre>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>use my_interfaces_rs::my_interfaces;
+fn _create_message_str() -&gt; Result&lt;my_interfaces::msg::MyMsgStr, DynError&gt; {
+    let mut my_msg = my_interfaces::msg::MyMsgStr::new().unwrap();
+
+    // string message
+    my_msg.message.assign(&quot;Hello, World!&quot;);
+
+    // string[2] static_array_str
+    my_msg.static_array_str[0].assign(&quot;static array 0&quot;);
+    my_msg.static_array_str[1].assign(&quot;static array 1&quot;);
+
+    // string[] dynamic_array_str
+    let mut msgs = RosStringSeq::new(3).ok_or(&quot;failed to create string&quot;)?;
+    let ref_msgs = msgs.as_slice_mut().ok_or(&quot;failed to get slice&quot;)?;
+    ref_msgs[0].assign(&quot;dynamic array 0&quot;);
+    ref_msgs[1].assign(&quot;dynamic array 1&quot;);
+    ref_msgs[2].assign(&quot;dynamic array 2&quot;);
+    my_msg.dynamic_array_str = msgs;
+
+    // string[&lt;=3] bounded_array_str
+    let mut msgs = RosStringSeq::new(2).ok_or(&quot;failed to create string&quot;)?;
+    let ref_msgs = msgs.as_slice_mut().ok_or(&quot;failed to get slice&quot;)?;
+    ref_msgs[0].assign(&quot;bounded array 0&quot;);
+    ref_msgs[1].assign(&quot;bounded array 1&quot;);
+    my_msg.bounded_array_str = msgs;
+
+    // string&lt;=10 bounded_str
+    my_msg.bounded_str.assign(&quot;Hello!&quot;);
+
+    // string&lt;=10[2] static_array_bounded_str
+    my_msg.static_array_bounded_str[0].assign(&quot;msg1&quot;);
+    my_msg.static_array_bounded_str[1].assign(&quot;msg2&quot;);
+
+    // string&lt;=10[] dynamic_array_bounded_str
+    let mut msgs = RosStringSeq::new(3).ok_or(&quot;failed to create string&quot;)?;
+    let ref_msgs = msgs.as_slice_mut().ok_or(&quot;failed to get slice&quot;)?;
+    ref_msgs[0].assign(&quot;msg3&quot;);
+    ref_msgs[1].assign(&quot;msg4&quot;);
+    ref_msgs[2].assign(&quot;msg5&quot;);
+    my_msg.dynamic_array_bounded_str = msgs;
+
+    // string&lt;=10[&lt;=3] bounded_array_bounded_str
+    let mut msgs = RosStringSeq::new(2).ok_or(&quot;failed to create string&quot;)?;
+    let ref_msgs = msgs.as_slice_mut().ok_or(&quot;failed to get slice&quot;)?;
+    ref_msgs[0].assign(&quot;msg3&quot;);
+    ref_msgs[1].assign(&quot;msg5&quot;);
+    my_msg.bounded_array_bounded_str = msgs;
+
+    Ok(my_msg)
+}
+<span class="boring">}
+</span></code></pre></pre>
 
                     </main>
 

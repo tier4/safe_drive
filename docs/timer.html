@@ -215,8 +215,7 @@ fn main() -&gt; Result&lt;(), DynError&gt; {
 </code></pre></pre>
 <p>Timers can be set by a method of selector as follows,
 and the timers will be invoked when calling the <code>Selector::wait()</code> methods.</p>
-<pre><pre class="playground"><code class="language-rust">
-<span class="boring">#![allow(unused)]
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
 </span><span class="boring">fn main() {
 </span>selector.add_wall_timer(
     &quot;publisher&quot;, // the name of timer
@@ -295,8 +294,7 @@ pub fn main() -&gt; Result&lt;(), DynError&gt; {
 </code></pre></pre>
 <p><code>Selector::add_timer()</code> does not take the name,
 but other arguments are same as <code>Selector::add_wall_timer()</code>.</p>
-<pre><pre class="playground"><code class="language-rust">
-<span class="boring">#![allow(unused)]
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
 </span><span class="boring">fn main() {
 </span>selector.add_timer(
     Duration::from_secs(2),
@@ -311,8 +309,7 @@ but other arguments are same as <code>Selector::add_wall_timer()</code>.</p>
 <p>This code reenables a timer in the callback function.
 To reenable, the callback takes a <code>queue</code> and
 timers in the <code>queue</code> is reenabled in the spin as follows.</p>
-<pre><pre class="playground"><code class="language-rust">
-<span class="boring">#![allow(unused)]
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
 </span><span class="boring">fn main() {
 </span>// Spin.
 loop {

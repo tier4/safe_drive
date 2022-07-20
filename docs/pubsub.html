@@ -172,11 +172,12 @@ $ mkdir ros2rust/src
 </code></pre>
 <p>Following directories are important directories
 we will create throughout this tutorial.</p>
-<table><thead><tr><th>Directories</th><th>What?</th></tr></thead><tbody>
+<div class="table-wrapper"><table><thead><tr><th>Directories</th><th>What?</th></tr></thead><tbody>
 <tr><td>ros2rust/src/my_talker</td><td>publisher in Rust</td></tr>
 <tr><td>ros2rust/src/my_listener</td><td>subscriber in Rust</td></tr>
 <tr><td>ros2rust/install</td><td>created by colcon</td></tr>
 </tbody></table>
+</div>
 <hr />
 <h2 id="talker-in-rust"><a class="header" href="#talker-in-rust">Talker in Rust</a></h2>
 <p>Let's start implementing a publisher.
@@ -192,12 +193,13 @@ my_talker/src:
 main.rs
 </code></pre>
 <p>We create(d) and edit files of the talker as follows.</p>
-<table><thead><tr><th>Files</th><th>What?</th></tr></thead><tbody>
+<div class="table-wrapper"><table><thead><tr><th>Files</th><th>What?</th></tr></thead><tbody>
 <tr><td>my_talker/Cargo.toml</td><td>for Cargo</td></tr>
 <tr><td>my_talker/build.rs</td><td>to specify library path for a linker</td></tr>
 <tr><td>my_talker/package.xml</td><td>for ROS2</td></tr>
 <tr><td>my_talker/src/main.rs</td><td>source code</td></tr>
 </tbody></table>
+</div>
 <h3 id="edit-my_talkercargotoml"><a class="header" href="#edit-my_talkercargotoml">Edit <code>my_talker/Cargo.toml</code></a></h3>
 <p><code>Cargo.toml</code> is used to describe a project of Rust.
 Add safe_drive to the dependencies of <code>Cargo.toml</code> to use it.
@@ -275,8 +277,7 @@ fn main() -&gt; Result&lt;(), DynError&gt; {
 </code></pre></pre>
 <h4 id="my_talker-in-detail"><a class="header" href="#my_talker-in-detail">my_talker in Detail</a></h4>
 <p><code>create_node</code> creates a node.</p>
-<pre><pre class="playground"><code class="language-rust">
-<span class="boring">#![allow(unused)]
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
 </span><span class="boring">fn main() {
 </span>// Create a node.
 let node = ctx.create_node(&quot;my_talker&quot;, None, Default::default())?;
@@ -294,8 +295,7 @@ let node = ctx.create_node(&quot;my_talker&quot;, None, Default::default())?;
 <li><code>Default::default()</code> : option of node.</li>
 </ul>
 <p><code>create_publisher</code> creates a publisher.</p>
-<pre><pre class="playground"><code class="language-rust">
-<span class="boring">#![allow(unused)]
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
 </span><span class="boring">fn main() {
 </span>// Create a publisher.
 let publisher = node.create_publisher::&lt;std_msgs::msg::String&gt;(&quot;my_topic&quot;, None)?;
@@ -307,8 +307,7 @@ let publisher = node.create_publisher::&lt;std_msgs::msg::String&gt;(&quot;my_to
 <li><code>None</code> : QoS of the publisher. QoS will be described in a later chapter.</li>
 </ul>
 <p>A message can be sent by <code>send</code> method as follows.</p>
-<pre><pre class="playground"><code class="language-rust">
-<span class="boring">#![allow(unused)]
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
 </span><span class="boring">fn main() {
 </span>// Create a message to be sent.
 let data = format!(&quot;Hello, World!: cnt = {cnt}&quot;);
@@ -320,8 +319,7 @@ publisher.send(&amp;msg)?;
 </span></code></pre></pre>
 <p><code>Logger</code> is used to print some messages.
 It can be created as follows.</p>
-<pre><pre class="playground"><code class="language-rust">
-<span class="boring">#![allow(unused)]
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
 </span><span class="boring">fn main() {
 </span>// Create a logger.
 let logger = Logger::new(&quot;my_talker&quot;);
@@ -329,8 +327,7 @@ let logger = Logger::new(&quot;my_talker&quot;);
 </span></code></pre></pre>
 <p>The argument of <code>&quot;my_talker&quot;</code> is the name of the logger.
 To print a message, use <code>pr_*</code> macros as follows.</p>
-<pre><pre class="playground"><code class="language-rust">
-<span class="boring">#![allow(unused)]
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
 </span><span class="boring">fn main() {
 </span>pr_info!(logger, &quot;send: {}&quot;, msg.data); // Print log.
 <span class="boring">}
@@ -409,12 +406,13 @@ First, create a project by using <code>cargo</code> as follows.</p>
 $ cargo new my_listener
 </code></pre>
 <p>The following files will be created throughout this tutorial.</p>
-<table><thead><tr><th>Files</th><th>What?</th></tr></thead><tbody>
+<div class="table-wrapper"><table><thead><tr><th>Files</th><th>What?</th></tr></thead><tbody>
 <tr><td>my_listener/Cargo.toml</td><td>for Cargo</td></tr>
 <tr><td>my_listener/build.rs</td><td>to specify library path for a linker</td></tr>
 <tr><td>my_listener/package.xml</td><td>for ROS2</td></tr>
 <tr><td>my_listener/src/main.rs</td><td>source code</td></tr>
 </tbody></table>
+</div>
 <h3 id="edit-my_listenercargotoml"><a class="header" href="#edit-my_listenercargotoml">Edit <code>my_listener/Cargo.toml</code></a></h3>
 <p><code>my_listener</code> also requires safe_drive.
 Add safe_drive to the dependencies as follows.</p>
@@ -466,8 +464,7 @@ fn main() -&gt; Result&lt;(), DynError&gt; {
 <h4 id="my_listener-in-detail"><a class="header" href="#my_listener-in-detail"><code>my_listener</code> in Detail</a></h4>
 <p>Similar to the publisher,
 <code>create_subscriber</code> creates a subscriber.</p>
-<pre><pre class="playground"><code class="language-rust">
-<span class="boring">#![allow(unused)]
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
 </span><span class="boring">fn main() {
 </span>// Create a subscriber.
 let subscriber = node.create_subscriber::&lt;std_msgs::msg::String&gt;(&quot;my_topic&quot;, None)?;
@@ -483,8 +480,7 @@ We need to create a selector,
 which can wait some events and invoke callback functions of the events.
 A selector is similar to <code>select</code> or <code>epoll</code> function,
 and equivalent to a executer of ROS2.</p>
-<pre><pre class="playground"><code class="language-rust">
-<span class="boring">#![allow(unused)]
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
 </span><span class="boring">fn main() {
 </span>// Create a selector.
 let mut selector = ctx.create_selector()?;

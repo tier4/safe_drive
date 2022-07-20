@@ -161,13 +161,14 @@ $ cargo new subscribers
 <p>The <code>mt_pubsub</code> is the root directory of this project,
 and we created <code>publishers</code> and <code>subscribers</code> of Rust's projects.
 At the moment, the following directories is present.</p>
-<table><thead><tr><th>Directories</th><th>What?</th></tr></thead><tbody>
+<div class="table-wrapper"><table><thead><tr><th>Directories</th><th>What?</th></tr></thead><tbody>
 <tr><td>mt_pubsub/src/publishers</td><td>publishers in Rust</td></tr>
 <tr><td>mt_pubsub/src/subscribers</td><td>subscribers in Rust</td></tr>
 </tbody></table>
+</div>
 <h2 id="common-configuration"><a class="header" href="#common-configuration">Common Configuration</a></h2>
 <p>Then, we have to create or edit the following files for basic configurations.</p>
-<table><thead><tr><th>Files</th><th>What?</th></tr></thead><tbody>
+<div class="table-wrapper"><table><thead><tr><th>Files</th><th>What?</th></tr></thead><tbody>
 <tr><td>mt_pubsub/src/publishers/Cargo.toml</td><td>for Cargo</td></tr>
 <tr><td>mt_pubsub/src/publishers/package.xml</td><td>for ROS2</td></tr>
 <tr><td>mt_pubsub/src/publishers/build.rs</td><td>for rustc</td></tr>
@@ -175,6 +176,7 @@ At the moment, the following directories is present.</p>
 <tr><td>mt_pubsub/src/subscribers/package.xml</td><td>for ROS2</td></tr>
 <tr><td>mt_pubsub/src/subscribers/build.rs</td><td>for rustc</td></tr>
 </tbody></table>
+</div>
 <p><code>package.xml</code> and <code>build.rs</code> are almost same as <a href="./pubsub.html">Publish and Subscribe</a>.
 If you cannot understand what these files do,
 please go back to the previous chapter.</p>
@@ -267,8 +269,7 @@ async fn main() -&gt; Result&lt;(), DynError&gt; {
 which is similar to a thread.
 The following is a excerpt creating a task which sends &quot;Hello, World!&quot;
 to &quot;topic1&quot; every 500ms.</p>
-<pre><pre class="playground"><code class="language-rust">
-<span class="boring">#![allow(unused)]
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
 </span><span class="boring">fn main() {
 </span>// Create a task which sends &quot;Hello, World!&quot;.
 let task1 = async_std::task::spawn(async move {
@@ -334,8 +335,7 @@ Otherwise, it yields the execution to another task and sleeps until arriving a m
 <p>By using a timeout mechanism provided by asynchronous libraries,
 we can implement receiving with timeout.
 Timeout can be implemented as follows.</p>
-<pre><pre class="playground"><code class="language-rust">
-<span class="boring">#![allow(unused)]
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
 </span><span class="boring">fn main() {
 </span>async fn receiver(
     mut subscriber: Subscriber&lt;std_msgs::msg::String&gt;,
