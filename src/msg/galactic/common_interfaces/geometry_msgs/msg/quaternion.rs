@@ -7,8 +7,10 @@ use crate::rcl;
 extern "C" {
     fn geometry_msgs__msg__Quaternion__init(msg: *mut Quaternion) -> bool;
     fn geometry_msgs__msg__Quaternion__fini(msg: *mut Quaternion);
+    fn geometry_msgs__msg__Quaternion__are_equal(lhs: *const Quaternion, rhs: *const Quaternion) -> bool;
     fn geometry_msgs__msg__Quaternion__Sequence__init(msg: *mut QuaternionSeqRaw, size: usize) -> bool;
     fn geometry_msgs__msg__Quaternion__Sequence__fini(msg: *mut QuaternionSeqRaw);
+    fn geometry_msgs__msg__Quaternion__Sequence__are_equal(lhs: *const QuaternionSeqRaw, rhs: *const QuaternionSeqRaw) -> bool;
     fn rosidl_typesupport_c__get_message_type_support_handle__geometry_msgs__msg__Quaternion() -> *const rcl::rosidl_message_type_support_t;
 }
 
@@ -113,3 +115,22 @@ impl TopicMsg for Quaternion {
         }
     }
 }
+
+impl PartialEq for Quaternion {
+    fn eq(&self, other: &Self) -> bool {
+        unsafe {
+            geometry_msgs__msg__Quaternion__are_equal(self, other)
+        }
+    }
+}
+
+impl<const N: usize> PartialEq for QuaternionSeq<N> {
+    fn eq(&self, other: &Self) -> bool {
+        unsafe {
+            let msg1 = QuaternionSeqRaw{data: self.data, size: self.size, capacity: self.capacity};
+            let msg2 = QuaternionSeqRaw{data: other.data, size: other.size, capacity: other.capacity};
+            geometry_msgs__msg__Quaternion__Sequence__are_equal(&msg1, &msg2)
+        }
+    }
+}
+

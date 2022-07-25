@@ -7,8 +7,10 @@ use crate::rcl;
 extern "C" {
     fn sensor_msgs__msg__Imu__init(msg: *mut Imu) -> bool;
     fn sensor_msgs__msg__Imu__fini(msg: *mut Imu);
+    fn sensor_msgs__msg__Imu__are_equal(lhs: *const Imu, rhs: *const Imu) -> bool;
     fn sensor_msgs__msg__Imu__Sequence__init(msg: *mut ImuSeqRaw, size: usize) -> bool;
     fn sensor_msgs__msg__Imu__Sequence__fini(msg: *mut ImuSeqRaw);
+    fn sensor_msgs__msg__Imu__Sequence__are_equal(lhs: *const ImuSeqRaw, rhs: *const ImuSeqRaw) -> bool;
     fn rosidl_typesupport_c__get_message_type_support_handle__sensor_msgs__msg__Imu() -> *const rcl::rosidl_message_type_support_t;
 }
 
@@ -116,3 +118,22 @@ impl TopicMsg for Imu {
         }
     }
 }
+
+impl PartialEq for Imu {
+    fn eq(&self, other: &Self) -> bool {
+        unsafe {
+            sensor_msgs__msg__Imu__are_equal(self, other)
+        }
+    }
+}
+
+impl<const N: usize> PartialEq for ImuSeq<N> {
+    fn eq(&self, other: &Self) -> bool {
+        unsafe {
+            let msg1 = ImuSeqRaw{data: self.data, size: self.size, capacity: self.capacity};
+            let msg2 = ImuSeqRaw{data: other.data, size: other.size, capacity: other.capacity};
+            sensor_msgs__msg__Imu__Sequence__are_equal(&msg1, &msg2)
+        }
+    }
+}
+

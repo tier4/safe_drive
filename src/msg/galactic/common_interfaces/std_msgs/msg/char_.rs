@@ -7,8 +7,10 @@ use crate::rcl;
 extern "C" {
     fn std_msgs__msg__Char__init(msg: *mut Char) -> bool;
     fn std_msgs__msg__Char__fini(msg: *mut Char);
+    fn std_msgs__msg__Char__are_equal(lhs: *const Char, rhs: *const Char) -> bool;
     fn std_msgs__msg__Char__Sequence__init(msg: *mut CharSeqRaw, size: usize) -> bool;
     fn std_msgs__msg__Char__Sequence__fini(msg: *mut CharSeqRaw);
+    fn std_msgs__msg__Char__Sequence__are_equal(lhs: *const CharSeqRaw, rhs: *const CharSeqRaw) -> bool;
     fn rosidl_typesupport_c__get_message_type_support_handle__std_msgs__msg__Char() -> *const rcl::rosidl_message_type_support_t;
 }
 
@@ -110,3 +112,22 @@ impl TopicMsg for Char {
         }
     }
 }
+
+impl PartialEq for Char {
+    fn eq(&self, other: &Self) -> bool {
+        unsafe {
+            std_msgs__msg__Char__are_equal(self, other)
+        }
+    }
+}
+
+impl<const N: usize> PartialEq for CharSeq<N> {
+    fn eq(&self, other: &Self) -> bool {
+        unsafe {
+            let msg1 = CharSeqRaw{data: self.data, size: self.size, capacity: self.capacity};
+            let msg2 = CharSeqRaw{data: other.data, size: other.size, capacity: other.capacity};
+            std_msgs__msg__Char__Sequence__are_equal(&msg1, &msg2)
+        }
+    }
+}
+

@@ -7,8 +7,10 @@ use crate::rcl;
 extern "C" {
     fn std_msgs__msg__Byte__init(msg: *mut Byte) -> bool;
     fn std_msgs__msg__Byte__fini(msg: *mut Byte);
+    fn std_msgs__msg__Byte__are_equal(lhs: *const Byte, rhs: *const Byte) -> bool;
     fn std_msgs__msg__Byte__Sequence__init(msg: *mut ByteSeqRaw, size: usize) -> bool;
     fn std_msgs__msg__Byte__Sequence__fini(msg: *mut ByteSeqRaw);
+    fn std_msgs__msg__Byte__Sequence__are_equal(lhs: *const ByteSeqRaw, rhs: *const ByteSeqRaw) -> bool;
     fn rosidl_typesupport_c__get_message_type_support_handle__std_msgs__msg__Byte() -> *const rcl::rosidl_message_type_support_t;
 }
 
@@ -110,3 +112,22 @@ impl TopicMsg for Byte {
         }
     }
 }
+
+impl PartialEq for Byte {
+    fn eq(&self, other: &Self) -> bool {
+        unsafe {
+            std_msgs__msg__Byte__are_equal(self, other)
+        }
+    }
+}
+
+impl<const N: usize> PartialEq for ByteSeq<N> {
+    fn eq(&self, other: &Self) -> bool {
+        unsafe {
+            let msg1 = ByteSeqRaw{data: self.data, size: self.size, capacity: self.capacity};
+            let msg2 = ByteSeqRaw{data: other.data, size: other.size, capacity: other.capacity};
+            std_msgs__msg__Byte__Sequence__are_equal(&msg1, &msg2)
+        }
+    }
+}
+

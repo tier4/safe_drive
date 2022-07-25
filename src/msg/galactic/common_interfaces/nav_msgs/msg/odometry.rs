@@ -7,8 +7,10 @@ use crate::rcl;
 extern "C" {
     fn nav_msgs__msg__Odometry__init(msg: *mut Odometry) -> bool;
     fn nav_msgs__msg__Odometry__fini(msg: *mut Odometry);
+    fn nav_msgs__msg__Odometry__are_equal(lhs: *const Odometry, rhs: *const Odometry) -> bool;
     fn nav_msgs__msg__Odometry__Sequence__init(msg: *mut OdometrySeqRaw, size: usize) -> bool;
     fn nav_msgs__msg__Odometry__Sequence__fini(msg: *mut OdometrySeqRaw);
+    fn nav_msgs__msg__Odometry__Sequence__are_equal(lhs: *const OdometrySeqRaw, rhs: *const OdometrySeqRaw) -> bool;
     fn rosidl_typesupport_c__get_message_type_support_handle__nav_msgs__msg__Odometry() -> *const rcl::rosidl_message_type_support_t;
 }
 
@@ -113,3 +115,22 @@ impl TopicMsg for Odometry {
         }
     }
 }
+
+impl PartialEq for Odometry {
+    fn eq(&self, other: &Self) -> bool {
+        unsafe {
+            nav_msgs__msg__Odometry__are_equal(self, other)
+        }
+    }
+}
+
+impl<const N: usize> PartialEq for OdometrySeq<N> {
+    fn eq(&self, other: &Self) -> bool {
+        unsafe {
+            let msg1 = OdometrySeqRaw{data: self.data, size: self.size, capacity: self.capacity};
+            let msg2 = OdometrySeqRaw{data: other.data, size: other.size, capacity: other.capacity};
+            nav_msgs__msg__Odometry__Sequence__are_equal(&msg1, &msg2)
+        }
+    }
+}
+

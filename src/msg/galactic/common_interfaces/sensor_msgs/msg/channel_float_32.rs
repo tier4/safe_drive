@@ -7,8 +7,10 @@ use crate::rcl;
 extern "C" {
     fn sensor_msgs__msg__ChannelFloat32__init(msg: *mut ChannelFloat32) -> bool;
     fn sensor_msgs__msg__ChannelFloat32__fini(msg: *mut ChannelFloat32);
+    fn sensor_msgs__msg__ChannelFloat32__are_equal(lhs: *const ChannelFloat32, rhs: *const ChannelFloat32) -> bool;
     fn sensor_msgs__msg__ChannelFloat32__Sequence__init(msg: *mut ChannelFloat32SeqRaw, size: usize) -> bool;
     fn sensor_msgs__msg__ChannelFloat32__Sequence__fini(msg: *mut ChannelFloat32SeqRaw);
+    fn sensor_msgs__msg__ChannelFloat32__Sequence__are_equal(lhs: *const ChannelFloat32SeqRaw, rhs: *const ChannelFloat32SeqRaw) -> bool;
     fn rosidl_typesupport_c__get_message_type_support_handle__sensor_msgs__msg__ChannelFloat32() -> *const rcl::rosidl_message_type_support_t;
 }
 
@@ -111,3 +113,22 @@ impl TopicMsg for ChannelFloat32 {
         }
     }
 }
+
+impl PartialEq for ChannelFloat32 {
+    fn eq(&self, other: &Self) -> bool {
+        unsafe {
+            sensor_msgs__msg__ChannelFloat32__are_equal(self, other)
+        }
+    }
+}
+
+impl<const N: usize> PartialEq for ChannelFloat32Seq<N> {
+    fn eq(&self, other: &Self) -> bool {
+        unsafe {
+            let msg1 = ChannelFloat32SeqRaw{data: self.data, size: self.size, capacity: self.capacity};
+            let msg2 = ChannelFloat32SeqRaw{data: other.data, size: other.size, capacity: other.capacity};
+            sensor_msgs__msg__ChannelFloat32__Sequence__are_equal(&msg1, &msg2)
+        }
+    }
+}
+

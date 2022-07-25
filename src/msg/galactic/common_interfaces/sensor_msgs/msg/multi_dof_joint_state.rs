@@ -7,8 +7,10 @@ use crate::rcl;
 extern "C" {
     fn sensor_msgs__msg__MultiDOFJointState__init(msg: *mut MultiDOFJointState) -> bool;
     fn sensor_msgs__msg__MultiDOFJointState__fini(msg: *mut MultiDOFJointState);
+    fn sensor_msgs__msg__MultiDOFJointState__are_equal(lhs: *const MultiDOFJointState, rhs: *const MultiDOFJointState) -> bool;
     fn sensor_msgs__msg__MultiDOFJointState__Sequence__init(msg: *mut MultiDOFJointStateSeqRaw, size: usize) -> bool;
     fn sensor_msgs__msg__MultiDOFJointState__Sequence__fini(msg: *mut MultiDOFJointStateSeqRaw);
+    fn sensor_msgs__msg__MultiDOFJointState__Sequence__are_equal(lhs: *const MultiDOFJointStateSeqRaw, rhs: *const MultiDOFJointStateSeqRaw) -> bool;
     fn rosidl_typesupport_c__get_message_type_support_handle__sensor_msgs__msg__MultiDOFJointState() -> *const rcl::rosidl_message_type_support_t;
 }
 
@@ -114,3 +116,22 @@ impl TopicMsg for MultiDOFJointState {
         }
     }
 }
+
+impl PartialEq for MultiDOFJointState {
+    fn eq(&self, other: &Self) -> bool {
+        unsafe {
+            sensor_msgs__msg__MultiDOFJointState__are_equal(self, other)
+        }
+    }
+}
+
+impl<const N: usize> PartialEq for MultiDOFJointStateSeq<N> {
+    fn eq(&self, other: &Self) -> bool {
+        unsafe {
+            let msg1 = MultiDOFJointStateSeqRaw{data: self.data, size: self.size, capacity: self.capacity};
+            let msg2 = MultiDOFJointStateSeqRaw{data: other.data, size: other.size, capacity: other.capacity};
+            sensor_msgs__msg__MultiDOFJointState__Sequence__are_equal(&msg1, &msg2)
+        }
+    }
+}
+

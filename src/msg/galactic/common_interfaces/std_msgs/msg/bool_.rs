@@ -7,8 +7,10 @@ use crate::rcl;
 extern "C" {
     fn std_msgs__msg__Bool__init(msg: *mut Bool) -> bool;
     fn std_msgs__msg__Bool__fini(msg: *mut Bool);
+    fn std_msgs__msg__Bool__are_equal(lhs: *const Bool, rhs: *const Bool) -> bool;
     fn std_msgs__msg__Bool__Sequence__init(msg: *mut BoolSeqRaw, size: usize) -> bool;
     fn std_msgs__msg__Bool__Sequence__fini(msg: *mut BoolSeqRaw);
+    fn std_msgs__msg__Bool__Sequence__are_equal(lhs: *const BoolSeqRaw, rhs: *const BoolSeqRaw) -> bool;
     fn rosidl_typesupport_c__get_message_type_support_handle__std_msgs__msg__Bool() -> *const rcl::rosidl_message_type_support_t;
 }
 
@@ -110,3 +112,22 @@ impl TopicMsg for Bool {
         }
     }
 }
+
+impl PartialEq for Bool {
+    fn eq(&self, other: &Self) -> bool {
+        unsafe {
+            std_msgs__msg__Bool__are_equal(self, other)
+        }
+    }
+}
+
+impl<const N: usize> PartialEq for BoolSeq<N> {
+    fn eq(&self, other: &Self) -> bool {
+        unsafe {
+            let msg1 = BoolSeqRaw{data: self.data, size: self.size, capacity: self.capacity};
+            let msg2 = BoolSeqRaw{data: other.data, size: other.size, capacity: other.capacity};
+            std_msgs__msg__Bool__Sequence__are_equal(&msg1, &msg2)
+        }
+    }
+}
+

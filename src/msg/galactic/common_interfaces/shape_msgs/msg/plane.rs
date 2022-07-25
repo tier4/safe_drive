@@ -7,8 +7,10 @@ use crate::rcl;
 extern "C" {
     fn shape_msgs__msg__Plane__init(msg: *mut Plane) -> bool;
     fn shape_msgs__msg__Plane__fini(msg: *mut Plane);
+    fn shape_msgs__msg__Plane__are_equal(lhs: *const Plane, rhs: *const Plane) -> bool;
     fn shape_msgs__msg__Plane__Sequence__init(msg: *mut PlaneSeqRaw, size: usize) -> bool;
     fn shape_msgs__msg__Plane__Sequence__fini(msg: *mut PlaneSeqRaw);
+    fn shape_msgs__msg__Plane__Sequence__are_equal(lhs: *const PlaneSeqRaw, rhs: *const PlaneSeqRaw) -> bool;
     fn rosidl_typesupport_c__get_message_type_support_handle__shape_msgs__msg__Plane() -> *const rcl::rosidl_message_type_support_t;
 }
 
@@ -110,3 +112,22 @@ impl TopicMsg for Plane {
         }
     }
 }
+
+impl PartialEq for Plane {
+    fn eq(&self, other: &Self) -> bool {
+        unsafe {
+            shape_msgs__msg__Plane__are_equal(self, other)
+        }
+    }
+}
+
+impl<const N: usize> PartialEq for PlaneSeq<N> {
+    fn eq(&self, other: &Self) -> bool {
+        unsafe {
+            let msg1 = PlaneSeqRaw{data: self.data, size: self.size, capacity: self.capacity};
+            let msg2 = PlaneSeqRaw{data: other.data, size: other.size, capacity: other.capacity};
+            shape_msgs__msg__Plane__Sequence__are_equal(&msg1, &msg2)
+        }
+    }
+}
+

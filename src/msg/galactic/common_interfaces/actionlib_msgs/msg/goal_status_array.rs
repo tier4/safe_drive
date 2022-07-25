@@ -7,8 +7,10 @@ use crate::rcl;
 extern "C" {
     fn actionlib_msgs__msg__GoalStatusArray__init(msg: *mut GoalStatusArray) -> bool;
     fn actionlib_msgs__msg__GoalStatusArray__fini(msg: *mut GoalStatusArray);
+    fn actionlib_msgs__msg__GoalStatusArray__are_equal(lhs: *const GoalStatusArray, rhs: *const GoalStatusArray) -> bool;
     fn actionlib_msgs__msg__GoalStatusArray__Sequence__init(msg: *mut GoalStatusArraySeqRaw, size: usize) -> bool;
     fn actionlib_msgs__msg__GoalStatusArray__Sequence__fini(msg: *mut GoalStatusArraySeqRaw);
+    fn actionlib_msgs__msg__GoalStatusArray__Sequence__are_equal(lhs: *const GoalStatusArraySeqRaw, rhs: *const GoalStatusArraySeqRaw) -> bool;
     fn rosidl_typesupport_c__get_message_type_support_handle__actionlib_msgs__msg__GoalStatusArray() -> *const rcl::rosidl_message_type_support_t;
 }
 
@@ -111,3 +113,22 @@ impl TopicMsg for GoalStatusArray {
         }
     }
 }
+
+impl PartialEq for GoalStatusArray {
+    fn eq(&self, other: &Self) -> bool {
+        unsafe {
+            actionlib_msgs__msg__GoalStatusArray__are_equal(self, other)
+        }
+    }
+}
+
+impl<const N: usize> PartialEq for GoalStatusArraySeq<N> {
+    fn eq(&self, other: &Self) -> bool {
+        unsafe {
+            let msg1 = GoalStatusArraySeqRaw{data: self.data, size: self.size, capacity: self.capacity};
+            let msg2 = GoalStatusArraySeqRaw{data: other.data, size: other.size, capacity: other.capacity};
+            actionlib_msgs__msg__GoalStatusArray__Sequence__are_equal(&msg1, &msg2)
+        }
+    }
+}
+

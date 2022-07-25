@@ -7,8 +7,10 @@ use crate::rcl;
 extern "C" {
     fn diagnostic_msgs__msg__DiagnosticArray__init(msg: *mut DiagnosticArray) -> bool;
     fn diagnostic_msgs__msg__DiagnosticArray__fini(msg: *mut DiagnosticArray);
+    fn diagnostic_msgs__msg__DiagnosticArray__are_equal(lhs: *const DiagnosticArray, rhs: *const DiagnosticArray) -> bool;
     fn diagnostic_msgs__msg__DiagnosticArray__Sequence__init(msg: *mut DiagnosticArraySeqRaw, size: usize) -> bool;
     fn diagnostic_msgs__msg__DiagnosticArray__Sequence__fini(msg: *mut DiagnosticArraySeqRaw);
+    fn diagnostic_msgs__msg__DiagnosticArray__Sequence__are_equal(lhs: *const DiagnosticArraySeqRaw, rhs: *const DiagnosticArraySeqRaw) -> bool;
     fn rosidl_typesupport_c__get_message_type_support_handle__diagnostic_msgs__msg__DiagnosticArray() -> *const rcl::rosidl_message_type_support_t;
 }
 
@@ -111,3 +113,22 @@ impl TopicMsg for DiagnosticArray {
         }
     }
 }
+
+impl PartialEq for DiagnosticArray {
+    fn eq(&self, other: &Self) -> bool {
+        unsafe {
+            diagnostic_msgs__msg__DiagnosticArray__are_equal(self, other)
+        }
+    }
+}
+
+impl<const N: usize> PartialEq for DiagnosticArraySeq<N> {
+    fn eq(&self, other: &Self) -> bool {
+        unsafe {
+            let msg1 = DiagnosticArraySeqRaw{data: self.data, size: self.size, capacity: self.capacity};
+            let msg2 = DiagnosticArraySeqRaw{data: other.data, size: other.size, capacity: other.capacity};
+            diagnostic_msgs__msg__DiagnosticArray__Sequence__are_equal(&msg1, &msg2)
+        }
+    }
+}
+

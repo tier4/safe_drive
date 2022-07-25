@@ -13,8 +13,10 @@ pub const MOUSE_UP: u8 = 5;
 extern "C" {
     fn visualization_msgs__msg__InteractiveMarkerFeedback__init(msg: *mut InteractiveMarkerFeedback) -> bool;
     fn visualization_msgs__msg__InteractiveMarkerFeedback__fini(msg: *mut InteractiveMarkerFeedback);
+    fn visualization_msgs__msg__InteractiveMarkerFeedback__are_equal(lhs: *const InteractiveMarkerFeedback, rhs: *const InteractiveMarkerFeedback) -> bool;
     fn visualization_msgs__msg__InteractiveMarkerFeedback__Sequence__init(msg: *mut InteractiveMarkerFeedbackSeqRaw, size: usize) -> bool;
     fn visualization_msgs__msg__InteractiveMarkerFeedback__Sequence__fini(msg: *mut InteractiveMarkerFeedbackSeqRaw);
+    fn visualization_msgs__msg__InteractiveMarkerFeedback__Sequence__are_equal(lhs: *const InteractiveMarkerFeedbackSeqRaw, rhs: *const InteractiveMarkerFeedbackSeqRaw) -> bool;
     fn rosidl_typesupport_c__get_message_type_support_handle__visualization_msgs__msg__InteractiveMarkerFeedback() -> *const rcl::rosidl_message_type_support_t;
 }
 
@@ -124,3 +126,22 @@ impl TopicMsg for InteractiveMarkerFeedback {
         }
     }
 }
+
+impl PartialEq for InteractiveMarkerFeedback {
+    fn eq(&self, other: &Self) -> bool {
+        unsafe {
+            visualization_msgs__msg__InteractiveMarkerFeedback__are_equal(self, other)
+        }
+    }
+}
+
+impl<const N: usize> PartialEq for InteractiveMarkerFeedbackSeq<N> {
+    fn eq(&self, other: &Self) -> bool {
+        unsafe {
+            let msg1 = InteractiveMarkerFeedbackSeqRaw{data: self.data, size: self.size, capacity: self.capacity};
+            let msg2 = InteractiveMarkerFeedbackSeqRaw{data: other.data, size: other.size, capacity: other.capacity};
+            visualization_msgs__msg__InteractiveMarkerFeedback__Sequence__are_equal(&msg1, &msg2)
+        }
+    }
+}
+

@@ -7,8 +7,10 @@ use crate::rcl;
 extern "C" {
     fn geometry_msgs__msg__Inertia__init(msg: *mut Inertia) -> bool;
     fn geometry_msgs__msg__Inertia__fini(msg: *mut Inertia);
+    fn geometry_msgs__msg__Inertia__are_equal(lhs: *const Inertia, rhs: *const Inertia) -> bool;
     fn geometry_msgs__msg__Inertia__Sequence__init(msg: *mut InertiaSeqRaw, size: usize) -> bool;
     fn geometry_msgs__msg__Inertia__Sequence__fini(msg: *mut InertiaSeqRaw);
+    fn geometry_msgs__msg__Inertia__Sequence__are_equal(lhs: *const InertiaSeqRaw, rhs: *const InertiaSeqRaw) -> bool;
     fn rosidl_typesupport_c__get_message_type_support_handle__geometry_msgs__msg__Inertia() -> *const rcl::rosidl_message_type_support_t;
 }
 
@@ -117,3 +119,22 @@ impl TopicMsg for Inertia {
         }
     }
 }
+
+impl PartialEq for Inertia {
+    fn eq(&self, other: &Self) -> bool {
+        unsafe {
+            geometry_msgs__msg__Inertia__are_equal(self, other)
+        }
+    }
+}
+
+impl<const N: usize> PartialEq for InertiaSeq<N> {
+    fn eq(&self, other: &Self) -> bool {
+        unsafe {
+            let msg1 = InertiaSeqRaw{data: self.data, size: self.size, capacity: self.capacity};
+            let msg2 = InertiaSeqRaw{data: other.data, size: other.size, capacity: other.capacity};
+            geometry_msgs__msg__Inertia__Sequence__are_equal(&msg1, &msg2)
+        }
+    }
+}
+

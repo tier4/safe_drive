@@ -7,8 +7,10 @@ use crate::rcl;
 extern "C" {
     fn geometry_msgs__msg__PolygonStamped__init(msg: *mut PolygonStamped) -> bool;
     fn geometry_msgs__msg__PolygonStamped__fini(msg: *mut PolygonStamped);
+    fn geometry_msgs__msg__PolygonStamped__are_equal(lhs: *const PolygonStamped, rhs: *const PolygonStamped) -> bool;
     fn geometry_msgs__msg__PolygonStamped__Sequence__init(msg: *mut PolygonStampedSeqRaw, size: usize) -> bool;
     fn geometry_msgs__msg__PolygonStamped__Sequence__fini(msg: *mut PolygonStampedSeqRaw);
+    fn geometry_msgs__msg__PolygonStamped__Sequence__are_equal(lhs: *const PolygonStampedSeqRaw, rhs: *const PolygonStampedSeqRaw) -> bool;
     fn rosidl_typesupport_c__get_message_type_support_handle__geometry_msgs__msg__PolygonStamped() -> *const rcl::rosidl_message_type_support_t;
 }
 
@@ -111,3 +113,22 @@ impl TopicMsg for PolygonStamped {
         }
     }
 }
+
+impl PartialEq for PolygonStamped {
+    fn eq(&self, other: &Self) -> bool {
+        unsafe {
+            geometry_msgs__msg__PolygonStamped__are_equal(self, other)
+        }
+    }
+}
+
+impl<const N: usize> PartialEq for PolygonStampedSeq<N> {
+    fn eq(&self, other: &Self) -> bool {
+        unsafe {
+            let msg1 = PolygonStampedSeqRaw{data: self.data, size: self.size, capacity: self.capacity};
+            let msg2 = PolygonStampedSeqRaw{data: other.data, size: other.size, capacity: other.capacity};
+            geometry_msgs__msg__PolygonStamped__Sequence__are_equal(&msg1, &msg2)
+        }
+    }
+}
+

@@ -23,8 +23,10 @@ pub const DELETEALL: i32 = 3;
 extern "C" {
     fn visualization_msgs__msg__Marker__init(msg: *mut Marker) -> bool;
     fn visualization_msgs__msg__Marker__fini(msg: *mut Marker);
+    fn visualization_msgs__msg__Marker__are_equal(lhs: *const Marker, rhs: *const Marker) -> bool;
     fn visualization_msgs__msg__Marker__Sequence__init(msg: *mut MarkerSeqRaw, size: usize) -> bool;
     fn visualization_msgs__msg__Marker__Sequence__fini(msg: *mut MarkerSeqRaw);
+    fn visualization_msgs__msg__Marker__Sequence__are_equal(lhs: *const MarkerSeqRaw, rhs: *const MarkerSeqRaw) -> bool;
     fn rosidl_typesupport_c__get_message_type_support_handle__visualization_msgs__msg__Marker() -> *const rcl::rosidl_message_type_support_t;
 }
 
@@ -140,3 +142,22 @@ impl TopicMsg for Marker {
         }
     }
 }
+
+impl PartialEq for Marker {
+    fn eq(&self, other: &Self) -> bool {
+        unsafe {
+            visualization_msgs__msg__Marker__are_equal(self, other)
+        }
+    }
+}
+
+impl<const N: usize> PartialEq for MarkerSeq<N> {
+    fn eq(&self, other: &Self) -> bool {
+        unsafe {
+            let msg1 = MarkerSeqRaw{data: self.data, size: self.size, capacity: self.capacity};
+            let msg2 = MarkerSeqRaw{data: other.data, size: other.size, capacity: other.capacity};
+            visualization_msgs__msg__Marker__Sequence__are_equal(&msg1, &msg2)
+        }
+    }
+}
+

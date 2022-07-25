@@ -7,8 +7,10 @@ use crate::rcl;
 extern "C" {
     fn std_msgs__msg__Float32__init(msg: *mut Float32) -> bool;
     fn std_msgs__msg__Float32__fini(msg: *mut Float32);
+    fn std_msgs__msg__Float32__are_equal(lhs: *const Float32, rhs: *const Float32) -> bool;
     fn std_msgs__msg__Float32__Sequence__init(msg: *mut Float32SeqRaw, size: usize) -> bool;
     fn std_msgs__msg__Float32__Sequence__fini(msg: *mut Float32SeqRaw);
+    fn std_msgs__msg__Float32__Sequence__are_equal(lhs: *const Float32SeqRaw, rhs: *const Float32SeqRaw) -> bool;
     fn rosidl_typesupport_c__get_message_type_support_handle__std_msgs__msg__Float32() -> *const rcl::rosidl_message_type_support_t;
 }
 
@@ -110,3 +112,22 @@ impl TopicMsg for Float32 {
         }
     }
 }
+
+impl PartialEq for Float32 {
+    fn eq(&self, other: &Self) -> bool {
+        unsafe {
+            std_msgs__msg__Float32__are_equal(self, other)
+        }
+    }
+}
+
+impl<const N: usize> PartialEq for Float32Seq<N> {
+    fn eq(&self, other: &Self) -> bool {
+        unsafe {
+            let msg1 = Float32SeqRaw{data: self.data, size: self.size, capacity: self.capacity};
+            let msg2 = Float32SeqRaw{data: other.data, size: other.size, capacity: other.capacity};
+            std_msgs__msg__Float32__Sequence__are_equal(&msg1, &msg2)
+        }
+    }
+}
+

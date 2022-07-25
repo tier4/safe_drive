@@ -7,8 +7,10 @@ use crate::rcl;
 extern "C" {
     fn sensor_msgs__msg__CameraInfo__init(msg: *mut CameraInfo) -> bool;
     fn sensor_msgs__msg__CameraInfo__fini(msg: *mut CameraInfo);
+    fn sensor_msgs__msg__CameraInfo__are_equal(lhs: *const CameraInfo, rhs: *const CameraInfo) -> bool;
     fn sensor_msgs__msg__CameraInfo__Sequence__init(msg: *mut CameraInfoSeqRaw, size: usize) -> bool;
     fn sensor_msgs__msg__CameraInfo__Sequence__fini(msg: *mut CameraInfoSeqRaw);
+    fn sensor_msgs__msg__CameraInfo__Sequence__are_equal(lhs: *const CameraInfoSeqRaw, rhs: *const CameraInfoSeqRaw) -> bool;
     fn rosidl_typesupport_c__get_message_type_support_handle__sensor_msgs__msg__CameraInfo() -> *const rcl::rosidl_message_type_support_t;
 }
 
@@ -120,3 +122,22 @@ impl TopicMsg for CameraInfo {
         }
     }
 }
+
+impl PartialEq for CameraInfo {
+    fn eq(&self, other: &Self) -> bool {
+        unsafe {
+            sensor_msgs__msg__CameraInfo__are_equal(self, other)
+        }
+    }
+}
+
+impl<const N: usize> PartialEq for CameraInfoSeq<N> {
+    fn eq(&self, other: &Self) -> bool {
+        unsafe {
+            let msg1 = CameraInfoSeqRaw{data: self.data, size: self.size, capacity: self.capacity};
+            let msg2 = CameraInfoSeqRaw{data: other.data, size: other.size, capacity: other.capacity};
+            sensor_msgs__msg__CameraInfo__Sequence__are_equal(&msg1, &msg2)
+        }
+    }
+}
+

@@ -7,8 +7,10 @@ use crate::rcl;
 extern "C" {
     fn sensor_msgs__msg__FluidPressure__init(msg: *mut FluidPressure) -> bool;
     fn sensor_msgs__msg__FluidPressure__fini(msg: *mut FluidPressure);
+    fn sensor_msgs__msg__FluidPressure__are_equal(lhs: *const FluidPressure, rhs: *const FluidPressure) -> bool;
     fn sensor_msgs__msg__FluidPressure__Sequence__init(msg: *mut FluidPressureSeqRaw, size: usize) -> bool;
     fn sensor_msgs__msg__FluidPressure__Sequence__fini(msg: *mut FluidPressureSeqRaw);
+    fn sensor_msgs__msg__FluidPressure__Sequence__are_equal(lhs: *const FluidPressureSeqRaw, rhs: *const FluidPressureSeqRaw) -> bool;
     fn rosidl_typesupport_c__get_message_type_support_handle__sensor_msgs__msg__FluidPressure() -> *const rcl::rosidl_message_type_support_t;
 }
 
@@ -112,3 +114,22 @@ impl TopicMsg for FluidPressure {
         }
     }
 }
+
+impl PartialEq for FluidPressure {
+    fn eq(&self, other: &Self) -> bool {
+        unsafe {
+            sensor_msgs__msg__FluidPressure__are_equal(self, other)
+        }
+    }
+}
+
+impl<const N: usize> PartialEq for FluidPressureSeq<N> {
+    fn eq(&self, other: &Self) -> bool {
+        unsafe {
+            let msg1 = FluidPressureSeqRaw{data: self.data, size: self.size, capacity: self.capacity};
+            let msg2 = FluidPressureSeqRaw{data: other.data, size: other.size, capacity: other.capacity};
+            sensor_msgs__msg__FluidPressure__Sequence__are_equal(&msg1, &msg2)
+        }
+    }
+}
+

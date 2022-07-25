@@ -7,8 +7,10 @@ use crate::rcl;
 extern "C" {
     fn diagnostic_msgs__msg__KeyValue__init(msg: *mut KeyValue) -> bool;
     fn diagnostic_msgs__msg__KeyValue__fini(msg: *mut KeyValue);
+    fn diagnostic_msgs__msg__KeyValue__are_equal(lhs: *const KeyValue, rhs: *const KeyValue) -> bool;
     fn diagnostic_msgs__msg__KeyValue__Sequence__init(msg: *mut KeyValueSeqRaw, size: usize) -> bool;
     fn diagnostic_msgs__msg__KeyValue__Sequence__fini(msg: *mut KeyValueSeqRaw);
+    fn diagnostic_msgs__msg__KeyValue__Sequence__are_equal(lhs: *const KeyValueSeqRaw, rhs: *const KeyValueSeqRaw) -> bool;
     fn rosidl_typesupport_c__get_message_type_support_handle__diagnostic_msgs__msg__KeyValue() -> *const rcl::rosidl_message_type_support_t;
 }
 
@@ -111,3 +113,22 @@ impl TopicMsg for KeyValue {
         }
     }
 }
+
+impl PartialEq for KeyValue {
+    fn eq(&self, other: &Self) -> bool {
+        unsafe {
+            diagnostic_msgs__msg__KeyValue__are_equal(self, other)
+        }
+    }
+}
+
+impl<const N: usize> PartialEq for KeyValueSeq<N> {
+    fn eq(&self, other: &Self) -> bool {
+        unsafe {
+            let msg1 = KeyValueSeqRaw{data: self.data, size: self.size, capacity: self.capacity};
+            let msg2 = KeyValueSeqRaw{data: other.data, size: other.size, capacity: other.capacity};
+            diagnostic_msgs__msg__KeyValue__Sequence__are_equal(&msg1, &msg2)
+        }
+    }
+}
+

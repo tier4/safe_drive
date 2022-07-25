@@ -10,8 +10,10 @@ pub const ROSLAUNCH: u8 = 2;
 extern "C" {
     fn visualization_msgs__msg__MenuEntry__init(msg: *mut MenuEntry) -> bool;
     fn visualization_msgs__msg__MenuEntry__fini(msg: *mut MenuEntry);
+    fn visualization_msgs__msg__MenuEntry__are_equal(lhs: *const MenuEntry, rhs: *const MenuEntry) -> bool;
     fn visualization_msgs__msg__MenuEntry__Sequence__init(msg: *mut MenuEntrySeqRaw, size: usize) -> bool;
     fn visualization_msgs__msg__MenuEntry__Sequence__fini(msg: *mut MenuEntrySeqRaw);
+    fn visualization_msgs__msg__MenuEntry__Sequence__are_equal(lhs: *const MenuEntrySeqRaw, rhs: *const MenuEntrySeqRaw) -> bool;
     fn rosidl_typesupport_c__get_message_type_support_handle__visualization_msgs__msg__MenuEntry() -> *const rcl::rosidl_message_type_support_t;
 }
 
@@ -117,3 +119,22 @@ impl TopicMsg for MenuEntry {
         }
     }
 }
+
+impl PartialEq for MenuEntry {
+    fn eq(&self, other: &Self) -> bool {
+        unsafe {
+            visualization_msgs__msg__MenuEntry__are_equal(self, other)
+        }
+    }
+}
+
+impl<const N: usize> PartialEq for MenuEntrySeq<N> {
+    fn eq(&self, other: &Self) -> bool {
+        unsafe {
+            let msg1 = MenuEntrySeqRaw{data: self.data, size: self.size, capacity: self.capacity};
+            let msg2 = MenuEntrySeqRaw{data: other.data, size: other.size, capacity: other.capacity};
+            visualization_msgs__msg__MenuEntry__Sequence__are_equal(&msg1, &msg2)
+        }
+    }
+}
+

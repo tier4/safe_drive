@@ -9,8 +9,10 @@ pub const INFRARED: u8 = 1;
 extern "C" {
     fn sensor_msgs__msg__Range__init(msg: *mut Range) -> bool;
     fn sensor_msgs__msg__Range__fini(msg: *mut Range);
+    fn sensor_msgs__msg__Range__are_equal(lhs: *const Range, rhs: *const Range) -> bool;
     fn sensor_msgs__msg__Range__Sequence__init(msg: *mut RangeSeqRaw, size: usize) -> bool;
     fn sensor_msgs__msg__Range__Sequence__fini(msg: *mut RangeSeqRaw);
+    fn sensor_msgs__msg__Range__Sequence__are_equal(lhs: *const RangeSeqRaw, rhs: *const RangeSeqRaw) -> bool;
     fn rosidl_typesupport_c__get_message_type_support_handle__sensor_msgs__msg__Range() -> *const rcl::rosidl_message_type_support_t;
 }
 
@@ -117,3 +119,22 @@ impl TopicMsg for Range {
         }
     }
 }
+
+impl PartialEq for Range {
+    fn eq(&self, other: &Self) -> bool {
+        unsafe {
+            sensor_msgs__msg__Range__are_equal(self, other)
+        }
+    }
+}
+
+impl<const N: usize> PartialEq for RangeSeq<N> {
+    fn eq(&self, other: &Self) -> bool {
+        unsafe {
+            let msg1 = RangeSeqRaw{data: self.data, size: self.size, capacity: self.capacity};
+            let msg2 = RangeSeqRaw{data: other.data, size: other.size, capacity: other.capacity};
+            sensor_msgs__msg__Range__Sequence__are_equal(&msg1, &msg2)
+        }
+    }
+}
+

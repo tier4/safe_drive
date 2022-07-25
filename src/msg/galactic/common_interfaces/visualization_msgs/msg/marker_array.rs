@@ -7,8 +7,10 @@ use crate::rcl;
 extern "C" {
     fn visualization_msgs__msg__MarkerArray__init(msg: *mut MarkerArray) -> bool;
     fn visualization_msgs__msg__MarkerArray__fini(msg: *mut MarkerArray);
+    fn visualization_msgs__msg__MarkerArray__are_equal(lhs: *const MarkerArray, rhs: *const MarkerArray) -> bool;
     fn visualization_msgs__msg__MarkerArray__Sequence__init(msg: *mut MarkerArraySeqRaw, size: usize) -> bool;
     fn visualization_msgs__msg__MarkerArray__Sequence__fini(msg: *mut MarkerArraySeqRaw);
+    fn visualization_msgs__msg__MarkerArray__Sequence__are_equal(lhs: *const MarkerArraySeqRaw, rhs: *const MarkerArraySeqRaw) -> bool;
     fn rosidl_typesupport_c__get_message_type_support_handle__visualization_msgs__msg__MarkerArray() -> *const rcl::rosidl_message_type_support_t;
 }
 
@@ -110,3 +112,22 @@ impl TopicMsg for MarkerArray {
         }
     }
 }
+
+impl PartialEq for MarkerArray {
+    fn eq(&self, other: &Self) -> bool {
+        unsafe {
+            visualization_msgs__msg__MarkerArray__are_equal(self, other)
+        }
+    }
+}
+
+impl<const N: usize> PartialEq for MarkerArraySeq<N> {
+    fn eq(&self, other: &Self) -> bool {
+        unsafe {
+            let msg1 = MarkerArraySeqRaw{data: self.data, size: self.size, capacity: self.capacity};
+            let msg2 = MarkerArraySeqRaw{data: other.data, size: other.size, capacity: other.capacity};
+            visualization_msgs__msg__MarkerArray__Sequence__are_equal(&msg1, &msg2)
+        }
+    }
+}
+

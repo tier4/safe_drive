@@ -15,8 +15,10 @@ pub const SERVICE_GALILEO: u16 = 8;
 extern "C" {
     fn sensor_msgs__msg__NavSatStatus__init(msg: *mut NavSatStatus) -> bool;
     fn sensor_msgs__msg__NavSatStatus__fini(msg: *mut NavSatStatus);
+    fn sensor_msgs__msg__NavSatStatus__are_equal(lhs: *const NavSatStatus, rhs: *const NavSatStatus) -> bool;
     fn sensor_msgs__msg__NavSatStatus__Sequence__init(msg: *mut NavSatStatusSeqRaw, size: usize) -> bool;
     fn sensor_msgs__msg__NavSatStatus__Sequence__fini(msg: *mut NavSatStatusSeqRaw);
+    fn sensor_msgs__msg__NavSatStatus__Sequence__are_equal(lhs: *const NavSatStatusSeqRaw, rhs: *const NavSatStatusSeqRaw) -> bool;
     fn rosidl_typesupport_c__get_message_type_support_handle__sensor_msgs__msg__NavSatStatus() -> *const rcl::rosidl_message_type_support_t;
 }
 
@@ -119,3 +121,22 @@ impl TopicMsg for NavSatStatus {
         }
     }
 }
+
+impl PartialEq for NavSatStatus {
+    fn eq(&self, other: &Self) -> bool {
+        unsafe {
+            sensor_msgs__msg__NavSatStatus__are_equal(self, other)
+        }
+    }
+}
+
+impl<const N: usize> PartialEq for NavSatStatusSeq<N> {
+    fn eq(&self, other: &Self) -> bool {
+        unsafe {
+            let msg1 = NavSatStatusSeqRaw{data: self.data, size: self.size, capacity: self.capacity};
+            let msg2 = NavSatStatusSeqRaw{data: other.data, size: other.size, capacity: other.capacity};
+            sensor_msgs__msg__NavSatStatus__Sequence__are_equal(&msg1, &msg2)
+        }
+    }
+}
+

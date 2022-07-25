@@ -7,8 +7,10 @@ use crate::rcl;
 extern "C" {
     fn shape_msgs__msg__Mesh__init(msg: *mut Mesh) -> bool;
     fn shape_msgs__msg__Mesh__fini(msg: *mut Mesh);
+    fn shape_msgs__msg__Mesh__are_equal(lhs: *const Mesh, rhs: *const Mesh) -> bool;
     fn shape_msgs__msg__Mesh__Sequence__init(msg: *mut MeshSeqRaw, size: usize) -> bool;
     fn shape_msgs__msg__Mesh__Sequence__fini(msg: *mut MeshSeqRaw);
+    fn shape_msgs__msg__Mesh__Sequence__are_equal(lhs: *const MeshSeqRaw, rhs: *const MeshSeqRaw) -> bool;
     fn rosidl_typesupport_c__get_message_type_support_handle__shape_msgs__msg__Mesh() -> *const rcl::rosidl_message_type_support_t;
 }
 
@@ -111,3 +113,22 @@ impl TopicMsg for Mesh {
         }
     }
 }
+
+impl PartialEq for Mesh {
+    fn eq(&self, other: &Self) -> bool {
+        unsafe {
+            shape_msgs__msg__Mesh__are_equal(self, other)
+        }
+    }
+}
+
+impl<const N: usize> PartialEq for MeshSeq<N> {
+    fn eq(&self, other: &Self) -> bool {
+        unsafe {
+            let msg1 = MeshSeqRaw{data: self.data, size: self.size, capacity: self.capacity};
+            let msg2 = MeshSeqRaw{data: other.data, size: other.size, capacity: other.capacity};
+            shape_msgs__msg__Mesh__Sequence__are_equal(&msg1, &msg2)
+        }
+    }
+}
+

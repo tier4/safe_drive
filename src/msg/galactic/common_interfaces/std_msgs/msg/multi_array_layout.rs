@@ -7,8 +7,10 @@ use crate::rcl;
 extern "C" {
     fn std_msgs__msg__MultiArrayLayout__init(msg: *mut MultiArrayLayout) -> bool;
     fn std_msgs__msg__MultiArrayLayout__fini(msg: *mut MultiArrayLayout);
+    fn std_msgs__msg__MultiArrayLayout__are_equal(lhs: *const MultiArrayLayout, rhs: *const MultiArrayLayout) -> bool;
     fn std_msgs__msg__MultiArrayLayout__Sequence__init(msg: *mut MultiArrayLayoutSeqRaw, size: usize) -> bool;
     fn std_msgs__msg__MultiArrayLayout__Sequence__fini(msg: *mut MultiArrayLayoutSeqRaw);
+    fn std_msgs__msg__MultiArrayLayout__Sequence__are_equal(lhs: *const MultiArrayLayoutSeqRaw, rhs: *const MultiArrayLayoutSeqRaw) -> bool;
     fn rosidl_typesupport_c__get_message_type_support_handle__std_msgs__msg__MultiArrayLayout() -> *const rcl::rosidl_message_type_support_t;
 }
 
@@ -111,3 +113,22 @@ impl TopicMsg for MultiArrayLayout {
         }
     }
 }
+
+impl PartialEq for MultiArrayLayout {
+    fn eq(&self, other: &Self) -> bool {
+        unsafe {
+            std_msgs__msg__MultiArrayLayout__are_equal(self, other)
+        }
+    }
+}
+
+impl<const N: usize> PartialEq for MultiArrayLayoutSeq<N> {
+    fn eq(&self, other: &Self) -> bool {
+        unsafe {
+            let msg1 = MultiArrayLayoutSeqRaw{data: self.data, size: self.size, capacity: self.capacity};
+            let msg2 = MultiArrayLayoutSeqRaw{data: other.data, size: other.size, capacity: other.capacity};
+            std_msgs__msg__MultiArrayLayout__Sequence__are_equal(&msg1, &msg2)
+        }
+    }
+}
+

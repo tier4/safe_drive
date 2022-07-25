@@ -7,8 +7,10 @@ use crate::rcl;
 extern "C" {
     fn geometry_msgs__msg__InertiaStamped__init(msg: *mut InertiaStamped) -> bool;
     fn geometry_msgs__msg__InertiaStamped__fini(msg: *mut InertiaStamped);
+    fn geometry_msgs__msg__InertiaStamped__are_equal(lhs: *const InertiaStamped, rhs: *const InertiaStamped) -> bool;
     fn geometry_msgs__msg__InertiaStamped__Sequence__init(msg: *mut InertiaStampedSeqRaw, size: usize) -> bool;
     fn geometry_msgs__msg__InertiaStamped__Sequence__fini(msg: *mut InertiaStampedSeqRaw);
+    fn geometry_msgs__msg__InertiaStamped__Sequence__are_equal(lhs: *const InertiaStampedSeqRaw, rhs: *const InertiaStampedSeqRaw) -> bool;
     fn rosidl_typesupport_c__get_message_type_support_handle__geometry_msgs__msg__InertiaStamped() -> *const rcl::rosidl_message_type_support_t;
 }
 
@@ -111,3 +113,22 @@ impl TopicMsg for InertiaStamped {
         }
     }
 }
+
+impl PartialEq for InertiaStamped {
+    fn eq(&self, other: &Self) -> bool {
+        unsafe {
+            geometry_msgs__msg__InertiaStamped__are_equal(self, other)
+        }
+    }
+}
+
+impl<const N: usize> PartialEq for InertiaStampedSeq<N> {
+    fn eq(&self, other: &Self) -> bool {
+        unsafe {
+            let msg1 = InertiaStampedSeqRaw{data: self.data, size: self.size, capacity: self.capacity};
+            let msg2 = InertiaStampedSeqRaw{data: other.data, size: other.size, capacity: other.capacity};
+            geometry_msgs__msg__InertiaStamped__Sequence__are_equal(&msg1, &msg2)
+        }
+    }
+}
+

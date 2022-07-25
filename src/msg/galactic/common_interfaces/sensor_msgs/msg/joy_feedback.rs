@@ -10,8 +10,10 @@ pub const TYPE_BUZZER: u8 = 2;
 extern "C" {
     fn sensor_msgs__msg__JoyFeedback__init(msg: *mut JoyFeedback) -> bool;
     fn sensor_msgs__msg__JoyFeedback__fini(msg: *mut JoyFeedback);
+    fn sensor_msgs__msg__JoyFeedback__are_equal(lhs: *const JoyFeedback, rhs: *const JoyFeedback) -> bool;
     fn sensor_msgs__msg__JoyFeedback__Sequence__init(msg: *mut JoyFeedbackSeqRaw, size: usize) -> bool;
     fn sensor_msgs__msg__JoyFeedback__Sequence__fini(msg: *mut JoyFeedbackSeqRaw);
+    fn sensor_msgs__msg__JoyFeedback__Sequence__are_equal(lhs: *const JoyFeedbackSeqRaw, rhs: *const JoyFeedbackSeqRaw) -> bool;
     fn rosidl_typesupport_c__get_message_type_support_handle__sensor_msgs__msg__JoyFeedback() -> *const rcl::rosidl_message_type_support_t;
 }
 
@@ -115,3 +117,22 @@ impl TopicMsg for JoyFeedback {
         }
     }
 }
+
+impl PartialEq for JoyFeedback {
+    fn eq(&self, other: &Self) -> bool {
+        unsafe {
+            sensor_msgs__msg__JoyFeedback__are_equal(self, other)
+        }
+    }
+}
+
+impl<const N: usize> PartialEq for JoyFeedbackSeq<N> {
+    fn eq(&self, other: &Self) -> bool {
+        unsafe {
+            let msg1 = JoyFeedbackSeqRaw{data: self.data, size: self.size, capacity: self.capacity};
+            let msg2 = JoyFeedbackSeqRaw{data: other.data, size: other.size, capacity: other.capacity};
+            sensor_msgs__msg__JoyFeedback__Sequence__are_equal(&msg1, &msg2)
+        }
+    }
+}
+

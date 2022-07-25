@@ -7,8 +7,10 @@ use crate::rcl;
 extern "C" {
     fn visualization_msgs__msg__InteractiveMarkerPose__init(msg: *mut InteractiveMarkerPose) -> bool;
     fn visualization_msgs__msg__InteractiveMarkerPose__fini(msg: *mut InteractiveMarkerPose);
+    fn visualization_msgs__msg__InteractiveMarkerPose__are_equal(lhs: *const InteractiveMarkerPose, rhs: *const InteractiveMarkerPose) -> bool;
     fn visualization_msgs__msg__InteractiveMarkerPose__Sequence__init(msg: *mut InteractiveMarkerPoseSeqRaw, size: usize) -> bool;
     fn visualization_msgs__msg__InteractiveMarkerPose__Sequence__fini(msg: *mut InteractiveMarkerPoseSeqRaw);
+    fn visualization_msgs__msg__InteractiveMarkerPose__Sequence__are_equal(lhs: *const InteractiveMarkerPoseSeqRaw, rhs: *const InteractiveMarkerPoseSeqRaw) -> bool;
     fn rosidl_typesupport_c__get_message_type_support_handle__visualization_msgs__msg__InteractiveMarkerPose() -> *const rcl::rosidl_message_type_support_t;
 }
 
@@ -112,3 +114,22 @@ impl TopicMsg for InteractiveMarkerPose {
         }
     }
 }
+
+impl PartialEq for InteractiveMarkerPose {
+    fn eq(&self, other: &Self) -> bool {
+        unsafe {
+            visualization_msgs__msg__InteractiveMarkerPose__are_equal(self, other)
+        }
+    }
+}
+
+impl<const N: usize> PartialEq for InteractiveMarkerPoseSeq<N> {
+    fn eq(&self, other: &Self) -> bool {
+        unsafe {
+            let msg1 = InteractiveMarkerPoseSeqRaw{data: self.data, size: self.size, capacity: self.capacity};
+            let msg2 = InteractiveMarkerPoseSeqRaw{data: other.data, size: other.size, capacity: other.capacity};
+            visualization_msgs__msg__InteractiveMarkerPose__Sequence__are_equal(&msg1, &msg2)
+        }
+    }
+}
+

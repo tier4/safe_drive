@@ -7,8 +7,10 @@ use crate::rcl;
 extern "C" {
     fn sensor_msgs__msg__LaserScan__init(msg: *mut LaserScan) -> bool;
     fn sensor_msgs__msg__LaserScan__fini(msg: *mut LaserScan);
+    fn sensor_msgs__msg__LaserScan__are_equal(lhs: *const LaserScan, rhs: *const LaserScan) -> bool;
     fn sensor_msgs__msg__LaserScan__Sequence__init(msg: *mut LaserScanSeqRaw, size: usize) -> bool;
     fn sensor_msgs__msg__LaserScan__Sequence__fini(msg: *mut LaserScanSeqRaw);
+    fn sensor_msgs__msg__LaserScan__Sequence__are_equal(lhs: *const LaserScanSeqRaw, rhs: *const LaserScanSeqRaw) -> bool;
     fn rosidl_typesupport_c__get_message_type_support_handle__sensor_msgs__msg__LaserScan() -> *const rcl::rosidl_message_type_support_t;
 }
 
@@ -119,3 +121,22 @@ impl TopicMsg for LaserScan {
         }
     }
 }
+
+impl PartialEq for LaserScan {
+    fn eq(&self, other: &Self) -> bool {
+        unsafe {
+            sensor_msgs__msg__LaserScan__are_equal(self, other)
+        }
+    }
+}
+
+impl<const N: usize> PartialEq for LaserScanSeq<N> {
+    fn eq(&self, other: &Self) -> bool {
+        unsafe {
+            let msg1 = LaserScanSeqRaw{data: self.data, size: self.size, capacity: self.capacity};
+            let msg2 = LaserScanSeqRaw{data: other.data, size: other.size, capacity: other.capacity};
+            sensor_msgs__msg__LaserScan__Sequence__are_equal(&msg1, &msg2)
+        }
+    }
+}
+

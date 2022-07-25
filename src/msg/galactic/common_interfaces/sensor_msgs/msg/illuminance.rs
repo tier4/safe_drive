@@ -7,8 +7,10 @@ use crate::rcl;
 extern "C" {
     fn sensor_msgs__msg__Illuminance__init(msg: *mut Illuminance) -> bool;
     fn sensor_msgs__msg__Illuminance__fini(msg: *mut Illuminance);
+    fn sensor_msgs__msg__Illuminance__are_equal(lhs: *const Illuminance, rhs: *const Illuminance) -> bool;
     fn sensor_msgs__msg__Illuminance__Sequence__init(msg: *mut IlluminanceSeqRaw, size: usize) -> bool;
     fn sensor_msgs__msg__Illuminance__Sequence__fini(msg: *mut IlluminanceSeqRaw);
+    fn sensor_msgs__msg__Illuminance__Sequence__are_equal(lhs: *const IlluminanceSeqRaw, rhs: *const IlluminanceSeqRaw) -> bool;
     fn rosidl_typesupport_c__get_message_type_support_handle__sensor_msgs__msg__Illuminance() -> *const rcl::rosidl_message_type_support_t;
 }
 
@@ -112,3 +114,22 @@ impl TopicMsg for Illuminance {
         }
     }
 }
+
+impl PartialEq for Illuminance {
+    fn eq(&self, other: &Self) -> bool {
+        unsafe {
+            sensor_msgs__msg__Illuminance__are_equal(self, other)
+        }
+    }
+}
+
+impl<const N: usize> PartialEq for IlluminanceSeq<N> {
+    fn eq(&self, other: &Self) -> bool {
+        unsafe {
+            let msg1 = IlluminanceSeqRaw{data: self.data, size: self.size, capacity: self.capacity};
+            let msg2 = IlluminanceSeqRaw{data: other.data, size: other.size, capacity: other.capacity};
+            sensor_msgs__msg__Illuminance__Sequence__are_equal(&msg1, &msg2)
+        }
+    }
+}
+

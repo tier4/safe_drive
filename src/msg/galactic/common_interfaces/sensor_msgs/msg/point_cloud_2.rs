@@ -7,8 +7,10 @@ use crate::rcl;
 extern "C" {
     fn sensor_msgs__msg__PointCloud2__init(msg: *mut PointCloud2) -> bool;
     fn sensor_msgs__msg__PointCloud2__fini(msg: *mut PointCloud2);
+    fn sensor_msgs__msg__PointCloud2__are_equal(lhs: *const PointCloud2, rhs: *const PointCloud2) -> bool;
     fn sensor_msgs__msg__PointCloud2__Sequence__init(msg: *mut PointCloud2SeqRaw, size: usize) -> bool;
     fn sensor_msgs__msg__PointCloud2__Sequence__fini(msg: *mut PointCloud2SeqRaw);
+    fn sensor_msgs__msg__PointCloud2__Sequence__are_equal(lhs: *const PointCloud2SeqRaw, rhs: *const PointCloud2SeqRaw) -> bool;
     fn rosidl_typesupport_c__get_message_type_support_handle__sensor_msgs__msg__PointCloud2() -> *const rcl::rosidl_message_type_support_t;
 }
 
@@ -118,3 +120,22 @@ impl TopicMsg for PointCloud2 {
         }
     }
 }
+
+impl PartialEq for PointCloud2 {
+    fn eq(&self, other: &Self) -> bool {
+        unsafe {
+            sensor_msgs__msg__PointCloud2__are_equal(self, other)
+        }
+    }
+}
+
+impl<const N: usize> PartialEq for PointCloud2Seq<N> {
+    fn eq(&self, other: &Self) -> bool {
+        unsafe {
+            let msg1 = PointCloud2SeqRaw{data: self.data, size: self.size, capacity: self.capacity};
+            let msg2 = PointCloud2SeqRaw{data: other.data, size: other.size, capacity: other.capacity};
+            sensor_msgs__msg__PointCloud2__Sequence__are_equal(&msg1, &msg2)
+        }
+    }
+}
+

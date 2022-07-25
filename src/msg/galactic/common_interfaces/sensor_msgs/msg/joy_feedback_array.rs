@@ -7,8 +7,10 @@ use crate::rcl;
 extern "C" {
     fn sensor_msgs__msg__JoyFeedbackArray__init(msg: *mut JoyFeedbackArray) -> bool;
     fn sensor_msgs__msg__JoyFeedbackArray__fini(msg: *mut JoyFeedbackArray);
+    fn sensor_msgs__msg__JoyFeedbackArray__are_equal(lhs: *const JoyFeedbackArray, rhs: *const JoyFeedbackArray) -> bool;
     fn sensor_msgs__msg__JoyFeedbackArray__Sequence__init(msg: *mut JoyFeedbackArraySeqRaw, size: usize) -> bool;
     fn sensor_msgs__msg__JoyFeedbackArray__Sequence__fini(msg: *mut JoyFeedbackArraySeqRaw);
+    fn sensor_msgs__msg__JoyFeedbackArray__Sequence__are_equal(lhs: *const JoyFeedbackArraySeqRaw, rhs: *const JoyFeedbackArraySeqRaw) -> bool;
     fn rosidl_typesupport_c__get_message_type_support_handle__sensor_msgs__msg__JoyFeedbackArray() -> *const rcl::rosidl_message_type_support_t;
 }
 
@@ -110,3 +112,22 @@ impl TopicMsg for JoyFeedbackArray {
         }
     }
 }
+
+impl PartialEq for JoyFeedbackArray {
+    fn eq(&self, other: &Self) -> bool {
+        unsafe {
+            sensor_msgs__msg__JoyFeedbackArray__are_equal(self, other)
+        }
+    }
+}
+
+impl<const N: usize> PartialEq for JoyFeedbackArraySeq<N> {
+    fn eq(&self, other: &Self) -> bool {
+        unsafe {
+            let msg1 = JoyFeedbackArraySeqRaw{data: self.data, size: self.size, capacity: self.capacity};
+            let msg2 = JoyFeedbackArraySeqRaw{data: other.data, size: other.size, capacity: other.capacity};
+            sensor_msgs__msg__JoyFeedbackArray__Sequence__are_equal(&msg1, &msg2)
+        }
+    }
+}
+

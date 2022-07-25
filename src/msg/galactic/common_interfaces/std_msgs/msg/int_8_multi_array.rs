@@ -7,8 +7,10 @@ use crate::rcl;
 extern "C" {
     fn std_msgs__msg__Int8MultiArray__init(msg: *mut Int8MultiArray) -> bool;
     fn std_msgs__msg__Int8MultiArray__fini(msg: *mut Int8MultiArray);
+    fn std_msgs__msg__Int8MultiArray__are_equal(lhs: *const Int8MultiArray, rhs: *const Int8MultiArray) -> bool;
     fn std_msgs__msg__Int8MultiArray__Sequence__init(msg: *mut Int8MultiArraySeqRaw, size: usize) -> bool;
     fn std_msgs__msg__Int8MultiArray__Sequence__fini(msg: *mut Int8MultiArraySeqRaw);
+    fn std_msgs__msg__Int8MultiArray__Sequence__are_equal(lhs: *const Int8MultiArraySeqRaw, rhs: *const Int8MultiArraySeqRaw) -> bool;
     fn rosidl_typesupport_c__get_message_type_support_handle__std_msgs__msg__Int8MultiArray() -> *const rcl::rosidl_message_type_support_t;
 }
 
@@ -111,3 +113,22 @@ impl TopicMsg for Int8MultiArray {
         }
     }
 }
+
+impl PartialEq for Int8MultiArray {
+    fn eq(&self, other: &Self) -> bool {
+        unsafe {
+            std_msgs__msg__Int8MultiArray__are_equal(self, other)
+        }
+    }
+}
+
+impl<const N: usize> PartialEq for Int8MultiArraySeq<N> {
+    fn eq(&self, other: &Self) -> bool {
+        unsafe {
+            let msg1 = Int8MultiArraySeqRaw{data: self.data, size: self.size, capacity: self.capacity};
+            let msg2 = Int8MultiArraySeqRaw{data: other.data, size: other.size, capacity: other.capacity};
+            std_msgs__msg__Int8MultiArray__Sequence__are_equal(&msg1, &msg2)
+        }
+    }
+}
+

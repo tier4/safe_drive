@@ -9,8 +9,10 @@ pub const UPDATE: u8 = 1;
 extern "C" {
     fn visualization_msgs__msg__InteractiveMarkerUpdate__init(msg: *mut InteractiveMarkerUpdate) -> bool;
     fn visualization_msgs__msg__InteractiveMarkerUpdate__fini(msg: *mut InteractiveMarkerUpdate);
+    fn visualization_msgs__msg__InteractiveMarkerUpdate__are_equal(lhs: *const InteractiveMarkerUpdate, rhs: *const InteractiveMarkerUpdate) -> bool;
     fn visualization_msgs__msg__InteractiveMarkerUpdate__Sequence__init(msg: *mut InteractiveMarkerUpdateSeqRaw, size: usize) -> bool;
     fn visualization_msgs__msg__InteractiveMarkerUpdate__Sequence__fini(msg: *mut InteractiveMarkerUpdateSeqRaw);
+    fn visualization_msgs__msg__InteractiveMarkerUpdate__Sequence__are_equal(lhs: *const InteractiveMarkerUpdateSeqRaw, rhs: *const InteractiveMarkerUpdateSeqRaw) -> bool;
     fn rosidl_typesupport_c__get_message_type_support_handle__visualization_msgs__msg__InteractiveMarkerUpdate() -> *const rcl::rosidl_message_type_support_t;
 }
 
@@ -117,3 +119,22 @@ impl TopicMsg for InteractiveMarkerUpdate {
         }
     }
 }
+
+impl PartialEq for InteractiveMarkerUpdate {
+    fn eq(&self, other: &Self) -> bool {
+        unsafe {
+            visualization_msgs__msg__InteractiveMarkerUpdate__are_equal(self, other)
+        }
+    }
+}
+
+impl<const N: usize> PartialEq for InteractiveMarkerUpdateSeq<N> {
+    fn eq(&self, other: &Self) -> bool {
+        unsafe {
+            let msg1 = InteractiveMarkerUpdateSeqRaw{data: self.data, size: self.size, capacity: self.capacity};
+            let msg2 = InteractiveMarkerUpdateSeqRaw{data: other.data, size: other.size, capacity: other.capacity};
+            visualization_msgs__msg__InteractiveMarkerUpdate__Sequence__are_equal(&msg1, &msg2)
+        }
+    }
+}
+

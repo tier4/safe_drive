@@ -7,8 +7,10 @@ use crate::rcl;
 extern "C" {
     fn sensor_msgs__msg__CompressedImage__init(msg: *mut CompressedImage) -> bool;
     fn sensor_msgs__msg__CompressedImage__fini(msg: *mut CompressedImage);
+    fn sensor_msgs__msg__CompressedImage__are_equal(lhs: *const CompressedImage, rhs: *const CompressedImage) -> bool;
     fn sensor_msgs__msg__CompressedImage__Sequence__init(msg: *mut CompressedImageSeqRaw, size: usize) -> bool;
     fn sensor_msgs__msg__CompressedImage__Sequence__fini(msg: *mut CompressedImageSeqRaw);
+    fn sensor_msgs__msg__CompressedImage__Sequence__are_equal(lhs: *const CompressedImageSeqRaw, rhs: *const CompressedImageSeqRaw) -> bool;
     fn rosidl_typesupport_c__get_message_type_support_handle__sensor_msgs__msg__CompressedImage() -> *const rcl::rosidl_message_type_support_t;
 }
 
@@ -112,3 +114,22 @@ impl TopicMsg for CompressedImage {
         }
     }
 }
+
+impl PartialEq for CompressedImage {
+    fn eq(&self, other: &Self) -> bool {
+        unsafe {
+            sensor_msgs__msg__CompressedImage__are_equal(self, other)
+        }
+    }
+}
+
+impl<const N: usize> PartialEq for CompressedImageSeq<N> {
+    fn eq(&self, other: &Self) -> bool {
+        unsafe {
+            let msg1 = CompressedImageSeqRaw{data: self.data, size: self.size, capacity: self.capacity};
+            let msg2 = CompressedImageSeqRaw{data: other.data, size: other.size, capacity: other.capacity};
+            sensor_msgs__msg__CompressedImage__Sequence__are_equal(&msg1, &msg2)
+        }
+    }
+}
+

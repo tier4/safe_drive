@@ -14,8 +14,10 @@ pub const REMOVE: i32 = 1;
 extern "C" {
     fn visualization_msgs__msg__ImageMarker__init(msg: *mut ImageMarker) -> bool;
     fn visualization_msgs__msg__ImageMarker__fini(msg: *mut ImageMarker);
+    fn visualization_msgs__msg__ImageMarker__are_equal(lhs: *const ImageMarker, rhs: *const ImageMarker) -> bool;
     fn visualization_msgs__msg__ImageMarker__Sequence__init(msg: *mut ImageMarkerSeqRaw, size: usize) -> bool;
     fn visualization_msgs__msg__ImageMarker__Sequence__fini(msg: *mut ImageMarkerSeqRaw);
+    fn visualization_msgs__msg__ImageMarker__Sequence__are_equal(lhs: *const ImageMarkerSeqRaw, rhs: *const ImageMarkerSeqRaw) -> bool;
     fn rosidl_typesupport_c__get_message_type_support_handle__visualization_msgs__msg__ImageMarker() -> *const rcl::rosidl_message_type_support_t;
 }
 
@@ -129,3 +131,22 @@ impl TopicMsg for ImageMarker {
         }
     }
 }
+
+impl PartialEq for ImageMarker {
+    fn eq(&self, other: &Self) -> bool {
+        unsafe {
+            visualization_msgs__msg__ImageMarker__are_equal(self, other)
+        }
+    }
+}
+
+impl<const N: usize> PartialEq for ImageMarkerSeq<N> {
+    fn eq(&self, other: &Self) -> bool {
+        unsafe {
+            let msg1 = ImageMarkerSeqRaw{data: self.data, size: self.size, capacity: self.capacity};
+            let msg2 = ImageMarkerSeqRaw{data: other.data, size: other.size, capacity: other.capacity};
+            visualization_msgs__msg__ImageMarker__Sequence__are_equal(&msg1, &msg2)
+        }
+    }
+}
+

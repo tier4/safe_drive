@@ -7,8 +7,10 @@ use crate::rcl;
 extern "C" {
     fn sensor_msgs__msg__RelativeHumidity__init(msg: *mut RelativeHumidity) -> bool;
     fn sensor_msgs__msg__RelativeHumidity__fini(msg: *mut RelativeHumidity);
+    fn sensor_msgs__msg__RelativeHumidity__are_equal(lhs: *const RelativeHumidity, rhs: *const RelativeHumidity) -> bool;
     fn sensor_msgs__msg__RelativeHumidity__Sequence__init(msg: *mut RelativeHumiditySeqRaw, size: usize) -> bool;
     fn sensor_msgs__msg__RelativeHumidity__Sequence__fini(msg: *mut RelativeHumiditySeqRaw);
+    fn sensor_msgs__msg__RelativeHumidity__Sequence__are_equal(lhs: *const RelativeHumiditySeqRaw, rhs: *const RelativeHumiditySeqRaw) -> bool;
     fn rosidl_typesupport_c__get_message_type_support_handle__sensor_msgs__msg__RelativeHumidity() -> *const rcl::rosidl_message_type_support_t;
 }
 
@@ -112,3 +114,22 @@ impl TopicMsg for RelativeHumidity {
         }
     }
 }
+
+impl PartialEq for RelativeHumidity {
+    fn eq(&self, other: &Self) -> bool {
+        unsafe {
+            sensor_msgs__msg__RelativeHumidity__are_equal(self, other)
+        }
+    }
+}
+
+impl<const N: usize> PartialEq for RelativeHumiditySeq<N> {
+    fn eq(&self, other: &Self) -> bool {
+        unsafe {
+            let msg1 = RelativeHumiditySeqRaw{data: self.data, size: self.size, capacity: self.capacity};
+            let msg2 = RelativeHumiditySeqRaw{data: other.data, size: other.size, capacity: other.capacity};
+            sensor_msgs__msg__RelativeHumidity__Sequence__are_equal(&msg1, &msg2)
+        }
+    }
+}
+

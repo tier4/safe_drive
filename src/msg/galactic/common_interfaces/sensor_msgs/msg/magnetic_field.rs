@@ -7,8 +7,10 @@ use crate::rcl;
 extern "C" {
     fn sensor_msgs__msg__MagneticField__init(msg: *mut MagneticField) -> bool;
     fn sensor_msgs__msg__MagneticField__fini(msg: *mut MagneticField);
+    fn sensor_msgs__msg__MagneticField__are_equal(lhs: *const MagneticField, rhs: *const MagneticField) -> bool;
     fn sensor_msgs__msg__MagneticField__Sequence__init(msg: *mut MagneticFieldSeqRaw, size: usize) -> bool;
     fn sensor_msgs__msg__MagneticField__Sequence__fini(msg: *mut MagneticFieldSeqRaw);
+    fn sensor_msgs__msg__MagneticField__Sequence__are_equal(lhs: *const MagneticFieldSeqRaw, rhs: *const MagneticFieldSeqRaw) -> bool;
     fn rosidl_typesupport_c__get_message_type_support_handle__sensor_msgs__msg__MagneticField() -> *const rcl::rosidl_message_type_support_t;
 }
 
@@ -112,3 +114,22 @@ impl TopicMsg for MagneticField {
         }
     }
 }
+
+impl PartialEq for MagneticField {
+    fn eq(&self, other: &Self) -> bool {
+        unsafe {
+            sensor_msgs__msg__MagneticField__are_equal(self, other)
+        }
+    }
+}
+
+impl<const N: usize> PartialEq for MagneticFieldSeq<N> {
+    fn eq(&self, other: &Self) -> bool {
+        unsafe {
+            let msg1 = MagneticFieldSeqRaw{data: self.data, size: self.size, capacity: self.capacity};
+            let msg2 = MagneticFieldSeqRaw{data: other.data, size: other.size, capacity: other.capacity};
+            sensor_msgs__msg__MagneticField__Sequence__are_equal(&msg1, &msg2)
+        }
+    }
+}
+

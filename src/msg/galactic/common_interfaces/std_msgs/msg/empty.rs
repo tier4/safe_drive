@@ -7,8 +7,10 @@ use crate::rcl;
 extern "C" {
     fn std_msgs__msg__Empty__init(msg: *mut Empty) -> bool;
     fn std_msgs__msg__Empty__fini(msg: *mut Empty);
+    fn std_msgs__msg__Empty__are_equal(lhs: *const Empty, rhs: *const Empty) -> bool;
     fn std_msgs__msg__Empty__Sequence__init(msg: *mut EmptySeqRaw, size: usize) -> bool;
     fn std_msgs__msg__Empty__Sequence__fini(msg: *mut EmptySeqRaw);
+    fn std_msgs__msg__Empty__Sequence__are_equal(lhs: *const EmptySeqRaw, rhs: *const EmptySeqRaw) -> bool;
     fn rosidl_typesupport_c__get_message_type_support_handle__std_msgs__msg__Empty() -> *const rcl::rosidl_message_type_support_t;
 }
 
@@ -110,3 +112,22 @@ impl TopicMsg for Empty {
         }
     }
 }
+
+impl PartialEq for Empty {
+    fn eq(&self, other: &Self) -> bool {
+        unsafe {
+            std_msgs__msg__Empty__are_equal(self, other)
+        }
+    }
+}
+
+impl<const N: usize> PartialEq for EmptySeq<N> {
+    fn eq(&self, other: &Self) -> bool {
+        unsafe {
+            let msg1 = EmptySeqRaw{data: self.data, size: self.size, capacity: self.capacity};
+            let msg2 = EmptySeqRaw{data: other.data, size: other.size, capacity: other.capacity};
+            std_msgs__msg__Empty__Sequence__are_equal(&msg1, &msg2)
+        }
+    }
+}
+

@@ -7,8 +7,10 @@ use crate::rcl;
 extern "C" {
     fn geometry_msgs__msg__PoseWithCovariance__init(msg: *mut PoseWithCovariance) -> bool;
     fn geometry_msgs__msg__PoseWithCovariance__fini(msg: *mut PoseWithCovariance);
+    fn geometry_msgs__msg__PoseWithCovariance__are_equal(lhs: *const PoseWithCovariance, rhs: *const PoseWithCovariance) -> bool;
     fn geometry_msgs__msg__PoseWithCovariance__Sequence__init(msg: *mut PoseWithCovarianceSeqRaw, size: usize) -> bool;
     fn geometry_msgs__msg__PoseWithCovariance__Sequence__fini(msg: *mut PoseWithCovarianceSeqRaw);
+    fn geometry_msgs__msg__PoseWithCovariance__Sequence__are_equal(lhs: *const PoseWithCovarianceSeqRaw, rhs: *const PoseWithCovarianceSeqRaw) -> bool;
     fn rosidl_typesupport_c__get_message_type_support_handle__geometry_msgs__msg__PoseWithCovariance() -> *const rcl::rosidl_message_type_support_t;
 }
 
@@ -111,3 +113,22 @@ impl TopicMsg for PoseWithCovariance {
         }
     }
 }
+
+impl PartialEq for PoseWithCovariance {
+    fn eq(&self, other: &Self) -> bool {
+        unsafe {
+            geometry_msgs__msg__PoseWithCovariance__are_equal(self, other)
+        }
+    }
+}
+
+impl<const N: usize> PartialEq for PoseWithCovarianceSeq<N> {
+    fn eq(&self, other: &Self) -> bool {
+        unsafe {
+            let msg1 = PoseWithCovarianceSeqRaw{data: self.data, size: self.size, capacity: self.capacity};
+            let msg2 = PoseWithCovarianceSeqRaw{data: other.data, size: other.size, capacity: other.capacity};
+            geometry_msgs__msg__PoseWithCovariance__Sequence__are_equal(&msg1, &msg2)
+        }
+    }
+}
+

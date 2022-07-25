@@ -7,8 +7,10 @@ use crate::rcl;
 extern "C" {
     fn visualization_msgs__msg__InteractiveMarkerInit__init(msg: *mut InteractiveMarkerInit) -> bool;
     fn visualization_msgs__msg__InteractiveMarkerInit__fini(msg: *mut InteractiveMarkerInit);
+    fn visualization_msgs__msg__InteractiveMarkerInit__are_equal(lhs: *const InteractiveMarkerInit, rhs: *const InteractiveMarkerInit) -> bool;
     fn visualization_msgs__msg__InteractiveMarkerInit__Sequence__init(msg: *mut InteractiveMarkerInitSeqRaw, size: usize) -> bool;
     fn visualization_msgs__msg__InteractiveMarkerInit__Sequence__fini(msg: *mut InteractiveMarkerInitSeqRaw);
+    fn visualization_msgs__msg__InteractiveMarkerInit__Sequence__are_equal(lhs: *const InteractiveMarkerInitSeqRaw, rhs: *const InteractiveMarkerInitSeqRaw) -> bool;
     fn rosidl_typesupport_c__get_message_type_support_handle__visualization_msgs__msg__InteractiveMarkerInit() -> *const rcl::rosidl_message_type_support_t;
 }
 
@@ -112,3 +114,22 @@ impl TopicMsg for InteractiveMarkerInit {
         }
     }
 }
+
+impl PartialEq for InteractiveMarkerInit {
+    fn eq(&self, other: &Self) -> bool {
+        unsafe {
+            visualization_msgs__msg__InteractiveMarkerInit__are_equal(self, other)
+        }
+    }
+}
+
+impl<const N: usize> PartialEq for InteractiveMarkerInitSeq<N> {
+    fn eq(&self, other: &Self) -> bool {
+        unsafe {
+            let msg1 = InteractiveMarkerInitSeqRaw{data: self.data, size: self.size, capacity: self.capacity};
+            let msg2 = InteractiveMarkerInitSeqRaw{data: other.data, size: other.size, capacity: other.capacity};
+            visualization_msgs__msg__InteractiveMarkerInit__Sequence__are_equal(&msg1, &msg2)
+        }
+    }
+}
+

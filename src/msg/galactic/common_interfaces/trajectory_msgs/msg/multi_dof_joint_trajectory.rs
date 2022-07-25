@@ -7,8 +7,10 @@ use crate::rcl;
 extern "C" {
     fn trajectory_msgs__msg__MultiDOFJointTrajectory__init(msg: *mut MultiDOFJointTrajectory) -> bool;
     fn trajectory_msgs__msg__MultiDOFJointTrajectory__fini(msg: *mut MultiDOFJointTrajectory);
+    fn trajectory_msgs__msg__MultiDOFJointTrajectory__are_equal(lhs: *const MultiDOFJointTrajectory, rhs: *const MultiDOFJointTrajectory) -> bool;
     fn trajectory_msgs__msg__MultiDOFJointTrajectory__Sequence__init(msg: *mut MultiDOFJointTrajectorySeqRaw, size: usize) -> bool;
     fn trajectory_msgs__msg__MultiDOFJointTrajectory__Sequence__fini(msg: *mut MultiDOFJointTrajectorySeqRaw);
+    fn trajectory_msgs__msg__MultiDOFJointTrajectory__Sequence__are_equal(lhs: *const MultiDOFJointTrajectorySeqRaw, rhs: *const MultiDOFJointTrajectorySeqRaw) -> bool;
     fn rosidl_typesupport_c__get_message_type_support_handle__trajectory_msgs__msg__MultiDOFJointTrajectory() -> *const rcl::rosidl_message_type_support_t;
 }
 
@@ -112,3 +114,22 @@ impl TopicMsg for MultiDOFJointTrajectory {
         }
     }
 }
+
+impl PartialEq for MultiDOFJointTrajectory {
+    fn eq(&self, other: &Self) -> bool {
+        unsafe {
+            trajectory_msgs__msg__MultiDOFJointTrajectory__are_equal(self, other)
+        }
+    }
+}
+
+impl<const N: usize> PartialEq for MultiDOFJointTrajectorySeq<N> {
+    fn eq(&self, other: &Self) -> bool {
+        unsafe {
+            let msg1 = MultiDOFJointTrajectorySeqRaw{data: self.data, size: self.size, capacity: self.capacity};
+            let msg2 = MultiDOFJointTrajectorySeqRaw{data: other.data, size: other.size, capacity: other.capacity};
+            trajectory_msgs__msg__MultiDOFJointTrajectory__Sequence__are_equal(&msg1, &msg2)
+        }
+    }
+}
+

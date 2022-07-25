@@ -7,8 +7,10 @@ use crate::rcl;
 extern "C" {
     fn std_msgs__msg__UInt64__init(msg: *mut UInt64) -> bool;
     fn std_msgs__msg__UInt64__fini(msg: *mut UInt64);
+    fn std_msgs__msg__UInt64__are_equal(lhs: *const UInt64, rhs: *const UInt64) -> bool;
     fn std_msgs__msg__UInt64__Sequence__init(msg: *mut UInt64SeqRaw, size: usize) -> bool;
     fn std_msgs__msg__UInt64__Sequence__fini(msg: *mut UInt64SeqRaw);
+    fn std_msgs__msg__UInt64__Sequence__are_equal(lhs: *const UInt64SeqRaw, rhs: *const UInt64SeqRaw) -> bool;
     fn rosidl_typesupport_c__get_message_type_support_handle__std_msgs__msg__UInt64() -> *const rcl::rosidl_message_type_support_t;
 }
 
@@ -110,3 +112,22 @@ impl TopicMsg for UInt64 {
         }
     }
 }
+
+impl PartialEq for UInt64 {
+    fn eq(&self, other: &Self) -> bool {
+        unsafe {
+            std_msgs__msg__UInt64__are_equal(self, other)
+        }
+    }
+}
+
+impl<const N: usize> PartialEq for UInt64Seq<N> {
+    fn eq(&self, other: &Self) -> bool {
+        unsafe {
+            let msg1 = UInt64SeqRaw{data: self.data, size: self.size, capacity: self.capacity};
+            let msg2 = UInt64SeqRaw{data: other.data, size: other.size, capacity: other.capacity};
+            std_msgs__msg__UInt64__Sequence__are_equal(&msg1, &msg2)
+        }
+    }
+}
+

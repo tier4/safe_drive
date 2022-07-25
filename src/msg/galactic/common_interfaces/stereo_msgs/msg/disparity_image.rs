@@ -7,8 +7,10 @@ use crate::rcl;
 extern "C" {
     fn stereo_msgs__msg__DisparityImage__init(msg: *mut DisparityImage) -> bool;
     fn stereo_msgs__msg__DisparityImage__fini(msg: *mut DisparityImage);
+    fn stereo_msgs__msg__DisparityImage__are_equal(lhs: *const DisparityImage, rhs: *const DisparityImage) -> bool;
     fn stereo_msgs__msg__DisparityImage__Sequence__init(msg: *mut DisparityImageSeqRaw, size: usize) -> bool;
     fn stereo_msgs__msg__DisparityImage__Sequence__fini(msg: *mut DisparityImageSeqRaw);
+    fn stereo_msgs__msg__DisparityImage__Sequence__are_equal(lhs: *const DisparityImageSeqRaw, rhs: *const DisparityImageSeqRaw) -> bool;
     fn rosidl_typesupport_c__get_message_type_support_handle__stereo_msgs__msg__DisparityImage() -> *const rcl::rosidl_message_type_support_t;
 }
 
@@ -117,3 +119,22 @@ impl TopicMsg for DisparityImage {
         }
     }
 }
+
+impl PartialEq for DisparityImage {
+    fn eq(&self, other: &Self) -> bool {
+        unsafe {
+            stereo_msgs__msg__DisparityImage__are_equal(self, other)
+        }
+    }
+}
+
+impl<const N: usize> PartialEq for DisparityImageSeq<N> {
+    fn eq(&self, other: &Self) -> bool {
+        unsafe {
+            let msg1 = DisparityImageSeqRaw{data: self.data, size: self.size, capacity: self.capacity};
+            let msg2 = DisparityImageSeqRaw{data: other.data, size: other.size, capacity: other.capacity};
+            stereo_msgs__msg__DisparityImage__Sequence__are_equal(&msg1, &msg2)
+        }
+    }
+}
+

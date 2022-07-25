@@ -7,8 +7,10 @@ use crate::rcl;
 extern "C" {
     fn nav_msgs__msg__MapMetaData__init(msg: *mut MapMetaData) -> bool;
     fn nav_msgs__msg__MapMetaData__fini(msg: *mut MapMetaData);
+    fn nav_msgs__msg__MapMetaData__are_equal(lhs: *const MapMetaData, rhs: *const MapMetaData) -> bool;
     fn nav_msgs__msg__MapMetaData__Sequence__init(msg: *mut MapMetaDataSeqRaw, size: usize) -> bool;
     fn nav_msgs__msg__MapMetaData__Sequence__fini(msg: *mut MapMetaDataSeqRaw);
+    fn nav_msgs__msg__MapMetaData__Sequence__are_equal(lhs: *const MapMetaDataSeqRaw, rhs: *const MapMetaDataSeqRaw) -> bool;
     fn rosidl_typesupport_c__get_message_type_support_handle__nav_msgs__msg__MapMetaData() -> *const rcl::rosidl_message_type_support_t;
 }
 
@@ -114,3 +116,22 @@ impl TopicMsg for MapMetaData {
         }
     }
 }
+
+impl PartialEq for MapMetaData {
+    fn eq(&self, other: &Self) -> bool {
+        unsafe {
+            nav_msgs__msg__MapMetaData__are_equal(self, other)
+        }
+    }
+}
+
+impl<const N: usize> PartialEq for MapMetaDataSeq<N> {
+    fn eq(&self, other: &Self) -> bool {
+        unsafe {
+            let msg1 = MapMetaDataSeqRaw{data: self.data, size: self.size, capacity: self.capacity};
+            let msg2 = MapMetaDataSeqRaw{data: other.data, size: other.size, capacity: other.capacity};
+            nav_msgs__msg__MapMetaData__Sequence__are_equal(&msg1, &msg2)
+        }
+    }
+}
+

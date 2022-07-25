@@ -7,8 +7,10 @@ use crate::rcl;
 extern "C" {
     fn geometry_msgs__msg__QuaternionStamped__init(msg: *mut QuaternionStamped) -> bool;
     fn geometry_msgs__msg__QuaternionStamped__fini(msg: *mut QuaternionStamped);
+    fn geometry_msgs__msg__QuaternionStamped__are_equal(lhs: *const QuaternionStamped, rhs: *const QuaternionStamped) -> bool;
     fn geometry_msgs__msg__QuaternionStamped__Sequence__init(msg: *mut QuaternionStampedSeqRaw, size: usize) -> bool;
     fn geometry_msgs__msg__QuaternionStamped__Sequence__fini(msg: *mut QuaternionStampedSeqRaw);
+    fn geometry_msgs__msg__QuaternionStamped__Sequence__are_equal(lhs: *const QuaternionStampedSeqRaw, rhs: *const QuaternionStampedSeqRaw) -> bool;
     fn rosidl_typesupport_c__get_message_type_support_handle__geometry_msgs__msg__QuaternionStamped() -> *const rcl::rosidl_message_type_support_t;
 }
 
@@ -111,3 +113,22 @@ impl TopicMsg for QuaternionStamped {
         }
     }
 }
+
+impl PartialEq for QuaternionStamped {
+    fn eq(&self, other: &Self) -> bool {
+        unsafe {
+            geometry_msgs__msg__QuaternionStamped__are_equal(self, other)
+        }
+    }
+}
+
+impl<const N: usize> PartialEq for QuaternionStampedSeq<N> {
+    fn eq(&self, other: &Self) -> bool {
+        unsafe {
+            let msg1 = QuaternionStampedSeqRaw{data: self.data, size: self.size, capacity: self.capacity};
+            let msg2 = QuaternionStampedSeqRaw{data: other.data, size: other.size, capacity: other.capacity};
+            geometry_msgs__msg__QuaternionStamped__Sequence__are_equal(&msg1, &msg2)
+        }
+    }
+}
+

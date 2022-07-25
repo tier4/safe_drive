@@ -7,8 +7,10 @@ use crate::rcl;
 extern "C" {
     fn sensor_msgs__msg__LaserEcho__init(msg: *mut LaserEcho) -> bool;
     fn sensor_msgs__msg__LaserEcho__fini(msg: *mut LaserEcho);
+    fn sensor_msgs__msg__LaserEcho__are_equal(lhs: *const LaserEcho, rhs: *const LaserEcho) -> bool;
     fn sensor_msgs__msg__LaserEcho__Sequence__init(msg: *mut LaserEchoSeqRaw, size: usize) -> bool;
     fn sensor_msgs__msg__LaserEcho__Sequence__fini(msg: *mut LaserEchoSeqRaw);
+    fn sensor_msgs__msg__LaserEcho__Sequence__are_equal(lhs: *const LaserEchoSeqRaw, rhs: *const LaserEchoSeqRaw) -> bool;
     fn rosidl_typesupport_c__get_message_type_support_handle__sensor_msgs__msg__LaserEcho() -> *const rcl::rosidl_message_type_support_t;
 }
 
@@ -110,3 +112,22 @@ impl TopicMsg for LaserEcho {
         }
     }
 }
+
+impl PartialEq for LaserEcho {
+    fn eq(&self, other: &Self) -> bool {
+        unsafe {
+            sensor_msgs__msg__LaserEcho__are_equal(self, other)
+        }
+    }
+}
+
+impl<const N: usize> PartialEq for LaserEchoSeq<N> {
+    fn eq(&self, other: &Self) -> bool {
+        unsafe {
+            let msg1 = LaserEchoSeqRaw{data: self.data, size: self.size, capacity: self.capacity};
+            let msg2 = LaserEchoSeqRaw{data: other.data, size: other.size, capacity: other.capacity};
+            sensor_msgs__msg__LaserEcho__Sequence__are_equal(&msg1, &msg2)
+        }
+    }
+}
+

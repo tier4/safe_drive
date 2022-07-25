@@ -7,8 +7,10 @@ use crate::rcl;
 extern "C" {
     fn sensor_msgs__msg__PointField__init(msg: *mut PointField) -> bool;
     fn sensor_msgs__msg__PointField__fini(msg: *mut PointField);
+    fn sensor_msgs__msg__PointField__are_equal(lhs: *const PointField, rhs: *const PointField) -> bool;
     fn sensor_msgs__msg__PointField__Sequence__init(msg: *mut PointFieldSeqRaw, size: usize) -> bool;
     fn sensor_msgs__msg__PointField__Sequence__fini(msg: *mut PointFieldSeqRaw);
+    fn sensor_msgs__msg__PointField__Sequence__are_equal(lhs: *const PointFieldSeqRaw, rhs: *const PointFieldSeqRaw) -> bool;
     fn rosidl_typesupport_c__get_message_type_support_handle__sensor_msgs__msg__PointField() -> *const rcl::rosidl_message_type_support_t;
 }
 
@@ -121,3 +123,22 @@ impl TopicMsg for PointField {
         }
     }
 }
+
+impl PartialEq for PointField {
+    fn eq(&self, other: &Self) -> bool {
+        unsafe {
+            sensor_msgs__msg__PointField__are_equal(self, other)
+        }
+    }
+}
+
+impl<const N: usize> PartialEq for PointFieldSeq<N> {
+    fn eq(&self, other: &Self) -> bool {
+        unsafe {
+            let msg1 = PointFieldSeqRaw{data: self.data, size: self.size, capacity: self.capacity};
+            let msg2 = PointFieldSeqRaw{data: other.data, size: other.size, capacity: other.capacity};
+            sensor_msgs__msg__PointField__Sequence__are_equal(&msg1, &msg2)
+        }
+    }
+}
+

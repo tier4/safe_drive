@@ -7,8 +7,10 @@ use crate::rcl;
 extern "C" {
     fn shape_msgs__msg__MeshTriangle__init(msg: *mut MeshTriangle) -> bool;
     fn shape_msgs__msg__MeshTriangle__fini(msg: *mut MeshTriangle);
+    fn shape_msgs__msg__MeshTriangle__are_equal(lhs: *const MeshTriangle, rhs: *const MeshTriangle) -> bool;
     fn shape_msgs__msg__MeshTriangle__Sequence__init(msg: *mut MeshTriangleSeqRaw, size: usize) -> bool;
     fn shape_msgs__msg__MeshTriangle__Sequence__fini(msg: *mut MeshTriangleSeqRaw);
+    fn shape_msgs__msg__MeshTriangle__Sequence__are_equal(lhs: *const MeshTriangleSeqRaw, rhs: *const MeshTriangleSeqRaw) -> bool;
     fn rosidl_typesupport_c__get_message_type_support_handle__shape_msgs__msg__MeshTriangle() -> *const rcl::rosidl_message_type_support_t;
 }
 
@@ -110,3 +112,22 @@ impl TopicMsg for MeshTriangle {
         }
     }
 }
+
+impl PartialEq for MeshTriangle {
+    fn eq(&self, other: &Self) -> bool {
+        unsafe {
+            shape_msgs__msg__MeshTriangle__are_equal(self, other)
+        }
+    }
+}
+
+impl<const N: usize> PartialEq for MeshTriangleSeq<N> {
+    fn eq(&self, other: &Self) -> bool {
+        unsafe {
+            let msg1 = MeshTriangleSeqRaw{data: self.data, size: self.size, capacity: self.capacity};
+            let msg2 = MeshTriangleSeqRaw{data: other.data, size: other.size, capacity: other.capacity};
+            shape_msgs__msg__MeshTriangle__Sequence__are_equal(&msg1, &msg2)
+        }
+    }
+}
+

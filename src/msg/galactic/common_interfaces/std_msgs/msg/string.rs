@@ -7,8 +7,10 @@ use crate::rcl;
 extern "C" {
     fn std_msgs__msg__String__init(msg: *mut String) -> bool;
     fn std_msgs__msg__String__fini(msg: *mut String);
+    fn std_msgs__msg__String__are_equal(lhs: *const String, rhs: *const String) -> bool;
     fn std_msgs__msg__String__Sequence__init(msg: *mut StringSeqRaw, size: usize) -> bool;
     fn std_msgs__msg__String__Sequence__fini(msg: *mut StringSeqRaw);
+    fn std_msgs__msg__String__Sequence__are_equal(lhs: *const StringSeqRaw, rhs: *const StringSeqRaw) -> bool;
     fn rosidl_typesupport_c__get_message_type_support_handle__std_msgs__msg__String() -> *const rcl::rosidl_message_type_support_t;
 }
 
@@ -110,3 +112,22 @@ impl TopicMsg for String {
         }
     }
 }
+
+impl PartialEq for String {
+    fn eq(&self, other: &Self) -> bool {
+        unsafe {
+            std_msgs__msg__String__are_equal(self, other)
+        }
+    }
+}
+
+impl<const N: usize> PartialEq for StringSeq<N> {
+    fn eq(&self, other: &Self) -> bool {
+        unsafe {
+            let msg1 = StringSeqRaw{data: self.data, size: self.size, capacity: self.capacity};
+            let msg2 = StringSeqRaw{data: other.data, size: other.size, capacity: other.capacity};
+            std_msgs__msg__String__Sequence__are_equal(&msg1, &msg2)
+        }
+    }
+}
+

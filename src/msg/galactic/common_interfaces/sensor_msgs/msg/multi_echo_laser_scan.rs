@@ -7,8 +7,10 @@ use crate::rcl;
 extern "C" {
     fn sensor_msgs__msg__MultiEchoLaserScan__init(msg: *mut MultiEchoLaserScan) -> bool;
     fn sensor_msgs__msg__MultiEchoLaserScan__fini(msg: *mut MultiEchoLaserScan);
+    fn sensor_msgs__msg__MultiEchoLaserScan__are_equal(lhs: *const MultiEchoLaserScan, rhs: *const MultiEchoLaserScan) -> bool;
     fn sensor_msgs__msg__MultiEchoLaserScan__Sequence__init(msg: *mut MultiEchoLaserScanSeqRaw, size: usize) -> bool;
     fn sensor_msgs__msg__MultiEchoLaserScan__Sequence__fini(msg: *mut MultiEchoLaserScanSeqRaw);
+    fn sensor_msgs__msg__MultiEchoLaserScan__Sequence__are_equal(lhs: *const MultiEchoLaserScanSeqRaw, rhs: *const MultiEchoLaserScanSeqRaw) -> bool;
     fn rosidl_typesupport_c__get_message_type_support_handle__sensor_msgs__msg__MultiEchoLaserScan() -> *const rcl::rosidl_message_type_support_t;
 }
 
@@ -119,3 +121,22 @@ impl TopicMsg for MultiEchoLaserScan {
         }
     }
 }
+
+impl PartialEq for MultiEchoLaserScan {
+    fn eq(&self, other: &Self) -> bool {
+        unsafe {
+            sensor_msgs__msg__MultiEchoLaserScan__are_equal(self, other)
+        }
+    }
+}
+
+impl<const N: usize> PartialEq for MultiEchoLaserScanSeq<N> {
+    fn eq(&self, other: &Self) -> bool {
+        unsafe {
+            let msg1 = MultiEchoLaserScanSeqRaw{data: self.data, size: self.size, capacity: self.capacity};
+            let msg2 = MultiEchoLaserScanSeqRaw{data: other.data, size: other.size, capacity: other.capacity};
+            sensor_msgs__msg__MultiEchoLaserScan__Sequence__are_equal(&msg1, &msg2)
+        }
+    }
+}
+

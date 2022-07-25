@@ -7,8 +7,10 @@ use crate::rcl;
 extern "C" {
     fn sensor_msgs__msg__JointState__init(msg: *mut JointState) -> bool;
     fn sensor_msgs__msg__JointState__fini(msg: *mut JointState);
+    fn sensor_msgs__msg__JointState__are_equal(lhs: *const JointState, rhs: *const JointState) -> bool;
     fn sensor_msgs__msg__JointState__Sequence__init(msg: *mut JointStateSeqRaw, size: usize) -> bool;
     fn sensor_msgs__msg__JointState__Sequence__fini(msg: *mut JointStateSeqRaw);
+    fn sensor_msgs__msg__JointState__Sequence__are_equal(lhs: *const JointStateSeqRaw, rhs: *const JointStateSeqRaw) -> bool;
     fn rosidl_typesupport_c__get_message_type_support_handle__sensor_msgs__msg__JointState() -> *const rcl::rosidl_message_type_support_t;
 }
 
@@ -114,3 +116,22 @@ impl TopicMsg for JointState {
         }
     }
 }
+
+impl PartialEq for JointState {
+    fn eq(&self, other: &Self) -> bool {
+        unsafe {
+            sensor_msgs__msg__JointState__are_equal(self, other)
+        }
+    }
+}
+
+impl<const N: usize> PartialEq for JointStateSeq<N> {
+    fn eq(&self, other: &Self) -> bool {
+        unsafe {
+            let msg1 = JointStateSeqRaw{data: self.data, size: self.size, capacity: self.capacity};
+            let msg2 = JointStateSeqRaw{data: other.data, size: other.size, capacity: other.capacity};
+            sensor_msgs__msg__JointState__Sequence__are_equal(&msg1, &msg2)
+        }
+    }
+}
+

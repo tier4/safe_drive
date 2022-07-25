@@ -7,8 +7,10 @@ use crate::rcl;
 extern "C" {
     fn geometry_msgs__msg__AccelWithCovarianceStamped__init(msg: *mut AccelWithCovarianceStamped) -> bool;
     fn geometry_msgs__msg__AccelWithCovarianceStamped__fini(msg: *mut AccelWithCovarianceStamped);
+    fn geometry_msgs__msg__AccelWithCovarianceStamped__are_equal(lhs: *const AccelWithCovarianceStamped, rhs: *const AccelWithCovarianceStamped) -> bool;
     fn geometry_msgs__msg__AccelWithCovarianceStamped__Sequence__init(msg: *mut AccelWithCovarianceStampedSeqRaw, size: usize) -> bool;
     fn geometry_msgs__msg__AccelWithCovarianceStamped__Sequence__fini(msg: *mut AccelWithCovarianceStampedSeqRaw);
+    fn geometry_msgs__msg__AccelWithCovarianceStamped__Sequence__are_equal(lhs: *const AccelWithCovarianceStampedSeqRaw, rhs: *const AccelWithCovarianceStampedSeqRaw) -> bool;
     fn rosidl_typesupport_c__get_message_type_support_handle__geometry_msgs__msg__AccelWithCovarianceStamped() -> *const rcl::rosidl_message_type_support_t;
 }
 
@@ -111,3 +113,22 @@ impl TopicMsg for AccelWithCovarianceStamped {
         }
     }
 }
+
+impl PartialEq for AccelWithCovarianceStamped {
+    fn eq(&self, other: &Self) -> bool {
+        unsafe {
+            geometry_msgs__msg__AccelWithCovarianceStamped__are_equal(self, other)
+        }
+    }
+}
+
+impl<const N: usize> PartialEq for AccelWithCovarianceStampedSeq<N> {
+    fn eq(&self, other: &Self) -> bool {
+        unsafe {
+            let msg1 = AccelWithCovarianceStampedSeqRaw{data: self.data, size: self.size, capacity: self.capacity};
+            let msg2 = AccelWithCovarianceStampedSeqRaw{data: other.data, size: other.size, capacity: other.capacity};
+            geometry_msgs__msg__AccelWithCovarianceStamped__Sequence__are_equal(&msg1, &msg2)
+        }
+    }
+}
+

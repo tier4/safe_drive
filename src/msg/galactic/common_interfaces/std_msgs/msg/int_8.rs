@@ -7,8 +7,10 @@ use crate::rcl;
 extern "C" {
     fn std_msgs__msg__Int8__init(msg: *mut Int8) -> bool;
     fn std_msgs__msg__Int8__fini(msg: *mut Int8);
+    fn std_msgs__msg__Int8__are_equal(lhs: *const Int8, rhs: *const Int8) -> bool;
     fn std_msgs__msg__Int8__Sequence__init(msg: *mut Int8SeqRaw, size: usize) -> bool;
     fn std_msgs__msg__Int8__Sequence__fini(msg: *mut Int8SeqRaw);
+    fn std_msgs__msg__Int8__Sequence__are_equal(lhs: *const Int8SeqRaw, rhs: *const Int8SeqRaw) -> bool;
     fn rosidl_typesupport_c__get_message_type_support_handle__std_msgs__msg__Int8() -> *const rcl::rosidl_message_type_support_t;
 }
 
@@ -110,3 +112,22 @@ impl TopicMsg for Int8 {
         }
     }
 }
+
+impl PartialEq for Int8 {
+    fn eq(&self, other: &Self) -> bool {
+        unsafe {
+            std_msgs__msg__Int8__are_equal(self, other)
+        }
+    }
+}
+
+impl<const N: usize> PartialEq for Int8Seq<N> {
+    fn eq(&self, other: &Self) -> bool {
+        unsafe {
+            let msg1 = Int8SeqRaw{data: self.data, size: self.size, capacity: self.capacity};
+            let msg2 = Int8SeqRaw{data: other.data, size: other.size, capacity: other.capacity};
+            std_msgs__msg__Int8__Sequence__are_equal(&msg1, &msg2)
+        }
+    }
+}
+

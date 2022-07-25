@@ -19,8 +19,10 @@ pub const CONE_RADIUS: u8 = 1;
 extern "C" {
     fn shape_msgs__msg__SolidPrimitive__init(msg: *mut SolidPrimitive) -> bool;
     fn shape_msgs__msg__SolidPrimitive__fini(msg: *mut SolidPrimitive);
+    fn shape_msgs__msg__SolidPrimitive__are_equal(lhs: *const SolidPrimitive, rhs: *const SolidPrimitive) -> bool;
     fn shape_msgs__msg__SolidPrimitive__Sequence__init(msg: *mut SolidPrimitiveSeqRaw, size: usize) -> bool;
     fn shape_msgs__msg__SolidPrimitive__Sequence__fini(msg: *mut SolidPrimitiveSeqRaw);
+    fn shape_msgs__msg__SolidPrimitive__Sequence__are_equal(lhs: *const SolidPrimitiveSeqRaw, rhs: *const SolidPrimitiveSeqRaw) -> bool;
     fn rosidl_typesupport_c__get_message_type_support_handle__shape_msgs__msg__SolidPrimitive() -> *const rcl::rosidl_message_type_support_t;
 }
 
@@ -123,3 +125,22 @@ impl TopicMsg for SolidPrimitive {
         }
     }
 }
+
+impl PartialEq for SolidPrimitive {
+    fn eq(&self, other: &Self) -> bool {
+        unsafe {
+            shape_msgs__msg__SolidPrimitive__are_equal(self, other)
+        }
+    }
+}
+
+impl<const N: usize> PartialEq for SolidPrimitiveSeq<N> {
+    fn eq(&self, other: &Self) -> bool {
+        unsafe {
+            let msg1 = SolidPrimitiveSeqRaw{data: self.data, size: self.size, capacity: self.capacity};
+            let msg2 = SolidPrimitiveSeqRaw{data: other.data, size: other.size, capacity: other.capacity};
+            shape_msgs__msg__SolidPrimitive__Sequence__are_equal(&msg1, &msg2)
+        }
+    }
+}
+

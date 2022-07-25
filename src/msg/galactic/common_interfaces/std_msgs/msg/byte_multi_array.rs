@@ -7,8 +7,10 @@ use crate::rcl;
 extern "C" {
     fn std_msgs__msg__ByteMultiArray__init(msg: *mut ByteMultiArray) -> bool;
     fn std_msgs__msg__ByteMultiArray__fini(msg: *mut ByteMultiArray);
+    fn std_msgs__msg__ByteMultiArray__are_equal(lhs: *const ByteMultiArray, rhs: *const ByteMultiArray) -> bool;
     fn std_msgs__msg__ByteMultiArray__Sequence__init(msg: *mut ByteMultiArraySeqRaw, size: usize) -> bool;
     fn std_msgs__msg__ByteMultiArray__Sequence__fini(msg: *mut ByteMultiArraySeqRaw);
+    fn std_msgs__msg__ByteMultiArray__Sequence__are_equal(lhs: *const ByteMultiArraySeqRaw, rhs: *const ByteMultiArraySeqRaw) -> bool;
     fn rosidl_typesupport_c__get_message_type_support_handle__std_msgs__msg__ByteMultiArray() -> *const rcl::rosidl_message_type_support_t;
 }
 
@@ -111,3 +113,22 @@ impl TopicMsg for ByteMultiArray {
         }
     }
 }
+
+impl PartialEq for ByteMultiArray {
+    fn eq(&self, other: &Self) -> bool {
+        unsafe {
+            std_msgs__msg__ByteMultiArray__are_equal(self, other)
+        }
+    }
+}
+
+impl<const N: usize> PartialEq for ByteMultiArraySeq<N> {
+    fn eq(&self, other: &Self) -> bool {
+        unsafe {
+            let msg1 = ByteMultiArraySeqRaw{data: self.data, size: self.size, capacity: self.capacity};
+            let msg2 = ByteMultiArraySeqRaw{data: other.data, size: other.size, capacity: other.capacity};
+            std_msgs__msg__ByteMultiArray__Sequence__are_equal(&msg1, &msg2)
+        }
+    }
+}
+

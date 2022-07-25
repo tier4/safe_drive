@@ -27,7 +27,7 @@ pub trait ServiceMsg {
 // Definition of Sequence -------------------------------------------------------------------------
 
 macro_rules! def_sequence {
-    ($ty: ident, $ty_orig:ty, $ty_seq:ty, $init:ident, $fini:ident) => {
+    ($ty: ident, $ty_orig:ty, $ty_seq:ty, $init:ident, $fini:ident, $eq:ident) => {
         /// A sequence of elements.
         /// `N` represents the maximum number of elements.
         /// If `N` is `0`, the sequence is unlimited.
@@ -78,6 +78,12 @@ macro_rules! def_sequence {
             }
         }
 
+        impl<const N: usize> PartialEq for $ty<N> {
+            fn eq(&self, other: &Self) -> bool {
+                unsafe { $eq(&self.0, &other.0) }
+            }
+        }
+
         unsafe impl<const N: usize> Sync for $ty<N> {}
         unsafe impl<const N: usize> Send for $ty<N> {}
     };
@@ -88,7 +94,8 @@ def_sequence!(
     bool,
     rosidl_runtime_c__boolean__Sequence,
     rosidl_runtime_c__boolean__Sequence__init,
-    rosidl_runtime_c__boolean__Sequence__fini
+    rosidl_runtime_c__boolean__Sequence__fini,
+    rosidl_runtime_c__boolean__Sequence__are_equal
 );
 
 def_sequence!(
@@ -96,7 +103,8 @@ def_sequence!(
     f32,
     rosidl_runtime_c__float__Sequence,
     rosidl_runtime_c__float__Sequence__init,
-    rosidl_runtime_c__float__Sequence__fini
+    rosidl_runtime_c__float__Sequence__fini,
+    rosidl_runtime_c__float__Sequence__are_equal
 );
 
 def_sequence!(
@@ -104,7 +112,8 @@ def_sequence!(
     f64,
     rosidl_runtime_c__double__Sequence,
     rosidl_runtime_c__double__Sequence__init,
-    rosidl_runtime_c__double__Sequence__fini
+    rosidl_runtime_c__double__Sequence__fini,
+    rosidl_runtime_c__double__Sequence__are_equal
 );
 
 def_sequence!(
@@ -112,7 +121,8 @@ def_sequence!(
     u8,
     rosidl_runtime_c__uint8__Sequence,
     rosidl_runtime_c__uint8__Sequence__init,
-    rosidl_runtime_c__uint8__Sequence__fini
+    rosidl_runtime_c__uint8__Sequence__fini,
+    rosidl_runtime_c__uint8__Sequence__are_equal
 );
 
 def_sequence!(
@@ -120,7 +130,8 @@ def_sequence!(
     i8,
     rosidl_runtime_c__int8__Sequence,
     rosidl_runtime_c__int8__Sequence__init,
-    rosidl_runtime_c__int8__Sequence__fini
+    rosidl_runtime_c__int8__Sequence__fini,
+    rosidl_runtime_c__int8__Sequence__are_equal
 );
 
 def_sequence!(
@@ -128,7 +139,8 @@ def_sequence!(
     u16,
     rosidl_runtime_c__uint16__Sequence,
     rosidl_runtime_c__uint16__Sequence__init,
-    rosidl_runtime_c__uint16__Sequence__fini
+    rosidl_runtime_c__uint16__Sequence__fini,
+    rosidl_runtime_c__uint16__Sequence__are_equal
 );
 
 def_sequence!(
@@ -136,7 +148,8 @@ def_sequence!(
     i16,
     rosidl_runtime_c__int16__Sequence,
     rosidl_runtime_c__int16__Sequence__init,
-    rosidl_runtime_c__int16__Sequence__fini
+    rosidl_runtime_c__int16__Sequence__fini,
+    rosidl_runtime_c__int16__Sequence__are_equal
 );
 
 def_sequence!(
@@ -144,7 +157,8 @@ def_sequence!(
     u32,
     rosidl_runtime_c__uint32__Sequence,
     rosidl_runtime_c__uint32__Sequence__init,
-    rosidl_runtime_c__uint32__Sequence__fini
+    rosidl_runtime_c__uint32__Sequence__fini,
+    rosidl_runtime_c__uint32__Sequence__are_equal
 );
 
 def_sequence!(
@@ -152,7 +166,8 @@ def_sequence!(
     i32,
     rosidl_runtime_c__int32__Sequence,
     rosidl_runtime_c__int32__Sequence__init,
-    rosidl_runtime_c__int32__Sequence__fini
+    rosidl_runtime_c__int32__Sequence__fini,
+    rosidl_runtime_c__int32__Sequence__are_equal
 );
 
 def_sequence!(
@@ -160,7 +175,8 @@ def_sequence!(
     u64,
     rosidl_runtime_c__uint64__Sequence,
     rosidl_runtime_c__uint64__Sequence__init,
-    rosidl_runtime_c__uint64__Sequence__fini
+    rosidl_runtime_c__uint64__Sequence__fini,
+    rosidl_runtime_c__uint64__Sequence__are_equal
 );
 
 def_sequence!(
@@ -168,7 +184,8 @@ def_sequence!(
     i64,
     rosidl_runtime_c__int64__Sequence,
     rosidl_runtime_c__int64__Sequence__init,
-    rosidl_runtime_c__int64__Sequence__fini
+    rosidl_runtime_c__int64__Sequence__fini,
+    rosidl_runtime_c__int64__Sequence__are_equal
 );
 
 // Definition of String ---------------------------------------------------------------------------
@@ -256,6 +273,12 @@ impl<const N: usize> Display for RosString<N> {
     }
 }
 
+impl<const N: usize> PartialEq for RosString<N> {
+    fn eq(&self, other: &Self) -> bool {
+        unsafe { rosidl_runtime_c__String__are_equal(&self.0, &other.0) }
+    }
+}
+
 unsafe impl<const N: usize> Sync for RosString<N> {}
 unsafe impl<const N: usize> Send for RosString<N> {}
 
@@ -316,6 +339,14 @@ impl<const STRLEN: usize, const SEQLEN: usize> Drop for RosStringSeq<STRLEN, SEQ
     }
 }
 
+impl<const STRLEN: usize, const SEQLEN: usize> PartialEq for RosStringSeq<STRLEN, SEQLEN> {
+    fn eq(&self, other: &Self) -> bool {
+        unsafe {
+            rosidl_runtime_c__String__Sequence__are_equal(&self.0 as *const _, &other.0 as *const _)
+        }
+    }
+}
+
 unsafe impl<const STRLEN: usize, const SEQLEN: usize> Sync for RosStringSeq<STRLEN, SEQLEN> {}
 unsafe impl<const STRLEN: usize, const SEQLEN: usize> Send for RosStringSeq<STRLEN, SEQLEN> {}
 
@@ -341,7 +372,8 @@ pub mod builtin_interfaces {
         UnsafeDuration,
         builtin_interfaces__msg__Duration__Sequence,
         builtin_interfaces__msg__Duration__Sequence__init,
-        builtin_interfaces__msg__Duration__Sequence__fini
+        builtin_interfaces__msg__Duration__Sequence__fini,
+        builtin_interfaces__msg__Duration__Sequence__are_equal
     );
 
     /// ROS2 provides the `Time` structure to represent a time,
@@ -362,7 +394,8 @@ pub mod builtin_interfaces {
         UnsafeTime,
         builtin_interfaces__msg__Time__Sequence,
         builtin_interfaces__msg__Time__Sequence__init,
-        builtin_interfaces__msg__Time__Sequence__fini
+        builtin_interfaces__msg__Time__Sequence__fini,
+        builtin_interfaces__msg__Time__Sequence__are_equal
     );
 }
 
@@ -402,5 +435,12 @@ mod tests {
             println!("{m}");
             assert_eq!(msg, m);
         }
+    }
+
+    #[test]
+    fn test_eq() {
+        let s1 = RosString::<0>::new("Hello, World!").unwrap();
+        let s2 = RosString::<0>::new("Hello, World!").unwrap();
+        assert_eq!(s1, s2);
     }
 }

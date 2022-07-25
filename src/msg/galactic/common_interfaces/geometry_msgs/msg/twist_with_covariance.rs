@@ -7,8 +7,10 @@ use crate::rcl;
 extern "C" {
     fn geometry_msgs__msg__TwistWithCovariance__init(msg: *mut TwistWithCovariance) -> bool;
     fn geometry_msgs__msg__TwistWithCovariance__fini(msg: *mut TwistWithCovariance);
+    fn geometry_msgs__msg__TwistWithCovariance__are_equal(lhs: *const TwistWithCovariance, rhs: *const TwistWithCovariance) -> bool;
     fn geometry_msgs__msg__TwistWithCovariance__Sequence__init(msg: *mut TwistWithCovarianceSeqRaw, size: usize) -> bool;
     fn geometry_msgs__msg__TwistWithCovariance__Sequence__fini(msg: *mut TwistWithCovarianceSeqRaw);
+    fn geometry_msgs__msg__TwistWithCovariance__Sequence__are_equal(lhs: *const TwistWithCovarianceSeqRaw, rhs: *const TwistWithCovarianceSeqRaw) -> bool;
     fn rosidl_typesupport_c__get_message_type_support_handle__geometry_msgs__msg__TwistWithCovariance() -> *const rcl::rosidl_message_type_support_t;
 }
 
@@ -111,3 +113,22 @@ impl TopicMsg for TwistWithCovariance {
         }
     }
 }
+
+impl PartialEq for TwistWithCovariance {
+    fn eq(&self, other: &Self) -> bool {
+        unsafe {
+            geometry_msgs__msg__TwistWithCovariance__are_equal(self, other)
+        }
+    }
+}
+
+impl<const N: usize> PartialEq for TwistWithCovarianceSeq<N> {
+    fn eq(&self, other: &Self) -> bool {
+        unsafe {
+            let msg1 = TwistWithCovarianceSeqRaw{data: self.data, size: self.size, capacity: self.capacity};
+            let msg2 = TwistWithCovarianceSeqRaw{data: other.data, size: other.size, capacity: other.capacity};
+            geometry_msgs__msg__TwistWithCovariance__Sequence__are_equal(&msg1, &msg2)
+        }
+    }
+}
+

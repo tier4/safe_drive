@@ -7,8 +7,10 @@ use crate::rcl;
 extern "C" {
     fn unique_identifier_msgs__msg__UUID__init(msg: *mut UUID) -> bool;
     fn unique_identifier_msgs__msg__UUID__fini(msg: *mut UUID);
+    fn unique_identifier_msgs__msg__UUID__are_equal(lhs: *const UUID, rhs: *const UUID) -> bool;
     fn unique_identifier_msgs__msg__UUID__Sequence__init(msg: *mut UUIDSeqRaw, size: usize) -> bool;
     fn unique_identifier_msgs__msg__UUID__Sequence__fini(msg: *mut UUIDSeqRaw);
+    fn unique_identifier_msgs__msg__UUID__Sequence__are_equal(lhs: *const UUIDSeqRaw, rhs: *const UUIDSeqRaw) -> bool;
     fn rosidl_typesupport_c__get_message_type_support_handle__unique_identifier_msgs__msg__UUID() -> *const rcl::rosidl_message_type_support_t;
 }
 
@@ -110,3 +112,22 @@ impl TopicMsg for UUID {
         }
     }
 }
+
+impl PartialEq for UUID {
+    fn eq(&self, other: &Self) -> bool {
+        unsafe {
+            unique_identifier_msgs__msg__UUID__are_equal(self, other)
+        }
+    }
+}
+
+impl<const N: usize> PartialEq for UUIDSeq<N> {
+    fn eq(&self, other: &Self) -> bool {
+        unsafe {
+            let msg1 = UUIDSeqRaw{data: self.data, size: self.size, capacity: self.capacity};
+            let msg2 = UUIDSeqRaw{data: other.data, size: other.size, capacity: other.capacity};
+            unique_identifier_msgs__msg__UUID__Sequence__are_equal(&msg1, &msg2)
+        }
+    }
+}
+

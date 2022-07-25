@@ -17,8 +17,10 @@ pub const LOST: u8 = 9; // An action client can determine that a goal is LOST. T
 extern "C" {
     fn actionlib_msgs__msg__GoalStatus__init(msg: *mut GoalStatus) -> bool;
     fn actionlib_msgs__msg__GoalStatus__fini(msg: *mut GoalStatus);
+    fn actionlib_msgs__msg__GoalStatus__are_equal(lhs: *const GoalStatus, rhs: *const GoalStatus) -> bool;
     fn actionlib_msgs__msg__GoalStatus__Sequence__init(msg: *mut GoalStatusSeqRaw, size: usize) -> bool;
     fn actionlib_msgs__msg__GoalStatus__Sequence__fini(msg: *mut GoalStatusSeqRaw);
+    fn actionlib_msgs__msg__GoalStatus__Sequence__are_equal(lhs: *const GoalStatusSeqRaw, rhs: *const GoalStatusSeqRaw) -> bool;
     fn rosidl_typesupport_c__get_message_type_support_handle__actionlib_msgs__msg__GoalStatus() -> *const rcl::rosidl_message_type_support_t;
 }
 
@@ -122,3 +124,22 @@ impl TopicMsg for GoalStatus {
         }
     }
 }
+
+impl PartialEq for GoalStatus {
+    fn eq(&self, other: &Self) -> bool {
+        unsafe {
+            actionlib_msgs__msg__GoalStatus__are_equal(self, other)
+        }
+    }
+}
+
+impl<const N: usize> PartialEq for GoalStatusSeq<N> {
+    fn eq(&self, other: &Self) -> bool {
+        unsafe {
+            let msg1 = GoalStatusSeqRaw{data: self.data, size: self.size, capacity: self.capacity};
+            let msg2 = GoalStatusSeqRaw{data: other.data, size: other.size, capacity: other.capacity};
+            actionlib_msgs__msg__GoalStatus__Sequence__are_equal(&msg1, &msg2)
+        }
+    }
+}
+

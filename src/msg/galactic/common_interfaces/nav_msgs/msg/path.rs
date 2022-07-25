@@ -7,8 +7,10 @@ use crate::rcl;
 extern "C" {
     fn nav_msgs__msg__Path__init(msg: *mut Path) -> bool;
     fn nav_msgs__msg__Path__fini(msg: *mut Path);
+    fn nav_msgs__msg__Path__are_equal(lhs: *const Path, rhs: *const Path) -> bool;
     fn nav_msgs__msg__Path__Sequence__init(msg: *mut PathSeqRaw, size: usize) -> bool;
     fn nav_msgs__msg__Path__Sequence__fini(msg: *mut PathSeqRaw);
+    fn nav_msgs__msg__Path__Sequence__are_equal(lhs: *const PathSeqRaw, rhs: *const PathSeqRaw) -> bool;
     fn rosidl_typesupport_c__get_message_type_support_handle__nav_msgs__msg__Path() -> *const rcl::rosidl_message_type_support_t;
 }
 
@@ -111,3 +113,22 @@ impl TopicMsg for Path {
         }
     }
 }
+
+impl PartialEq for Path {
+    fn eq(&self, other: &Self) -> bool {
+        unsafe {
+            nav_msgs__msg__Path__are_equal(self, other)
+        }
+    }
+}
+
+impl<const N: usize> PartialEq for PathSeq<N> {
+    fn eq(&self, other: &Self) -> bool {
+        unsafe {
+            let msg1 = PathSeqRaw{data: self.data, size: self.size, capacity: self.capacity};
+            let msg2 = PathSeqRaw{data: other.data, size: other.size, capacity: other.capacity};
+            nav_msgs__msg__Path__Sequence__are_equal(&msg1, &msg2)
+        }
+    }
+}
+

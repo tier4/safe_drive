@@ -28,8 +28,10 @@ pub const POWER_SUPPLY_TECHNOLOGY_LIMN: u8 = 6;
 extern "C" {
     fn sensor_msgs__msg__BatteryState__init(msg: *mut BatteryState) -> bool;
     fn sensor_msgs__msg__BatteryState__fini(msg: *mut BatteryState);
+    fn sensor_msgs__msg__BatteryState__are_equal(lhs: *const BatteryState, rhs: *const BatteryState) -> bool;
     fn sensor_msgs__msg__BatteryState__Sequence__init(msg: *mut BatteryStateSeqRaw, size: usize) -> bool;
     fn sensor_msgs__msg__BatteryState__Sequence__fini(msg: *mut BatteryStateSeqRaw);
+    fn sensor_msgs__msg__BatteryState__Sequence__are_equal(lhs: *const BatteryStateSeqRaw, rhs: *const BatteryStateSeqRaw) -> bool;
     fn rosidl_typesupport_c__get_message_type_support_handle__sensor_msgs__msg__BatteryState() -> *const rcl::rosidl_message_type_support_t;
 }
 
@@ -146,3 +148,22 @@ impl TopicMsg for BatteryState {
         }
     }
 }
+
+impl PartialEq for BatteryState {
+    fn eq(&self, other: &Self) -> bool {
+        unsafe {
+            sensor_msgs__msg__BatteryState__are_equal(self, other)
+        }
+    }
+}
+
+impl<const N: usize> PartialEq for BatteryStateSeq<N> {
+    fn eq(&self, other: &Self) -> bool {
+        unsafe {
+            let msg1 = BatteryStateSeqRaw{data: self.data, size: self.size, capacity: self.capacity};
+            let msg2 = BatteryStateSeqRaw{data: other.data, size: other.size, capacity: other.capacity};
+            sensor_msgs__msg__BatteryState__Sequence__are_equal(&msg1, &msg2)
+        }
+    }
+}
+

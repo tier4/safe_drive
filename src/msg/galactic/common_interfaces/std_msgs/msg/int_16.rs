@@ -7,8 +7,10 @@ use crate::rcl;
 extern "C" {
     fn std_msgs__msg__Int16__init(msg: *mut Int16) -> bool;
     fn std_msgs__msg__Int16__fini(msg: *mut Int16);
+    fn std_msgs__msg__Int16__are_equal(lhs: *const Int16, rhs: *const Int16) -> bool;
     fn std_msgs__msg__Int16__Sequence__init(msg: *mut Int16SeqRaw, size: usize) -> bool;
     fn std_msgs__msg__Int16__Sequence__fini(msg: *mut Int16SeqRaw);
+    fn std_msgs__msg__Int16__Sequence__are_equal(lhs: *const Int16SeqRaw, rhs: *const Int16SeqRaw) -> bool;
     fn rosidl_typesupport_c__get_message_type_support_handle__std_msgs__msg__Int16() -> *const rcl::rosidl_message_type_support_t;
 }
 
@@ -110,3 +112,22 @@ impl TopicMsg for Int16 {
         }
     }
 }
+
+impl PartialEq for Int16 {
+    fn eq(&self, other: &Self) -> bool {
+        unsafe {
+            std_msgs__msg__Int16__are_equal(self, other)
+        }
+    }
+}
+
+impl<const N: usize> PartialEq for Int16Seq<N> {
+    fn eq(&self, other: &Self) -> bool {
+        unsafe {
+            let msg1 = Int16SeqRaw{data: self.data, size: self.size, capacity: self.capacity};
+            let msg2 = Int16SeqRaw{data: other.data, size: other.size, capacity: other.capacity};
+            std_msgs__msg__Int16__Sequence__are_equal(&msg1, &msg2)
+        }
+    }
+}
+

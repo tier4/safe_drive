@@ -7,8 +7,10 @@ use crate::rcl;
 extern "C" {
     fn trajectory_msgs__msg__JointTrajectoryPoint__init(msg: *mut JointTrajectoryPoint) -> bool;
     fn trajectory_msgs__msg__JointTrajectoryPoint__fini(msg: *mut JointTrajectoryPoint);
+    fn trajectory_msgs__msg__JointTrajectoryPoint__are_equal(lhs: *const JointTrajectoryPoint, rhs: *const JointTrajectoryPoint) -> bool;
     fn trajectory_msgs__msg__JointTrajectoryPoint__Sequence__init(msg: *mut JointTrajectoryPointSeqRaw, size: usize) -> bool;
     fn trajectory_msgs__msg__JointTrajectoryPoint__Sequence__fini(msg: *mut JointTrajectoryPointSeqRaw);
+    fn trajectory_msgs__msg__JointTrajectoryPoint__Sequence__are_equal(lhs: *const JointTrajectoryPointSeqRaw, rhs: *const JointTrajectoryPointSeqRaw) -> bool;
     fn rosidl_typesupport_c__get_message_type_support_handle__trajectory_msgs__msg__JointTrajectoryPoint() -> *const rcl::rosidl_message_type_support_t;
 }
 
@@ -114,3 +116,22 @@ impl TopicMsg for JointTrajectoryPoint {
         }
     }
 }
+
+impl PartialEq for JointTrajectoryPoint {
+    fn eq(&self, other: &Self) -> bool {
+        unsafe {
+            trajectory_msgs__msg__JointTrajectoryPoint__are_equal(self, other)
+        }
+    }
+}
+
+impl<const N: usize> PartialEq for JointTrajectoryPointSeq<N> {
+    fn eq(&self, other: &Self) -> bool {
+        unsafe {
+            let msg1 = JointTrajectoryPointSeqRaw{data: self.data, size: self.size, capacity: self.capacity};
+            let msg2 = JointTrajectoryPointSeqRaw{data: other.data, size: other.size, capacity: other.capacity};
+            trajectory_msgs__msg__JointTrajectoryPoint__Sequence__are_equal(&msg1, &msg2)
+        }
+    }
+}
+

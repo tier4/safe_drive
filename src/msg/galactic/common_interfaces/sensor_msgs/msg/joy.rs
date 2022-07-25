@@ -7,8 +7,10 @@ use crate::rcl;
 extern "C" {
     fn sensor_msgs__msg__Joy__init(msg: *mut Joy) -> bool;
     fn sensor_msgs__msg__Joy__fini(msg: *mut Joy);
+    fn sensor_msgs__msg__Joy__are_equal(lhs: *const Joy, rhs: *const Joy) -> bool;
     fn sensor_msgs__msg__Joy__Sequence__init(msg: *mut JoySeqRaw, size: usize) -> bool;
     fn sensor_msgs__msg__Joy__Sequence__fini(msg: *mut JoySeqRaw);
+    fn sensor_msgs__msg__Joy__Sequence__are_equal(lhs: *const JoySeqRaw, rhs: *const JoySeqRaw) -> bool;
     fn rosidl_typesupport_c__get_message_type_support_handle__sensor_msgs__msg__Joy() -> *const rcl::rosidl_message_type_support_t;
 }
 
@@ -112,3 +114,22 @@ impl TopicMsg for Joy {
         }
     }
 }
+
+impl PartialEq for Joy {
+    fn eq(&self, other: &Self) -> bool {
+        unsafe {
+            sensor_msgs__msg__Joy__are_equal(self, other)
+        }
+    }
+}
+
+impl<const N: usize> PartialEq for JoySeq<N> {
+    fn eq(&self, other: &Self) -> bool {
+        unsafe {
+            let msg1 = JoySeqRaw{data: self.data, size: self.size, capacity: self.capacity};
+            let msg2 = JoySeqRaw{data: other.data, size: other.size, capacity: other.capacity};
+            sensor_msgs__msg__Joy__Sequence__are_equal(&msg1, &msg2)
+        }
+    }
+}
+

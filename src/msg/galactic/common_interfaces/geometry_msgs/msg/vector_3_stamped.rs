@@ -7,8 +7,10 @@ use crate::rcl;
 extern "C" {
     fn geometry_msgs__msg__Vector3Stamped__init(msg: *mut Vector3Stamped) -> bool;
     fn geometry_msgs__msg__Vector3Stamped__fini(msg: *mut Vector3Stamped);
+    fn geometry_msgs__msg__Vector3Stamped__are_equal(lhs: *const Vector3Stamped, rhs: *const Vector3Stamped) -> bool;
     fn geometry_msgs__msg__Vector3Stamped__Sequence__init(msg: *mut Vector3StampedSeqRaw, size: usize) -> bool;
     fn geometry_msgs__msg__Vector3Stamped__Sequence__fini(msg: *mut Vector3StampedSeqRaw);
+    fn geometry_msgs__msg__Vector3Stamped__Sequence__are_equal(lhs: *const Vector3StampedSeqRaw, rhs: *const Vector3StampedSeqRaw) -> bool;
     fn rosidl_typesupport_c__get_message_type_support_handle__geometry_msgs__msg__Vector3Stamped() -> *const rcl::rosidl_message_type_support_t;
 }
 
@@ -111,3 +113,22 @@ impl TopicMsg for Vector3Stamped {
         }
     }
 }
+
+impl PartialEq for Vector3Stamped {
+    fn eq(&self, other: &Self) -> bool {
+        unsafe {
+            geometry_msgs__msg__Vector3Stamped__are_equal(self, other)
+        }
+    }
+}
+
+impl<const N: usize> PartialEq for Vector3StampedSeq<N> {
+    fn eq(&self, other: &Self) -> bool {
+        unsafe {
+            let msg1 = Vector3StampedSeqRaw{data: self.data, size: self.size, capacity: self.capacity};
+            let msg2 = Vector3StampedSeqRaw{data: other.data, size: other.size, capacity: other.capacity};
+            geometry_msgs__msg__Vector3Stamped__Sequence__are_equal(&msg1, &msg2)
+        }
+    }
+}
+

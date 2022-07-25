@@ -7,8 +7,10 @@ use crate::rcl;
 extern "C" {
     fn sensor_msgs__msg__Temperature__init(msg: *mut Temperature) -> bool;
     fn sensor_msgs__msg__Temperature__fini(msg: *mut Temperature);
+    fn sensor_msgs__msg__Temperature__are_equal(lhs: *const Temperature, rhs: *const Temperature) -> bool;
     fn sensor_msgs__msg__Temperature__Sequence__init(msg: *mut TemperatureSeqRaw, size: usize) -> bool;
     fn sensor_msgs__msg__Temperature__Sequence__fini(msg: *mut TemperatureSeqRaw);
+    fn sensor_msgs__msg__Temperature__Sequence__are_equal(lhs: *const TemperatureSeqRaw, rhs: *const TemperatureSeqRaw) -> bool;
     fn rosidl_typesupport_c__get_message_type_support_handle__sensor_msgs__msg__Temperature() -> *const rcl::rosidl_message_type_support_t;
 }
 
@@ -112,3 +114,22 @@ impl TopicMsg for Temperature {
         }
     }
 }
+
+impl PartialEq for Temperature {
+    fn eq(&self, other: &Self) -> bool {
+        unsafe {
+            sensor_msgs__msg__Temperature__are_equal(self, other)
+        }
+    }
+}
+
+impl<const N: usize> PartialEq for TemperatureSeq<N> {
+    fn eq(&self, other: &Self) -> bool {
+        unsafe {
+            let msg1 = TemperatureSeqRaw{data: self.data, size: self.size, capacity: self.capacity};
+            let msg2 = TemperatureSeqRaw{data: other.data, size: other.size, capacity: other.capacity};
+            sensor_msgs__msg__Temperature__Sequence__are_equal(&msg1, &msg2)
+        }
+    }
+}
+

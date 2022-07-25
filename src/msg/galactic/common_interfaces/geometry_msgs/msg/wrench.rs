@@ -7,8 +7,10 @@ use crate::rcl;
 extern "C" {
     fn geometry_msgs__msg__Wrench__init(msg: *mut Wrench) -> bool;
     fn geometry_msgs__msg__Wrench__fini(msg: *mut Wrench);
+    fn geometry_msgs__msg__Wrench__are_equal(lhs: *const Wrench, rhs: *const Wrench) -> bool;
     fn geometry_msgs__msg__Wrench__Sequence__init(msg: *mut WrenchSeqRaw, size: usize) -> bool;
     fn geometry_msgs__msg__Wrench__Sequence__fini(msg: *mut WrenchSeqRaw);
+    fn geometry_msgs__msg__Wrench__Sequence__are_equal(lhs: *const WrenchSeqRaw, rhs: *const WrenchSeqRaw) -> bool;
     fn rosidl_typesupport_c__get_message_type_support_handle__geometry_msgs__msg__Wrench() -> *const rcl::rosidl_message_type_support_t;
 }
 
@@ -111,3 +113,22 @@ impl TopicMsg for Wrench {
         }
     }
 }
+
+impl PartialEq for Wrench {
+    fn eq(&self, other: &Self) -> bool {
+        unsafe {
+            geometry_msgs__msg__Wrench__are_equal(self, other)
+        }
+    }
+}
+
+impl<const N: usize> PartialEq for WrenchSeq<N> {
+    fn eq(&self, other: &Self) -> bool {
+        unsafe {
+            let msg1 = WrenchSeqRaw{data: self.data, size: self.size, capacity: self.capacity};
+            let msg2 = WrenchSeqRaw{data: other.data, size: other.size, capacity: other.capacity};
+            geometry_msgs__msg__Wrench__Sequence__are_equal(&msg1, &msg2)
+        }
+    }
+}
+

@@ -7,8 +7,10 @@ use crate::rcl;
 extern "C" {
     fn sensor_msgs__msg__Image__init(msg: *mut Image) -> bool;
     fn sensor_msgs__msg__Image__fini(msg: *mut Image);
+    fn sensor_msgs__msg__Image__are_equal(lhs: *const Image, rhs: *const Image) -> bool;
     fn sensor_msgs__msg__Image__Sequence__init(msg: *mut ImageSeqRaw, size: usize) -> bool;
     fn sensor_msgs__msg__Image__Sequence__fini(msg: *mut ImageSeqRaw);
+    fn sensor_msgs__msg__Image__Sequence__are_equal(lhs: *const ImageSeqRaw, rhs: *const ImageSeqRaw) -> bool;
     fn rosidl_typesupport_c__get_message_type_support_handle__sensor_msgs__msg__Image() -> *const rcl::rosidl_message_type_support_t;
 }
 
@@ -116,3 +118,22 @@ impl TopicMsg for Image {
         }
     }
 }
+
+impl PartialEq for Image {
+    fn eq(&self, other: &Self) -> bool {
+        unsafe {
+            sensor_msgs__msg__Image__are_equal(self, other)
+        }
+    }
+}
+
+impl<const N: usize> PartialEq for ImageSeq<N> {
+    fn eq(&self, other: &Self) -> bool {
+        unsafe {
+            let msg1 = ImageSeqRaw{data: self.data, size: self.size, capacity: self.capacity};
+            let msg2 = ImageSeqRaw{data: other.data, size: other.size, capacity: other.capacity};
+            sensor_msgs__msg__Image__Sequence__are_equal(&msg1, &msg2)
+        }
+    }
+}
+

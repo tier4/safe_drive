@@ -7,8 +7,10 @@ use crate::rcl;
 extern "C" {
     fn sensor_msgs__msg__RegionOfInterest__init(msg: *mut RegionOfInterest) -> bool;
     fn sensor_msgs__msg__RegionOfInterest__fini(msg: *mut RegionOfInterest);
+    fn sensor_msgs__msg__RegionOfInterest__are_equal(lhs: *const RegionOfInterest, rhs: *const RegionOfInterest) -> bool;
     fn sensor_msgs__msg__RegionOfInterest__Sequence__init(msg: *mut RegionOfInterestSeqRaw, size: usize) -> bool;
     fn sensor_msgs__msg__RegionOfInterest__Sequence__fini(msg: *mut RegionOfInterestSeqRaw);
+    fn sensor_msgs__msg__RegionOfInterest__Sequence__are_equal(lhs: *const RegionOfInterestSeqRaw, rhs: *const RegionOfInterestSeqRaw) -> bool;
     fn rosidl_typesupport_c__get_message_type_support_handle__sensor_msgs__msg__RegionOfInterest() -> *const rcl::rosidl_message_type_support_t;
 }
 
@@ -114,3 +116,22 @@ impl TopicMsg for RegionOfInterest {
         }
     }
 }
+
+impl PartialEq for RegionOfInterest {
+    fn eq(&self, other: &Self) -> bool {
+        unsafe {
+            sensor_msgs__msg__RegionOfInterest__are_equal(self, other)
+        }
+    }
+}
+
+impl<const N: usize> PartialEq for RegionOfInterestSeq<N> {
+    fn eq(&self, other: &Self) -> bool {
+        unsafe {
+            let msg1 = RegionOfInterestSeqRaw{data: self.data, size: self.size, capacity: self.capacity};
+            let msg2 = RegionOfInterestSeqRaw{data: other.data, size: other.size, capacity: other.capacity};
+            sensor_msgs__msg__RegionOfInterest__Sequence__are_equal(&msg1, &msg2)
+        }
+    }
+}
+

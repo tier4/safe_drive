@@ -7,8 +7,10 @@ use crate::rcl;
 extern "C" {
     fn nav_msgs__msg__GridCells__init(msg: *mut GridCells) -> bool;
     fn nav_msgs__msg__GridCells__fini(msg: *mut GridCells);
+    fn nav_msgs__msg__GridCells__are_equal(lhs: *const GridCells, rhs: *const GridCells) -> bool;
     fn nav_msgs__msg__GridCells__Sequence__init(msg: *mut GridCellsSeqRaw, size: usize) -> bool;
     fn nav_msgs__msg__GridCells__Sequence__fini(msg: *mut GridCellsSeqRaw);
+    fn nav_msgs__msg__GridCells__Sequence__are_equal(lhs: *const GridCellsSeqRaw, rhs: *const GridCellsSeqRaw) -> bool;
     fn rosidl_typesupport_c__get_message_type_support_handle__nav_msgs__msg__GridCells() -> *const rcl::rosidl_message_type_support_t;
 }
 
@@ -113,3 +115,22 @@ impl TopicMsg for GridCells {
         }
     }
 }
+
+impl PartialEq for GridCells {
+    fn eq(&self, other: &Self) -> bool {
+        unsafe {
+            nav_msgs__msg__GridCells__are_equal(self, other)
+        }
+    }
+}
+
+impl<const N: usize> PartialEq for GridCellsSeq<N> {
+    fn eq(&self, other: &Self) -> bool {
+        unsafe {
+            let msg1 = GridCellsSeqRaw{data: self.data, size: self.size, capacity: self.capacity};
+            let msg2 = GridCellsSeqRaw{data: other.data, size: other.size, capacity: other.capacity};
+            nav_msgs__msg__GridCells__Sequence__are_equal(&msg1, &msg2)
+        }
+    }
+}
+

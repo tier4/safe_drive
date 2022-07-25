@@ -7,8 +7,10 @@ use crate::rcl;
 extern "C" {
     fn geometry_msgs__msg__TwistWithCovarianceStamped__init(msg: *mut TwistWithCovarianceStamped) -> bool;
     fn geometry_msgs__msg__TwistWithCovarianceStamped__fini(msg: *mut TwistWithCovarianceStamped);
+    fn geometry_msgs__msg__TwistWithCovarianceStamped__are_equal(lhs: *const TwistWithCovarianceStamped, rhs: *const TwistWithCovarianceStamped) -> bool;
     fn geometry_msgs__msg__TwistWithCovarianceStamped__Sequence__init(msg: *mut TwistWithCovarianceStampedSeqRaw, size: usize) -> bool;
     fn geometry_msgs__msg__TwistWithCovarianceStamped__Sequence__fini(msg: *mut TwistWithCovarianceStampedSeqRaw);
+    fn geometry_msgs__msg__TwistWithCovarianceStamped__Sequence__are_equal(lhs: *const TwistWithCovarianceStampedSeqRaw, rhs: *const TwistWithCovarianceStampedSeqRaw) -> bool;
     fn rosidl_typesupport_c__get_message_type_support_handle__geometry_msgs__msg__TwistWithCovarianceStamped() -> *const rcl::rosidl_message_type_support_t;
 }
 
@@ -111,3 +113,22 @@ impl TopicMsg for TwistWithCovarianceStamped {
         }
     }
 }
+
+impl PartialEq for TwistWithCovarianceStamped {
+    fn eq(&self, other: &Self) -> bool {
+        unsafe {
+            geometry_msgs__msg__TwistWithCovarianceStamped__are_equal(self, other)
+        }
+    }
+}
+
+impl<const N: usize> PartialEq for TwistWithCovarianceStampedSeq<N> {
+    fn eq(&self, other: &Self) -> bool {
+        unsafe {
+            let msg1 = TwistWithCovarianceStampedSeqRaw{data: self.data, size: self.size, capacity: self.capacity};
+            let msg2 = TwistWithCovarianceStampedSeqRaw{data: other.data, size: other.size, capacity: other.capacity};
+            geometry_msgs__msg__TwistWithCovarianceStamped__Sequence__are_equal(&msg1, &msg2)
+        }
+    }
+}
+

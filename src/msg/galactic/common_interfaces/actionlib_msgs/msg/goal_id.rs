@@ -7,8 +7,10 @@ use crate::rcl;
 extern "C" {
     fn actionlib_msgs__msg__GoalID__init(msg: *mut GoalID) -> bool;
     fn actionlib_msgs__msg__GoalID__fini(msg: *mut GoalID);
+    fn actionlib_msgs__msg__GoalID__are_equal(lhs: *const GoalID, rhs: *const GoalID) -> bool;
     fn actionlib_msgs__msg__GoalID__Sequence__init(msg: *mut GoalIDSeqRaw, size: usize) -> bool;
     fn actionlib_msgs__msg__GoalID__Sequence__fini(msg: *mut GoalIDSeqRaw);
+    fn actionlib_msgs__msg__GoalID__Sequence__are_equal(lhs: *const GoalIDSeqRaw, rhs: *const GoalIDSeqRaw) -> bool;
     fn rosidl_typesupport_c__get_message_type_support_handle__actionlib_msgs__msg__GoalID() -> *const rcl::rosidl_message_type_support_t;
 }
 
@@ -111,3 +113,22 @@ impl TopicMsg for GoalID {
         }
     }
 }
+
+impl PartialEq for GoalID {
+    fn eq(&self, other: &Self) -> bool {
+        unsafe {
+            actionlib_msgs__msg__GoalID__are_equal(self, other)
+        }
+    }
+}
+
+impl<const N: usize> PartialEq for GoalIDSeq<N> {
+    fn eq(&self, other: &Self) -> bool {
+        unsafe {
+            let msg1 = GoalIDSeqRaw{data: self.data, size: self.size, capacity: self.capacity};
+            let msg2 = GoalIDSeqRaw{data: other.data, size: other.size, capacity: other.capacity};
+            actionlib_msgs__msg__GoalID__Sequence__are_equal(&msg1, &msg2)
+        }
+    }
+}
+

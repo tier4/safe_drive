@@ -7,8 +7,10 @@ use crate::rcl;
 extern "C" {
     fn nav_msgs__msg__OccupancyGrid__init(msg: *mut OccupancyGrid) -> bool;
     fn nav_msgs__msg__OccupancyGrid__fini(msg: *mut OccupancyGrid);
+    fn nav_msgs__msg__OccupancyGrid__are_equal(lhs: *const OccupancyGrid, rhs: *const OccupancyGrid) -> bool;
     fn nav_msgs__msg__OccupancyGrid__Sequence__init(msg: *mut OccupancyGridSeqRaw, size: usize) -> bool;
     fn nav_msgs__msg__OccupancyGrid__Sequence__fini(msg: *mut OccupancyGridSeqRaw);
+    fn nav_msgs__msg__OccupancyGrid__Sequence__are_equal(lhs: *const OccupancyGridSeqRaw, rhs: *const OccupancyGridSeqRaw) -> bool;
     fn rosidl_typesupport_c__get_message_type_support_handle__nav_msgs__msg__OccupancyGrid() -> *const rcl::rosidl_message_type_support_t;
 }
 
@@ -112,3 +114,22 @@ impl TopicMsg for OccupancyGrid {
         }
     }
 }
+
+impl PartialEq for OccupancyGrid {
+    fn eq(&self, other: &Self) -> bool {
+        unsafe {
+            nav_msgs__msg__OccupancyGrid__are_equal(self, other)
+        }
+    }
+}
+
+impl<const N: usize> PartialEq for OccupancyGridSeq<N> {
+    fn eq(&self, other: &Self) -> bool {
+        unsafe {
+            let msg1 = OccupancyGridSeqRaw{data: self.data, size: self.size, capacity: self.capacity};
+            let msg2 = OccupancyGridSeqRaw{data: other.data, size: other.size, capacity: other.capacity};
+            nav_msgs__msg__OccupancyGrid__Sequence__are_equal(&msg1, &msg2)
+        }
+    }
+}
+

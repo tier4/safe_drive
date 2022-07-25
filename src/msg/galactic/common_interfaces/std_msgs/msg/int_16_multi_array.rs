@@ -7,8 +7,10 @@ use crate::rcl;
 extern "C" {
     fn std_msgs__msg__Int16MultiArray__init(msg: *mut Int16MultiArray) -> bool;
     fn std_msgs__msg__Int16MultiArray__fini(msg: *mut Int16MultiArray);
+    fn std_msgs__msg__Int16MultiArray__are_equal(lhs: *const Int16MultiArray, rhs: *const Int16MultiArray) -> bool;
     fn std_msgs__msg__Int16MultiArray__Sequence__init(msg: *mut Int16MultiArraySeqRaw, size: usize) -> bool;
     fn std_msgs__msg__Int16MultiArray__Sequence__fini(msg: *mut Int16MultiArraySeqRaw);
+    fn std_msgs__msg__Int16MultiArray__Sequence__are_equal(lhs: *const Int16MultiArraySeqRaw, rhs: *const Int16MultiArraySeqRaw) -> bool;
     fn rosidl_typesupport_c__get_message_type_support_handle__std_msgs__msg__Int16MultiArray() -> *const rcl::rosidl_message_type_support_t;
 }
 
@@ -111,3 +113,22 @@ impl TopicMsg for Int16MultiArray {
         }
     }
 }
+
+impl PartialEq for Int16MultiArray {
+    fn eq(&self, other: &Self) -> bool {
+        unsafe {
+            std_msgs__msg__Int16MultiArray__are_equal(self, other)
+        }
+    }
+}
+
+impl<const N: usize> PartialEq for Int16MultiArraySeq<N> {
+    fn eq(&self, other: &Self) -> bool {
+        unsafe {
+            let msg1 = Int16MultiArraySeqRaw{data: self.data, size: self.size, capacity: self.capacity};
+            let msg2 = Int16MultiArraySeqRaw{data: other.data, size: other.size, capacity: other.capacity};
+            std_msgs__msg__Int16MultiArray__Sequence__are_equal(&msg1, &msg2)
+        }
+    }
+}
+

@@ -7,8 +7,10 @@ use crate::rcl;
 extern "C" {
     fn geometry_msgs__msg__Accel__init(msg: *mut Accel) -> bool;
     fn geometry_msgs__msg__Accel__fini(msg: *mut Accel);
+    fn geometry_msgs__msg__Accel__are_equal(lhs: *const Accel, rhs: *const Accel) -> bool;
     fn geometry_msgs__msg__Accel__Sequence__init(msg: *mut AccelSeqRaw, size: usize) -> bool;
     fn geometry_msgs__msg__Accel__Sequence__fini(msg: *mut AccelSeqRaw);
+    fn geometry_msgs__msg__Accel__Sequence__are_equal(lhs: *const AccelSeqRaw, rhs: *const AccelSeqRaw) -> bool;
     fn rosidl_typesupport_c__get_message_type_support_handle__geometry_msgs__msg__Accel() -> *const rcl::rosidl_message_type_support_t;
 }
 
@@ -111,3 +113,22 @@ impl TopicMsg for Accel {
         }
     }
 }
+
+impl PartialEq for Accel {
+    fn eq(&self, other: &Self) -> bool {
+        unsafe {
+            geometry_msgs__msg__Accel__are_equal(self, other)
+        }
+    }
+}
+
+impl<const N: usize> PartialEq for AccelSeq<N> {
+    fn eq(&self, other: &Self) -> bool {
+        unsafe {
+            let msg1 = AccelSeqRaw{data: self.data, size: self.size, capacity: self.capacity};
+            let msg2 = AccelSeqRaw{data: other.data, size: other.size, capacity: other.capacity};
+            geometry_msgs__msg__Accel__Sequence__are_equal(&msg1, &msg2)
+        }
+    }
+}
+

@@ -11,8 +11,10 @@ pub const COVARIANCE_TYPE_KNOWN: u8 = 3;
 extern "C" {
     fn sensor_msgs__msg__NavSatFix__init(msg: *mut NavSatFix) -> bool;
     fn sensor_msgs__msg__NavSatFix__fini(msg: *mut NavSatFix);
+    fn sensor_msgs__msg__NavSatFix__are_equal(lhs: *const NavSatFix, rhs: *const NavSatFix) -> bool;
     fn sensor_msgs__msg__NavSatFix__Sequence__init(msg: *mut NavSatFixSeqRaw, size: usize) -> bool;
     fn sensor_msgs__msg__NavSatFix__Sequence__fini(msg: *mut NavSatFixSeqRaw);
+    fn sensor_msgs__msg__NavSatFix__Sequence__are_equal(lhs: *const NavSatFixSeqRaw, rhs: *const NavSatFixSeqRaw) -> bool;
     fn rosidl_typesupport_c__get_message_type_support_handle__sensor_msgs__msg__NavSatFix() -> *const rcl::rosidl_message_type_support_t;
 }
 
@@ -120,3 +122,22 @@ impl TopicMsg for NavSatFix {
         }
     }
 }
+
+impl PartialEq for NavSatFix {
+    fn eq(&self, other: &Self) -> bool {
+        unsafe {
+            sensor_msgs__msg__NavSatFix__are_equal(self, other)
+        }
+    }
+}
+
+impl<const N: usize> PartialEq for NavSatFixSeq<N> {
+    fn eq(&self, other: &Self) -> bool {
+        unsafe {
+            let msg1 = NavSatFixSeqRaw{data: self.data, size: self.size, capacity: self.capacity};
+            let msg2 = NavSatFixSeqRaw{data: other.data, size: other.size, capacity: other.capacity};
+            sensor_msgs__msg__NavSatFix__Sequence__are_equal(&msg1, &msg2)
+        }
+    }
+}
+

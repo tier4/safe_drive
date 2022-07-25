@@ -17,8 +17,10 @@ pub const MOVE_ROTATE: u8 = 6;
 extern "C" {
     fn visualization_msgs__msg__InteractiveMarkerControl__init(msg: *mut InteractiveMarkerControl) -> bool;
     fn visualization_msgs__msg__InteractiveMarkerControl__fini(msg: *mut InteractiveMarkerControl);
+    fn visualization_msgs__msg__InteractiveMarkerControl__are_equal(lhs: *const InteractiveMarkerControl, rhs: *const InteractiveMarkerControl) -> bool;
     fn visualization_msgs__msg__InteractiveMarkerControl__Sequence__init(msg: *mut InteractiveMarkerControlSeqRaw, size: usize) -> bool;
     fn visualization_msgs__msg__InteractiveMarkerControl__Sequence__fini(msg: *mut InteractiveMarkerControlSeqRaw);
+    fn visualization_msgs__msg__InteractiveMarkerControl__Sequence__are_equal(lhs: *const InteractiveMarkerControlSeqRaw, rhs: *const InteractiveMarkerControlSeqRaw) -> bool;
     fn rosidl_typesupport_c__get_message_type_support_handle__visualization_msgs__msg__InteractiveMarkerControl() -> *const rcl::rosidl_message_type_support_t;
 }
 
@@ -130,3 +132,22 @@ impl TopicMsg for InteractiveMarkerControl {
         }
     }
 }
+
+impl PartialEq for InteractiveMarkerControl {
+    fn eq(&self, other: &Self) -> bool {
+        unsafe {
+            visualization_msgs__msg__InteractiveMarkerControl__are_equal(self, other)
+        }
+    }
+}
+
+impl<const N: usize> PartialEq for InteractiveMarkerControlSeq<N> {
+    fn eq(&self, other: &Self) -> bool {
+        unsafe {
+            let msg1 = InteractiveMarkerControlSeqRaw{data: self.data, size: self.size, capacity: self.capacity};
+            let msg2 = InteractiveMarkerControlSeqRaw{data: other.data, size: other.size, capacity: other.capacity};
+            visualization_msgs__msg__InteractiveMarkerControl__Sequence__are_equal(&msg1, &msg2)
+        }
+    }
+}
+

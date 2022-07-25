@@ -7,8 +7,10 @@ use crate::rcl;
 extern "C" {
     fn std_msgs__msg__ColorRGBA__init(msg: *mut ColorRGBA) -> bool;
     fn std_msgs__msg__ColorRGBA__fini(msg: *mut ColorRGBA);
+    fn std_msgs__msg__ColorRGBA__are_equal(lhs: *const ColorRGBA, rhs: *const ColorRGBA) -> bool;
     fn std_msgs__msg__ColorRGBA__Sequence__init(msg: *mut ColorRGBASeqRaw, size: usize) -> bool;
     fn std_msgs__msg__ColorRGBA__Sequence__fini(msg: *mut ColorRGBASeqRaw);
+    fn std_msgs__msg__ColorRGBA__Sequence__are_equal(lhs: *const ColorRGBASeqRaw, rhs: *const ColorRGBASeqRaw) -> bool;
     fn rosidl_typesupport_c__get_message_type_support_handle__std_msgs__msg__ColorRGBA() -> *const rcl::rosidl_message_type_support_t;
 }
 
@@ -113,3 +115,22 @@ impl TopicMsg for ColorRGBA {
         }
     }
 }
+
+impl PartialEq for ColorRGBA {
+    fn eq(&self, other: &Self) -> bool {
+        unsafe {
+            std_msgs__msg__ColorRGBA__are_equal(self, other)
+        }
+    }
+}
+
+impl<const N: usize> PartialEq for ColorRGBASeq<N> {
+    fn eq(&self, other: &Self) -> bool {
+        unsafe {
+            let msg1 = ColorRGBASeqRaw{data: self.data, size: self.size, capacity: self.capacity};
+            let msg2 = ColorRGBASeqRaw{data: other.data, size: other.size, capacity: other.capacity};
+            std_msgs__msg__ColorRGBA__Sequence__are_equal(&msg1, &msg2)
+        }
+    }
+}
+

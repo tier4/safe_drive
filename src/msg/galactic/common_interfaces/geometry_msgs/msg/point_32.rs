@@ -7,8 +7,10 @@ use crate::rcl;
 extern "C" {
     fn geometry_msgs__msg__Point32__init(msg: *mut Point32) -> bool;
     fn geometry_msgs__msg__Point32__fini(msg: *mut Point32);
+    fn geometry_msgs__msg__Point32__are_equal(lhs: *const Point32, rhs: *const Point32) -> bool;
     fn geometry_msgs__msg__Point32__Sequence__init(msg: *mut Point32SeqRaw, size: usize) -> bool;
     fn geometry_msgs__msg__Point32__Sequence__fini(msg: *mut Point32SeqRaw);
+    fn geometry_msgs__msg__Point32__Sequence__are_equal(lhs: *const Point32SeqRaw, rhs: *const Point32SeqRaw) -> bool;
     fn rosidl_typesupport_c__get_message_type_support_handle__geometry_msgs__msg__Point32() -> *const rcl::rosidl_message_type_support_t;
 }
 
@@ -112,3 +114,22 @@ impl TopicMsg for Point32 {
         }
     }
 }
+
+impl PartialEq for Point32 {
+    fn eq(&self, other: &Self) -> bool {
+        unsafe {
+            geometry_msgs__msg__Point32__are_equal(self, other)
+        }
+    }
+}
+
+impl<const N: usize> PartialEq for Point32Seq<N> {
+    fn eq(&self, other: &Self) -> bool {
+        unsafe {
+            let msg1 = Point32SeqRaw{data: self.data, size: self.size, capacity: self.capacity};
+            let msg2 = Point32SeqRaw{data: other.data, size: other.size, capacity: other.capacity};
+            geometry_msgs__msg__Point32__Sequence__are_equal(&msg1, &msg2)
+        }
+    }
+}
+

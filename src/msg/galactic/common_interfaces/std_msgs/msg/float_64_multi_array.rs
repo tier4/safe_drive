@@ -7,8 +7,10 @@ use crate::rcl;
 extern "C" {
     fn std_msgs__msg__Float64MultiArray__init(msg: *mut Float64MultiArray) -> bool;
     fn std_msgs__msg__Float64MultiArray__fini(msg: *mut Float64MultiArray);
+    fn std_msgs__msg__Float64MultiArray__are_equal(lhs: *const Float64MultiArray, rhs: *const Float64MultiArray) -> bool;
     fn std_msgs__msg__Float64MultiArray__Sequence__init(msg: *mut Float64MultiArraySeqRaw, size: usize) -> bool;
     fn std_msgs__msg__Float64MultiArray__Sequence__fini(msg: *mut Float64MultiArraySeqRaw);
+    fn std_msgs__msg__Float64MultiArray__Sequence__are_equal(lhs: *const Float64MultiArraySeqRaw, rhs: *const Float64MultiArraySeqRaw) -> bool;
     fn rosidl_typesupport_c__get_message_type_support_handle__std_msgs__msg__Float64MultiArray() -> *const rcl::rosidl_message_type_support_t;
 }
 
@@ -111,3 +113,22 @@ impl TopicMsg for Float64MultiArray {
         }
     }
 }
+
+impl PartialEq for Float64MultiArray {
+    fn eq(&self, other: &Self) -> bool {
+        unsafe {
+            std_msgs__msg__Float64MultiArray__are_equal(self, other)
+        }
+    }
+}
+
+impl<const N: usize> PartialEq for Float64MultiArraySeq<N> {
+    fn eq(&self, other: &Self) -> bool {
+        unsafe {
+            let msg1 = Float64MultiArraySeqRaw{data: self.data, size: self.size, capacity: self.capacity};
+            let msg2 = Float64MultiArraySeqRaw{data: other.data, size: other.size, capacity: other.capacity};
+            std_msgs__msg__Float64MultiArray__Sequence__are_equal(&msg1, &msg2)
+        }
+    }
+}
+

@@ -7,8 +7,10 @@ use crate::rcl;
 extern "C" {
     fn sensor_msgs__msg__TimeReference__init(msg: *mut TimeReference) -> bool;
     fn sensor_msgs__msg__TimeReference__fini(msg: *mut TimeReference);
+    fn sensor_msgs__msg__TimeReference__are_equal(lhs: *const TimeReference, rhs: *const TimeReference) -> bool;
     fn sensor_msgs__msg__TimeReference__Sequence__init(msg: *mut TimeReferenceSeqRaw, size: usize) -> bool;
     fn sensor_msgs__msg__TimeReference__Sequence__fini(msg: *mut TimeReferenceSeqRaw);
+    fn sensor_msgs__msg__TimeReference__Sequence__are_equal(lhs: *const TimeReferenceSeqRaw, rhs: *const TimeReferenceSeqRaw) -> bool;
     fn rosidl_typesupport_c__get_message_type_support_handle__sensor_msgs__msg__TimeReference() -> *const rcl::rosidl_message_type_support_t;
 }
 
@@ -112,3 +114,22 @@ impl TopicMsg for TimeReference {
         }
     }
 }
+
+impl PartialEq for TimeReference {
+    fn eq(&self, other: &Self) -> bool {
+        unsafe {
+            sensor_msgs__msg__TimeReference__are_equal(self, other)
+        }
+    }
+}
+
+impl<const N: usize> PartialEq for TimeReferenceSeq<N> {
+    fn eq(&self, other: &Self) -> bool {
+        unsafe {
+            let msg1 = TimeReferenceSeqRaw{data: self.data, size: self.size, capacity: self.capacity};
+            let msg2 = TimeReferenceSeqRaw{data: other.data, size: other.size, capacity: other.capacity};
+            sensor_msgs__msg__TimeReference__Sequence__are_equal(&msg1, &msg2)
+        }
+    }
+}
+

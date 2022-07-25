@@ -7,8 +7,10 @@ use crate::rcl;
 extern "C" {
     fn geometry_msgs__msg__WrenchStamped__init(msg: *mut WrenchStamped) -> bool;
     fn geometry_msgs__msg__WrenchStamped__fini(msg: *mut WrenchStamped);
+    fn geometry_msgs__msg__WrenchStamped__are_equal(lhs: *const WrenchStamped, rhs: *const WrenchStamped) -> bool;
     fn geometry_msgs__msg__WrenchStamped__Sequence__init(msg: *mut WrenchStampedSeqRaw, size: usize) -> bool;
     fn geometry_msgs__msg__WrenchStamped__Sequence__fini(msg: *mut WrenchStampedSeqRaw);
+    fn geometry_msgs__msg__WrenchStamped__Sequence__are_equal(lhs: *const WrenchStampedSeqRaw, rhs: *const WrenchStampedSeqRaw) -> bool;
     fn rosidl_typesupport_c__get_message_type_support_handle__geometry_msgs__msg__WrenchStamped() -> *const rcl::rosidl_message_type_support_t;
 }
 
@@ -111,3 +113,22 @@ impl TopicMsg for WrenchStamped {
         }
     }
 }
+
+impl PartialEq for WrenchStamped {
+    fn eq(&self, other: &Self) -> bool {
+        unsafe {
+            geometry_msgs__msg__WrenchStamped__are_equal(self, other)
+        }
+    }
+}
+
+impl<const N: usize> PartialEq for WrenchStampedSeq<N> {
+    fn eq(&self, other: &Self) -> bool {
+        unsafe {
+            let msg1 = WrenchStampedSeqRaw{data: self.data, size: self.size, capacity: self.capacity};
+            let msg2 = WrenchStampedSeqRaw{data: other.data, size: other.size, capacity: other.capacity};
+            geometry_msgs__msg__WrenchStamped__Sequence__are_equal(&msg1, &msg2)
+        }
+    }
+}
+

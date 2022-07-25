@@ -11,8 +11,10 @@ pub const STALE: u8 = 3;
 extern "C" {
     fn diagnostic_msgs__msg__DiagnosticStatus__init(msg: *mut DiagnosticStatus) -> bool;
     fn diagnostic_msgs__msg__DiagnosticStatus__fini(msg: *mut DiagnosticStatus);
+    fn diagnostic_msgs__msg__DiagnosticStatus__are_equal(lhs: *const DiagnosticStatus, rhs: *const DiagnosticStatus) -> bool;
     fn diagnostic_msgs__msg__DiagnosticStatus__Sequence__init(msg: *mut DiagnosticStatusSeqRaw, size: usize) -> bool;
     fn diagnostic_msgs__msg__DiagnosticStatus__Sequence__fini(msg: *mut DiagnosticStatusSeqRaw);
+    fn diagnostic_msgs__msg__DiagnosticStatus__Sequence__are_equal(lhs: *const DiagnosticStatusSeqRaw, rhs: *const DiagnosticStatusSeqRaw) -> bool;
     fn rosidl_typesupport_c__get_message_type_support_handle__diagnostic_msgs__msg__DiagnosticStatus() -> *const rcl::rosidl_message_type_support_t;
 }
 
@@ -118,3 +120,22 @@ impl TopicMsg for DiagnosticStatus {
         }
     }
 }
+
+impl PartialEq for DiagnosticStatus {
+    fn eq(&self, other: &Self) -> bool {
+        unsafe {
+            diagnostic_msgs__msg__DiagnosticStatus__are_equal(self, other)
+        }
+    }
+}
+
+impl<const N: usize> PartialEq for DiagnosticStatusSeq<N> {
+    fn eq(&self, other: &Self) -> bool {
+        unsafe {
+            let msg1 = DiagnosticStatusSeqRaw{data: self.data, size: self.size, capacity: self.capacity};
+            let msg2 = DiagnosticStatusSeqRaw{data: other.data, size: other.size, capacity: other.capacity};
+            diagnostic_msgs__msg__DiagnosticStatus__Sequence__are_equal(&msg1, &msg2)
+        }
+    }
+}
+

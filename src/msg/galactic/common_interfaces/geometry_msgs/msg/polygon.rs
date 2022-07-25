@@ -7,8 +7,10 @@ use crate::rcl;
 extern "C" {
     fn geometry_msgs__msg__Polygon__init(msg: *mut Polygon) -> bool;
     fn geometry_msgs__msg__Polygon__fini(msg: *mut Polygon);
+    fn geometry_msgs__msg__Polygon__are_equal(lhs: *const Polygon, rhs: *const Polygon) -> bool;
     fn geometry_msgs__msg__Polygon__Sequence__init(msg: *mut PolygonSeqRaw, size: usize) -> bool;
     fn geometry_msgs__msg__Polygon__Sequence__fini(msg: *mut PolygonSeqRaw);
+    fn geometry_msgs__msg__Polygon__Sequence__are_equal(lhs: *const PolygonSeqRaw, rhs: *const PolygonSeqRaw) -> bool;
     fn rosidl_typesupport_c__get_message_type_support_handle__geometry_msgs__msg__Polygon() -> *const rcl::rosidl_message_type_support_t;
 }
 
@@ -110,3 +112,22 @@ impl TopicMsg for Polygon {
         }
     }
 }
+
+impl PartialEq for Polygon {
+    fn eq(&self, other: &Self) -> bool {
+        unsafe {
+            geometry_msgs__msg__Polygon__are_equal(self, other)
+        }
+    }
+}
+
+impl<const N: usize> PartialEq for PolygonSeq<N> {
+    fn eq(&self, other: &Self) -> bool {
+        unsafe {
+            let msg1 = PolygonSeqRaw{data: self.data, size: self.size, capacity: self.capacity};
+            let msg2 = PolygonSeqRaw{data: other.data, size: other.size, capacity: other.capacity};
+            geometry_msgs__msg__Polygon__Sequence__are_equal(&msg1, &msg2)
+        }
+    }
+}
+

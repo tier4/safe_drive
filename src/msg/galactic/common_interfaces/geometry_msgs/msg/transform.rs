@@ -7,8 +7,10 @@ use crate::rcl;
 extern "C" {
     fn geometry_msgs__msg__Transform__init(msg: *mut Transform) -> bool;
     fn geometry_msgs__msg__Transform__fini(msg: *mut Transform);
+    fn geometry_msgs__msg__Transform__are_equal(lhs: *const Transform, rhs: *const Transform) -> bool;
     fn geometry_msgs__msg__Transform__Sequence__init(msg: *mut TransformSeqRaw, size: usize) -> bool;
     fn geometry_msgs__msg__Transform__Sequence__fini(msg: *mut TransformSeqRaw);
+    fn geometry_msgs__msg__Transform__Sequence__are_equal(lhs: *const TransformSeqRaw, rhs: *const TransformSeqRaw) -> bool;
     fn rosidl_typesupport_c__get_message_type_support_handle__geometry_msgs__msg__Transform() -> *const rcl::rosidl_message_type_support_t;
 }
 
@@ -111,3 +113,22 @@ impl TopicMsg for Transform {
         }
     }
 }
+
+impl PartialEq for Transform {
+    fn eq(&self, other: &Self) -> bool {
+        unsafe {
+            geometry_msgs__msg__Transform__are_equal(self, other)
+        }
+    }
+}
+
+impl<const N: usize> PartialEq for TransformSeq<N> {
+    fn eq(&self, other: &Self) -> bool {
+        unsafe {
+            let msg1 = TransformSeqRaw{data: self.data, size: self.size, capacity: self.capacity};
+            let msg2 = TransformSeqRaw{data: other.data, size: other.size, capacity: other.capacity};
+            geometry_msgs__msg__Transform__Sequence__are_equal(&msg1, &msg2)
+        }
+    }
+}
+
