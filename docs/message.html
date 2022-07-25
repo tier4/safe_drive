@@ -143,33 +143,66 @@
                 <div id="content" class="content">
                     <main>
                         <h1 id="user-defined-data-structure"><a class="header" href="#user-defined-data-structure">User Defined Data Structure</a></h1>
+<p>Until previous tutorial, we used pre-defined message types.
+In this tutorial, we will describe how to define user defined types.</p>
 <h2 id="install-ros2msg_to_rs"><a class="header" href="#install-ros2msg_to_rs">Install <code>ros2msg_to_rs</code></a></h2>
+<p>ROS2 provides a special format to define types,
+and it can be translated into C or C++ header files.
+Because they do not provide a translator of Rust,
+<code>safe_drive</code> provides a translator called <code>ros2msg_to_rs</code>.
+So, please install <code>ros2msg_to_rs</code> in advance as follows.</p>
 <pre><code class="language-text">$ git clone https://github.com/tier4/ros2msg_to_rs.git
 $ cd ros2msg_to_rs
 $ cargo build --release
 $ cargo instal --path .
 </code></pre>
+<h2 id="create-project-directory"><a class="header" href="#create-project-directory">Create Project Directory</a></h2>
+<p>Then create a project directory as follows.</p>
 <pre><code class="language-text">$ mkdir -p msgtest/src
 </code></pre>
+<p>Throughout this tutorial, we will create 4 packages as follows.</p>
+<div class="table-wrapper"><table><thead><tr><th>packages</th><th>description</th></tr></thead><tbody>
+<tr><td>msgtest/src/my_interfaces</td><td>defining types of ROS2</td></tr>
+<tr><td>msgtest/src/my_interfaces_rs</td><td>Rust's types generated from <code>my_interfaces</code></td></tr>
+<tr><td>msgtest/src/talker</td><td>a publisher</td></tr>
+<tr><td>msgtest/src/listener</td><td>a subscriber</td></tr>
+</tbody></table>
+</div>
 <h2 id="define-user-defined-type"><a class="header" href="#define-user-defined-type">Define User Defined Type</a></h2>
+<p>To define message types, we have to create a ROS2's package,
+and create a '.msg' files.
+The package can be created in the ordinary way of ROS2 as follows.</p>
 <pre><code class="language-text">$ cd msgtest/src
 $ ros2 pkg create --build-type ament_cmake my_interfaces
 $ cd my_interfaces
 $ mkdir msg
 $ cd msg
 </code></pre>
-<p><code>msgtest/src/my_interfaces/msg</code></p>
-<h3 id="primitive-type-msgtestsrcmy_interfacesmsgmymsgmsg"><a class="header" href="#primitive-type-msgtestsrcmy_interfacesmsgmymsgmsg">Primitive Type: <code>msgtest/src/my_interfaces/msg/MyMsg.msg</code></a></h3>
+<h3 id="primitive-type-my_interfacesmsgmymsgmsg"><a class="header" href="#primitive-type-my_interfacesmsgmymsgmsg">Primitive Type: <code>my_interfaces/msg/MyMsg.msg</code></a></h3>
+<p>Then create a file, <code>msgtest/src/my_interfaces/msg</code>, as follows.</p>
 <pre><code class="language-text">int32 integer_value
 int32[] unbounded_integer_array
 int32[5] five_integers_array
 int32[&lt;=5] up_to_five_integers_array
 </code></pre>
-<h3 id="using-user-defiend-type-msgtestsrcmy_interfacesmsgmymsgsmsg"><a class="header" href="#using-user-defiend-type-msgtestsrcmy_interfacesmsgmymsgsmsg">Using User Defiend Type: <code>msgtest/src/my_interfaces/msg/MyMsgs.msg</code></a></h3>
+<p>There are 4 values in this type.</p>
+<ul>
+<li><code>integer_value</code> : a value of the <code>int32</code> type</li>
+<li><code>unbounded_integer_array</code> : an unbounded array of the <code>int32</code> type</li>
+<li><code>five_integers_array</code> : an array which size is 5 of the <code>int32</code> type</li>
+<li><code>up_to_five_integers_array</code> : an array whose size is up to 5 of the <code>int32</code> type</li>
+</ul>
+<h3 id="using-user-defiend-type-my_interfacesmsgmymsgsmsg"><a class="header" href="#using-user-defiend-type-my_interfacesmsgmymsgsmsg">Using User Defiend Type: <code>my_interfaces/msg/MyMsgs.msg</code></a></h3>
+<p>We can use the <code>MyMsg</code> previously defined in another message type, <code>msgtest/src/my_interfaces/msg/MyMsgs.msg</code>, as follows.</p>
 <pre><code class="language-text">MyMsg msg1
 MyMsg msg2
 </code></pre>
-<h3 id="string-type-msgtestsrcmy_interfacesmsgmymsgstrmsg"><a class="header" href="#string-type-msgtestsrcmy_interfacesmsgmymsgstrmsg">String Type: <code>msgtest/src/my_interfaces/msg/MyMsgStr.msg</code></a></h3>
+<h3 id="string-type-my_interfacesmsgmymsgstrmsg"><a class="header" href="#string-type-my_interfacesmsgmymsgstrmsg">String Type: <code>my_interfaces/msg/MyMsgStr.msg</code></a></h3>
+<p>A size of an array can be specified as described above,
+a length of a string can be also specified.
+For example, <code>string&lt;=10</code> is a type of string,
+but its length is up to 10.</p>
+<p>We prepare <code>msgtest/src/my_interfaces/msg/MyMsgStr.msg</code> as follows.</p>
 <pre><code class="language-text">string message
 string[2] static_array_str
 string[] dynamic_array_str
@@ -181,6 +214,8 @@ string&lt;=10[] dynamic_array_bounded_str
 string&lt;=10[&lt;=3] bounded_array_bounded_str
 </code></pre>
 <h3 id="edit-my_interfacescmakeliststxt"><a class="header" href="#edit-my_interfacescmakeliststxt">Edit <code>my_interfaces/CMakeLists.txt</code></a></h3>
+<p>To generate C or C++ files and libraries for used defined types,
+we have to edit <code>CMakeLists.txt</code> as follows.</p>
 <pre><code class="language-cmake"># msgtest/src/my_interfaces/CMakeLists.txt
 find_package(rosidl_default_generators REQUIRED)
 
@@ -190,7 +225,9 @@ rosidl_generate_interfaces(${PROJECT_NAME}
   &quot;msg/MyMsgStr.msg&quot;
 )
 </code></pre>
+<p>We have to specify messages files in <code>CMakeLists.txt</code>.</p>
 <h3 id="edit-my_interfacespackagexml"><a class="header" href="#edit-my_interfacespackagexml">Edit <code>my_interfaces/package.xml</code></a></h3>
+<p>We also have to edit <code>package.xml</code> as follows.</p>
 <pre><code class="language-xml">&lt;!-- msgtest/src/my_interfaces/package.xml --&gt;
 &lt;build_depend&gt;rosidl_default_generators&lt;/build_depend&gt;
 
@@ -199,17 +236,47 @@ rosidl_generate_interfaces(${PROJECT_NAME}
 &lt;member_of_group&gt;rosidl_interface_packages&lt;/member_of_group&gt;
 </code></pre>
 <h2 id="user-defined-type-in-rust"><a class="header" href="#user-defined-type-in-rust">User Defined Type in Rust</a></h2>
+<p>Primitive types are translated into Rust's types as follows by <code>ros2msg_to_rs</code>.</p>
+<div class="table-wrapper"><table><thead><tr><th>ROS2</th><th>Rust</th></tr></thead><tbody>
+<tr><td>bool</td><td>bool</td></tr>
+<tr><td>byte</td><td>u8</td></tr>
+<tr><td>char</td><td>i8</td></tr>
+<tr><td>int8</td><td>i8</td></tr>
+<tr><td>uint8</td><td>u8</td></tr>
+<tr><td>int16</td><td>i16</td></tr>
+<tr><td>uint16</td><td>u16</td></tr>
+<tr><td>int32</td><td>i32</td></tr>
+<tr><td>uint32</td><td>u32</td></tr>
+<tr><td>int64</td><td>i64</td></tr>
+<tr><td>uint64</td><td>u64</td></tr>
+<tr><td>float32</td><td>f32</td></tr>
+<tr><td>float64</td><td>f64</td></tr>
+<tr><td>string</td><td>safe_drive::msg::RosString</td></tr>
+</tbody></table>
+</div>
 <h3 id="generate-rusts-files"><a class="header" href="#generate-rusts-files">Generate Rust's Files</a></h3>
+<p>To generate Rust's files, just use <code>ros2msg_to_rs</code> as follows.</p>
 <pre><code class="language-text">$ cd msgtest/src
 $ create new --lib my_interfaces_rs
 $ ros2msg_to_rs  -i ./ -o ./my_interfaces_rs/src
-$ generating: my_interfaces_rs/src/msg/msg/my_msg.rs
-$ generating: my_interfaces_rs/src/msg/msg/my_msg_str.rs
-$ generating: my_interfaces_rs/src/msg/msg.rs
-$ generating: my_interfaces_rs/src/mod.rs
-$ generating: my_interfaces_rs/src/msg/mod.rs
+generating: my_interfaces_rs/src/msg/msg/my_msg.rs
+generating: my_interfaces_rs/src/msg/msg/my_msg_str.rs
+generating: my_interfaces_rs/src/msg/msg.rs
+generating: my_interfaces_rs/src/mod.rs
+generating: my_interfaces_rs/src/msg/mod.rs
 </code></pre>
+<p><code>ros2msg_to_rs</code> search the directory specified by the <code>-i</code> option,
+and under <code>my_interfaces_rs/src</code> specified by the <code>-o</code> option.</p>
 <h3 id="generated-types"><a class="header" href="#generated-types">Generated Types</a></h3>
+<p>Array types are generated as follows.</p>
+<div class="table-wrapper"><table><thead><tr><th>ROS2</th><th>Rust</th></tr></thead><tbody>
+<tr><td>int32[5]</td><td>[i32; 5]</td></tr>
+<tr><td>int32[]</td><td>safe_drive::msg::I32Seq&lt;0&gt;</td></tr>
+<tr><td>int32[&lt;=]</td><td>safe_drive::msg::I32Seq&lt;5&gt;</td></tr>
+</tbody></table>
+</div>
+<p><code>0</code> of <code>I32Seq&lt;0&gt;</code> indicates unbounded, and <code>5</code> of <code>I32Seq&lt;5&gt;</code> indicates less than or equal to 5.
+So, <code>MyMsg</code> and <code>MyMsgs</code> are generated as follows.</p>
 <pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
 </span><span class="boring">fn main() {
 </span>// msgtest/src/my_interfaces_rs/src/my_interfaces/msg/my_msg.rs
@@ -234,24 +301,10 @@ pub struct MyMsgs {
 }
 <span class="boring">}
 </span></code></pre></pre>
-<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
-</span><span class="boring">fn main() {
-</span>// msgtest/src/my_interfaces_rs/src/my_interfaces/msg/my_msg_str.rs
-#[repr(C)]
-#[derive(Debug)]
-pub struct MyMsgStr {
-    pub message: safe_drive::msg::RosString&lt;0&gt;,
-    pub static_array_str: [safe_drive::msg::RosString&lt;0&gt;; 2],
-    pub dynamic_array_str: safe_drive::msg::RosStringSeq&lt;0, 0&gt;,
-    pub bounded_array_str: safe_drive::msg::RosStringSeq&lt;0, 3&gt;,
-    pub bounded_str: safe_drive::msg::RosString&lt;10&gt;,
-    pub static_array_bounded_str: [safe_drive::msg::RosString&lt;10&gt;; 2],
-    pub dynamic_array_bounded_str: safe_drive::msg::RosStringSeq&lt;10, 0&gt;,
-    pub bounded_array_bounded_str: safe_drive::msg::RosStringSeq&lt;10, 3&gt;,
-}
-<span class="boring">}
-</span></code></pre></pre>
 <h3 id="edit-my_interfaces_rssrclibrs"><a class="header" href="#edit-my_interfaces_rssrclibrs">Edit <code>my_interfaces_rs/src/lib.rs</code></a></h3>
+<p>To use generated files, <code>my_interfaces</code> must be imported in <code>lib.rs</code> as follows.
+Some warning will be generated when compiling,
+we recommend to add some attributes as follows.</p>
 <pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
 </span><span class="boring">fn main() {
 </span>// msgtest/src/my_interfaces_rs/src/lib.rs
@@ -269,6 +322,7 @@ pub mod my_interfaces;
 <span class="boring">}
 </span></code></pre></pre>
 <h3 id="create-my_interfaces_rspackagexml"><a class="header" href="#create-my_interfaces_rspackagexml">Create <code>my_interfaces_rs/package.xml</code></a></h3>
+<p>Then create <code>package.xml</code> as follows.</p>
 <pre><code class="language-xml">&lt;!-- msgtest/src/my_interfaces_rs/package.xml --&gt;
 &lt;?xml version=&quot;1.0&quot;?&gt;
 &lt;?xml-model href=&quot;http://download.ros.org/schema/package_format3.xsd&quot; schematypens=&quot;http://www.w3.org/2001/XMLSchema&quot;?&gt;
@@ -288,6 +342,7 @@ pub mod my_interfaces;
 &lt;/package&gt;
 </code></pre>
 <h3 id="my_interfaces_rsbuildrs"><a class="header" href="#my_interfaces_rsbuildrs"><code>my_interfaces_rs/build.rs</code></a></h3>
+<p>The following <code>build.rs</code> is required because generated files depends libraries generated by ROS2.</p>
 <pre><pre class="playground"><code class="language-rust">// msgtest/src/my_interfaces_rs/build.rs
 fn main() {
     println!(&quot;cargo:rustc-link-lib=my_interfaces__rosidl_generator_c&quot;);
@@ -302,7 +357,12 @@ fn main() {
 }
 </code></pre></pre>
 <h2 id="talker"><a class="header" href="#talker">Talker</a></h2>
+<p>Let's create a talker which publishes <code>MyMsgs</code> periodically. To create the package, use <code>cargo</code> as follows.</p>
+<pre><code class="language-text">$ cd msgtest/src
+$ cargo new talker
+</code></pre>
 <h3 id="edit-talkersrcmainrs"><a class="header" href="#edit-talkersrcmainrs">Edit <code>talker/src/main.rs</code></a></h3>
+<p>If you want to know how to implement a subscriber or a publisher, please see <a href="./pubsub.html">a tutorial of Pub/Sub</a>. This section describes how to handle a messages generated by <code>ros2msg_to_rs</code>.</p>
 <pre><pre class="playground"><code class="language-rust">// msgtest/src/talker/src/main.rs
 use my_interfaces_rs::my_interfaces;
 use safe_drive::{
@@ -375,13 +435,39 @@ fn create_message() -&gt; Result&lt;my_interfaces::msg::MyMsg, DynError&gt; {
     Ok(my_msg)
 }
 </code></pre></pre>
+<p>Primitive types and arrays can be handles in the ordinary way of Rust as follows.</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>my_msg.integer_value = 10;
+
+// int32[5] five_integers_array
+my_msg.five_integers_array[0] = 11;
+my_msg.five_integers_array[1] = 13;
+my_msg.five_integers_array[2] = 49;
+my_msg.five_integers_array[3] = 55;
+my_msg.five_integers_array[4] = 19;
+<span class="boring">}
+</span></code></pre></pre>
+<p>To access elements of unbounded or bounded arrays,
+we can use <code>as_slice_mut()</code> or <code>as_slice()</code> methods as follows.</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>// unbounded or unbounded array
+let mut msgs = I32Seq::new(3).unwrap();
+let ref_msgs = msgs.as_slice_mut().unwrap();
+<span class="boring">}
+</span></code></pre></pre>
+<p><code>as_slice_mut()</code> returns a mutable slice,
+you can thus update the elements of the array via the slice.</p>
 <h3 id="edit-talkercargotoml"><a class="header" href="#edit-talkercargotoml">Edit <code>talker/Cargo.toml</code></a></h3>
+<p>To use the generated Rust's types, we have to edit <code>Cargo.toml</code> as follows.</p>
 <pre><code class="language-toml"># msgtest/src/talker/Cargo.toml
 [dependencies]
 safe_drive = { path = &quot;/root/safe_drive&quot; }
 my_interfaces_rs = { path = &quot;../my_interfaces_rs&quot; }
 </code></pre>
 <h3 id="create-talkerpackagexml"><a class="header" href="#create-talkerpackagexml">Create <code>talker/package.xml</code></a></h3>
+<p>Then create <code>package.xml</code> as follows.</p>
 <pre><code class="language-xml">&lt;!-- msgtest/src/talker/package.xml --&gt;
 &lt;?xml version=&quot;1.0&quot;?&gt;
 &lt;?xml-model href=&quot;http://download.ros.org/schema/package_format3.xsd&quot; schematypens=&quot;http://www.w3.org/2001/XMLSchema&quot;?&gt;
@@ -403,7 +489,13 @@ my_interfaces_rs = { path = &quot;../my_interfaces_rs&quot; }
 &lt;/package&gt;
 </code></pre>
 <h2 id="listener"><a class="header" href="#listener">Listener</a></h2>
+<p>Let's then create a listener which receive messages published by the talker.
+Create a package as follows.</p>
+<pre><code class="language-text">$ cd msgtest/src
+$ cargo new listener
+</code></pre>
 <h3 id="edit-listenersrcmainrs"><a class="header" href="#edit-listenersrcmainrs">Edit <code>listener/src/main.rs</code></a></h3>
+<p>The listener can also be implemented straightforwardly as follows.</p>
 <pre><pre class="playground"><code class="language-rust">// msgtest/src/listener/src/main.rs
 use my_interfaces_rs::my_interfaces;
 use safe_drive::{context::Context, error::DynError, logger::Logger, pr_info};
@@ -459,13 +551,16 @@ fn main() -&gt; Result&lt;(), DynError&gt; {
     }
 }
 </code></pre></pre>
+<p>To access to elements of an array, we used <code>as_slice</code> as above.</p>
 <h3 id="edit-listenercargotoml"><a class="header" href="#edit-listenercargotoml">Edit <code>listener/Cargo.toml</code></a></h3>
+<p>The listener also requires <code>my_interfaces_rs</code>, and edit <code>Cargo.toml</code> as follows.</p>
 <pre><code class="language-toml"># msgtest/src/listener/Cargo.toml
 [dependencies]
 safe_drive = { path = &quot;/root/safe_drive&quot; }
 my_interfaces_rs = { path = &quot;../my_interfaces_rs&quot; }
 </code></pre>
 <h3 id="create-listenerpackagexml"><a class="header" href="#create-listenerpackagexml">Create <code>listener/package.xml</code></a></h3>
+<p>Then create <code>package.xml</code> as follows.</p>
 <pre><code class="language-xml">&lt;!-- msgtest/src/listener/package.xml --&gt;
 &lt;?xml version=&quot;1.0&quot;?&gt;
 &lt;?xml-model href=&quot;http://download.ros.org/schema/package_format3.xsd&quot; schematypens=&quot;http://www.w3.org/2001/XMLSchema&quot;?&gt;
@@ -487,14 +582,17 @@ my_interfaces_rs = { path = &quot;../my_interfaces_rs&quot; }
 &lt;/package&gt;
 </code></pre>
 <h2 id="compilation-and-execution"><a class="header" href="#compilation-and-execution">Compilation and Execution</a></h2>
+<p>Now, we can compile and execute the talker and listener. Let's do it!</p>
 <h3 id="compile"><a class="header" href="#compile">Compile</a></h3>
+<p>The compilation can be performed by using <code>colcon</code> as follows.</p>
 <pre><code class="language-text">$ cd msgtest
 $ colcon build --cargo-args --release
+$ . ./install/setup.bash
 </code></pre>
 <h3 id="execute-listener"><a class="header" href="#execute-listener">Execute Listener</a></h3>
-<pre><code class="language-text">$ cd msgtest
-$ . ./install/setup.bash
-$ ros2 run listener listener
+<p>The listener can be executed by using <code>ros2</code> as follows.
+After executing the talker, it receives messages as follows.</p>
+<pre><code class="language-text">$ ros2 run listener listener
 [INFO] [1658305910.013449534] [listener]: listening
 [INFO] [1658305914.359791460] [listener]: message: 10
 [INFO] [1658305914.359839382] [listener]: five_integers_array: 11
@@ -508,13 +606,32 @@ $ ros2 run listener listener
 [INFO] [1658305914.359946479] [listener]: up_to_five_integers_array: 2
 [INFO] [1658305914.359959422] [listener]: up_to_five_integers_array: 3
 </code></pre>
-<h3 id="execute"><a class="header" href="#execute">Execute</a></h3>
+<h3 id="execute-talker"><a class="header" href="#execute-talker">Execute Talker</a></h3>
+<p>To execute the talker, open a new terminal window and execute it as follows.</p>
 <pre><code class="language-text">$ cd msgtest
 $ . ./install/setup.bash
 $ ros2 run talker talker
 [INFO] [1658305913.359250753] [talker]: send: MyMsgs { msg1: MyMsg { integer_value: 10, unbounded_integer_array: I32Seq(rosidl_runtime_c__int32__Sequence { data: 0x55a0653f7aa0, size: 3, capacity: 3 }), five_integers_array: [11, 13, 49, 55, 19], up_to_five_integers_array: I32Seq(rosidl_runtime_c__int32__Sequence { data: 0x55a0653efaa0, size: 2, capacity: 2 }) }, msg2: MyMsg { integer_value: 10, unbounded_integer_array: I32Seq(rosidl_runtime_c__int32__Sequence { data: 0x55a0653f7e30, size: 3, capacity: 3 }), five_integers_array: [11, 13, 49, 55, 19], up_to_five_integers_array: I32Seq(rosidl_runtime_c__int32__Sequence { data: 0x55a0653f7e50, size: 2, capacity: 2 }) }
 </code></pre>
+<p>Nicely done! Now, we can define new types and handle the types in Rust.</p>
 <h2 id="string-type"><a class="header" href="#string-type">String Type</a></h2>
+<p>Arrays of string are bit different from arrays of primitive types.
+<code>string</code> is unbounded string, and <code>string&lt;=5</code> is bounded string whose length is up to 5.
+So, there are arrays for unbounded and bounded strings as follows; <code>msg</code> is <code>safe_drive::msg</code>.</p>
+<div class="table-wrapper"><table><thead><tr><th>ROS</th><th>Rust</th></tr></thead><tbody>
+<tr><td>string</td><td>msg::RosString&lt;0&gt;</td></tr>
+<tr><td>string[]</td><td>msg::StringSeq&lt;0, 0&gt;</td></tr>
+<tr><td>string[&lt;=5]</td><td>msg::StringSeq&lt;0, 5&gt;</td></tr>
+<tr><td>string[10]</td><td>[msg::RosString&lt;0&gt;; 10]</td></tr>
+<tr><td>string&lt;=5</td><td>msg::RosString&lt;5&gt;</td></tr>
+<tr><td>string&lt;=5[&lt;=10]</td><td>msg::StringSeq&lt;5, 10&gt;</td></tr>
+<tr><td>string&lt;=5[10]</td><td>[msg::RosString&lt;5&gt;; 10]</td></tr>
+</tbody></table>
+</div>
+<p><code>RosString&lt;0&gt;</code> is a type of unbounded string, and <code>RosString&lt;5&gt;</code> is a type of bounded string whose length is less than or equal to 5.
+<code>5</code> of <code>StringSeq&lt;5, 10&gt;</code> indicates the length of a string is less than or equal to 5,
+and <code>10</code> of it indicates the length of the array is less than or equal to 10.</p>
+<p>For example, the following ROS2 message type can be translated into the <code>MyMsgStr</code> as follows.</p>
 <pre><code class="language-text">string message
 string[2] static_array_str
 string[] dynamic_array_str
@@ -542,6 +659,8 @@ pub struct MyMsgStr {
 }
 <span class="boring">}
 </span></code></pre></pre>
+<p>To access to elements of string arrays,
+we can use <code>as_slice_mut()</code> or <code>as_slice_mut()</code> as follows.</p>
 <pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
 </span><span class="boring">fn main() {
 </span>use my_interfaces_rs::my_interfaces;

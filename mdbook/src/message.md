@@ -1,6 +1,15 @@
 # User Defined Data Structure
 
+Until previous tutorial, we used pre-defined message types.
+In this tutorial, we will describe how to define user defined types.
+
 ## Install `ros2msg_to_rs`
+
+ROS2 provides a special format to define types,
+and it can be translated into C or C++ header files.
+Because they do not provide a translator of Rust,
+`safe_drive` provides a translator called `ros2msg_to_rs`.
+So, please install `ros2msg_to_rs` in advance as follows.
 
 ```text
 $ git clone https://github.com/tier4/ros2msg_to_rs.git
@@ -9,11 +18,28 @@ $ cargo build --release
 $ cargo instal --path .
 ```
 
+## Create Project Directory
+
+Then create a project directory as follows.
+
 ```text
 $ mkdir -p msgtest/src
 ```
 
+Throughout this tutorial, we will create 4 packages as follows.
+
+| packages                     | description            |
+|------------------------------|------------------------|
+| msgtest/src/my_interfaces    | defining types of ROS2 |
+| msgtest/src/my_interfaces_rs | Rust's types generated from `my_interfaces` |
+| msgtest/src/talker           | a publisher  |
+| msgtest/src/listener         | a subscriber |
+
 ## Define User Defined Type
+
+To define message types, we have to create a ROS2's package,
+and create a '.msg' files.
+The package can be created in the ordinary way of ROS2 as follows.
 
 ```text
 $ cd msgtest/src
@@ -23,10 +49,9 @@ $ mkdir msg
 $ cd msg
 ```
 
-`msgtest/src/my_interfaces/msg`
+### Primitive Type: `my_interfaces/msg/MyMsg.msg`
 
-
-### Primitive Type: `msgtest/src/my_interfaces/msg/MyMsg.msg`
+Then create a file, `msgtest/src/my_interfaces/msg`, as follows.
 
 ```text
 int32 integer_value
@@ -35,14 +60,30 @@ int32[5] five_integers_array
 int32[<=5] up_to_five_integers_array
 ```
 
-### Using User Defiend Type: `msgtest/src/my_interfaces/msg/MyMsgs.msg`
+There are 4 values in this type.
+
+- `integer_value` : a value of the `int32` type
+- `unbounded_integer_array` : an unbounded array of the `int32` type
+- `five_integers_array` : an array which size is 5 of the `int32` type
+- `up_to_five_integers_array` : an array whose size is up to 5 of the `int32` type
+
+### Using User Defiend Type: `my_interfaces/msg/MyMsgs.msg`
+
+We can use the `MyMsg` previously defined in another message type, `msgtest/src/my_interfaces/msg/MyMsgs.msg`, as follows.
 
 ```text
 MyMsg msg1
 MyMsg msg2
 ```
 
-### String Type: `msgtest/src/my_interfaces/msg/MyMsgStr.msg`
+### String Type: `my_interfaces/msg/MyMsgStr.msg`
+
+A size of an array can be specified as described above,
+a length of a string can be also specified.
+For example, `string<=10` is a type of string,
+but its length is up to 10.
+
+We prepare `msgtest/src/my_interfaces/msg/MyMsgStr.msg` as follows.
 
 ```text
 string message
@@ -58,6 +99,9 @@ string<=10[<=3] bounded_array_bounded_str
 
 ### Edit `my_interfaces/CMakeLists.txt`
 
+To generate C or C++ files and libraries for used defined types,
+we have to edit `CMakeLists.txt` as follows.
+
 ```cmake
 # msgtest/src/my_interfaces/CMakeLists.txt
 find_package(rosidl_default_generators REQUIRED)
@@ -69,7 +113,11 @@ rosidl_generate_interfaces(${PROJECT_NAME}
 )
 ```
 
+We have to specify messages files in `CMakeLists.txt`.
+
 ### Edit `my_interfaces/package.xml`
+
+We also have to edit `package.xml` as follows.
 
 ```xml
 <!-- msgtest/src/my_interfaces/package.xml -->
@@ -82,20 +130,55 @@ rosidl_generate_interfaces(${PROJECT_NAME}
 
 ## User Defined Type in Rust
 
+Primitive types are translated into Rust's types as follows by `ros2msg_to_rs`.
+
+| ROS2    | Rust                       |
+|---------|----------------------------|
+| bool    | bool                       |
+| byte    | u8                         |
+| char    | i8                         |
+| int8    | i8                         |
+| uint8   | u8                         |
+| int16   | i16                        |
+| uint16  | u16                        |
+| int32   | i32                        |
+| uint32  | u32                        |
+| int64   | i64                        |
+| uint64  | u64                        |
+| float32 | f32                        |
+| float64 | f64                        |
+| string  | safe_drive::msg::RosString |
+
 ### Generate Rust's Files
+
+To generate Rust's files, just use `ros2msg_to_rs` as follows.
 
 ```text
 $ cd msgtest/src
 $ create new --lib my_interfaces_rs
 $ ros2msg_to_rs  -i ./ -o ./my_interfaces_rs/src
-$ generating: my_interfaces_rs/src/msg/msg/my_msg.rs
-$ generating: my_interfaces_rs/src/msg/msg/my_msg_str.rs
-$ generating: my_interfaces_rs/src/msg/msg.rs
-$ generating: my_interfaces_rs/src/mod.rs
-$ generating: my_interfaces_rs/src/msg/mod.rs
+generating: my_interfaces_rs/src/msg/msg/my_msg.rs
+generating: my_interfaces_rs/src/msg/msg/my_msg_str.rs
+generating: my_interfaces_rs/src/msg/msg.rs
+generating: my_interfaces_rs/src/mod.rs
+generating: my_interfaces_rs/src/msg/mod.rs
 ```
 
+`ros2msg_to_rs` search the directory specified by the `-i` option,
+and under `my_interfaces_rs/src` specified by the `-o` option.
+
 ### Generated Types
+
+Array types are generated as follows.
+
+| ROS2      | Rust                       |
+|-----------|----------------------------|
+| int32[5]  | [i32; 5]                   |
+| int32[]   | safe_drive::msg::I32Seq<0> |
+| int32[<=] | safe_drive::msg::I32Seq<5> |
+
+`0` of `I32Seq<0>` indicates unbounded, and `5` of `I32Seq<5>` indicates less than or equal to 5.
+So, `MyMsg` and `MyMsgs` are generated as follows.
 
 ```rust
 // msgtest/src/my_interfaces_rs/src/my_interfaces/msg/my_msg.rs
@@ -119,23 +202,11 @@ pub struct MyMsgs {
 }
 ```
 
-```rust
-// msgtest/src/my_interfaces_rs/src/my_interfaces/msg/my_msg_str.rs
-#[repr(C)]
-#[derive(Debug)]
-pub struct MyMsgStr {
-    pub message: safe_drive::msg::RosString<0>,
-    pub static_array_str: [safe_drive::msg::RosString<0>; 2],
-    pub dynamic_array_str: safe_drive::msg::RosStringSeq<0, 0>,
-    pub bounded_array_str: safe_drive::msg::RosStringSeq<0, 3>,
-    pub bounded_str: safe_drive::msg::RosString<10>,
-    pub static_array_bounded_str: [safe_drive::msg::RosString<10>; 2],
-    pub dynamic_array_bounded_str: safe_drive::msg::RosStringSeq<10, 0>,
-    pub bounded_array_bounded_str: safe_drive::msg::RosStringSeq<10, 3>,
-}
-```
-
 ### Edit `my_interfaces_rs/src/lib.rs`
+
+To use generated files, `my_interfaces` must be imported in `lib.rs` as follows.
+Some warning will be generated when compiling,
+we recommend to add some attributes as follows.
 
 ```rust
 // msgtest/src/my_interfaces_rs/src/lib.rs
@@ -153,6 +224,8 @@ pub mod my_interfaces;
 ```
 
 ### Create `my_interfaces_rs/package.xml`
+
+Then create `package.xml` as follows.
 
 ```xml
 <!-- msgtest/src/my_interfaces_rs/package.xml -->
@@ -176,6 +249,8 @@ pub mod my_interfaces;
 
 ### `my_interfaces_rs/build.rs`
 
+The following `build.rs` is required because generated files depends libraries generated by ROS2.
+
 ```rust
 // msgtest/src/my_interfaces_rs/build.rs
 fn main() {
@@ -193,7 +268,16 @@ fn main() {
 
 ## Talker
 
+Let's create a talker which publishes `MyMsgs` periodically. To create the package, use `cargo` as follows.
+
+```text
+$ cd msgtest/src
+$ cargo new talker
+```
+
 ### Edit `talker/src/main.rs`
+
+If you want to know how to implement a subscriber or a publisher, please see [a tutorial of Pub/Sub](./pubsub.md). This section describes how to handle a messages generated by `ros2msg_to_rs`.
 
 ```rust
 // msgtest/src/talker/src/main.rs
@@ -269,7 +353,34 @@ fn create_message() -> Result<my_interfaces::msg::MyMsg, DynError> {
 }
 ```
 
+Primitive types and arrays can be handles in the ordinary way of Rust as follows.
+
+```rust
+my_msg.integer_value = 10;
+
+// int32[5] five_integers_array
+my_msg.five_integers_array[0] = 11;
+my_msg.five_integers_array[1] = 13;
+my_msg.five_integers_array[2] = 49;
+my_msg.five_integers_array[3] = 55;
+my_msg.five_integers_array[4] = 19;
+```
+
+To access elements of unbounded or bounded arrays,
+we can use `as_slice_mut()` or `as_slice()` methods as follows.
+
+```rust
+// unbounded or unbounded array
+let mut msgs = I32Seq::new(3).unwrap();
+let ref_msgs = msgs.as_slice_mut().unwrap();
+```
+
+`as_slice_mut()` returns a mutable slice,
+you can thus update the elements of the array via the slice.
+
 ### Edit `talker/Cargo.toml`
+
+To use the generated Rust's types, we have to edit `Cargo.toml` as follows.
 
 ```toml
 # msgtest/src/talker/Cargo.toml
@@ -279,6 +390,8 @@ my_interfaces_rs = { path = "../my_interfaces_rs" }
 ```
 
 ### Create `talker/package.xml`
+
+Then create `package.xml` as follows.
 
 ```xml
 <!-- msgtest/src/talker/package.xml -->
@@ -304,7 +417,17 @@ my_interfaces_rs = { path = "../my_interfaces_rs" }
 
 ## Listener
 
+Let's then create a listener which receive messages published by the talker.
+Create a package as follows.
+
+```text
+$ cd msgtest/src
+$ cargo new listener
+```
+
 ### Edit `listener/src/main.rs`
+
+The listener can also be implemented straightforwardly as follows.
 
 ```rust
 // msgtest/src/listener/src/main.rs
@@ -363,7 +486,11 @@ fn main() -> Result<(), DynError> {
 }
 ```
 
+To access to elements of an array, we used `as_slice` as above.
+
 ### Edit `listener/Cargo.toml`
+
+The listener also requires `my_interfaces_rs`, and edit `Cargo.toml` as follows.
 
 ```toml
 # msgtest/src/listener/Cargo.toml
@@ -373,6 +500,8 @@ my_interfaces_rs = { path = "../my_interfaces_rs" }
 ```
 
 ### Create `listener/package.xml`
+
+Then create `package.xml` as follows.
 
 ```xml
 <!-- msgtest/src/listener/package.xml -->
@@ -398,18 +527,24 @@ my_interfaces_rs = { path = "../my_interfaces_rs" }
 
 ## Compilation and Execution
 
+Now, we can compile and execute the talker and listener. Let's do it!
+
 ### Compile
+
+The compilation can be performed by using `colcon` as follows.
 
 ```text
 $ cd msgtest
 $ colcon build --cargo-args --release
+$ . ./install/setup.bash
 ```
 
 ### Execute Listener
 
+The listener can be executed by using `ros2` as follows.
+After executing the talker, it receives messages as follows.
+
 ```text
-$ cd msgtest
-$ . ./install/setup.bash
 $ ros2 run listener listener
 [INFO] [1658305910.013449534] [listener]: listening
 [INFO] [1658305914.359791460] [listener]: message: 10
@@ -425,7 +560,9 @@ $ ros2 run listener listener
 [INFO] [1658305914.359959422] [listener]: up_to_five_integers_array: 3
 ```
 
-### Execute
+### Execute Talker
+
+To execute the talker, open a new terminal window and execute it as follows.
 
 ```text
 $ cd msgtest
@@ -434,7 +571,29 @@ $ ros2 run talker talker
 [INFO] [1658305913.359250753] [talker]: send: MyMsgs { msg1: MyMsg { integer_value: 10, unbounded_integer_array: I32Seq(rosidl_runtime_c__int32__Sequence { data: 0x55a0653f7aa0, size: 3, capacity: 3 }), five_integers_array: [11, 13, 49, 55, 19], up_to_five_integers_array: I32Seq(rosidl_runtime_c__int32__Sequence { data: 0x55a0653efaa0, size: 2, capacity: 2 }) }, msg2: MyMsg { integer_value: 10, unbounded_integer_array: I32Seq(rosidl_runtime_c__int32__Sequence { data: 0x55a0653f7e30, size: 3, capacity: 3 }), five_integers_array: [11, 13, 49, 55, 19], up_to_five_integers_array: I32Seq(rosidl_runtime_c__int32__Sequence { data: 0x55a0653f7e50, size: 2, capacity: 2 }) }
 ```
 
+Nicely done! Now, we can define new types and handle the types in Rust.
+
 ## String Type
+
+Arrays of string are bit different from arrays of primitive types.
+`string` is unbounded string, and `string<=5` is bounded string whose length is up to 5.
+So, there are arrays for unbounded and bounded strings as follows; `msg` is `safe_drive::msg`.
+
+| ROS             | Rust                    |
+|-----------------|-------------------------|
+| string          | msg::RosString<0>       |
+| string[]        | msg::StringSeq<0, 0>    |
+| string[<=5]     | msg::StringSeq<0, 5>    |
+| string[10]      | [msg::RosString<0>; 10] |
+| string<=5       | msg::RosString<5>       |
+| string<=5[<=10] | msg::StringSeq<5, 10>   |
+| string<=5[10]   | [msg::RosString<5>; 10] |
+
+`RosString<0>` is a type of unbounded string, and `RosString<5>` is a type of bounded string whose length is less than or equal to 5.
+`5` of `StringSeq<5, 10>` indicates the length of a string is less than or equal to 5,
+and `10` of it indicates the length of the array is less than or equal to 10.
+
+For example, the following ROS2 message type can be translated into the `MyMsgStr` as follows.
 
 ```text
 string message
@@ -447,7 +606,6 @@ string<=10[2] static_array_bounded_str
 string<=10[] dynamic_array_bounded_str
 string<=10[<=3] bounded_array_bounded_str
 ```
-
 
 ```rust
 // msgtest/src/my_interfaces_rs/src/my_interfaces/msg/my_msg_str.rs
@@ -464,6 +622,9 @@ pub struct MyMsgStr {
     pub bounded_array_bounded_str: safe_drive::msg::RosStringSeq<10, 3>,
 }
 ```
+
+To access to elements of string arrays,
+we can use `as_slice_mut()` or `as_slice_mut()` as follows.
 
 ```rust
 use my_interfaces_rs::my_interfaces;
