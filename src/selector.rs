@@ -69,7 +69,7 @@ use crate::{
         server::{Server, ServerData},
         Header,
     },
-    signal_handler,
+    signal_handler::{self, Signaled},
     topic::subscriber::{RCLSubscription, Subscriber},
     PhantomUnsend, PhantomUnsync, RecvResult, ST,
 };
@@ -767,7 +767,7 @@ impl Selector {
 
     fn wait_timeout(&mut self) -> Result<(), DynError> {
         if signal_handler::is_halt() {
-            return Err("Signaled".into());
+            return Err(Signaled.into());
         }
 
         if self.timer.is_empty() {
@@ -828,7 +828,7 @@ impl Selector {
         }
 
         if signal_handler::is_halt() {
-            return Err("Signaled".into());
+            return Err(Signaled.into());
         }
 
         Ok(())

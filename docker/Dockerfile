@@ -1,5 +1,5 @@
-FROM nvidia/cuda:11.7.0-runtime-ubuntu20.04
-# FROM ubuntu:20.04
+# FROM nvidia/cuda:11.7.0-runtime-ubuntu20.04
+FROM ubuntu:20.04
 
 ENV TZ=Asia/Tokyo
 RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone

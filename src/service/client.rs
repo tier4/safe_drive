@@ -65,6 +65,7 @@ use crate::{
         async_selector::{self, SELECTOR},
         CallbackResult,
     },
+    signal_handler::Signaled,
     PhantomUnsync, RecvResult,
 };
 use std::{
@@ -281,6 +282,10 @@ impl<T: ServiceMsg> ClientRecv<T> {
             Err(e) => return RecvResult::Err(e),
         };
 
+        if header.request_id.sequence_number != self.seq {
+            return RecvResult::RetryLater(self);
+        }
+
         RecvResult::Ok((
             Client {
                 data: self.data,
@@ -384,6 +389,14 @@ impl<T: ServiceMsg> ClientRecv<T> {
         let (client, val, _) = self.recv_with_header().await?;
         Ok((client, val))
     }
+
+    pub fn give_up(self) -> Client<T> {
+        Client {
+            data: self.data,
+            _phantom: Default::default(),
+            _unsync: Default::default(),
+        }
+    }
 }
 
 fn rcl_take_response_with_info<T>(
@@ -411,6 +424,16 @@ pub struct AsyncReceiver<T> {
     is_waiting: bool,
 }
 
+impl<T: ServiceMsg> AsyncReceiver<T> {
+    pub fn give_up(self) -> Client<T> {
+        Client {
+            data: self.client.data.clone(),
+            _phantom: Default::default(),
+            _unsync: Default::default(),
+        }
+    }
+}
+
 impl<T: ServiceMsg> Future for AsyncReceiver<T> {
     type Output = Result<(Client<T>, <T as ServiceMsg>::Response, Header), DynError>;
 
@@ -419,7 +442,7 @@ impl<T: ServiceMsg> Future for AsyncReceiver<T> {
         cx: &mut std::task::Context<'_>,
     ) -> std::task::Poll<Self::Output> {
         if is_halt() {
-            return Poll::Ready(Err("Signaled".into()));
+            return Poll::Ready(Err(Signaled.into()));
         }
 
         let (client, is_waiting) = unsafe {
@@ -429,37 +452,42 @@ impl<T: ServiceMsg> Future for AsyncReceiver<T> {
         *is_waiting = false;
 
         match rcl_take_response_with_info(&client.data.client, client.seq) {
-            Ok((val, header)) => Poll::Ready(Ok((
-                Client {
-                    data: client.data.clone(),
-                    _phantom: Default::default(),
-                    _unsync: Default::default(),
-                },
-                val,
-                Header { header },
-            ))),
-            Err(RCLError::ClientTakeFailed) => {
-                let mut waker = Some(cx.waker().clone());
-                let mut guard = SELECTOR.lock();
-                if let Err(e) = guard.send_command(
-                    &client.data.node.context,
-                    async_selector::Command::Client(
-                        client.data.clone(),
-                        Box::new(move || {
-                            let w = waker.take().unwrap();
-                            w.wake();
-                            CallbackResult::Ok
-                        }),
-                    ),
-                ) {
-                    return Poll::Ready(Err(e));
+            Ok((val, header)) => {
+                if header.request_id.sequence_number == client.seq {
+                    return Poll::Ready(Ok((
+                        Client {
+                            data: client.data.clone(),
+                            _phantom: Default::default(),
+                            _unsync: Default::default(),
+                        },
+                        val,
+                        Header { header },
+                    )));
                 }
-
-                *is_waiting = true;
-                Poll::Pending
             }
-            Err(e) => Poll::Ready(Err(e.into())),
+            Err(RCLError::ClientTakeFailed) => (),
+            Err(e) => return Poll::Ready(Err(e.into())),
         }
+
+        // wait message arrival
+        let mut waker = Some(cx.waker().clone());
+        let mut guard = SELECTOR.lock();
+        if let Err(e) = guard.send_command(
+            &client.data.node.context,
+            async_selector::Command::Client(
+                client.data.clone(),
+                Box::new(move || {
+                    let w = waker.take().unwrap();
+                    w.wake();
+                    CallbackResult::Ok
+                }),
+            ),
+        ) {
+            return Poll::Ready(Err(e));
+        }
+
+        *is_waiting = true;
+        Poll::Pending
     }
 }
 

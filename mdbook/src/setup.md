@@ -18,14 +18,14 @@ Choose `Default` when installing Rust.
 ## Install ROS2
 
 ```text
-$curl -s https://raw.githubusercontent.com/ros/rosdistro/master/ros.asc | sudo apt-key add -
+$ curl -s https://raw.githubusercontent.com/ros/rosdistro/master/ros.asc | sudo apt-key add -
 $ sudo sh -c 'echo "deb [arch=$(dpkg --print-architecture)] http://packages.ros.org/ros2/ubuntu $(lsb_release -cs) main" > /etc/apt/sources.list.d/ros2-latest.list'
 $ sudo curl -sSL https://raw.githubusercontent.com/ros/rosdistro/master/ros.key -o /usr/share/keyrings/ros-archive-keyring.gpg
 ```
 
 ```text
 $ sudo apt update
-$ sudp apt install ros-galactic-desktop python3-colcon-common-extensions
+$ sudo apt install ros-galactic-desktop python3-colcon-common-extensions
 ```
 
 ```text

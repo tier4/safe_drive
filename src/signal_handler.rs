@@ -14,6 +14,8 @@ use signal_hook::{
 };
 use std::{
     collections::BTreeMap,
+    error::Error,
+    fmt::Display,
     sync::{
         atomic::{AtomicBool, Ordering},
         Arc,
@@ -34,6 +36,17 @@ static GUARD_COND: Lazy<Mutex<ConditionSet>> = Lazy::new(|| Mutex::new(Condition
 static SIGHDL: Lazy<Mutex<Option<Handle>>> = Lazy::new(|| Mutex::new(None));
 static THREAD: Lazy<Mutex<Option<JoinHandle<()>>>> = Lazy::new(|| Mutex::new(None));
 static IS_HALT: AtomicBool = AtomicBool::new(false);
+
+#[derive(Debug)]
+pub struct Signaled;
+
+impl Display for Signaled {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "Signaled")
+    }
+}
+
+impl Error for Signaled {}
 
 pub(crate) fn init() {
     INITIALIZER.init(

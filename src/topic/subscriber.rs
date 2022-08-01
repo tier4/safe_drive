@@ -159,6 +159,7 @@ use crate::{
         async_selector::{self, SELECTOR},
         CallbackResult,
     },
+    signal_handler::Signaled,
     PhantomUnsync, RecvResult,
 };
 use std::{
@@ -388,7 +389,7 @@ impl<'a, T> Future for AsyncReceiver<'a, T> {
 
     fn poll(self: Pin<&mut Self>, cx: &mut task::Context<'_>) -> Poll<Self::Output> {
         if is_halt() {
-            return Poll::Ready(Err("Signaled".into()));
+            return Poll::Ready(Err(Signaled.into()));
         }
 
         let (is_waiting, subscription) = unsafe {

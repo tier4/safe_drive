@@ -52,6 +52,7 @@ use crate::{
     msg::TopicMsg,
     node::Node,
     qos, rcl,
+    signal_handler::Signaled,
 };
 use std::{ffi::CString, marker::PhantomData, ptr::null_mut, sync::Arc};
 
@@ -159,7 +160,7 @@ impl<T: TopicMsg> Publisher<T> {
     /// - `RCLError::Error` if an unspecified error occurs.
     pub fn send(&self, msg: &T) -> Result<(), DynError> {
         if crate::is_halt() {
-            return Err("Signaled".into());
+            return Err(Signaled.into());
         }
 
         #[cfg(feature = "rcl_stat")]
