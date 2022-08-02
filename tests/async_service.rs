@@ -73,7 +73,7 @@ async fn run_client(mut client: Client<common::ServiceType>) -> Result<(), DynEr
         let receiver = client.send(&data)?;
 
         // receive a response
-        let (c, response) = receiver.recv().await?;
+        let (c, response, _header) = receiver.recv().await?;
         println!("Client: response = {:?}", response);
         assert_eq!(response.sum, n + n * 10 + n * 100);
 

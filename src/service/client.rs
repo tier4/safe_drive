@@ -35,7 +35,7 @@
 //!         let request = std_srvs::srv::EmptyRequest::new().unwrap();
 //!         let receiver = client.send(&request).unwrap();
 //!         match async_std::future::timeout(dur, receiver.recv()).await {
-//!             Ok(Ok((c, response))) => {
+//!             Ok(Ok((c, response, _header))) => {
 //!                 client = c;
 //!             }
 //!             Ok(Err(e)) => {
@@ -144,7 +144,7 @@ impl<T: ServiceMsg> Client<T> {
     ///         let request = std_srvs::srv::EmptyRequest::new().unwrap();
     ///         let receiver = client.send(&request).unwrap();
     ///         match async_std::future::timeout(dur, receiver.recv()).await {
-    ///             Ok(Ok((c, response))) => {
+    ///             Ok(Ok((c, response, _header))) => {
     ///                 client = c;
     ///             }
     ///             Ok(Err(e)) => {
@@ -189,7 +189,7 @@ impl<T: ServiceMsg> Client<T> {
     ///         let (receiver, sequence) = client.send_ret_seq(&request).unwrap();
     ///         pr_info!(logger, "sent: sequence = {sequence}");
     ///         match async_std::future::timeout(dur, receiver.recv()).await {
-    ///             Ok(Ok((c, response))) => {
+    ///             Ok(Ok((c, response, _header))) => {
     ///                 client = c;
     ///             }
     ///             Ok(Err(e)) => {
@@ -314,7 +314,7 @@ impl<T: ServiceMsg> ClientRecv<T> {
     ///     loop {
     ///         let request = std_srvs::srv::EmptyRequest::new().unwrap();
     ///         let receiver = client.send(&request).unwrap();
-    ///         match async_std::future::timeout(dur, receiver.recv_with_header()).await {
+    ///         match async_std::future::timeout(dur, receiver.recv()).await {
     ///             Ok(Ok((c, response, header))) => {
     ///                 pr_info!(logger, "received: header = {:?}", header);
     ///                 client = c;
@@ -337,54 +337,11 @@ impl<T: ServiceMsg> ClientRecv<T> {
     /// - `RCLError::InvalidArgument` if any arguments are invalid, or
     /// - `RCLError::ClientInvalid` if the client is invalid, or
     /// - `RCLError::Error` if an unspecified error occurs.
-    pub fn recv_with_header(self) -> AsyncReceiver<T> {
+    pub fn recv(self) -> AsyncReceiver<T> {
         AsyncReceiver {
             client: self,
             is_waiting: false,
         }
-    }
-
-    /// Receive a message asynchronously.
-    ///
-    /// # Example
-    ///
-    /// ```
-    /// use safe_drive::{
-    ///     logger::Logger, msg::common_interfaces::std_srvs, pr_error, pr_info, service::client::Client,
-    /// };
-    /// use std::time::Duration;
-    ///
-    /// async fn run_client(mut client: Client<std_srvs::srv::Empty>, logger: Logger) {
-    ///     let dur = Duration::from_millis(100);
-    ///
-    ///     loop {
-    ///         let request = std_srvs::srv::EmptyRequest::new().unwrap();
-    ///         let receiver = client.send(&request).unwrap();
-    ///         match async_std::future::timeout(dur, receiver.recv()).await {
-    ///             Ok(Ok((c, response))) => {
-    ///                 client = c;
-    ///             }
-    ///             Ok(Err(e)) => {
-    ///                 pr_error!(logger, "error: {e}");
-    ///                 break;
-    ///             }
-    ///             Err(_) => {
-    ///                 pr_info!(logger, "timeout");
-    ///                 break;
-    ///             }
-    ///         }
-    ///     }
-    /// }
-    /// ```
-    ///
-    /// # Errors
-    ///
-    /// - `RCLError::InvalidArgument` if any arguments are invalid, or
-    /// - `RCLError::ClientInvalid` if the client is invalid, or
-    /// - `RCLError::Error` if an unspecified error occurs.
-    pub async fn recv(self) -> Result<(Client<T>, <T as ServiceMsg>::Response), DynError> {
-        let (client, val, _) = self.recv_with_header().await?;
-        Ok((client, val))
     }
 
     pub fn give_up(self) -> Client<T> {
