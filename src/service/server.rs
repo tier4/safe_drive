@@ -34,8 +34,7 @@
 //!         // Create a response.
 //!         let response = std_srvs::srv::EmptyResponse::new().unwrap();
 //!         response
-//!     }),
-//!     false,
+//!     })
 //! );
 //!
 //! for _ in 0..2 {

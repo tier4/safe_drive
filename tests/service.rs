@@ -49,7 +49,6 @@ fn test_service() -> Result<(), DynError> {
                 sum: request.a + request.b + request.c,
             }
         }),
-        true,
     );
     selector.wait()?;
 
@@ -118,7 +117,6 @@ fn test_client_wait() -> Result<(), DynError> {
                 sum: request.a + request.b + request.c,
             }
         }),
-        true,
     );
     selector.wait()?; // Wait the request.
 

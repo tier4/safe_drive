@@ -388,7 +388,6 @@ impl Selector {
     ///             let response = std_srvs::srv::EmptyResponse::new().unwrap();
     ///             response
     ///         }), // Callback function.
-    ///         true,
     ///     );
     /// }
     /// ```
@@ -396,7 +395,6 @@ impl Selector {
         &mut self,
         server: Server<T>,
         mut handler: Box<dyn FnMut(T::Request, Header) -> T::Response>,
-        is_once: bool,
     ) -> bool {
         let context_ptr = server.data.node.context.as_ptr();
         let srv = server.data.clone();
@@ -444,7 +442,7 @@ impl Selector {
         };
 
         if self.context.as_ptr() == context_ptr {
-            self.add_server_data(srv, Some(Box::new(f)), is_once);
+            self.add_server_data(srv, Some(Box::new(f)), false);
             true
         } else {
             false

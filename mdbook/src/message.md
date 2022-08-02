@@ -15,7 +15,7 @@ So, please install `ros2msg_to_rs` in advance as follows.
 $ git clone https://github.com/tier4/ros2msg_to_rs.git
 $ cd ros2msg_to_rs
 $ cargo build --release
-$ cargo instal --path .
+$ cargo install --path .
 ```
 
 ## Create Project Directory
@@ -155,7 +155,7 @@ To generate Rust's files, just use `ros2msg_to_rs` as follows.
 
 ```text
 $ cd msgtest/src
-$ create new --lib my_interfaces_rs
+$ cargo new --lib my_interfaces_rs
 $ ros2msg_to_rs  -i ./ -o ./my_interfaces_rs/src
 generating: my_interfaces_rs/src/msg/msg/my_msg.rs
 generating: my_interfaces_rs/src/msg/msg/my_msg_str.rs
@@ -415,6 +415,8 @@ Then create `package.xml` as follows.
 </package>
 ```
 
+Don't forget `<depend>my_interfaces</depend>`.
+
 ## Listener
 
 Let's then create a listener which receive messages published by the talker.
@@ -524,6 +526,8 @@ Then create `package.xml` as follows.
   </export>
 </package>
 ```
+
+Don't forget `<depend>my_interfaces</depend>`.
 
 ## Compilation and Execution
 

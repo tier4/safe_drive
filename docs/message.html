@@ -154,7 +154,7 @@ So, please install <code>ros2msg_to_rs</code> in advance as follows.</p>
 <pre><code class="language-text">$ git clone https://github.com/tier4/ros2msg_to_rs.git
 $ cd ros2msg_to_rs
 $ cargo build --release
-$ cargo instal --path .
+$ cargo install --path .
 </code></pre>
 <h2 id="create-project-directory"><a class="header" href="#create-project-directory">Create Project Directory</a></h2>
 <p>Then create a project directory as follows.</p>
@@ -257,7 +257,7 @@ rosidl_generate_interfaces(${PROJECT_NAME}
 <h3 id="generate-rusts-files"><a class="header" href="#generate-rusts-files">Generate Rust's Files</a></h3>
 <p>To generate Rust's files, just use <code>ros2msg_to_rs</code> as follows.</p>
 <pre><code class="language-text">$ cd msgtest/src
-$ create new --lib my_interfaces_rs
+$ cargo new --lib my_interfaces_rs
 $ ros2msg_to_rs  -i ./ -o ./my_interfaces_rs/src
 generating: my_interfaces_rs/src/msg/msg/my_msg.rs
 generating: my_interfaces_rs/src/msg/msg/my_msg_str.rs
@@ -488,6 +488,7 @@ my_interfaces_rs = { path = &quot;../my_interfaces_rs&quot; }
   &lt;/export&gt;
 &lt;/package&gt;
 </code></pre>
+<p>Don't forget <code>&lt;depend&gt;my_interfaces&lt;/depend&gt;</code>.</p>
 <h2 id="listener"><a class="header" href="#listener">Listener</a></h2>
 <p>Let's then create a listener which receive messages published by the talker.
 Create a package as follows.</p>
@@ -581,6 +582,7 @@ my_interfaces_rs = { path = &quot;../my_interfaces_rs&quot; }
   &lt;/export&gt;
 &lt;/package&gt;
 </code></pre>
+<p>Don't forget <code>&lt;depend&gt;my_interfaces&lt;/depend&gt;</code>.</p>
 <h2 id="compilation-and-execution"><a class="header" href="#compilation-and-execution">Compilation and Execution</a></h2>
 <p>Now, we can compile and execute the talker and listener. Let's do it!</p>
 <h3 id="compile"><a class="header" href="#compile">Compile</a></h3>

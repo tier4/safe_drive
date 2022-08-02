@@ -337,14 +337,11 @@ impl<T: ServiceMsg> ClientRecv<T> {
     /// - `RCLError::InvalidArgument` if any arguments are invalid, or
     /// - `RCLError::ClientInvalid` if the client is invalid, or
     /// - `RCLError::Error` if an unspecified error occurs.
-    pub async fn recv_with_header(
-        self,
-    ) -> Result<(Client<T>, <T as ServiceMsg>::Response, Header), DynError> {
+    pub fn recv_with_header(self) -> AsyncReceiver<T> {
         AsyncReceiver {
             client: self,
             is_waiting: false,
         }
-        .await
     }
 
     /// Receive a message asynchronously.

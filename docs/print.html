@@ -1069,7 +1069,7 @@ So, please install <code>ros2msg_to_rs</code> in advance as follows.</p>
 <pre><code class="language-text">$ git clone https://github.com/tier4/ros2msg_to_rs.git
 $ cd ros2msg_to_rs
 $ cargo build --release
-$ cargo instal --path .
+$ cargo install --path .
 </code></pre>
 <h2 id="create-project-directory"><a class="header" href="#create-project-directory">Create Project Directory</a></h2>
 <p>Then create a project directory as follows.</p>
@@ -1172,7 +1172,7 @@ rosidl_generate_interfaces(${PROJECT_NAME}
 <h3 id="generate-rusts-files"><a class="header" href="#generate-rusts-files">Generate Rust's Files</a></h3>
 <p>To generate Rust's files, just use <code>ros2msg_to_rs</code> as follows.</p>
 <pre><code class="language-text">$ cd msgtest/src
-$ create new --lib my_interfaces_rs
+$ cargo new --lib my_interfaces_rs
 $ ros2msg_to_rs  -i ./ -o ./my_interfaces_rs/src
 generating: my_interfaces_rs/src/msg/msg/my_msg.rs
 generating: my_interfaces_rs/src/msg/msg/my_msg_str.rs
@@ -1403,6 +1403,7 @@ my_interfaces_rs = { path = &quot;../my_interfaces_rs&quot; }
   &lt;/export&gt;
 &lt;/package&gt;
 </code></pre>
+<p>Don't forget <code>&lt;depend&gt;my_interfaces&lt;/depend&gt;</code>.</p>
 <h2 id="listener"><a class="header" href="#listener">Listener</a></h2>
 <p>Let's then create a listener which receive messages published by the talker.
 Create a package as follows.</p>
@@ -1496,6 +1497,7 @@ my_interfaces_rs = { path = &quot;../my_interfaces_rs&quot; }
   &lt;/export&gt;
 &lt;/package&gt;
 </code></pre>
+<p>Don't forget <code>&lt;depend&gt;my_interfaces&lt;/depend&gt;</code>.</p>
 <h2 id="compilation-and-execution"><a class="header" href="#compilation-and-execution">Compilation and Execution</a></h2>
 <p>Now, we can compile and execute the talker and listener. Let's do it!</p>
 <h3 id="compile"><a class="header" href="#compile">Compile</a></h3>
@@ -1652,6 +1654,185 @@ fn _create_message_str() -&gt; Result&lt;my_interfaces::msg::MyMsgStr, DynError&
 <code>msg</code>s include data types of topics discussed in previous chapters,
 and <code>srv</code>s include data types of services introduced from next chapter.</p>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="service"><a class="header" href="#service">Service</a></h1>
+<pre><code class="language-text">$ mkdir -p srvtest/src
+$ cd srvtest/src
+$ cargo new server
+$ cargo new client
+$ cargo new --lib srvmsg_rs
+$ ros2 pkg create --build-type ament_cmake srvmsg
+</code></pre>
+<h2 id="define-protocol"><a class="header" href="#define-protocol">Define Protocol</a></h2>
+<pre><code class="language-text">$ cd srvtest/src/srvmsg
+$ mkdir srv
+</code></pre>
+<p><code>srvmsg/srv/AddTwoInts.srv</code></p>
+<pre><code class="language-text">uint32 x
+uint32 y
+---
+uint32 result
+</code></pre>
+<pre><code class="language-cmake"># srvtest/src/srvmsg/CMakeLists.txt
+find_package(rosidl_default_generators REQUIRED)
+
+rosidl_generate_interfaces(${PROJECT_NAME}
+  &quot;srv/AddTwoInts.srv&quot;
+)
+</code></pre>
+<pre><code class="language-xml">&lt;!-- srvtest/src/srvmsg/package.xml --&gt;
+&lt;build_depend&gt;rosidl_default_generators&lt;/build_depend&gt;
+
+&lt;exec_depend&gt;rosidl_default_runtime&lt;/exec_depend&gt;
+
+&lt;member_of_group&gt;rosidl_interface_packages&lt;/member_of_group&gt;
+</code></pre>
+<pre><code class="language-text">$ cd srvtest/src
+$ ros2msg_to_rs  -i ./ -o ./srvmsg_rs/src
+generating: ./srvmsg_rs/src/srvmsg/srv/add_two_ints.rs
+generating: ./srvmsg_rs/src/srvmsg/srv.rs
+generating: ./srvmsg_rs/src/mod.rs
+generating: ./srvmsg_rs/src/srvmsg/mod.rs
+</code></pre>
+<h2 id="srvmsg_rs"><a class="header" href="#srvmsg_rs"><code>srvmsg_rs</code></a></h2>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>// srvtest/src/srvmsg_rs/src/lib.rs
+#![allow(dead_code)]
+#![allow(non_upper_case_globals)]
+#![allow(non_camel_case_types)]
+#![allow(deref_nullptr)]
+#![allow(non_snake_case)]
+#![allow(improper_ctypes)]
+#![allow(unused_imports)]
+#![allow(clippy::upper_case_acronyms)]
+#![allow(clippy::too_many_arguments)]
+
+pub mod srvmsg;
+<span class="boring">}
+</span></code></pre></pre>
+<pre><code class="language-toml"># srvtest/src/srvmsg_rs/Cargo.toml
+[dependencies]
+safe_drive = { path = &quot;/root/safe_drive&quot; }
+</code></pre>
+<pre><code>// srvtest/src/srvmsg_rs/build.rs
+fn main() {
+    println!(&quot;cargo:rustc-link-lib=srvmsg__rosidl_generator_c&quot;);
+    println!(&quot;cargo:rustc-link-lib=srvmsg__rosidl_typesupport_c&quot;);
+
+    if let Some(e) = std::env::var_os(&quot;AMENT_PREFIX_PATH&quot;) {
+        let env = e.to_str().unwrap();
+        for path in env.split(':') {
+            println!(&quot;cargo:rustc-link-search={path}/lib&quot;);
+        }
+    }
+}
+</code></pre>
+<pre><code class="language-xml">&lt;!-- srvtest/src/srvmsg_rs/package.xml --&gt;
+&lt;?xml version=&quot;1.0&quot;?&gt;
+&lt;?xml-model href=&quot;http://download.ros.org/schema/package_format3.xsd&quot; schematypens=&quot;http://www.w3.org/2001/XMLSchema&quot;?&gt;
+&lt;package format=&quot;3&quot;&gt;
+  &lt;name&gt;srvmsg_rs&lt;/name&gt;
+  &lt;version&gt;0.0.0&lt;/version&gt;
+  &lt;description&gt;Protocol Definition in Rust&lt;/description&gt;
+  &lt;maintainer email=&quot;yuuki.takano@tier4.jp&quot;&gt;Yuuki Takano&lt;/maintainer&gt;
+  &lt;license&gt;TODO: License declaration&lt;/license&gt;
+
+  &lt;test_depend&gt;ament_lint_auto&lt;/test_depend&gt;
+  &lt;test_depend&gt;ament_lint_common&lt;/test_depend&gt;
+
+  &lt;export&gt;
+    &lt;build_type&gt;ament_cargo&lt;/build_type&gt;
+  &lt;/export&gt;
+&lt;/package&gt;
+</code></pre>
+<h2 id="server"><a class="header" href="#server">Server</a></h2>
+<pre><pre class="playground"><code class="language-rust">use safe_drive::{context::Context, error::DynError, logger::Logger, pr_error, qos::Profile};
+use srvmsg_rs::srvmsg::srv::{AddTwoInts, AddTwoIntsResponse};
+
+fn main() -&gt; Result&lt;(), DynError&gt; {
+    // Create a context.
+    let ctx = Context::new()?;
+
+    // Create a node.
+    let node = ctx.create_node(&quot;server_node&quot;, None, Default::default())?;
+
+    // Create a server.
+    let server = node.create_server::&lt;AddTwoInts&gt;(&quot;my_service&quot;, Some(Profile::default()))?;
+
+    // Create a selector.
+    let mut selector = ctx.create_selector()?;
+
+    // Create a logger.
+    let logger = Logger::new(&quot;server&quot;);
+
+    selector.add_server(
+        server,
+        Box::new(move |msg, _header| {
+            let mut response = AddTwoIntsResponse::new().unwrap();
+            pr_error!(logger, &quot;recv: {:?}&quot;, msg);
+            response.result = msg.x + msg.y;
+            response
+        }),
+    );
+
+    loop {
+        selector.wait()?; // Spin.
+    }
+}
+</code></pre></pre>
+<pre><code class="language-toml"># srvtest/src/server/Cargo.toml
+[dependencies]
+safe_drive = { path = &quot;/root/safe_drive&quot; }
+srvmsg_rs = { path = &quot;../srvmsg_rs&quot; }
+</code></pre>
+<pre><code class="language-xml">&lt;!-- srvtest/src/server/package.xml --&gt;
+&lt;?xml version=&quot;1.0&quot;?&gt;
+&lt;?xml-model href=&quot;http://download.ros.org/schema/package_format3.xsd&quot; schematypens=&quot;http://www.w3.org/2001/XMLSchema&quot;?&gt;
+&lt;package format=&quot;3&quot;&gt;
+  &lt;name&gt;server&lt;/name&gt;
+  &lt;version&gt;0.0.0&lt;/version&gt;
+  &lt;description&gt;Server in Rust&lt;/description&gt;
+  &lt;maintainer email=&quot;yuuki.takano@tier4.jp&quot;&gt;Yuuki Takano&lt;/maintainer&gt;
+  &lt;license&gt;TODO: License declaration&lt;/license&gt;
+
+  &lt;test_depend&gt;ament_lint_auto&lt;/test_depend&gt;
+  &lt;test_depend&gt;ament_lint_common&lt;/test_depend&gt;
+
+  &lt;depend&gt;srvmsg&lt;/depend&gt;
+
+  &lt;export&gt;
+    &lt;build_type&gt;ament_cargo&lt;/build_type&gt;
+  &lt;/export&gt;
+&lt;/package&gt;
+</code></pre>
+<p>Don't forget <code>&lt;depend&gt;srvmsg&lt;/depend&gt;</code>.</p>
+<h2 id="client"><a class="header" href="#client">Client</a></h2>
+<pre><code class="language-toml"># srvtest/src/client/Cargo.toml
+[dependencies]
+safe_drive = { path = &quot;/root/safe_drive&quot; }
+srvmsg_rs = { path = &quot;../srvmsg_rs&quot; }
+tokio = { version = &quot;1&quot;, features = [&quot;full&quot;] }
+</code></pre>
+<pre><code class="language-xml">&lt;!-- srvtest/src/client/package.xml --&gt;
+&lt;?xml version=&quot;1.0&quot;?&gt;
+&lt;?xml-model href=&quot;http://download.ros.org/schema/package_format3.xsd&quot; schematypens=&quot;http://www.w3.org/2001/XMLSchema&quot;?&gt;
+&lt;package format=&quot;3&quot;&gt;
+  &lt;name&gt;client&lt;/name&gt;
+  &lt;version&gt;0.0.0&lt;/version&gt;
+  &lt;description&gt;Client in Rust&lt;/description&gt;
+  &lt;maintainer email=&quot;yuuki.takano@tier4.jp&quot;&gt;Yuuki Takano&lt;/maintainer&gt;
+  &lt;license&gt;TODO: License declaration&lt;/license&gt;
+
+  &lt;test_depend&gt;ament_lint_auto&lt;/test_depend&gt;
+  &lt;test_depend&gt;ament_lint_common&lt;/test_depend&gt;
+
+  &lt;depend&gt;srvmsg&lt;/depend&gt;
+
+  &lt;export&gt;
+    &lt;build_type&gt;ament_cargo&lt;/build_type&gt;
+  &lt;/export&gt;
+&lt;/package&gt;
+</code></pre>
+<p>Don't forget <code>&lt;depend&gt;srvmsg&lt;/depend&gt;</code>.</p>
 
                     </main>
 
