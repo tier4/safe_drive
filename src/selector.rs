@@ -406,7 +406,7 @@ impl Selector {
 
             loop {
                 let s = server.take().unwrap();
-                match s.try_recv_with_header() {
+                match s.try_recv() {
                     RecvResult::Ok((server_send, request, header)) => {
                         let result = handler(request, header);
                         match server_send.send(&result) {
@@ -497,7 +497,7 @@ impl Selector {
     ///
     ///             // Receive a message
     ///             match receiver.try_recv() {
-    ///                 RecvResult::Ok((s, _response)) => {
+    ///                 RecvResult::Ok((s, _response, _header)) => {
     ///                     sender = s;
     ///                     break;
     ///                 }

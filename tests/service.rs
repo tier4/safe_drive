@@ -55,7 +55,7 @@ fn test_service() -> Result<(), DynError> {
     std::thread::sleep(Duration::from_millis(1));
 
     // Client: receive the response
-    match rcv_client.try_recv_with_header() {
+    match rcv_client.try_recv() {
         RecvResult::Ok((_, data, header)) => {
             println!("Client: sum = {}, header = {:?}", data.sum, header);
             assert_eq!(data.sum, 8);
@@ -125,7 +125,7 @@ fn test_client_wait() -> Result<(), DynError> {
     selector.wait()?; // Wait the response.
 
     match rcv_client.try_recv() {
-        RecvResult::Ok((_client, response)) => {
+        RecvResult::Ok((_client, response, _)) => {
             println!("received: {}", response.sum);
             Ok(())
         }
@@ -158,7 +158,7 @@ fn test_no_server() -> Result<(), DynError> {
 
     let srv;
     let request;
-    match server.try_recv_with_header() {
+    match server.try_recv() {
         RecvResult::Ok((s, req, header)) => {
             println!("server:recv: seq = {:?}", header.get_sequence());
             srv = s;
@@ -182,11 +182,11 @@ fn test_no_server() -> Result<(), DynError> {
     let resp = common::Response {
         sum: request.a + request.b + request.c,
     };
-    srv.send(&resp)?;
+    let _ = srv.send(&resp)?;
 
     std::thread::sleep(Duration::from_millis(50));
 
-    match client.try_recv_with_header() {
+    match client.try_recv() {
         RecvResult::Ok((_, msg, header)) => {
             panic!(
                 "try_recv: msg = {:?}, seq = {:?}",

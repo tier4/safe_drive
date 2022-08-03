@@ -46,7 +46,7 @@
 //!
 //! ```
 //! use safe_drive::{
-//!     context::Context, logger::Logger, msg::common_interfaces::std_srvs, pr_error, pr_warn,
+//!     context::Context, logger::Logger, msg::common_interfaces::std_srvs, pr_error,
 //!     service::server::Server,
 //! };
 //! use std::time::Duration;
@@ -65,30 +65,25 @@
 //! let logger = Logger::new("service_rs");
 //!
 //! async fn server_task(mut server: Server<std_srvs::srv::Empty>, logger: Logger) {
-//!     let dur = Duration::from_millis(200);
-//!
 //!     loop {
-//!         // Call recv() by using timeout.
-//!         if let Ok(result) = async_std::future::timeout(dur, server.recv()).await {
-//!             match result {
-//!                 Ok((sender, request)) => {
-//!                     let response = std_srvs::srv::EmptyResponse::new().unwrap();
-//!                     let s = sender.send(&response).unwrap();
-//!                     server = s; // Get a new server to handle next request.
-//!                 }
-//!                 Err(e) => {
-//!                     pr_error!(logger, "error: {e}");
-//!                     return;
-//!                 }
+//!         // Receive a request.
+//!         let req = server.recv().await;
+//!         match req {
+//!             Ok((sender, request, _header)) => {
+//!                 let response = std_srvs::srv::EmptyResponse::new().unwrap();
+//!                 let s = sender.send(&response).unwrap();
+//!                 server = s; // Get a new server to handle next request.
 //!             }
-//!         } else {
-//!             pr_warn!(logger, "timeout");
-//!             return;
+//!             Err(e) => {
+//!                 pr_error!(logger, "error: {e}");
+//!                 return;
+//!             }
 //!         }
 //!     }
 //! }
 //!
-//! async_std::task::block_on(server_task(server, logger)); // Spawn an asynchronous task.
+//! // We don't call `server_task` here because testing this code will block forever.
+//! // async_std::task::block_on(server_task(server, logger)); // Spawn an asynchronous task.
 //! ```
 
 use super::Header;
@@ -129,6 +124,7 @@ unsafe impl Sync for ServerData {}
 unsafe impl Send for ServerData {}
 
 /// Server.
+#[must_use]
 pub struct Server<T> {
     pub(crate) data: Arc<ServerData>,
     _phantom: PhantomData<T>,
@@ -174,71 +170,6 @@ impl<T: ServiceMsg> Server<T> {
     ///
     /// # Return value
     ///
-    /// `RecvResult::Ok((ServerSend<T1, T2>, T1))` is returned.
-    /// `T1` is a type of request.
-    /// After receiving a request, `ServerSend` can be used to send a response.
-    ///
-    /// # Example
-    ///
-    /// ```
-    /// use safe_drive::{
-    ///     logger::Logger, msg::common_interfaces::std_srvs, pr_error, pr_info, service::server::Server,
-    ///     RecvResult,
-    /// };
-    ///
-    /// fn server_fn(mut server: Server<std_srvs::srv::Empty>, logger: Logger) {
-    ///     loop {
-    ///         match server.try_recv() {
-    ///             RecvResult::Ok((sender, request)) => {
-    ///                 let msg = std_srvs::srv::EmptyResponse::new().unwrap();
-    ///                 server = sender.send(&msg).unwrap();
-    ///             }
-    ///             RecvResult::RetryLater(s) => {
-    ///                 pr_info!(logger, "retry later");
-    ///                 server = s;
-    ///             }
-    ///             RecvResult::Err(e) => {
-    ///                 pr_error!(logger, "error: {e}");
-    ///                 break;
-    ///             }
-    ///         }
-    ///     }
-    /// }
-    /// ```
-    ///
-    /// # Errors
-    ///
-    /// - `RCLError::InvalidArgument` if any arguments are invalid, or
-    /// - `RCLError::ServiceInvalid` if the service is invalid, or
-    /// - `RCLError::BadAlloc` if allocating memory failed, or
-    /// - `RCLError::Error` if an unspecified error occurs.
-    #[must_use]
-    pub fn try_recv(self) -> RecvResult<(ServerSend<T>, <T as ServiceMsg>::Request), Self> {
-        let (request, header) =
-            match rcl_take_request_with_info::<<T as ServiceMsg>::Request>(&self.data.service) {
-                Ok(data) => data,
-                Err(RCLError::ServiceTakeFailed) => return RecvResult::RetryLater(self),
-                Err(e) => return RecvResult::Err(e),
-            };
-
-        RecvResult::Ok((
-            ServerSend {
-                data: self.data,
-                request_id: header.request_id,
-                _phantom: Default::default(),
-                _unsync: Default::default(),
-            },
-            request,
-        ))
-    }
-
-    /// `try_recv_with_header` is equivalent to `try_recv`, but
-    /// this function returns `super::Header` including some information together.
-    /// `RecvResult::RetryLater(self)` is returned if there is no available data.
-    /// So, please retry later if this error is returned.
-    ///
-    /// # Return value
-    ///
     /// `RecvResult::Ok((ServerSend<T>, <T as ServiceMsg>::Request, Header))` is returned.
     /// `T` is a type of the request and response.
     /// After receiving a request, `ServerSend<T>` can be used to send a response.
@@ -253,7 +184,7 @@ impl<T: ServiceMsg> Server<T> {
     ///
     /// fn server_fn(mut server: Server<std_srvs::srv::Empty>, logger: Logger) {
     ///     loop {
-    ///         match server.try_recv_with_header() {
+    ///         match server.try_recv() {
     ///             RecvResult::Ok((sender, request, header)) => {
     ///                 pr_info!(logger, "received: header = {:?}", header);
     ///                 let msg = std_srvs::srv::EmptyResponse::new().unwrap();
@@ -279,9 +210,7 @@ impl<T: ServiceMsg> Server<T> {
     /// - `RCLError::BadAlloc` if allocating memory failed, or
     /// - `RCLError::Error` if an unspecified error occurs.
     #[must_use]
-    pub fn try_recv_with_header(
-        self,
-    ) -> RecvResult<(ServerSend<T>, <T as ServiceMsg>::Request, Header), Self> {
+    pub fn try_recv(self) -> RecvResult<(ServerSend<T>, <T as ServiceMsg>::Request, Header), Self> {
         let (request, header) =
             match rcl_take_request_with_info::<<T as ServiceMsg>::Request>(&self.data.service) {
                 Ok(data) => data,
@@ -302,7 +231,6 @@ impl<T: ServiceMsg> Server<T> {
     }
 
     /// Receive a request asynchronously.
-    /// This function returns `super::Header` including some information together.
     ///
     /// # Return value
     ///
@@ -314,32 +242,24 @@ impl<T: ServiceMsg> Server<T> {
     ///
     /// ```
     /// use safe_drive::{
-    ///     logger::Logger, msg::common_interfaces::std_srvs, pr_error, pr_info, pr_warn,
-    ///     service::server::Server,
+    ///     logger::Logger, msg::common_interfaces::std_srvs, pr_error, pr_info, service::server::Server,
     /// };
-    /// use std::time::Duration;
     ///
     /// async fn server_task(mut server: Server<std_srvs::srv::Empty>, logger: Logger) {
-    ///     let dur = Duration::from_millis(200);
-    ///
     ///     loop {
-    ///         // Call recv_with_header() by using timeout.
-    ///         if let Ok(result) = async_std::future::timeout(dur, server.recv_with_header()).await {
-    ///             match result {
-    ///                 Ok((sender, request, header)) => {
-    ///                     pr_info!(logger, "recv: header = {:?}", header);
-    ///                     let response = std_srvs::srv::EmptyResponse::new().unwrap();
-    ///                     let s = sender.send(&response).unwrap();
-    ///                     server = s; // Get a new server to handle next request.
-    ///                 }
-    ///                 Err(e) => {
-    ///                     pr_error!(logger, "error: {e}");
-    ///                     return;
-    ///                 }
+    ///         // Receive a request.
+    ///         let req = server.recv().await;
+    ///         match req {
+    ///             Ok((sender, request, header)) => {
+    ///                 pr_info!(logger, "recv: header = {:?}", header);
+    ///                 let response = std_srvs::srv::EmptyResponse::new().unwrap();
+    ///                 let s = sender.send(&response).unwrap();
+    ///                 server = s; // Get a new server to handle next request.
     ///             }
-    ///         } else {
-    ///             pr_warn!(logger, "timeout");
-    ///             return;
+    ///             Err(e) => {
+    ///                 pr_error!(logger, "error: {e}");
+    ///                 return;
+    ///             }
     ///         }
     ///     }
     /// }
@@ -351,7 +271,7 @@ impl<T: ServiceMsg> Server<T> {
     /// - `RCLError::ServiceInvalid` if the service is invalid, or
     /// - `RCLError::BadAlloc` if allocating memory failed, or
     /// - `RCLError::Error` if an unspecified error occurs.
-    pub async fn recv_with_header(
+    pub async fn recv(
         self,
     ) -> Result<(ServerSend<T>, <T as ServiceMsg>::Request, Header), DynError> {
         AsyncReceiver {
@@ -360,65 +280,12 @@ impl<T: ServiceMsg> Server<T> {
         }
         .await
     }
-
-    /// Receive a request asynchronously.
-    ///
-    /// # Return value
-    ///
-    /// `Ok((ServerSend<T>, <T as ServiceMsg>::Request)` is returned.
-    /// `T` is a type of the request and response.
-    /// After receiving a request, `ServerSend<T>` can be used to send a response.
-    ///
-    /// # Example
-    ///
-    /// ```
-    /// use safe_drive::{
-    ///     logger::Logger, msg::common_interfaces::std_srvs, pr_error, pr_warn, service::server::Server,
-    /// };
-    /// use std::time::Duration;
-    ///
-    /// async fn server_task(mut server: Server<std_srvs::srv::Empty>, logger: Logger) {
-    ///     let dur = Duration::from_millis(200);
-    ///
-    ///     loop {
-    ///         // Call recv() by using timeout.
-    ///         if let Ok(result) = async_std::future::timeout(dur, server.recv()).await {
-    ///             match result {
-    ///                 Ok((sender, request)) => {
-    ///                     let response = std_srvs::srv::EmptyResponse::new().unwrap();
-    ///                     let s = sender.send(&response).unwrap();
-    ///                     server = s; // Get a new server to handle next request.
-    ///                 }
-    ///                 Err(e) => {
-    ///                     pr_error!(logger, "error: {e}");
-    ///                     return;
-    ///                 }
-    ///             }
-    ///         } else {
-    ///             pr_warn!(logger, "timeout");
-    ///             return;
-    ///         }
-    ///     }
-    /// }
-    /// ```
-    ///
-    /// # Errors
-    ///
-    /// `Err((self, RCLError))` is returned when error.
-    ///
-    /// - `RCLError::InvalidArgument` if any arguments are invalid, or
-    /// - `RCLError::ServiceInvalid` if the service is invalid, or
-    /// - `RCLError::BadAlloc` if allocating memory failed, or
-    /// - `RCLError::Error` if an unspecified error occurs.
-    pub async fn recv(self) -> Result<(ServerSend<T>, <T as ServiceMsg>::Request), DynError> {
-        let (srv, val, _) = self.recv_with_header().await?;
-        Ok((srv, val))
-    }
 }
 
 unsafe impl<T> Send for Server<T> {}
 
 /// Sender to send a response.
+#[must_use]
 pub struct ServerSend<T> {
     data: Arc<ServerData>,
     request_id: rmw_request_id_t,
@@ -439,30 +306,23 @@ impl<T: ServiceMsg> ServerSend<T> {
     ///
     /// ```
     /// use safe_drive::{
-    ///     logger::Logger, msg::common_interfaces::std_srvs, pr_error, pr_warn, service::server::Server,
+    ///     logger::Logger, msg::common_interfaces::std_srvs, pr_error, service::server::Server,
     /// };
-    /// use std::time::Duration;
     ///
     /// async fn server_task(mut server: Server<std_srvs::srv::Empty>, logger: Logger) {
-    ///     let dur = Duration::from_millis(200);
-    ///
     ///     loop {
     ///         // Call recv() by using timeout.
-    ///         if let Ok(result) = async_std::future::timeout(dur, server.recv()).await {
-    ///             match result {
-    ///                 Ok((sender, request)) => {
-    ///                     let response = std_srvs::srv::EmptyResponse::new().unwrap();
-    ///                     let s = sender.send(&response).unwrap();
-    ///                     server = s; // Get a new server to handle next request.
-    ///                 }
-    ///                 Err(e) => {
-    ///                     pr_error!(logger, "error: {e}");
-    ///                     return;
-    ///                 }
+    ///         let req = server.recv().await;
+    ///         match req {
+    ///             Ok((sender, request, _header)) => {
+    ///                 let response = std_srvs::srv::EmptyResponse::new().unwrap();
+    ///                 let s = sender.send(&response).unwrap();
+    ///                 server = s; // Get a new server to handle next request.
     ///             }
-    ///         } else {
-    ///             pr_warn!(logger, "timeout");
-    ///             return;
+    ///             Err(e) => {
+    ///                 pr_error!(logger, "error: {e}");
+    ///                 return;
+    ///             }
     ///         }
     ///     }
     /// }
@@ -507,6 +367,7 @@ fn rcl_take_request_with_info<T>(
 }
 
 /// Receiver to receive a request asynchronously.
+#[must_use]
 pub struct AsyncReceiver<T> {
     server: Server<T>,
     is_waiting: bool,

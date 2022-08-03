@@ -284,25 +284,13 @@ impl<T> DerefMut for ST<T> {
 }
 
 impl<T: msg::ServiceMsg> ST<ClientRecv<T>> {
-    /// This function calls `ClientRecv::try_recv_with_header` internally,
+    /// This function calls `ClientRecv::try_recv` internally,
     /// but `RecvResult::RetryLater` includes `ST<CleintRecv<T>>` instead of `ClientRecv<T>`.
-    pub fn try_recv_with_header(
-        self,
-    ) -> RecvResult<(Client<T>, <T as ServiceMsg>::Response, Header), Self> {
-        match self.data.try_recv_with_header() {
+    pub fn try_recv(self) -> RecvResult<(Client<T>, <T as ServiceMsg>::Response, Header), Self> {
+        match self.data.try_recv() {
             RecvResult::Ok((client, response, header)) => {
                 RecvResult::Ok((client, response, header))
             }
-            RecvResult::RetryLater(rcv) => RecvResult::RetryLater(ST::new(rcv)),
-            RecvResult::Err(e) => RecvResult::Err(e),
-        }
-    }
-
-    /// This function calls `ClientRecv::try_recv` internally,
-    /// but `RecvResult::RetryLater` includes `ST<CleintRecv<T>>` instead of `ClientRecv<T>`.
-    pub fn try_recv(self) -> RecvResult<(Client<T>, <T as ServiceMsg>::Response), Self> {
-        match self.data.try_recv() {
-            RecvResult::Ok((client, response)) => RecvResult::Ok((client, response)),
             RecvResult::RetryLater(rcv) => RecvResult::RetryLater(ST::new(rcv)),
             RecvResult::Err(e) => RecvResult::Err(e),
         }

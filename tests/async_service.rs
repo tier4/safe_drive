@@ -6,6 +6,9 @@ use safe_drive::{
     self,
     context::Context,
     error::DynError,
+    logger::Logger,
+    msg::common_interfaces::std_srvs,
+    pr_error, pr_info,
     service::{client::Client, server::Server},
 };
 use std::{error::Error, time::Duration};
@@ -42,7 +45,7 @@ fn test_async() -> Result<(), Box<dyn Error + Sync + Send + 'static>> {
 async fn run_server(mut server: Server<common::ServiceType>) -> Result<(), DynError> {
     for _ in 0..3 {
         // receive a request
-        let (sender, request) = server.recv().await?;
+        let (sender, request, _) = server.recv().await?;
         println!("Server: request = {:?}", request);
 
         let response = common::Response {
@@ -85,4 +88,53 @@ async fn run_client(mut client: Client<common::ServiceType>) -> Result<(), DynEr
     }
 
     Ok(())
+}
+
+#[test]
+fn test_client_rs() {
+    // Create a context.
+    let ctx = Context::new().unwrap();
+
+    // Create a server node.
+    let node = ctx
+        .create_node("service_test_client_rs", None, Default::default())
+        .unwrap();
+
+    // Create a client.
+    let client = node
+        .create_client::<std_srvs::srv::Empty>("service_test_client_rs", None)
+        .unwrap();
+
+    // Create a logger.
+    let logger = Logger::new("test_client_rs");
+
+    async fn run_client(mut client: Client<std_srvs::srv::Empty>, logger: Logger) {
+        let dur = Duration::from_millis(100);
+        let mut n_timeout = 0;
+
+        loop {
+            let request = std_srvs::srv::EmptyRequest::new().unwrap();
+            let mut receiver = client.send(&request).unwrap().recv();
+            match async_std::future::timeout(dur, &mut receiver).await {
+                Ok(Ok((c, response, _header))) => {
+                    pr_info!(logger, "received: {:?}", response);
+                    client = c;
+                }
+                Ok(Err(e)) => {
+                    pr_error!(logger, "error: {e}");
+                    break;
+                }
+                Err(_) => {
+                    pr_info!(logger, "timeout");
+                    n_timeout += 1;
+                    if n_timeout > 10 {
+                        return;
+                    }
+                    client = receiver.give_up();
+                }
+            }
+        }
+    }
+
+    async_std::task::block_on(run_client(client, logger)); // Spawn an asynchronous task.
 }
