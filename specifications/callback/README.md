@@ -17,8 +17,12 @@ There are 2 global variables.
 \* example: <<[delta |-> 3, name |-> "timer1"], [delta |-> 2, name |-> "timer2"]>>
 delta_list = SetToSeq({[delta |-> random_num(0, DeltaRange), name |-> x]: x \in Timers});
 
+\* events
+runnable = {};
+
 \* tasks
 running = {};
+waiting = Tasks;
 ```
 
 `delta_list` is a sequence of record containing `delta` and `name`.
@@ -37,7 +41,9 @@ then
 - timer3 will be invoked after 10 = 3 + 2 + 5 clocks later.
 
 
-`running` contains processes running.
+- `running`: a set of processes running now
+- `runnable`: a set of processes which can execute
+- `waiting`: a set of processes waiting a event
 
 
 ## What do we check?
@@ -49,11 +55,18 @@ The starvation freedom can be checked by using the temporal logic.
 We use the expression as follows to check the starvation freedom.
 
 ```tla+
-starvation_free == \A x \in Timers: (x \in {y.name: y \in ToSet(delta_list)} ~> <>(x \in running))
+starvation_free == \A x \in (Timers \union Tasks):
+    (((x \in {y.name: y \in ToSet(delta_list)}) \/ (x \in runnable)) ~> <>(x \in running))
 ```
 
 This is equivalent to
 
 $$
-\forall x \in \mathrm{Timers}(x \in \lbrace y.\mathrm{name}\ |\ y \in \mathrm{deltaList}\rbrace \Rightarrow \lozenge (x \in \mathrm{running})).
+\forall x \in (\mathrm{Timers} \cup \mathrm{Tasks})((x \in \lbrace y.\mathrm{name}\ |\ y \in \mathrm{deltaList}\rbrace) \lor (x \in \mathrm{runnable}) \leadsto \lozenge (x \in \mathrm{running}))
+$$
+
+where
+
+$$
+\mathrm{Tasks} = \mathrm{Subscribers} \cap \mathrm{Servers} \cap \mathrm{Clients}.
 $$

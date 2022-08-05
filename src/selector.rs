@@ -416,7 +416,7 @@ impl Selector {
                             Err(e) => {
                                 let logger = Logger::new("safe_drive");
                                 pr_error_in!(logger, "{e}");
-                                return CallbackResult::Remove;
+                                return CallbackResult::Ok;
                             }
                         }
                     }
