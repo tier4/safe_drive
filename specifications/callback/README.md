@@ -40,6 +40,7 @@ then
 - timer2 will be invoked after 5 = 3 + 2 clocks later.
 - timer3 will be invoked after 10 = 3 + 2 + 5 clocks later.
 
+Additionally, there are 3 sets to represents states of callback functions as follows.
 
 - `running`: a set of processes running now
 - `runnable`: a set of processes which can execute
