@@ -75,7 +75,6 @@ fn test_wall_timer() -> Result<(), Box<dyn Error + Sync + Send + 'static>> {
         Box::new(move |msg| {
             println!("recv: {}", msg.data);
         }),
-        false,
     );
 
     // spin

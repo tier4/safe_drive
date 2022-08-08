@@ -44,7 +44,6 @@ fn test_select_subscriptions() -> Result<(), Box<dyn Error + Sync + Send + 'stat
             assert_eq!(msg.num, cnt1_m.get());
             cnt1_m.set(cnt1_m.get() + 1);
         }),
-        false,
     );
 
     // 2nd subscriber
@@ -56,7 +55,6 @@ fn test_select_subscriptions() -> Result<(), Box<dyn Error + Sync + Send + 'stat
             assert_eq!(msg.num, cnt2_m.get());
             cnt2_m.set(cnt2_m.get() + 1);
         }),
-        false,
     );
 
     while cnt1.get() < INIT_1 + COUNT && cnt2.get() < INIT_2 + COUNT {
@@ -111,7 +109,6 @@ fn test_callback() -> Result<(), Box<dyn Error + Sync + Send + 'static>> {
             println!("callback: num = {}", msg.num);
             cnt1.set(cnt1.get() + 1);
         }),
-        false,
     );
 
     while cnt.get() < COUNT {

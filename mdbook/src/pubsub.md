@@ -370,7 +370,6 @@ fn main() -> Result<(), DynError> {
         Box::new(move |msg| {
             pr_info!(logger, "receive: {}", msg.data);
         }),
-        false,
     );
 
     // Spin.
@@ -411,7 +410,6 @@ selector.add_subscriber(
     Box::new(move |msg| {
         pr_info!(logger, "receive: {}", msg.data);
     }),
-    false,
 );
 
 // Spin.

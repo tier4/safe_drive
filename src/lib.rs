@@ -105,7 +105,6 @@
 //!         // Print the message
 //!         pr_info!(logger_sub, "Received: msg = {}", msg.data); // Print a message.
 //!     }),
-//!     false,
 //! );
 //!
 //! // Create a wall timer, which invoke the callback periodically.

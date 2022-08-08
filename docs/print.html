@@ -517,7 +517,6 @@ fn main() -&gt; Result&lt;(), DynError&gt; {
         Box::new(move |msg| {
             pr_info!(logger, &quot;receive: {}&quot;, msg.data);
         }),
-        false,
     );
 
     // Spin.
@@ -556,7 +555,6 @@ selector.add_subscriber(
     Box::new(move |msg| {
         pr_info!(logger, &quot;receive: {}&quot;, msg.data);
     }),
-    false,
 );
 
 // Spin.
@@ -976,7 +974,7 @@ async fn main() -&gt; Result&lt;(), DynError&gt; {
     let ctx = Context::new()?;
     let node = ctx.create_node(&quot;subscribers&quot;, None, Default::default())?;
 
-    // Create subsucribers.
+    // Create subscribers.
     let subscriber1 = node.create_subscriber::&lt;std_msgs::msg::String&gt;(&quot;topic1&quot;, None)?;
     let subscriber2 = node.create_subscriber::&lt;std_msgs::msg::String&gt;(&quot;topic2&quot;, None)?;
 

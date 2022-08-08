@@ -32,15 +32,12 @@
 //! // Add subscriber to the selector.
 //! // The 2nd argument is a callback function.
 //! // If data arrive, the callback will be invoked.
-//! // The 3rd argument is used to specify the callback will be invoked only once or infinitely.
-//! // If the 3rd argument is `true`, the callback function is invoked once and unregistered.
 //! selector.add_subscriber(
 //!     subscriber,
 //!     Box::new(move |msg| {
 //!         // Print the message
 //!         pr_info!(logger_sub, "Received: msg = {}", msg.data); // Print a message.
 //!     }),
-//!     false,
 //! );
 //!
 //! // Create a wall timer, which invoke the callback periodically.
@@ -272,7 +269,6 @@ impl Selector {
     ///     selector.add_subscriber(
     ///         subscriber,
     ///         Box::new(|msg: std_msgs::msg::Bool| /* some tasks */ ()), // Callback function.
-    ///         true,
     ///     );
     /// }
     /// ```
@@ -280,7 +276,6 @@ impl Selector {
         &mut self,
         subscriber: Subscriber<T>,
         mut handler: Box<dyn FnMut(T)>,
-        is_once: bool,
     ) -> bool {
         let sub = subscriber.subscription.clone();
         let context_ptr = subscriber.subscription.node.context.as_ptr();
@@ -334,7 +329,7 @@ impl Selector {
                 );
             }
 
-            self.add_rcl_subscription(sub, Some(Box::new(f)), is_once);
+            self.add_rcl_subscription(sub, Some(Box::new(f)), false);
             true
         } else {
             false

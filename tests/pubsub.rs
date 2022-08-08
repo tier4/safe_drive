@@ -32,7 +32,6 @@ fn test_pubsub() -> Result<(), Box<dyn Error + Sync + Send + 'static>> {
         Box::new(move |msg| {
             assert_eq!(msg.num, n);
         }),
-        false,
     );
     selector.wait()?;
 
@@ -72,7 +71,6 @@ fn test_pubsub_string() -> Result<(), Box<dyn Error + Sync + Send + 'static>> {
             println!("{s}");
             assert_eq!(&s, PUBSUB_MSG);
         }),
-        false,
     );
     selector.wait()?;
 

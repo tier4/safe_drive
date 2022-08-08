@@ -187,7 +187,7 @@ async fn main() -> Result<(), DynError> {
     let ctx = Context::new()?;
     let node = ctx.create_node("subscribers", None, Default::default())?;
 
-    // Create subsucribers.
+    // Create subscribers.
     let subscriber1 = node.create_subscriber::<std_msgs::msg::String>("topic1", None)?;
     let subscriber2 = node.create_subscriber::<std_msgs::msg::String>("topic2", None)?;
 
