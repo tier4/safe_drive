@@ -18,7 +18,7 @@ There are 2 global variables.
 delta_list = SetToSeq({[delta |-> random_num(0, DeltaRange), name |-> x]: x \in Timers});
 
 \* events
-runnable = {};
+wait_set = {};
 
 \* tasks
 running = {};
@@ -43,7 +43,7 @@ then
 Additionally, there are 3 sets to represents states of callback functions as follows.
 
 - `running`: a set of processes running now
-- `runnable`: a set of processes which can execute
+- `wait_set`: a set of processes which can execute
 - `waiting`: a set of processes waiting a event
 
 
@@ -57,13 +57,13 @@ We use the expression as follows to check the starvation freedom.
 
 ```tla+
 starvation_free == \A x \in (Timers \union Tasks):
-    (((x \in {y.name: y \in ToSet(delta_list)}) \/ (x \in runnable)) ~> <>(x \in running))
+    (((x \in {y.name: y \in ToSet(delta_list)}) \/ (x \in wait_set)) ~> <>(x \in running))
 ```
 
 This is equivalent to
 
 $$
-\forall x \in (\mathrm{Timers} \cup \mathrm{Tasks})((x \in \lbrace y.\mathrm{name}\ |\ y \in \mathrm{deltaList}\rbrace) \lor (x \in \mathrm{runnable}) \leadsto \lozenge (x \in \mathrm{running}))
+\forall x \in (\mathrm{Timers} \cup \mathrm{Tasks})((x \in \lbrace y.\mathrm{name}\ |\ y \in \mathrm{delta\verb|_|list}\rbrace) \lor (x \in \mathrm{wait\verb|_|set}) \leadsto \lozenge (x \in \mathrm{running}))
 $$
 
 where

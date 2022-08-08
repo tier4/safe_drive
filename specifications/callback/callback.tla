@@ -12,7 +12,7 @@ variables
     delta_list = SetToSeq({[delta |-> random_num(0, DeltaRange), name |-> x]: x \in Timers});
 
     \* events
-    runnable = {};
+    wait_set = {};
 
     \* tasks
     running = {};
@@ -20,9 +20,21 @@ variables
 
 define
     random_num(min, max) == CHOOSE i \in min..max: TRUE
-    starvation_free == \A x \in (Timers \union Tasks):
-        (((x \in {y.name: y \in ToSet(delta_list)}) \/ (x \in runnable)) ~> <>(x \in running))
     pick_task(set) == CHOOSE x \in set: TRUE
+
+    starvation_free == \A x \in (Timers \union Tasks):
+        LET delta_set == {y.name: y \in ToSet(delta_list)} IN
+        (((x \in delta_set) \/ (x \in wait_set)) ~> <>(x \in running))
+    running_xor_waiting == \A x \in Tasks:
+        (x \in running /\ x \notin waiting) \/ (x \notin running /\ x \in waiting)
+    running_then_not_delta_list == \A x \in Timers:
+        LET delta_set == {y.name: y \in ToSet(delta_list)} IN
+        x \in running => x \notin delta_set
+    type_check ==
+        LET delta_set == {y.name: y \in ToSet(delta_list)} IN
+        /\ waiting \subseteq Tasks
+        /\ running \subseteq (Tasks \union Timers)
+        /\ delta_set \subseteq Timers
 end define
 
 \* To emulate incrementing clock, decrement the delta of the head of the delta_list.
@@ -39,9 +51,13 @@ begin
     start_callback:
         increment_clock();
         running := running \union { name };
+        waiting := waiting \ { name };
 
     end_callback:
         running := running \ { name };
+        if name \in Tasks then
+            waiting := waiting \union  { name }
+        end if;
         return;
 end procedure;
 
@@ -80,18 +96,15 @@ begin
 end procedure;
 
 \* execute a task
-procedure execute_task(wait_set)
+procedure execute_task(runnable)
 variables
     task;
 begin
     start_task:
-        while wait_set /= {} do
-            task := pick_task(wait_set);
-            wait_set := wait_set \ {task};
+        while runnable /= {} do
+            task := pick_task(runnable);
+            runnable := runnable \ {task};
             call callback(task);
-
-            finish_a_task:
-                waiting := waiting \union {task};
         end while;
 
         return;
@@ -101,10 +114,7 @@ fair process trigger_event \in Tasks
 begin
     fire_event:
         while TRUE do
-            if self \in waiting then
-                runnable := runnable \union {self};
-                waiting := waiting \ {self};
-            end if;
+            wait_set := wait_set \union {self};
         end while;
 end process;
 
@@ -141,36 +151,48 @@ begin
                 end while;
 
             execute_tasks:
-                \* pick runnable tasks up
-                with tmp_runnable = runnable do
-                    runnable := {};
-                    call execute_task(tmp_runnable);
+                \* pick wait_set tasks up
+                with tmp_wait_set = wait_set do
+                    wait_set := {};
+                    call execute_task(tmp_wait_set);
                 end with;
 
         end while;
 end process;
 end algorithm; *)
-\* BEGIN TRANSLATION (chksum(pcal) = "3e628361" /\ chksum(tla) = "d2603b82")
-\* Parameter name of procedure callback at line 37 col 20 changed to name_
+\* BEGIN TRANSLATION (chksum(pcal) = "86a9cce3" /\ chksum(tla) = "1a4cbaba")
+\* Parameter name of procedure callback at line 49 col 20 changed to name_
 CONSTANT defaultInitValue
-VARIABLES delta_list, runnable, running, waiting, pc, stack
+VARIABLES delta_list, wait_set, running, waiting, pc, stack
 
 (* define statement *)
 random_num(min, max) == CHOOSE i \in min..max: TRUE
-starvation_free == \A x \in (Timers \union Tasks):
-    (((x \in {y.name: y \in ToSet(delta_list)}) \/ (x \in runnable)) ~> <>(x \in running))
 pick_task(set) == CHOOSE x \in set: TRUE
 
-VARIABLES name_, name, idx, delta, wait_set, task, head, to_be_reloaded
+starvation_free == \A x \in (Timers \union Tasks):
+    LET delta_set == {y.name: y \in ToSet(delta_list)} IN
+    (((x \in delta_set) \/ (x \in wait_set)) ~> <>(x \in running))
+running_xor_waiting == \A x \in Tasks:
+    (x \in running /\ x \notin waiting) \/ (x \notin running /\ x \in waiting)
+running_then_not_delta_list == \A x \in Timers:
+    LET delta_set == {y.name: y \in ToSet(delta_list)} IN
+    x \in running => x \notin delta_set
+type_check ==
+    LET delta_set == {y.name: y \in ToSet(delta_list)} IN
+    /\ waiting \subseteq Tasks
+    /\ running \subseteq (Tasks \union Timers)
+    /\ delta_set \subseteq Timers
 
-vars == << delta_list, runnable, running, waiting, pc, stack, name_, name, 
-           idx, delta, wait_set, task, head, to_be_reloaded >>
+VARIABLES name_, name, idx, delta, runnable, task, head, to_be_reloaded
+
+vars == << delta_list, wait_set, running, waiting, pc, stack, name_, name, 
+           idx, delta, runnable, task, head, to_be_reloaded >>
 
 ProcSet == (Tasks) \cup {"executor"}
 
 Init == (* Global variables *)
         /\ delta_list = SetToSeq({[delta |-> random_num(0, DeltaRange), name |-> x]: x \in Timers})
-        /\ runnable = {}
+        /\ wait_set = {}
         /\ running = {}
         /\ waiting = Tasks
         (* Procedure callback *)
@@ -180,7 +202,7 @@ Init == (* Global variables *)
         /\ idx = [ self \in ProcSet |-> defaultInitValue]
         /\ delta = [ self \in ProcSet |-> defaultInitValue]
         (* Procedure execute_task *)
-        /\ wait_set = [ self \in ProcSet |-> defaultInitValue]
+        /\ runnable = [ self \in ProcSet |-> defaultInitValue]
         /\ task = [ self \in ProcSet |-> defaultInitValue]
         (* Process executor *)
         /\ head = defaultInitValue
@@ -195,19 +217,23 @@ start_callback(self) == /\ pc[self] = "start_callback"
                               ELSE /\ TRUE
                                    /\ UNCHANGED delta_list
                         /\ running' = (running \union { name_[self] })
+                        /\ waiting' = waiting \ { name_[self] }
                         /\ pc' = [pc EXCEPT ![self] = "end_callback"]
-                        /\ UNCHANGED << runnable, waiting, stack, name_, name, 
-                                        idx, delta, wait_set, task, head, 
+                        /\ UNCHANGED << wait_set, stack, name_, name, idx, 
+                                        delta, runnable, task, head, 
                                         to_be_reloaded >>
 
 end_callback(self) == /\ pc[self] = "end_callback"
                       /\ running' = running \ { name_[self] }
+                      /\ IF name_[self] \in Tasks
+                            THEN /\ waiting' = (waiting \union  { name_[self] })
+                            ELSE /\ TRUE
+                                 /\ UNCHANGED waiting
                       /\ pc' = [pc EXCEPT ![self] = Head(stack[self]).pc]
                       /\ name_' = [name_ EXCEPT ![self] = Head(stack[self]).name_]
                       /\ stack' = [stack EXCEPT ![self] = Tail(stack[self])]
-                      /\ UNCHANGED << delta_list, runnable, waiting, name, idx, 
-                                      delta, wait_set, task, head, 
-                                      to_be_reloaded >>
+                      /\ UNCHANGED << delta_list, wait_set, name, idx, delta, 
+                                      runnable, task, head, to_be_reloaded >>
 
 callback(self) == start_callback(self) \/ end_callback(self)
 
@@ -222,30 +248,30 @@ start_reload_timer(self) == /\ pc[self] = "start_reload_timer"
                                        /\ pc' = [pc EXCEPT ![self] = "reload_insert1"]
                                   ELSE /\ delta' = [delta EXCEPT ![self] = random_num(0, DeltaRange)]
                                        /\ pc' = [pc EXCEPT ![self] = "reload_insert_end"]
-                            /\ UNCHANGED << runnable, running, waiting, stack, 
-                                            name_, name, wait_set, task, head, 
+                            /\ UNCHANGED << wait_set, running, waiting, stack, 
+                                            name_, name, runnable, task, head, 
                                             to_be_reloaded >>
 
 reload_insert1(self) == /\ pc[self] = "reload_insert1"
                         /\ delta_list' = [delta_list EXCEPT ![idx[self]].delta = delta_list[idx[self]].delta - delta[self]]
                         /\ pc' = [pc EXCEPT ![self] = "reload_insert2"]
-                        /\ UNCHANGED << runnable, running, waiting, stack, 
-                                        name_, name, idx, delta, wait_set, 
+                        /\ UNCHANGED << wait_set, running, waiting, stack, 
+                                        name_, name, idx, delta, runnable, 
                                         task, head, to_be_reloaded >>
 
 reload_insert2(self) == /\ pc[self] = "reload_insert2"
                         /\ delta_list' = InsertAt(delta_list, idx[self], [delta |-> delta[self], name |-> name[self]])
                         /\ pc' = [pc EXCEPT ![self] = "end_reload_timer"]
-                        /\ UNCHANGED << runnable, running, waiting, stack, 
-                                        name_, name, idx, delta, wait_set, 
+                        /\ UNCHANGED << wait_set, running, waiting, stack, 
+                                        name_, name, idx, delta, runnable, 
                                         task, head, to_be_reloaded >>
 
 reload_insert_end(self) == /\ pc[self] = "reload_insert_end"
                            /\ delta_list' = Append(delta_list, [delta |-> delta[self], name |-> name[self]])
                            /\ TRUE
                            /\ pc' = [pc EXCEPT ![self] = "end_reload_timer"]
-                           /\ UNCHANGED << runnable, running, waiting, stack, 
-                                           name_, name, idx, delta, wait_set, 
+                           /\ UNCHANGED << wait_set, running, waiting, stack, 
+                                           name_, name, idx, delta, runnable, 
                                            task, head, to_be_reloaded >>
 
 end_reload_timer(self) == /\ pc[self] = "end_reload_timer"
@@ -254,8 +280,8 @@ end_reload_timer(self) == /\ pc[self] = "end_reload_timer"
                           /\ delta' = [delta EXCEPT ![self] = Head(stack[self]).delta]
                           /\ name' = [name EXCEPT ![self] = Head(stack[self]).name]
                           /\ stack' = [stack EXCEPT ![self] = Tail(stack[self])]
-                          /\ UNCHANGED << delta_list, runnable, running, 
-                                          waiting, name_, wait_set, task, head, 
+                          /\ UNCHANGED << delta_list, wait_set, running, 
+                                          waiting, name_, runnable, task, head, 
                                           to_be_reloaded >>
 
 reload_timer(self) == start_reload_timer(self) \/ reload_insert1(self)
@@ -263,41 +289,30 @@ reload_timer(self) == start_reload_timer(self) \/ reload_insert1(self)
                          \/ end_reload_timer(self)
 
 start_task(self) == /\ pc[self] = "start_task"
-                    /\ IF wait_set[self] /= {}
-                          THEN /\ task' = [task EXCEPT ![self] = pick_task(wait_set[self])]
-                               /\ wait_set' = [wait_set EXCEPT ![self] = wait_set[self] \ {task'[self]}]
+                    /\ IF runnable[self] /= {}
+                          THEN /\ task' = [task EXCEPT ![self] = pick_task(runnable[self])]
+                               /\ runnable' = [runnable EXCEPT ![self] = runnable[self] \ {task'[self]}]
                                /\ /\ name_' = [name_ EXCEPT ![self] = task'[self]]
                                   /\ stack' = [stack EXCEPT ![self] = << [ procedure |->  "callback",
-                                                                           pc        |->  "finish_a_task",
+                                                                           pc        |->  "start_task",
                                                                            name_     |->  name_[self] ] >>
                                                                        \o stack[self]]
                                /\ pc' = [pc EXCEPT ![self] = "start_callback"]
                           ELSE /\ pc' = [pc EXCEPT ![self] = Head(stack[self]).pc]
                                /\ task' = [task EXCEPT ![self] = Head(stack[self]).task]
-                               /\ wait_set' = [wait_set EXCEPT ![self] = Head(stack[self]).wait_set]
+                               /\ runnable' = [runnable EXCEPT ![self] = Head(stack[self]).runnable]
                                /\ stack' = [stack EXCEPT ![self] = Tail(stack[self])]
                                /\ name_' = name_
-                    /\ UNCHANGED << delta_list, runnable, running, waiting, 
+                    /\ UNCHANGED << delta_list, wait_set, running, waiting, 
                                     name, idx, delta, head, to_be_reloaded >>
 
-finish_a_task(self) == /\ pc[self] = "finish_a_task"
-                       /\ waiting' = (waiting \union {task[self]})
-                       /\ pc' = [pc EXCEPT ![self] = "start_task"]
-                       /\ UNCHANGED << delta_list, runnable, running, stack, 
-                                       name_, name, idx, delta, wait_set, task, 
-                                       head, to_be_reloaded >>
-
-execute_task(self) == start_task(self) \/ finish_a_task(self)
+execute_task(self) == start_task(self)
 
 fire_event(self) == /\ pc[self] = "fire_event"
-                    /\ IF self \in waiting
-                          THEN /\ runnable' = (runnable \union {self})
-                               /\ waiting' = waiting \ {self}
-                          ELSE /\ TRUE
-                               /\ UNCHANGED << runnable, waiting >>
+                    /\ wait_set' = (wait_set \union {self})
                     /\ pc' = [pc EXCEPT ![self] = "fire_event"]
-                    /\ UNCHANGED << delta_list, running, stack, name_, name, 
-                                    idx, delta, wait_set, task, head, 
+                    /\ UNCHANGED << delta_list, running, waiting, stack, name_, 
+                                    name, idx, delta, runnable, task, head, 
                                     to_be_reloaded >>
 
 trigger_event(self) == fire_event(self)
@@ -308,8 +323,8 @@ start_executor == /\ pc["executor"] = "start_executor"
                         ELSE /\ TRUE
                              /\ UNCHANGED delta_list
                   /\ pc' = [pc EXCEPT !["executor"] = "execute"]
-                  /\ UNCHANGED << runnable, running, waiting, stack, name_, 
-                                  name, idx, delta, wait_set, task, head, 
+                  /\ UNCHANGED << wait_set, running, waiting, stack, name_, 
+                                  name, idx, delta, runnable, task, head, 
                                   to_be_reloaded >>
 
 execute == /\ pc["executor"] = "execute"
@@ -324,14 +339,14 @@ execute == /\ pc["executor"] = "execute"
                       /\ pc' = [pc EXCEPT !["executor"] = "start_callback"]
                  ELSE /\ pc' = [pc EXCEPT !["executor"] = "reload"]
                       /\ UNCHANGED << delta_list, stack, name_, head >>
-           /\ UNCHANGED << runnable, running, waiting, name, idx, delta, 
-                           wait_set, task, to_be_reloaded >>
+           /\ UNCHANGED << wait_set, running, waiting, name, idx, delta, 
+                           runnable, task, to_be_reloaded >>
 
 save_timer == /\ pc["executor"] = "save_timer"
               /\ to_be_reloaded' = Append(to_be_reloaded, head.name)
               /\ pc' = [pc EXCEPT !["executor"] = "execute"]
-              /\ UNCHANGED << delta_list, runnable, running, waiting, stack, 
-                              name_, name, idx, delta, wait_set, task, head >>
+              /\ UNCHANGED << delta_list, wait_set, running, waiting, stack, 
+                              name_, name, idx, delta, runnable, task, head >>
 
 reload == /\ pc["executor"] = "reload"
           /\ IF to_be_reloaded /= <<>>
@@ -347,24 +362,24 @@ reload == /\ pc["executor"] = "reload"
                      /\ pc' = [pc EXCEPT !["executor"] = "start_reload_timer"]
                 ELSE /\ pc' = [pc EXCEPT !["executor"] = "execute_tasks"]
                      /\ UNCHANGED << stack, name, idx, delta >>
-          /\ UNCHANGED << delta_list, runnable, running, waiting, name_, 
-                          wait_set, task, head, to_be_reloaded >>
+          /\ UNCHANGED << delta_list, wait_set, running, waiting, name_, 
+                          runnable, task, head, to_be_reloaded >>
 
 reload2 == /\ pc["executor"] = "reload2"
            /\ to_be_reloaded' = Tail(to_be_reloaded)
            /\ pc' = [pc EXCEPT !["executor"] = "reload"]
-           /\ UNCHANGED << delta_list, runnable, running, waiting, stack, 
-                           name_, name, idx, delta, wait_set, task, head >>
+           /\ UNCHANGED << delta_list, wait_set, running, waiting, stack, 
+                           name_, name, idx, delta, runnable, task, head >>
 
 execute_tasks == /\ pc["executor"] = "execute_tasks"
-                 /\ LET tmp_runnable == runnable IN
-                      /\ runnable' = {}
-                      /\ /\ stack' = [stack EXCEPT !["executor"] = << [ procedure |->  "execute_task",
+                 /\ LET tmp_wait_set == wait_set IN
+                      /\ wait_set' = {}
+                      /\ /\ runnable' = [runnable EXCEPT !["executor"] = tmp_wait_set]
+                         /\ stack' = [stack EXCEPT !["executor"] = << [ procedure |->  "execute_task",
                                                                         pc        |->  "start_executor",
                                                                         task      |->  task["executor"],
-                                                                        wait_set  |->  wait_set["executor"] ] >>
+                                                                        runnable  |->  runnable["executor"] ] >>
                                                                     \o stack["executor"]]
-                         /\ wait_set' = [wait_set EXCEPT !["executor"] = tmp_runnable]
                       /\ task' = [task EXCEPT !["executor"] = defaultInitValue]
                       /\ pc' = [pc EXCEPT !["executor"] = "start_task"]
                  /\ UNCHANGED << delta_list, running, waiting, name_, name, 
