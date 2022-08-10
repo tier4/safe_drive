@@ -336,7 +336,7 @@ fn create_message() -> Result<my_interfaces::msg::MyMsg, DynError> {
 
     // int32[] unbounded_integer_array
     let mut msgs = I32Seq::new(3).unwrap();
-    let ref_msgs = msgs.as_slice_mut().unwrap();
+    let ref_msgs = msgs.as_slice_mut();
     ref_msgs[0] = 6;
     ref_msgs[1] = 7;
     ref_msgs[2] = 8;
@@ -344,7 +344,7 @@ fn create_message() -> Result<my_interfaces::msg::MyMsg, DynError> {
 
     // int32[<=5] up_to_five_integers_array
     let mut msgs = I32Seq::new(2).unwrap();
-    let ref_msgs = msgs.as_slice_mut().unwrap();
+    let ref_msgs = msgs.as_slice_mut();
     ref_msgs[0] = 2;
     ref_msgs[1] = 3;
     my_msg.up_to_five_integers_array = msgs;
@@ -372,7 +372,7 @@ we can use `as_slice_mut()` or `as_slice()` methods as follows.
 ```rust
 // unbounded or unbounded array
 let mut msgs = I32Seq::new(3).unwrap();
-let ref_msgs = msgs.as_slice_mut().unwrap();
+let ref_msgs = msgs.as_slice_mut();
 ```
 
 `as_slice_mut()` returns a mutable slice,
@@ -466,16 +466,14 @@ fn main() -> Result<(), DynError> {
                 pr_info!(logger, "five_integers_array: {}", msg);
             }
 
-            if let Some(slice) = msg.unbounded_integer_array.as_slice() {
-                for msg in slice {
-                    pr_info!(logger, "unbounded_integer_array: {}", msg);
-                }
+            let slice = msg.unbounded_integer_array.as_slice();
+            for msg in slice {
+                pr_info!(logger, "unbounded_integer_array: {}", msg);
             }
 
-            if let Some(slice) = msg.up_to_five_integers_array.as_slice() {
-                for msg in slice {
-                    pr_info!(logger, "up_to_five_integers_array: {}", msg);
-                }
+            let slice = msg.up_to_five_integers_array.as_slice();
+            for msg in slice {
+                pr_info!(logger, "up_to_five_integers_array: {}", msg);
             }
         }),
         false,
@@ -644,7 +642,7 @@ fn _create_message_str() -> Result<my_interfaces::msg::MyMsgStr, DynError> {
 
     // string[] dynamic_array_str
     let mut msgs = RosStringSeq::new(3).ok_or("failed to create string")?;
-    let ref_msgs = msgs.as_slice_mut().ok_or("failed to get slice")?;
+    let ref_msgs = msgs.as_slice_mut();
     ref_msgs[0].assign("dynamic array 0");
     ref_msgs[1].assign("dynamic array 1");
     ref_msgs[2].assign("dynamic array 2");
@@ -652,7 +650,7 @@ fn _create_message_str() -> Result<my_interfaces::msg::MyMsgStr, DynError> {
 
     // string[<=3] bounded_array_str
     let mut msgs = RosStringSeq::new(2).ok_or("failed to create string")?;
-    let ref_msgs = msgs.as_slice_mut().ok_or("failed to get slice")?;
+    let ref_msgs = msgs.as_slice_mut();
     ref_msgs[0].assign("bounded array 0");
     ref_msgs[1].assign("bounded array 1");
     my_msg.bounded_array_str = msgs;
@@ -666,7 +664,7 @@ fn _create_message_str() -> Result<my_interfaces::msg::MyMsgStr, DynError> {
 
     // string<=10[] dynamic_array_bounded_str
     let mut msgs = RosStringSeq::new(3).ok_or("failed to create string")?;
-    let ref_msgs = msgs.as_slice_mut().ok_or("failed to get slice")?;
+    let ref_msgs = msgs.as_slice_mut();
     ref_msgs[0].assign("msg3");
     ref_msgs[1].assign("msg4");
     ref_msgs[2].assign("msg5");
@@ -674,7 +672,7 @@ fn _create_message_str() -> Result<my_interfaces::msg::MyMsgStr, DynError> {
 
     // string<=10[<=3] bounded_array_bounded_str
     let mut msgs = RosStringSeq::new(2).ok_or("failed to create string")?;
-    let ref_msgs = msgs.as_slice_mut().ok_or("failed to get slice")?;
+    let ref_msgs = msgs.as_slice_mut();
     ref_msgs[0].assign("msg3");
     ref_msgs[1].assign("msg5");
     my_msg.bounded_array_bounded_str = msgs;

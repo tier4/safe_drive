@@ -77,21 +77,21 @@ impl<const N: usize> MultiArrayDimensionSeq<N> {
         }
     }
 
-    pub fn as_slice(&self) -> Option<&[MultiArrayDimension]> {
+    pub fn as_slice(&self) -> &[MultiArrayDimension] {
         if self.data.is_null() {
-            None
+            &[]
         } else {
             let s = unsafe { std::slice::from_raw_parts(self.data, self.size) };
-            Some(s)
+            s
         }
     }
 
-    pub fn as_slice_mut(&mut self) -> Option<&mut [MultiArrayDimension]> {
+    pub fn as_slice_mut(&mut self) -> &mut [MultiArrayDimension] {
         if self.data.is_null() {
-            None
+            &mut []
         } else {
             let s = unsafe { std::slice::from_raw_parts_mut(self.data, self.size) };
-            Some(s)
+            s
         }
     }
 }

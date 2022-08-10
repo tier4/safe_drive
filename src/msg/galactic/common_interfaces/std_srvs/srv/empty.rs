@@ -84,21 +84,21 @@ impl<const N: usize> EmptyRequestSeq<N> {
         }
     }
 
-    pub fn as_slice(&self) -> Option<&[EmptyRequest]> {
+    pub fn as_slice(&self) -> &[EmptyRequest] {
         if self.data.is_null() {
-            None
+            &[]
         } else {
             let s = unsafe { std::slice::from_raw_parts(self.data, self.size) };
-            Some(s)
+            s
         }
     }
 
-    pub fn as_slice_mut(&mut self) -> Option<&mut [EmptyRequest]> {
+    pub fn as_slice_mut(&mut self) -> &mut [EmptyRequest] {
         if self.data.is_null() {
-            None
+            &mut []
         } else {
             let s = unsafe { std::slice::from_raw_parts_mut(self.data, self.size) };
-            Some(s)
+            s
         }
     }
 }
@@ -168,21 +168,21 @@ impl<const N: usize> EmptyResponseSeq<N> {
         }
     }
 
-    pub fn as_slice(&self) -> Option<&[EmptyResponse]> {
+    pub fn as_slice(&self) -> &[EmptyResponse] {
         if self.data.is_null() {
-            None
+            &[]
         } else {
             let s = unsafe { std::slice::from_raw_parts(self.data, self.size) };
-            Some(s)
+            s
         }
     }
 
-    pub fn as_slice_mut(&mut self) -> Option<&mut [EmptyResponse]> {
+    pub fn as_slice_mut(&mut self) -> &mut [EmptyResponse] {
         if self.data.is_null() {
-            None
+            &mut []
         } else {
             let s = unsafe { std::slice::from_raw_parts_mut(self.data, self.size) };
-            Some(s)
+            s
         }
     }
 }

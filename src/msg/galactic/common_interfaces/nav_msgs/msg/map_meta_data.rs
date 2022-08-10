@@ -79,21 +79,21 @@ impl<const N: usize> MapMetaDataSeq<N> {
         }
     }
 
-    pub fn as_slice(&self) -> Option<&[MapMetaData]> {
+    pub fn as_slice(&self) -> &[MapMetaData] {
         if self.data.is_null() {
-            None
+            &[]
         } else {
             let s = unsafe { std::slice::from_raw_parts(self.data, self.size) };
-            Some(s)
+            s
         }
     }
 
-    pub fn as_slice_mut(&mut self) -> Option<&mut [MapMetaData]> {
+    pub fn as_slice_mut(&mut self) -> &mut [MapMetaData] {
         if self.data.is_null() {
-            None
+            &mut []
         } else {
             let s = unsafe { std::slice::from_raw_parts_mut(self.data, self.size) };
-            Some(s)
+            s
         }
     }
 }

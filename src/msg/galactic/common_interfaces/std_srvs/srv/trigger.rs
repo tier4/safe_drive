@@ -85,21 +85,21 @@ impl<const N: usize> TriggerRequestSeq<N> {
         }
     }
 
-    pub fn as_slice(&self) -> Option<&[TriggerRequest]> {
+    pub fn as_slice(&self) -> &[TriggerRequest] {
         if self.data.is_null() {
-            None
+            &[]
         } else {
             let s = unsafe { std::slice::from_raw_parts(self.data, self.size) };
-            Some(s)
+            s
         }
     }
 
-    pub fn as_slice_mut(&mut self) -> Option<&mut [TriggerRequest]> {
+    pub fn as_slice_mut(&mut self) -> &mut [TriggerRequest] {
         if self.data.is_null() {
-            None
+            &mut []
         } else {
             let s = unsafe { std::slice::from_raw_parts_mut(self.data, self.size) };
-            Some(s)
+            s
         }
     }
 }
@@ -169,21 +169,21 @@ impl<const N: usize> TriggerResponseSeq<N> {
         }
     }
 
-    pub fn as_slice(&self) -> Option<&[TriggerResponse]> {
+    pub fn as_slice(&self) -> &[TriggerResponse] {
         if self.data.is_null() {
-            None
+            &[]
         } else {
             let s = unsafe { std::slice::from_raw_parts(self.data, self.size) };
-            Some(s)
+            s
         }
     }
 
-    pub fn as_slice_mut(&mut self) -> Option<&mut [TriggerResponse]> {
+    pub fn as_slice_mut(&mut self) -> &mut [TriggerResponse] {
         if self.data.is_null() {
-            None
+            &mut []
         } else {
             let s = unsafe { std::slice::from_raw_parts_mut(self.data, self.size) };
-            Some(s)
+            s
         }
     }
 }

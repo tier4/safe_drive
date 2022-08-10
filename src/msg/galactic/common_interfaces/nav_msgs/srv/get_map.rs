@@ -84,21 +84,21 @@ impl<const N: usize> GetMapRequestSeq<N> {
         }
     }
 
-    pub fn as_slice(&self) -> Option<&[GetMapRequest]> {
+    pub fn as_slice(&self) -> &[GetMapRequest] {
         if self.data.is_null() {
-            None
+            &[]
         } else {
             let s = unsafe { std::slice::from_raw_parts(self.data, self.size) };
-            Some(s)
+            s
         }
     }
 
-    pub fn as_slice_mut(&mut self) -> Option<&mut [GetMapRequest]> {
+    pub fn as_slice_mut(&mut self) -> &mut [GetMapRequest] {
         if self.data.is_null() {
-            None
+            &mut []
         } else {
             let s = unsafe { std::slice::from_raw_parts_mut(self.data, self.size) };
-            Some(s)
+            s
         }
     }
 }
@@ -168,21 +168,21 @@ impl<const N: usize> GetMapResponseSeq<N> {
         }
     }
 
-    pub fn as_slice(&self) -> Option<&[GetMapResponse]> {
+    pub fn as_slice(&self) -> &[GetMapResponse] {
         if self.data.is_null() {
-            None
+            &[]
         } else {
             let s = unsafe { std::slice::from_raw_parts(self.data, self.size) };
-            Some(s)
+            s
         }
     }
 
-    pub fn as_slice_mut(&mut self) -> Option<&mut [GetMapResponse]> {
+    pub fn as_slice_mut(&mut self) -> &mut [GetMapResponse] {
         if self.data.is_null() {
-            None
+            &mut []
         } else {
             let s = unsafe { std::slice::from_raw_parts_mut(self.data, self.size) };
-            Some(s)
+            s
         }
     }
 }

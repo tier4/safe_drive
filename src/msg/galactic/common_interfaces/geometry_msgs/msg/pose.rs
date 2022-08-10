@@ -76,21 +76,21 @@ impl<const N: usize> PoseSeq<N> {
         }
     }
 
-    pub fn as_slice(&self) -> Option<&[Pose]> {
+    pub fn as_slice(&self) -> &[Pose] {
         if self.data.is_null() {
-            None
+            &[]
         } else {
             let s = unsafe { std::slice::from_raw_parts(self.data, self.size) };
-            Some(s)
+            s
         }
     }
 
-    pub fn as_slice_mut(&mut self) -> Option<&mut [Pose]> {
+    pub fn as_slice_mut(&mut self) -> &mut [Pose] {
         if self.data.is_null() {
-            None
+            &mut []
         } else {
             let s = unsafe { std::slice::from_raw_parts_mut(self.data, self.size) };
-            Some(s)
+            s
         }
     }
 }

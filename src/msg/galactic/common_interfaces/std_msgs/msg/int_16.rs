@@ -75,21 +75,21 @@ impl<const N: usize> Int16Seq<N> {
         }
     }
 
-    pub fn as_slice(&self) -> Option<&[Int16]> {
+    pub fn as_slice(&self) -> &[Int16] {
         if self.data.is_null() {
-            None
+            &[]
         } else {
             let s = unsafe { std::slice::from_raw_parts(self.data, self.size) };
-            Some(s)
+            s
         }
     }
 
-    pub fn as_slice_mut(&mut self) -> Option<&mut [Int16]> {
+    pub fn as_slice_mut(&mut self) -> &mut [Int16] {
         if self.data.is_null() {
-            None
+            &mut []
         } else {
             let s = unsafe { std::slice::from_raw_parts_mut(self.data, self.size) };
-            Some(s)
+            s
         }
     }
 }

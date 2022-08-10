@@ -85,21 +85,21 @@ impl<const N: usize> SetBoolRequestSeq<N> {
         }
     }
 
-    pub fn as_slice(&self) -> Option<&[SetBoolRequest]> {
+    pub fn as_slice(&self) -> &[SetBoolRequest] {
         if self.data.is_null() {
-            None
+            &[]
         } else {
             let s = unsafe { std::slice::from_raw_parts(self.data, self.size) };
-            Some(s)
+            s
         }
     }
 
-    pub fn as_slice_mut(&mut self) -> Option<&mut [SetBoolRequest]> {
+    pub fn as_slice_mut(&mut self) -> &mut [SetBoolRequest] {
         if self.data.is_null() {
-            None
+            &mut []
         } else {
             let s = unsafe { std::slice::from_raw_parts_mut(self.data, self.size) };
-            Some(s)
+            s
         }
     }
 }
@@ -169,21 +169,21 @@ impl<const N: usize> SetBoolResponseSeq<N> {
         }
     }
 
-    pub fn as_slice(&self) -> Option<&[SetBoolResponse]> {
+    pub fn as_slice(&self) -> &[SetBoolResponse] {
         if self.data.is_null() {
-            None
+            &[]
         } else {
             let s = unsafe { std::slice::from_raw_parts(self.data, self.size) };
-            Some(s)
+            s
         }
     }
 
-    pub fn as_slice_mut(&mut self) -> Option<&mut [SetBoolResponse]> {
+    pub fn as_slice_mut(&mut self) -> &mut [SetBoolResponse] {
         if self.data.is_null() {
-            None
+            &mut []
         } else {
             let s = unsafe { std::slice::from_raw_parts_mut(self.data, self.size) };
-            Some(s)
+            s
         }
     }
 }

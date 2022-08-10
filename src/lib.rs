@@ -223,6 +223,7 @@ pub mod error;
 pub mod logger;
 pub mod msg;
 pub mod node;
+pub mod parameter;
 pub mod qos;
 pub mod rcl;
 pub mod selector;

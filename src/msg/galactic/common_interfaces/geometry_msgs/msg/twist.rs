@@ -76,21 +76,21 @@ impl<const N: usize> TwistSeq<N> {
         }
     }
 
-    pub fn as_slice(&self) -> Option<&[Twist]> {
+    pub fn as_slice(&self) -> &[Twist] {
         if self.data.is_null() {
-            None
+            &[]
         } else {
             let s = unsafe { std::slice::from_raw_parts(self.data, self.size) };
-            Some(s)
+            s
         }
     }
 
-    pub fn as_slice_mut(&mut self) -> Option<&mut [Twist]> {
+    pub fn as_slice_mut(&mut self) -> &mut [Twist] {
         if self.data.is_null() {
-            None
+            &mut []
         } else {
             let s = unsafe { std::slice::from_raw_parts_mut(self.data, self.size) };
-            Some(s)
+            s
         }
     }
 }

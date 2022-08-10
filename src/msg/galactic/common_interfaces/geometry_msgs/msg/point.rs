@@ -77,21 +77,21 @@ impl<const N: usize> PointSeq<N> {
         }
     }
 
-    pub fn as_slice(&self) -> Option<&[Point]> {
+    pub fn as_slice(&self) -> &[Point] {
         if self.data.is_null() {
-            None
+            &[]
         } else {
             let s = unsafe { std::slice::from_raw_parts(self.data, self.size) };
-            Some(s)
+            s
         }
     }
 
-    pub fn as_slice_mut(&mut self) -> Option<&mut [Point]> {
+    pub fn as_slice_mut(&mut self) -> &mut [Point] {
         if self.data.is_null() {
-            None
+            &mut []
         } else {
             let s = unsafe { std::slice::from_raw_parts_mut(self.data, self.size) };
-            Some(s)
+            s
         }
     }
 }

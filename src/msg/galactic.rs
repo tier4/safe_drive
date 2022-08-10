@@ -11,6 +11,10 @@
 //! $ mkdir ros2msg && cd ros2msg
 //! $ git clone https://github.com/ros2/unique_identifier_msgs.git -b galactic
 //! $ ros2msg_to_rs --disable-common-interfaces -s crate -i . -o {safe_drive}/src/msg/galactic/ros2msg
+//!
+//! $ git clone https://github.com/ros2/rcl_interfaces.git -b galactic
+//! $ rm -rf rcl_interfaces/test_msgs rcl_interfaces/builtin_interfaces
+//! $ ros2msg_to_rs --disable-common-interfaces -s crate -i rcl_interfaces -o {safe_drive}/src/msg/galactic/interfaces
 //! ```
 //!
 //! ## runtime_c.rs
@@ -18,6 +22,7 @@
 //! See [Makefile](https://github.com/tier4/safe_drive/blob/main/supplements/bindgen/Makefile) in supplements.
 
 pub mod common_interfaces;
+pub mod interfaces;
 pub mod ros2msg;
 mod runtime_c;
 

@@ -76,21 +76,21 @@ impl<const N: usize> Vector3StampedSeq<N> {
         }
     }
 
-    pub fn as_slice(&self) -> Option<&[Vector3Stamped]> {
+    pub fn as_slice(&self) -> &[Vector3Stamped] {
         if self.data.is_null() {
-            None
+            &[]
         } else {
             let s = unsafe { std::slice::from_raw_parts(self.data, self.size) };
-            Some(s)
+            s
         }
     }
 
-    pub fn as_slice_mut(&mut self) -> Option<&mut [Vector3Stamped]> {
+    pub fn as_slice_mut(&mut self) -> &mut [Vector3Stamped] {
         if self.data.is_null() {
-            None
+            &mut []
         } else {
             let s = unsafe { std::slice::from_raw_parts_mut(self.data, self.size) };
-            Some(s)
+            s
         }
     }
 }

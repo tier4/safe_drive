@@ -78,21 +78,21 @@ impl<const N: usize> GridCellsSeq<N> {
         }
     }
 
-    pub fn as_slice(&self) -> Option<&[GridCells]> {
+    pub fn as_slice(&self) -> &[GridCells] {
         if self.data.is_null() {
-            None
+            &[]
         } else {
             let s = unsafe { std::slice::from_raw_parts(self.data, self.size) };
-            Some(s)
+            s
         }
     }
 
-    pub fn as_slice_mut(&mut self) -> Option<&mut [GridCells]> {
+    pub fn as_slice_mut(&mut self) -> &mut [GridCells] {
         if self.data.is_null() {
-            None
+            &mut []
         } else {
             let s = unsafe { std::slice::from_raw_parts_mut(self.data, self.size) };
-            Some(s)
+            s
         }
     }
 }

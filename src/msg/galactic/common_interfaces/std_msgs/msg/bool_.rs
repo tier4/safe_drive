@@ -75,21 +75,21 @@ impl<const N: usize> BoolSeq<N> {
         }
     }
 
-    pub fn as_slice(&self) -> Option<&[Bool]> {
+    pub fn as_slice(&self) -> &[Bool] {
         if self.data.is_null() {
-            None
+            &[]
         } else {
             let s = unsafe { std::slice::from_raw_parts(self.data, self.size) };
-            Some(s)
+            s
         }
     }
 
-    pub fn as_slice_mut(&mut self) -> Option<&mut [Bool]> {
+    pub fn as_slice_mut(&mut self) -> &mut [Bool] {
         if self.data.is_null() {
-            None
+            &mut []
         } else {
             let s = unsafe { std::slice::from_raw_parts_mut(self.data, self.size) };
-            Some(s)
+            s
         }
     }
 }

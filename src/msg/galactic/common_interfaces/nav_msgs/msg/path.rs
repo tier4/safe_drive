@@ -76,21 +76,21 @@ impl<const N: usize> PathSeq<N> {
         }
     }
 
-    pub fn as_slice(&self) -> Option<&[Path]> {
+    pub fn as_slice(&self) -> &[Path] {
         if self.data.is_null() {
-            None
+            &[]
         } else {
             let s = unsafe { std::slice::from_raw_parts(self.data, self.size) };
-            Some(s)
+            s
         }
     }
 
-    pub fn as_slice_mut(&mut self) -> Option<&mut [Path]> {
+    pub fn as_slice_mut(&mut self) -> &mut [Path] {
         if self.data.is_null() {
-            None
+            &mut []
         } else {
             let s = unsafe { std::slice::from_raw_parts_mut(self.data, self.size) };
-            Some(s)
+            s
         }
     }
 }

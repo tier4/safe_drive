@@ -77,21 +77,21 @@ impl<const N: usize> CompressedImageSeq<N> {
         }
     }
 
-    pub fn as_slice(&self) -> Option<&[CompressedImage]> {
+    pub fn as_slice(&self) -> &[CompressedImage] {
         if self.data.is_null() {
-            None
+            &[]
         } else {
             let s = unsafe { std::slice::from_raw_parts(self.data, self.size) };
-            Some(s)
+            s
         }
     }
 
-    pub fn as_slice_mut(&mut self) -> Option<&mut [CompressedImage]> {
+    pub fn as_slice_mut(&mut self) -> &mut [CompressedImage] {
         if self.data.is_null() {
-            None
+            &mut []
         } else {
             let s = unsafe { std::slice::from_raw_parts_mut(self.data, self.size) };
-            Some(s)
+            s
         }
     }
 }

@@ -76,21 +76,21 @@ impl<const N: usize> TwistWithCovarianceStampedSeq<N> {
         }
     }
 
-    pub fn as_slice(&self) -> Option<&[TwistWithCovarianceStamped]> {
+    pub fn as_slice(&self) -> &[TwistWithCovarianceStamped] {
         if self.data.is_null() {
-            None
+            &[]
         } else {
             let s = unsafe { std::slice::from_raw_parts(self.data, self.size) };
-            Some(s)
+            s
         }
     }
 
-    pub fn as_slice_mut(&mut self) -> Option<&mut [TwistWithCovarianceStamped]> {
+    pub fn as_slice_mut(&mut self) -> &mut [TwistWithCovarianceStamped] {
         if self.data.is_null() {
-            None
+            &mut []
         } else {
             let s = unsafe { std::slice::from_raw_parts_mut(self.data, self.size) };
-            Some(s)
+            s
         }
     }
 }

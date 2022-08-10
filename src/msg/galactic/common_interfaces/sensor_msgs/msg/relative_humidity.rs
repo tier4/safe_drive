@@ -77,21 +77,21 @@ impl<const N: usize> RelativeHumiditySeq<N> {
         }
     }
 
-    pub fn as_slice(&self) -> Option<&[RelativeHumidity]> {
+    pub fn as_slice(&self) -> &[RelativeHumidity] {
         if self.data.is_null() {
-            None
+            &[]
         } else {
             let s = unsafe { std::slice::from_raw_parts(self.data, self.size) };
-            Some(s)
+            s
         }
     }
 
-    pub fn as_slice_mut(&mut self) -> Option<&mut [RelativeHumidity]> {
+    pub fn as_slice_mut(&mut self) -> &mut [RelativeHumidity] {
         if self.data.is_null() {
-            None
+            &mut []
         } else {
             let s = unsafe { std::slice::from_raw_parts_mut(self.data, self.size) };
-            Some(s)
+            s
         }
     }
 }

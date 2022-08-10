@@ -85,21 +85,21 @@ impl<const N: usize> AddDiagnosticsRequestSeq<N> {
         }
     }
 
-    pub fn as_slice(&self) -> Option<&[AddDiagnosticsRequest]> {
+    pub fn as_slice(&self) -> &[AddDiagnosticsRequest] {
         if self.data.is_null() {
-            None
+            &[]
         } else {
             let s = unsafe { std::slice::from_raw_parts(self.data, self.size) };
-            Some(s)
+            s
         }
     }
 
-    pub fn as_slice_mut(&mut self) -> Option<&mut [AddDiagnosticsRequest]> {
+    pub fn as_slice_mut(&mut self) -> &mut [AddDiagnosticsRequest] {
         if self.data.is_null() {
-            None
+            &mut []
         } else {
             let s = unsafe { std::slice::from_raw_parts_mut(self.data, self.size) };
-            Some(s)
+            s
         }
     }
 }
@@ -169,21 +169,21 @@ impl<const N: usize> AddDiagnosticsResponseSeq<N> {
         }
     }
 
-    pub fn as_slice(&self) -> Option<&[AddDiagnosticsResponse]> {
+    pub fn as_slice(&self) -> &[AddDiagnosticsResponse] {
         if self.data.is_null() {
-            None
+            &[]
         } else {
             let s = unsafe { std::slice::from_raw_parts(self.data, self.size) };
-            Some(s)
+            s
         }
     }
 
-    pub fn as_slice_mut(&mut self) -> Option<&mut [AddDiagnosticsResponse]> {
+    pub fn as_slice_mut(&mut self) -> &mut [AddDiagnosticsResponse] {
         if self.data.is_null() {
-            None
+            &mut []
         } else {
             let s = unsafe { std::slice::from_raw_parts_mut(self.data, self.size) };
-            Some(s)
+            s
         }
     }
 }

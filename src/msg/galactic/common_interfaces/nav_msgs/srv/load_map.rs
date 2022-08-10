@@ -90,21 +90,21 @@ impl<const N: usize> LoadMapRequestSeq<N> {
         }
     }
 
-    pub fn as_slice(&self) -> Option<&[LoadMapRequest]> {
+    pub fn as_slice(&self) -> &[LoadMapRequest] {
         if self.data.is_null() {
-            None
+            &[]
         } else {
             let s = unsafe { std::slice::from_raw_parts(self.data, self.size) };
-            Some(s)
+            s
         }
     }
 
-    pub fn as_slice_mut(&mut self) -> Option<&mut [LoadMapRequest]> {
+    pub fn as_slice_mut(&mut self) -> &mut [LoadMapRequest] {
         if self.data.is_null() {
-            None
+            &mut []
         } else {
             let s = unsafe { std::slice::from_raw_parts_mut(self.data, self.size) };
-            Some(s)
+            s
         }
     }
 }
@@ -174,21 +174,21 @@ impl<const N: usize> LoadMapResponseSeq<N> {
         }
     }
 
-    pub fn as_slice(&self) -> Option<&[LoadMapResponse]> {
+    pub fn as_slice(&self) -> &[LoadMapResponse] {
         if self.data.is_null() {
-            None
+            &[]
         } else {
             let s = unsafe { std::slice::from_raw_parts(self.data, self.size) };
-            Some(s)
+            s
         }
     }
 
-    pub fn as_slice_mut(&mut self) -> Option<&mut [LoadMapResponse]> {
+    pub fn as_slice_mut(&mut self) -> &mut [LoadMapResponse] {
         if self.data.is_null() {
-            None
+            &mut []
         } else {
             let s = unsafe { std::slice::from_raw_parts_mut(self.data, self.size) };
-            Some(s)
+            s
         }
     }
 }

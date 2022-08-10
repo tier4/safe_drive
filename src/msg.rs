@@ -50,24 +50,24 @@ macro_rules! def_sequence {
                 }
             }
 
-            pub fn as_slice(&self) -> Option<&[$ty_orig]> {
+            pub fn as_slice(&self) -> &[$ty_orig] {
                 if self.0.data.is_null() {
-                    None
+                    &[]
                 } else {
                     let s =
                         unsafe { std::slice::from_raw_parts(self.0.data, self.0.size as usize) };
-                    Some(s)
+                    s
                 }
             }
 
-            pub fn as_slice_mut(&mut self) -> Option<&mut [$ty_orig]> {
+            pub fn as_slice_mut(&mut self) -> &mut [$ty_orig] {
                 if self.0.data.is_null() {
-                    None
+                    &mut []
                 } else {
                     let s = unsafe {
                         std::slice::from_raw_parts_mut(self.0.data, self.0.size as usize)
                     };
-                    Some(s)
+                    s
                 }
             }
         }
@@ -229,31 +229,27 @@ impl<const N: usize> RosString<N> {
         Self::assign_string(&mut self.0, s)
     }
 
-    pub fn as_slice(&self) -> Option<&[std::os::raw::c_char]> {
+    pub fn as_slice(&self) -> &[std::os::raw::c_char] {
         if self.0.data.is_null() {
-            None
+            &[]
         } else {
             let s = unsafe { std::slice::from_raw_parts(self.0.data, self.0.size as usize) };
-            Some(s)
+            s
         }
     }
 
-    pub fn as_slice_mut(&mut self) -> Option<&mut [std::os::raw::c_char]> {
+    pub fn as_slice_mut(&mut self) -> &mut [std::os::raw::c_char] {
         if self.0.data.is_null() {
-            None
+            &mut []
         } else {
             let s = unsafe { std::slice::from_raw_parts_mut(self.0.data, self.0.size as usize) };
-            Some(s)
+            s
         }
     }
 
-    fn get_string(&self) -> String {
-        if let Some(s) = self.as_slice() {
-            if let Ok(m) = String::from_utf8(s.iter().map(|&c| c as u8).collect()) {
-                m
-            } else {
-                "".to_string()
-            }
+    pub fn get_string(&self) -> String {
+        if let Ok(m) = String::from_utf8(self.as_slice().iter().map(|&c| c as u8).collect()) {
+            m
         } else {
             "".to_string()
         }
@@ -309,26 +305,26 @@ impl<const STRLEN: usize, const SEQLEN: usize> RosStringSeq<STRLEN, SEQLEN> {
         }
     }
 
-    pub fn as_slice(&self) -> Option<&[RosString<STRLEN>]> {
+    pub fn as_slice(&self) -> &[RosString<STRLEN>] {
         if self.0.data.is_null() {
-            None
+            &[]
         } else {
             let s = unsafe { std::slice::from_raw_parts(self.0.data, self.0.size as usize) };
             let result =
                 unsafe { transmute::<&[rosidl_runtime_c__String], &[RosString<STRLEN>]>(s) };
-            Some(result)
+            result
         }
     }
 
-    pub fn as_slice_mut(&mut self) -> Option<&mut [RosString<STRLEN>]> {
+    pub fn as_slice_mut(&mut self) -> &mut [RosString<STRLEN>] {
         if self.0.data.is_null() {
-            None
+            &mut []
         } else {
             let s = unsafe { std::slice::from_raw_parts_mut(self.0.data, self.0.size as usize) };
             let result = unsafe {
                 transmute::<&mut [rosidl_runtime_c__String], &mut [RosString<STRLEN>]>(s)
             };
-            Some(result)
+            result
         }
     }
 }
@@ -422,14 +418,14 @@ mod tests {
     #[test]
     fn test_string_rs() {
         let mut str_seq = RosStringSeq::<0, 0>::new(5).unwrap();
-        let s = str_seq.as_slice_mut().unwrap();
+        let s = str_seq.as_slice_mut();
         for (i, rosstr) in s.iter_mut().enumerate() {
             let msg = format!("RosString::Assign: i = {i}");
             rosstr.assign(&msg);
         }
 
         for (i, rosstr) in s.iter().enumerate() {
-            let m = rosstr.as_slice().unwrap();
+            let m = rosstr.as_slice();
             let m = String::from_utf8(m.iter().map(|&c| c as u8).collect()).unwrap();
             let msg = format!("RosString::Assign: i = {i}");
             println!("{m}");

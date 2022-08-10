@@ -85,21 +85,21 @@ impl<const N: usize> GetInteractiveMarkersRequestSeq<N> {
         }
     }
 
-    pub fn as_slice(&self) -> Option<&[GetInteractiveMarkersRequest]> {
+    pub fn as_slice(&self) -> &[GetInteractiveMarkersRequest] {
         if self.data.is_null() {
-            None
+            &[]
         } else {
             let s = unsafe { std::slice::from_raw_parts(self.data, self.size) };
-            Some(s)
+            s
         }
     }
 
-    pub fn as_slice_mut(&mut self) -> Option<&mut [GetInteractiveMarkersRequest]> {
+    pub fn as_slice_mut(&mut self) -> &mut [GetInteractiveMarkersRequest] {
         if self.data.is_null() {
-            None
+            &mut []
         } else {
             let s = unsafe { std::slice::from_raw_parts_mut(self.data, self.size) };
-            Some(s)
+            s
         }
     }
 }
@@ -169,21 +169,21 @@ impl<const N: usize> GetInteractiveMarkersResponseSeq<N> {
         }
     }
 
-    pub fn as_slice(&self) -> Option<&[GetInteractiveMarkersResponse]> {
+    pub fn as_slice(&self) -> &[GetInteractiveMarkersResponse] {
         if self.data.is_null() {
-            None
+            &[]
         } else {
             let s = unsafe { std::slice::from_raw_parts(self.data, self.size) };
-            Some(s)
+            s
         }
     }
 
-    pub fn as_slice_mut(&mut self) -> Option<&mut [GetInteractiveMarkersResponse]> {
+    pub fn as_slice_mut(&mut self) -> &mut [GetInteractiveMarkersResponse] {
         if self.data.is_null() {
-            None
+            &mut []
         } else {
             let s = unsafe { std::slice::from_raw_parts_mut(self.data, self.size) };
-            Some(s)
+            s
         }
     }
 }

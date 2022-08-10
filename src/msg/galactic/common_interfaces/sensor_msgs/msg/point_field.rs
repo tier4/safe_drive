@@ -86,21 +86,21 @@ impl<const N: usize> PointFieldSeq<N> {
         }
     }
 
-    pub fn as_slice(&self) -> Option<&[PointField]> {
+    pub fn as_slice(&self) -> &[PointField] {
         if self.data.is_null() {
-            None
+            &[]
         } else {
             let s = unsafe { std::slice::from_raw_parts(self.data, self.size) };
-            Some(s)
+            s
         }
     }
 
-    pub fn as_slice_mut(&mut self) -> Option<&mut [PointField]> {
+    pub fn as_slice_mut(&mut self) -> &mut [PointField] {
         if self.data.is_null() {
-            None
+            &mut []
         } else {
             let s = unsafe { std::slice::from_raw_parts_mut(self.data, self.size) };
-            Some(s)
+            s
         }
     }
 }

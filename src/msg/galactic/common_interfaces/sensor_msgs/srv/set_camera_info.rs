@@ -85,21 +85,21 @@ impl<const N: usize> SetCameraInfoRequestSeq<N> {
         }
     }
 
-    pub fn as_slice(&self) -> Option<&[SetCameraInfoRequest]> {
+    pub fn as_slice(&self) -> &[SetCameraInfoRequest] {
         if self.data.is_null() {
-            None
+            &[]
         } else {
             let s = unsafe { std::slice::from_raw_parts(self.data, self.size) };
-            Some(s)
+            s
         }
     }
 
-    pub fn as_slice_mut(&mut self) -> Option<&mut [SetCameraInfoRequest]> {
+    pub fn as_slice_mut(&mut self) -> &mut [SetCameraInfoRequest] {
         if self.data.is_null() {
-            None
+            &mut []
         } else {
             let s = unsafe { std::slice::from_raw_parts_mut(self.data, self.size) };
-            Some(s)
+            s
         }
     }
 }
@@ -169,21 +169,21 @@ impl<const N: usize> SetCameraInfoResponseSeq<N> {
         }
     }
 
-    pub fn as_slice(&self) -> Option<&[SetCameraInfoResponse]> {
+    pub fn as_slice(&self) -> &[SetCameraInfoResponse] {
         if self.data.is_null() {
-            None
+            &[]
         } else {
             let s = unsafe { std::slice::from_raw_parts(self.data, self.size) };
-            Some(s)
+            s
         }
     }
 
-    pub fn as_slice_mut(&mut self) -> Option<&mut [SetCameraInfoResponse]> {
+    pub fn as_slice_mut(&mut self) -> &mut [SetCameraInfoResponse] {
         if self.data.is_null() {
-            None
+            &mut []
         } else {
             let s = unsafe { std::slice::from_raw_parts_mut(self.data, self.size) };
-            Some(s)
+            s
         }
     }
 }

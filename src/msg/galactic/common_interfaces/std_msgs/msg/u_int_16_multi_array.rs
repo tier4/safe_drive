@@ -76,21 +76,21 @@ impl<const N: usize> UInt16MultiArraySeq<N> {
         }
     }
 
-    pub fn as_slice(&self) -> Option<&[UInt16MultiArray]> {
+    pub fn as_slice(&self) -> &[UInt16MultiArray] {
         if self.data.is_null() {
-            None
+            &[]
         } else {
             let s = unsafe { std::slice::from_raw_parts(self.data, self.size) };
-            Some(s)
+            s
         }
     }
 
-    pub fn as_slice_mut(&mut self) -> Option<&mut [UInt16MultiArray]> {
+    pub fn as_slice_mut(&mut self) -> &mut [UInt16MultiArray] {
         if self.data.is_null() {
-            None
+            &mut []
         } else {
             let s = unsafe { std::slice::from_raw_parts_mut(self.data, self.size) };
-            Some(s)
+            s
         }
     }
 }

@@ -86,21 +86,21 @@ impl<const N: usize> SelfTestRequestSeq<N> {
         }
     }
 
-    pub fn as_slice(&self) -> Option<&[SelfTestRequest]> {
+    pub fn as_slice(&self) -> &[SelfTestRequest] {
         if self.data.is_null() {
-            None
+            &[]
         } else {
             let s = unsafe { std::slice::from_raw_parts(self.data, self.size) };
-            Some(s)
+            s
         }
     }
 
-    pub fn as_slice_mut(&mut self) -> Option<&mut [SelfTestRequest]> {
+    pub fn as_slice_mut(&mut self) -> &mut [SelfTestRequest] {
         if self.data.is_null() {
-            None
+            &mut []
         } else {
             let s = unsafe { std::slice::from_raw_parts_mut(self.data, self.size) };
-            Some(s)
+            s
         }
     }
 }
@@ -170,21 +170,21 @@ impl<const N: usize> SelfTestResponseSeq<N> {
         }
     }
 
-    pub fn as_slice(&self) -> Option<&[SelfTestResponse]> {
+    pub fn as_slice(&self) -> &[SelfTestResponse] {
         if self.data.is_null() {
-            None
+            &[]
         } else {
             let s = unsafe { std::slice::from_raw_parts(self.data, self.size) };
-            Some(s)
+            s
         }
     }
 
-    pub fn as_slice_mut(&mut self) -> Option<&mut [SelfTestResponse]> {
+    pub fn as_slice_mut(&mut self) -> &mut [SelfTestResponse] {
         if self.data.is_null() {
-            None
+            &mut []
         } else {
             let s = unsafe { std::slice::from_raw_parts_mut(self.data, self.size) };
-            Some(s)
+            s
         }
     }
 }

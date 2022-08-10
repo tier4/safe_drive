@@ -83,21 +83,21 @@ impl<const N: usize> PointCloud2Seq<N> {
         }
     }
 
-    pub fn as_slice(&self) -> Option<&[PointCloud2]> {
+    pub fn as_slice(&self) -> &[PointCloud2] {
         if self.data.is_null() {
-            None
+            &[]
         } else {
             let s = unsafe { std::slice::from_raw_parts(self.data, self.size) };
-            Some(s)
+            s
         }
     }
 
-    pub fn as_slice_mut(&mut self) -> Option<&mut [PointCloud2]> {
+    pub fn as_slice_mut(&mut self) -> &mut [PointCloud2] {
         if self.data.is_null() {
-            None
+            &mut []
         } else {
             let s = unsafe { std::slice::from_raw_parts_mut(self.data, self.size) };
-            Some(s)
+            s
         }
     }
 }

@@ -86,21 +86,21 @@ impl<const N: usize> GetPlanRequestSeq<N> {
         }
     }
 
-    pub fn as_slice(&self) -> Option<&[GetPlanRequest]> {
+    pub fn as_slice(&self) -> &[GetPlanRequest] {
         if self.data.is_null() {
-            None
+            &[]
         } else {
             let s = unsafe { std::slice::from_raw_parts(self.data, self.size) };
-            Some(s)
+            s
         }
     }
 
-    pub fn as_slice_mut(&mut self) -> Option<&mut [GetPlanRequest]> {
+    pub fn as_slice_mut(&mut self) -> &mut [GetPlanRequest] {
         if self.data.is_null() {
-            None
+            &mut []
         } else {
             let s = unsafe { std::slice::from_raw_parts_mut(self.data, self.size) };
-            Some(s)
+            s
         }
     }
 }
@@ -170,21 +170,21 @@ impl<const N: usize> GetPlanResponseSeq<N> {
         }
     }
 
-    pub fn as_slice(&self) -> Option<&[GetPlanResponse]> {
+    pub fn as_slice(&self) -> &[GetPlanResponse] {
         if self.data.is_null() {
-            None
+            &[]
         } else {
             let s = unsafe { std::slice::from_raw_parts(self.data, self.size) };
-            Some(s)
+            s
         }
     }
 
-    pub fn as_slice_mut(&mut self) -> Option<&mut [GetPlanResponse]> {
+    pub fn as_slice_mut(&mut self) -> &mut [GetPlanResponse] {
         if self.data.is_null() {
-            None
+            &mut []
         } else {
             let s = unsafe { std::slice::from_raw_parts_mut(self.data, self.size) };
-            Some(s)
+            s
         }
     }
 }

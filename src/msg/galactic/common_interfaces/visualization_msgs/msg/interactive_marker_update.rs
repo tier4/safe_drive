@@ -82,21 +82,21 @@ impl<const N: usize> InteractiveMarkerUpdateSeq<N> {
         }
     }
 
-    pub fn as_slice(&self) -> Option<&[InteractiveMarkerUpdate]> {
+    pub fn as_slice(&self) -> &[InteractiveMarkerUpdate] {
         if self.data.is_null() {
-            None
+            &[]
         } else {
             let s = unsafe { std::slice::from_raw_parts(self.data, self.size) };
-            Some(s)
+            s
         }
     }
 
-    pub fn as_slice_mut(&mut self) -> Option<&mut [InteractiveMarkerUpdate]> {
+    pub fn as_slice_mut(&mut self) -> &mut [InteractiveMarkerUpdate] {
         if self.data.is_null() {
-            None
+            &mut []
         } else {
             let s = unsafe { std::slice::from_raw_parts_mut(self.data, self.size) };
-            Some(s)
+            s
         }
     }
 }
