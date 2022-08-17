@@ -182,7 +182,7 @@ fn test_no_server() -> Result<(), DynError> {
     let resp = common::Response {
         sum: request.a + request.b + request.c,
     };
-    let _ = srv.send(&resp)?;
+    let _ = srv.send(&resp);
 
     std::thread::sleep(Duration::from_millis(50));
 

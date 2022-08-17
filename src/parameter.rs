@@ -10,11 +10,11 @@ use crate::{
     rcl::rcl_variant_t,
     selector::Selector,
 };
-use parking_lot::Mutex;
+use parking_lot::RwLock;
 use std::{collections::BTreeMap, ffi::CStr, slice::from_raw_parts, sync::Arc};
 
 pub struct Parameters {
-    params: Arc<Mutex<BTreeMap<String, Value>>>,
+    params: Arc<RwLock<BTreeMap<String, Value>>>,
     node: Arc<Node>,
 }
 
@@ -75,7 +75,7 @@ impl From<&rcl_variant_t> for Value {
 
 impl Parameters {
     fn new(node: Arc<Node>) -> RCLResult<Self> {
-        let params = Arc::new(Mutex::new(BTreeMap::new()));
+        let params = Arc::new(RwLock::new(BTreeMap::new()));
         let ps = params.clone();
         let n = node.clone();
 
@@ -88,7 +88,7 @@ impl Parameters {
     }
 }
 
-fn param_server(node: Arc<Node>, params: Arc<Mutex<BTreeMap<String, Value>>>) -> RCLResult<()> {
+fn param_server(node: Arc<Node>, params: Arc<RwLock<BTreeMap<String, Value>>>) -> RCLResult<()> {
     if let Ok(mut selector) = node.context.create_selector() {
         add_srv_list(&node, &mut selector, params)?;
     } else {
@@ -102,7 +102,7 @@ fn param_server(node: Arc<Node>, params: Arc<Mutex<BTreeMap<String, Value>>>) ->
 fn add_srv_list(
     node: &Arc<Node>,
     selector: &mut Selector,
-    params: Arc<Mutex<BTreeMap<String, Value>>>,
+    params: Arc<RwLock<BTreeMap<String, Value>>>,
 ) -> RCLResult<()> {
     let name = node.get_name();
     let srv_list = node.create_server::<ListParameters>(
@@ -123,7 +123,7 @@ fn add_srv_list(
                 .map(|prefix| prefix.get_string())
                 .collect();
 
-            let guard = params.lock();
+            let guard = params.write();
 
             for (k, _v) in guard.iter() {
                 let cnt = k.as_bytes().iter().filter(|c| **c == separator).count();

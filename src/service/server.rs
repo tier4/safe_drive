@@ -71,8 +71,10 @@
 //!         match req {
 //!             Ok((sender, request, _header)) => {
 //!                 let response = std_srvs::srv::EmptyResponse::new().unwrap();
-//!                 let s = sender.send(&response).unwrap();
-//!                 server = s; // Get a new server to handle next request.
+//!                 match sender.send(&response) {
+//!                     Ok(s) => server = s,                  // Get a new server to handle next request.
+//!                     Err((s, _e)) => server = s.give_up(), // Failed to send.
+//!                 }
 //!             }
 //!             Err(e) => {
 //!                 pr_error!(logger, "error: {e}");
@@ -188,7 +190,10 @@ impl<T: ServiceMsg> Server<T> {
     ///             RecvResult::Ok((sender, request, header)) => {
     ///                 pr_info!(logger, "received: header = {:?}", header);
     ///                 let msg = std_srvs::srv::EmptyResponse::new().unwrap();
-    ///                 server = sender.send(&msg).unwrap();
+    ///                 match sender.send(&msg) {
+    ///                     Ok(s) => server = s,                  // Get a new server to handle next request.
+    ///                     Err((s, _e)) => server = s.give_up(), // Failed to send.
+    ///                 }
     ///             }
     ///             RecvResult::RetryLater(s) => {
     ///                 pr_info!(logger, "retry later");
@@ -253,8 +258,10 @@ impl<T: ServiceMsg> Server<T> {
     ///             Ok((sender, request, header)) => {
     ///                 pr_info!(logger, "recv: header = {:?}", header);
     ///                 let response = std_srvs::srv::EmptyResponse::new().unwrap();
-    ///                 let s = sender.send(&response).unwrap();
-    ///                 server = s; // Get a new server to handle next request.
+    ///                 match sender.send(&response) {
+    ///                     Ok(s) => server = s,                  // Get a new server to handle next request.
+    ///                     Err((s, _e)) => server = s.give_up(), // Failed to send.
+    ///                 }
     ///             }
     ///             Err(e) => {
     ///                 pr_error!(logger, "error: {e}");
@@ -316,8 +323,10 @@ impl<T: ServiceMsg> ServerSend<T> {
     ///         match req {
     ///             Ok((sender, request, _header)) => {
     ///                 let response = std_srvs::srv::EmptyResponse::new().unwrap();
-    ///                 let s = sender.send(&response).unwrap();
-    ///                 server = s; // Get a new server to handle next request.
+    ///                 match sender.send(&response) {
+    ///                     Ok(s) => server = s,                  // Get a new server to handle next request.
+    ///                     Err((s, _e)) => server = s.give_up(), // Failed to send.
+    ///                 }
     ///             }
     ///             Err(e) => {
     ///                 pr_error!(logger, "error: {e}");
@@ -333,13 +342,16 @@ impl<T: ServiceMsg> ServerSend<T> {
     /// `data` should be immutable, but `rcl_send_response` provided
     /// by ROS2 takes normal pointers instead of `const` pointers.
     /// So, currently, `send` takes `data` as mutable.
-    pub fn send(mut self, data: &<T as ServiceMsg>::Response) -> RCLResult<Server<T>> {
+    pub fn send(
+        mut self,
+        data: &<T as ServiceMsg>::Response,
+    ) -> Result<Server<T>, (Self, RCLError)> {
         if let Err(e) = rcl::MTSafeFn::rcl_send_response(
             &self.data.service,
             &mut self.request_id,
             data as *const _ as *mut c_void,
         ) {
-            return Err(e);
+            return Err((self, e));
         }
 
         Ok(Server {
@@ -347,6 +359,14 @@ impl<T: ServiceMsg> ServerSend<T> {
             _phantom: Default::default(),
             _unsync: Default::default(),
         })
+    }
+
+    pub fn give_up(self) -> Server<T> {
+        Server {
+            data: self.data,
+            _phantom: Default::default(),
+            _unsync: Default::default(),
+        }
     }
 }
 

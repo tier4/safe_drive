@@ -58,7 +58,7 @@ use crate::{
     context::Context,
     delta_list::DeltaList,
     error::{DynError, RCLError, RCLResult},
-    logger::{pr_error_in, Logger},
+    logger::{pr_error_in, pr_fatal_in, Logger},
     msg::{ServiceMsg, TopicMsg},
     rcl,
     service::{
@@ -408,9 +408,10 @@ impl Selector {
                             Ok(s) => {
                                 server = Some(s);
                             }
-                            Err(e) => {
+                            Err((server_send, e)) => {
                                 let logger = Logger::new("safe_drive");
                                 pr_error_in!(logger, "{e}");
+                                server = Some(server_send.give_up());
                                 return CallbackResult::Ok;
                             }
                         }
@@ -421,7 +422,7 @@ impl Selector {
                     }
                     RecvResult::Err(e) => {
                         let logger = Logger::new("safe_drive");
-                        pr_error_in!(logger, "failed try_recv() of server: {}", e);
+                        pr_fatal_in!(logger, "failed try_recv() of server: {}", e);
                         return CallbackResult::Remove;
                     }
                 }

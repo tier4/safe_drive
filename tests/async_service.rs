@@ -55,7 +55,10 @@ async fn run_server(mut server: Server<common::ServiceType>) -> Result<(), DynEr
         // send a response
         // send returns a new server to receive the next request
         println!("Server: response = {:?}", response);
-        server = sender.send(&response)?;
+        match sender.send(&response) {
+            Ok(s) => server = s,
+            Err((s, _e)) => server = s.give_up(),
+        }
     }
 
     Ok(())
