@@ -2,8 +2,11 @@ use crate::{
     error::RCLResult,
     logger::{pr_error_in, Logger},
     msg::{
-        interfaces::rcl_interfaces::srv::{ListParameters, ListParametersResponse},
-        RosStringSeq,
+        interfaces::rcl_interfaces::{
+            msg::{ParameterValue, ParameterValueSeq},
+            srv::{GetParameters, GetParametersResponse, ListParameters, ListParametersResponse},
+        },
+        BoolSeq, F64Seq, I64Seq, RosString, RosStringSeq, U8Seq,
     },
     node::Node,
     qos::Profile,
@@ -30,6 +33,79 @@ pub enum Value {
     VecU8(Vec<u8>),
     VecF64(Vec<f64>),
     VecString(Vec<String>),
+}
+
+impl From<&Value> for ParameterValue {
+    fn from(var: &Value) -> Self {
+        let mut result = ParameterValue::new().unwrap();
+        match var {
+            Value::NotSet => result.type_ = 0,
+            Value::Bool(val) => {
+                result.type_ = 1;
+                result.bool_value = *val;
+            }
+            Value::I64(val) => {
+                result.type_ = 2;
+                result.integer_value = *val;
+            }
+            Value::F64(val) => {
+                result.type_ = 3;
+                result.double_value = *val;
+            }
+            Value::String(val) => {
+                result.type_ = 4;
+                result.string_value = RosString::new(&val).unwrap();
+            }
+            Value::VecU8(val) => {
+                result.type_ = 5;
+                result.byte_array_value = U8Seq::new(val.len()).unwrap();
+                result
+                    .byte_array_value
+                    .iter_mut()
+                    .zip(val.iter())
+                    .for_each(|(dst, src)| *dst = *src);
+            }
+            Value::VecBool(val) => {
+                result.type_ = 6;
+                result.bool_array_value = BoolSeq::new(val.len()).unwrap();
+                result
+                    .bool_array_value
+                    .iter_mut()
+                    .zip(val.iter())
+                    .for_each(|(dst, src)| *dst = *src);
+            }
+            Value::VecI64(val) => {
+                result.type_ = 7;
+                result.integer_array_value = I64Seq::new(val.len()).unwrap();
+                result
+                    .integer_array_value
+                    .iter_mut()
+                    .zip(val.iter())
+                    .for_each(|(dst, src)| *dst = *src);
+            }
+            Value::VecF64(val) => {
+                result.type_ = 8;
+                result.double_array_value = F64Seq::new(val.len()).unwrap();
+                result
+                    .double_array_value
+                    .iter_mut()
+                    .zip(val.iter())
+                    .for_each(|(dst, src)| *dst = *src);
+            }
+            Value::VecString(val) => {
+                result.type_ = 9;
+                result.string_array_value = RosStringSeq::new(val.len()).unwrap();
+                result
+                    .string_array_value
+                    .iter_mut()
+                    .zip(val.iter())
+                    .for_each(|(dst, src)| {
+                        dst.assign(src);
+                    });
+            }
+        }
+        result
+    }
 }
 
 impl From<&rcl_variant_t> for Value {
@@ -90,11 +166,52 @@ impl Parameters {
 
 fn param_server(node: Arc<Node>, params: Arc<RwLock<BTreeMap<String, Value>>>) -> RCLResult<()> {
     if let Ok(mut selector) = node.context.create_selector() {
-        add_srv_list(&node, &mut selector, params)?;
+        add_srv_list(&node, &mut selector, params.clone())?;
+        add_srv_get(&node, &mut selector, params)?;
     } else {
         let logger = Logger::new("safe_drive");
         pr_error_in!(logger, "");
     }
+
+    Ok(())
+}
+
+fn add_srv_get(
+    node: &Arc<Node>,
+    selector: &mut Selector,
+    params: Arc<RwLock<BTreeMap<String, Value>>>,
+) -> RCLResult<()> {
+    let name = node.get_name();
+    let srv_get = node.create_server::<GetParameters>(
+        &format!("{name}/get_parameters"),
+        Some(Profile::default()),
+    )?;
+    selector.add_server(
+        srv_get,
+        Box::new(move |req, _| {
+            let mut result = Vec::new();
+
+            let gurad = params.read();
+            for name in req.names.as_slice().iter() {
+                let key = name.to_string();
+                if let Some(value) = gurad.get(&key) {
+                    result.push(value);
+                }
+            }
+
+            let mut response = GetParametersResponse::new().unwrap();
+            response.values = ParameterValueSeq::new(result.len()).unwrap();
+
+            response
+                .values
+                .as_slice_mut()
+                .iter_mut()
+                .zip(result.iter())
+                .for_each(|(dst, src)| *dst = (*src).into());
+
+            response
+        }),
+    );
 
     Ok(())
 }
@@ -175,7 +292,6 @@ fn add_srv_list(
             response
                 .result
                 .names
-                .as_slice_mut()
                 .iter_mut()
                 .zip(result.iter())
                 .for_each(|(dst, src)| {
@@ -186,7 +302,6 @@ fn add_srv_list(
             response
                 .result
                 .prefixes
-                .as_slice_mut()
                 .iter_mut()
                 .zip(result_prefix.iter())
                 .for_each(|(dst, src)| {
