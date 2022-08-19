@@ -5,8 +5,9 @@ use crate::{
         interfaces::rcl_interfaces::{
             msg::{ParameterValue, ParameterValueSeq, SetParametersResultSeq},
             srv::{
-                GetParameterTypes, GetParameterTypesResponse, GetParameters, GetParametersResponse,
-                ListParameters, ListParametersResponse, SetParameters, SetParametersResponse,
+                DescribeParameters, DescribeParametersResponse, GetParameterTypes,
+                GetParameterTypesResponse, GetParameters, GetParametersResponse, ListParameters,
+                ListParametersResponse, SetParameters, SetParametersResponse,
             },
         },
         BoolSeq, F64Seq, I64Seq, RosString, RosStringSeq, U8Seq,
@@ -16,14 +17,286 @@ use crate::{
     rcl::rcl_variant_t,
     selector::{guard_condition::GuardCondition, CallbackResult, Selector},
 };
+use num_traits::Zero;
 use parking_lot::RwLock;
 use std::{cell::Cell, collections::BTreeMap, ffi::CStr, rc::Rc, slice::from_raw_parts, sync::Arc};
 
 pub struct ParameterServer {
-    pub params: Arc<RwLock<BTreeMap<String, Value>>>,
+    pub params: Arc<RwLock<Parameters>>,
     handler: Option<std::thread::JoinHandle<Result<(), DynError>>>,
     cond: Arc<GuardCondition>,
     _node: Arc<Node>,
+}
+
+trait Contains {
+    type T;
+    fn contains(&self, val: Self::T) -> bool;
+}
+
+struct IntegerRange {
+    min: i64,
+    max: i64,
+    step: usize,
+}
+
+impl Contains for IntegerRange {
+    type T = i64;
+    fn contains(&self, val: i64) -> bool {
+        let range = self.min..=self.max;
+        if range.contains(&val) {
+            let diff = val - self.min;
+            (diff % self.step as i64) == 0
+        } else {
+            false
+        }
+    }
+}
+
+struct FloatingPointRange {
+    min: f64,
+    max: f64,
+    step: f64,
+}
+
+impl Contains for FloatingPointRange {
+    type T = f64;
+    fn contains(&self, val: f64) -> bool {
+        let range = self.min..=self.max;
+        if range.contains(&val) {
+            if self.step.is_zero() {
+                return true;
+            }
+
+            let diff = val - self.min;
+            (diff % self.step).is_zero()
+        } else {
+            false
+        }
+    }
+}
+
+struct Descriptor {
+    description: String,
+    additional_constraints: String,
+    read_only: bool,
+    dynamic_typing: bool,
+    floating_point_range: FloatingPointRange,
+    integer_range: IntegerRange,
+}
+
+pub struct Parameters {
+    params: BTreeMap<String, Parameter>,
+}
+
+impl Parameters {
+    fn new() -> Self {
+        Self {
+            params: BTreeMap::new(),
+        }
+    }
+
+    pub fn set_parameter(
+        &mut self,
+        name: String,
+        value: Value,
+        read_only: bool,
+        description: Option<String>,
+    ) -> Result<(), DynError> {
+        if value == Value::NotSet {
+            Err("Value::NotSet cannot be used as a statically typed value".into())
+        } else {
+            if let Some(param) = self.params.get_mut(&name) {
+                if param.descriptor.dynamic_typing {
+                    let msg = format!("{} is a dynamically typed value", name);
+                    return Err(msg.into());
+                }
+
+                if param.descriptor.read_only {
+                    let msg = format!("{} is read only", name);
+                    return Err(msg.into());
+                }
+
+                if !param.check_range(&value) {
+                    let msg = format!("{} is exceeding the range", name);
+                    return Err(msg.into());
+                }
+
+                if param.value.type_check(&value) {
+                    param.value = value;
+                    Ok(())
+                } else {
+                    let msg = format!(
+                        "failed type checking: dst = {}, src = {}",
+                        param.value.type_name(),
+                        value.type_name()
+                    );
+                    Err(msg.into())
+                }
+            } else {
+                let param = Parameter::new(
+                    value,
+                    read_only,
+                    false,
+                    description.unwrap_or_else(|| name.clone()),
+                );
+                self.params.insert(name, param);
+                Ok(())
+            }
+        }
+    }
+
+    pub fn set_dynamically_typed_parameter(
+        &mut self,
+        name: String,
+        value: Value,
+        read_only: bool,
+        description: Option<String>,
+    ) -> Result<(), DynError> {
+        if let Some(param) = self.params.get_mut(&name) {
+            // TODO: check range
+
+            if !param.descriptor.dynamic_typing {
+                let msg = format!("{} is a statically typed value", name);
+                return Err(msg.into());
+            }
+
+            if param.descriptor.read_only {
+                let msg = format!("{} is read only", name);
+                return Err(msg.into());
+            }
+
+            if !param.check_range(&value) {
+                let msg = format!("{} is exceeding the range", name);
+                return Err(msg.into());
+            }
+
+            param.value = value;
+        } else {
+            let param = Parameter::new(
+                value,
+                read_only,
+                true,
+                description.unwrap_or_else(|| name.clone()),
+            );
+            self.params.insert(name, param);
+        }
+        Ok(())
+    }
+
+    pub fn set_floating_point_range(
+        &mut self,
+        name: &str,
+        min: f64,
+        max: f64,
+        step: f64,
+    ) -> Result<(), DynError> {
+        let range = FloatingPointRange { min, max, step };
+
+        if let Some(param) = self.params.get_mut(name) {
+            // TODO: check range
+
+            if param.descriptor.dynamic_typing {
+                param.descriptor.floating_point_range = range;
+                Ok(())
+            } else {
+                match &param.value {
+                    Value::F64(_) | Value::VecF64(_) => {
+                        param.descriptor.floating_point_range = range;
+                        Ok(())
+                    }
+                    _ => {
+                        let msg = format!(
+                            "{}({}) is not a floating point (array) type.",
+                            name,
+                            param.value.type_name()
+                        );
+                        Err(msg.into())
+                    }
+                }
+            }
+        } else {
+            let msg = format!("no such parameter: name = {}", name);
+            Err(msg.into())
+        }
+    }
+
+    pub fn set_integer_range(
+        &mut self,
+        name: &str,
+        min: i64,
+        max: i64,
+        step: usize,
+    ) -> Result<(), DynError> {
+        let range = IntegerRange { min, max, step };
+
+        if let Some(param) = self.params.get_mut(name) {
+            if param.descriptor.dynamic_typing {
+                param.descriptor.integer_range = range;
+                Ok(())
+            } else {
+                match &param.value {
+                    Value::I64(_) | Value::VecI64(_) => {
+                        param.descriptor.integer_range = range;
+                        Ok(())
+                    }
+                    _ => {
+                        let msg = format!(
+                            "{}({}) is not an integer (array) type.",
+                            name,
+                            param.value.type_name()
+                        );
+                        Err(msg.into())
+                    }
+                }
+            }
+        } else {
+            let msg = format!("no such parameter: name = {}", name);
+            Err(msg.into())
+        }
+    }
+}
+
+pub struct Parameter {
+    descriptor: Descriptor,
+    value: Value,
+}
+
+impl Parameter {
+    fn new(value: Value, read_only: bool, dynamic_typing: bool, description: String) -> Self {
+        Self {
+            descriptor: Descriptor {
+                description,
+                additional_constraints: "".to_string(),
+                read_only,
+                dynamic_typing,
+                floating_point_range: FloatingPointRange {
+                    min: f64::MIN,
+                    max: f64::MAX,
+                    step: 0.0,
+                },
+                integer_range: IntegerRange {
+                    min: i64::MIN,
+                    max: i64::MAX,
+                    step: 1,
+                },
+            },
+            value,
+        }
+    }
+
+    fn check_range(&self, value: &Value) -> bool {
+        match value {
+            Value::I64(x) => self.descriptor.integer_range.contains(*x),
+            Value::F64(x) => self.descriptor.floating_point_range.contains(*x),
+            Value::VecI64(arr) => arr
+                .iter()
+                .all(|x| self.descriptor.integer_range.contains(*x)),
+            Value::VecF64(arr) => arr
+                .iter()
+                .all(|x| self.descriptor.floating_point_range.contains(*x)),
+            _ => true,
+        }
+    }
 }
 
 #[derive(Debug, PartialEq, PartialOrd)]
@@ -227,7 +500,7 @@ impl From<&rcl_variant_t> for Value {
 
 impl ParameterServer {
     pub fn new(node: Arc<Node>) -> RCLResult<Self> {
-        let params = Arc::new(RwLock::new(BTreeMap::new()));
+        let params = Arc::new(RwLock::new(Parameters::new()));
         let ps = params.clone();
         let n = node.clone();
         let cond = GuardCondition::new(node.context.clone())?;
@@ -255,7 +528,7 @@ impl Drop for ParameterServer {
 
 fn param_server(
     node: Arc<Node>,
-    params: Arc<RwLock<BTreeMap<String, Value>>>,
+    params: Arc<RwLock<Parameters>>,
     guard: Arc<GuardCondition>,
 ) -> Result<(), DynError> {
     if let Ok(mut selector) = node.context.create_selector() {
@@ -295,7 +568,7 @@ fn param_server(
 fn add_srv_set(
     node: &Arc<Node>,
     selector: &mut Selector,
-    params: Arc<RwLock<BTreeMap<String, Value>>>,
+    params: Arc<RwLock<Parameters>>,
     service_name: &str,
 ) -> RCLResult<()> {
     let name = node.get_name();
@@ -315,23 +588,39 @@ fn add_srv_set(
                 let key = param.name.to_string();
                 let val: Value = (&param.value).into();
 
-                if let Some(original) = guard.get_mut(&key) {
-                    if original.type_check(&val) {
-                        *original = val;
+                if let Some(original) = guard.params.get_mut(&key) {
+                    if original.descriptor.read_only {
+                        let reason = format!("{} is read only", key);
+                        slice[i].reason.assign(&reason);
+                        continue;
+                    }
+
+                    if !original.check_range(&val) {
+                        let reason = format!("{} is exceeding the range", key);
+                        slice[i].reason.assign(&reason);
+                        slice[i].successful = false;
+                        continue;
+                    }
+
+                    if original.descriptor.dynamic_typing {
+                        original.value = val;
+                        slice[i].successful = true;
+                    } else if original.value.type_check(&val) {
+                        original.value = val;
                         slice[i].successful = true;
                     } else {
-                        slice[i].successful = false;
                         let reason = format!(
                             "failed type checking: dst = {}, src = {}",
-                            original.type_name(),
+                            original.value.type_name(),
                             val.type_name()
                         );
                         slice[i].reason.assign(&reason);
+                        slice[i].successful = false;
                     }
                 } else {
-                    slice[i].successful = false;
                     let reason = format!("no such parameter: name = {}", key);
                     slice[i].reason.assign(&reason);
+                    slice[i].successful = false;
                 }
             }
 
@@ -348,7 +637,7 @@ fn add_srv_set(
 fn add_srv_get(
     node: &Arc<Node>,
     selector: &mut Selector,
-    params: Arc<RwLock<BTreeMap<String, Value>>>,
+    params: Arc<RwLock<Parameters>>,
 ) -> RCLResult<()> {
     let name = node.get_name();
     let srv_get = node.create_server::<GetParameters>(
@@ -363,8 +652,8 @@ fn add_srv_get(
             let gurad = params.read();
             for name in req.names.iter() {
                 let key = name.to_string();
-                if let Some(value) = gurad.get(&key) {
-                    result.push(value);
+                if let Some(param) = gurad.params.get(&key) {
+                    result.push(&param.value);
                 }
             }
 
@@ -384,10 +673,46 @@ fn add_srv_get(
     Ok(())
 }
 
-fn add_srv_get_types(
+fn add_srv_describe(
     node: &Arc<Node>,
     selector: &mut Selector,
     params: Arc<RwLock<BTreeMap<String, Value>>>,
+) -> RCLResult<()> {
+    let name = node.get_name();
+    let srv_describe = node.create_server::<DescribeParameters>(
+        &format!("{name}/describe_parameters"),
+        Some(Profile::default()),
+    )?;
+    selector.add_server(
+        srv_describe,
+        Box::new(move |req, _| {
+            let mut types = Vec::new();
+
+            let gurad = params.read();
+            for name in req.names.iter() {
+                let key = name.to_string();
+                if let Some(value) = gurad.get(&key) {
+                    let v: ParameterValue = value.into();
+                    types.push(v.type_);
+                } else {
+                    types.push(0);
+                }
+            }
+
+            let mut response = DescribeParametersResponse::new().unwrap();
+            // TODO: set response
+
+            response
+        }),
+    );
+
+    Ok(())
+}
+
+fn add_srv_get_types(
+    node: &Arc<Node>,
+    selector: &mut Selector,
+    params: Arc<RwLock<Parameters>>,
 ) -> RCLResult<()> {
     let name = node.get_name();
     let srv_get_types = node.create_server::<GetParameterTypes>(
@@ -402,8 +727,8 @@ fn add_srv_get_types(
             let gurad = params.read();
             for name in req.names.iter() {
                 let key = name.to_string();
-                if let Some(value) = gurad.get(&key) {
-                    let v: ParameterValue = value.into();
+                if let Some(param) = gurad.params.get(&key) {
+                    let v: ParameterValue = (&param.value).into();
                     types.push(v.type_);
                 } else {
                     types.push(0);
@@ -427,7 +752,7 @@ fn add_srv_get_types(
 fn add_srv_list(
     node: &Arc<Node>,
     selector: &mut Selector,
-    params: Arc<RwLock<BTreeMap<String, Value>>>,
+    params: Arc<RwLock<Parameters>>,
 ) -> RCLResult<()> {
     let name = node.get_name();
     let srv_list = node.create_server::<ListParameters>(
@@ -449,7 +774,7 @@ fn add_srv_list(
 
             let guard = params.write();
 
-            for (k, _v) in guard.iter() {
+            for (k, _v) in guard.params.iter() {
                 let cnt = k.as_bytes().iter().filter(|c| **c == separator).count();
                 let get_all = prefixes.is_empty() && req.depth == 0 || cnt < req.depth as usize;
 
