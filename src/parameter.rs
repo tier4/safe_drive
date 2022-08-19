@@ -5,8 +5,8 @@ use crate::{
         interfaces::rcl_interfaces::{
             msg::{ParameterValue, ParameterValueSeq, SetParametersResultSeq},
             srv::{
-                GetParameters, GetParametersResponse, ListParameters, ListParametersResponse,
-                SetParameters, SetParametersResponse,
+                GetParameterTypes, GetParameterTypesResponse, GetParameters, GetParametersResponse,
+                ListParameters, ListParametersResponse, SetParameters, SetParametersResponse,
             },
         },
         BoolSeq, F64Seq, I64Seq, RosString, RosStringSeq, U8Seq,
@@ -267,7 +267,8 @@ fn param_server(
             params.clone(),
             "set_parameters_atomically",
         )?;
-        add_srv_get(&node, &mut selector, params)?;
+        add_srv_get(&node, &mut selector, params.clone())?;
+        add_srv_get_types(&node, &mut selector, params)?;
 
         let is_halt = Rc::new(Cell::new(false));
         let is_halt_cloned = is_halt.clone();
@@ -375,6 +376,46 @@ fn add_srv_get(
                 .iter_mut()
                 .zip(result.iter())
                 .for_each(|(dst, src)| *dst = (*src).into());
+
+            response
+        }),
+    );
+
+    Ok(())
+}
+
+fn add_srv_get_types(
+    node: &Arc<Node>,
+    selector: &mut Selector,
+    params: Arc<RwLock<BTreeMap<String, Value>>>,
+) -> RCLResult<()> {
+    let name = node.get_name();
+    let srv_get_types = node.create_server::<GetParameterTypes>(
+        &format!("{name}/get_parameter_types"),
+        Some(Profile::default()),
+    )?;
+    selector.add_server(
+        srv_get_types,
+        Box::new(move |req, _| {
+            let mut types = Vec::new();
+
+            let gurad = params.read();
+            for name in req.names.iter() {
+                let key = name.to_string();
+                if let Some(value) = gurad.get(&key) {
+                    let v: ParameterValue = value.into();
+                    types.push(v.type_);
+                } else {
+                    types.push(0);
+                }
+            }
+
+            let mut response = GetParameterTypesResponse::new().unwrap();
+            response
+                .types
+                .iter_mut()
+                .zip(types.iter())
+                .for_each(|(dst, src)| *dst = *src);
 
             response
         }),
