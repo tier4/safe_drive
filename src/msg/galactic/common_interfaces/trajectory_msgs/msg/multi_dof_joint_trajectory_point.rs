@@ -117,6 +117,18 @@ impl<const N: usize> MultiDOFJointTrajectoryPointSeq<N> {
             s
         }
     }
+
+    pub fn iter<'a>(&'a self) -> std::slice::Iter<'a, MultiDOFJointTrajectoryPoint> {
+        self.as_slice().iter()
+    }
+
+    pub fn iter_mut<'a>(&'a mut self) -> std::slice::IterMut<'a, MultiDOFJointTrajectoryPoint> {
+        self.as_slice_mut().iter_mut()
+    }
+
+    pub fn len(&self) -> usize {
+        self.as_slice().len()
+    }
 }
 
 impl<const N: usize> Drop for MultiDOFJointTrajectoryPointSeq<N> {

@@ -119,6 +119,18 @@ impl<const N: usize> ListParametersRequestSeq<N> {
             s
         }
     }
+
+    pub fn iter<'a>(&'a self) -> std::slice::Iter<'a, ListParametersRequest> {
+        self.as_slice().iter()
+    }
+
+    pub fn iter_mut<'a>(&'a mut self) -> std::slice::IterMut<'a, ListParametersRequest> {
+        self.as_slice_mut().iter_mut()
+    }
+
+    pub fn len(&self) -> usize {
+        self.as_slice().len()
+    }
 }
 
 impl<const N: usize> Drop for ListParametersRequestSeq<N> {
@@ -210,6 +222,18 @@ impl<const N: usize> ListParametersResponseSeq<N> {
             let s = unsafe { std::slice::from_raw_parts_mut(self.data, self.size) };
             s
         }
+    }
+
+    pub fn iter<'a>(&'a self) -> std::slice::Iter<'a, ListParametersResponse> {
+        self.as_slice().iter()
+    }
+
+    pub fn iter_mut<'a>(&'a mut self) -> std::slice::IterMut<'a, ListParametersResponse> {
+        self.as_slice_mut().iter_mut()
+    }
+
+    pub fn len(&self) -> usize {
+        self.as_slice().len()
     }
 }
 

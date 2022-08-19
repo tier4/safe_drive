@@ -112,6 +112,18 @@ impl<const N: usize> GetStateRequestSeq<N> {
             s
         }
     }
+
+    pub fn iter<'a>(&'a self) -> std::slice::Iter<'a, GetStateRequest> {
+        self.as_slice().iter()
+    }
+
+    pub fn iter_mut<'a>(&'a mut self) -> std::slice::IterMut<'a, GetStateRequest> {
+        self.as_slice_mut().iter_mut()
+    }
+
+    pub fn len(&self) -> usize {
+        self.as_slice().len()
+    }
 }
 
 impl<const N: usize> Drop for GetStateRequestSeq<N> {
@@ -203,6 +215,18 @@ impl<const N: usize> GetStateResponseSeq<N> {
             let s = unsafe { std::slice::from_raw_parts_mut(self.data, self.size) };
             s
         }
+    }
+
+    pub fn iter<'a>(&'a self) -> std::slice::Iter<'a, GetStateResponse> {
+        self.as_slice().iter()
+    }
+
+    pub fn iter_mut<'a>(&'a mut self) -> std::slice::IterMut<'a, GetStateResponse> {
+        self.as_slice_mut().iter_mut()
+    }
+
+    pub fn len(&self) -> usize {
+        self.as_slice().len()
     }
 }
 

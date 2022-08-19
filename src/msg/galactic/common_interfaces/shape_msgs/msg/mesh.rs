@@ -100,6 +100,18 @@ impl<const N: usize> MeshSeq<N> {
             s
         }
     }
+
+    pub fn iter<'a>(&'a self) -> std::slice::Iter<'a, Mesh> {
+        self.as_slice().iter()
+    }
+
+    pub fn iter_mut<'a>(&'a mut self) -> std::slice::IterMut<'a, Mesh> {
+        self.as_slice_mut().iter_mut()
+    }
+
+    pub fn len(&self) -> usize {
+        self.as_slice().len()
+    }
 }
 
 impl<const N: usize> Drop for MeshSeq<N> {

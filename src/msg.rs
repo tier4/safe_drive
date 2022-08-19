@@ -78,6 +78,10 @@ macro_rules! def_sequence {
             pub fn iter_mut<'a>(&'a mut self) -> std::slice::IterMut<'a, $ty_orig> {
                 self.as_slice_mut().iter_mut()
             }
+
+            pub fn len(&self) -> usize {
+                self.as_slice().len()
+            }
         }
 
         impl<const N: usize> Drop for $ty<N> {
@@ -342,6 +346,10 @@ impl<const STRLEN: usize, const SEQLEN: usize> RosStringSeq<STRLEN, SEQLEN> {
 
     pub fn iter_mut<'a>(&'a mut self) -> std::slice::IterMut<'a, RosString<STRLEN>> {
         self.as_slice_mut().iter_mut()
+    }
+
+    pub fn len(&self) -> usize {
+        self.as_slice().len()
     }
 }
 

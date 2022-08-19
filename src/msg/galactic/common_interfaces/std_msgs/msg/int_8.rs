@@ -99,6 +99,18 @@ impl<const N: usize> Int8Seq<N> {
             s
         }
     }
+
+    pub fn iter<'a>(&'a self) -> std::slice::Iter<'a, Int8> {
+        self.as_slice().iter()
+    }
+
+    pub fn iter_mut<'a>(&'a mut self) -> std::slice::IterMut<'a, Int8> {
+        self.as_slice_mut().iter_mut()
+    }
+
+    pub fn len(&self) -> usize {
+        self.as_slice().len()
+    }
 }
 
 impl<const N: usize> Drop for Int8Seq<N> {

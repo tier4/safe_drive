@@ -111,6 +111,18 @@ impl<const N: usize> GetMapRequestSeq<N> {
             s
         }
     }
+
+    pub fn iter<'a>(&'a self) -> std::slice::Iter<'a, GetMapRequest> {
+        self.as_slice().iter()
+    }
+
+    pub fn iter_mut<'a>(&'a mut self) -> std::slice::IterMut<'a, GetMapRequest> {
+        self.as_slice_mut().iter_mut()
+    }
+
+    pub fn len(&self) -> usize {
+        self.as_slice().len()
+    }
 }
 
 impl<const N: usize> Drop for GetMapRequestSeq<N> {
@@ -202,6 +214,18 @@ impl<const N: usize> GetMapResponseSeq<N> {
             let s = unsafe { std::slice::from_raw_parts_mut(self.data, self.size) };
             s
         }
+    }
+
+    pub fn iter<'a>(&'a self) -> std::slice::Iter<'a, GetMapResponse> {
+        self.as_slice().iter()
+    }
+
+    pub fn iter_mut<'a>(&'a mut self) -> std::slice::IterMut<'a, GetMapResponse> {
+        self.as_slice_mut().iter_mut()
+    }
+
+    pub fn len(&self) -> usize {
+        self.as_slice().len()
     }
 }
 

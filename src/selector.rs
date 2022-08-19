@@ -526,7 +526,7 @@ impl Selector {
         );
     }
 
-    fn add_guard_condition(
+    pub(crate) fn add_guard_condition(
         &mut self,
         cond: &GuardCondition,
         handler: Option<Box<dyn FnMut() -> CallbackResult>>,

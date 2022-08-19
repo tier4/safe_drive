@@ -114,6 +114,18 @@ impl<const N: usize> SelfTestRequestSeq<N> {
             s
         }
     }
+
+    pub fn iter<'a>(&'a self) -> std::slice::Iter<'a, SelfTestRequest> {
+        self.as_slice().iter()
+    }
+
+    pub fn iter_mut<'a>(&'a mut self) -> std::slice::IterMut<'a, SelfTestRequest> {
+        self.as_slice_mut().iter_mut()
+    }
+
+    pub fn len(&self) -> usize {
+        self.as_slice().len()
+    }
 }
 
 impl<const N: usize> Drop for SelfTestRequestSeq<N> {
@@ -205,6 +217,18 @@ impl<const N: usize> SelfTestResponseSeq<N> {
             let s = unsafe { std::slice::from_raw_parts_mut(self.data, self.size) };
             s
         }
+    }
+
+    pub fn iter<'a>(&'a self) -> std::slice::Iter<'a, SelfTestResponse> {
+        self.as_slice().iter()
+    }
+
+    pub fn iter_mut<'a>(&'a mut self) -> std::slice::IterMut<'a, SelfTestResponse> {
+        self.as_slice_mut().iter_mut()
+    }
+
+    pub fn len(&self) -> usize {
+        self.as_slice().len()
     }
 }
 

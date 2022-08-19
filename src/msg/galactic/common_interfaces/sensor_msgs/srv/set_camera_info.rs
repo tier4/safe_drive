@@ -117,6 +117,18 @@ impl<const N: usize> SetCameraInfoRequestSeq<N> {
             s
         }
     }
+
+    pub fn iter<'a>(&'a self) -> std::slice::Iter<'a, SetCameraInfoRequest> {
+        self.as_slice().iter()
+    }
+
+    pub fn iter_mut<'a>(&'a mut self) -> std::slice::IterMut<'a, SetCameraInfoRequest> {
+        self.as_slice_mut().iter_mut()
+    }
+
+    pub fn len(&self) -> usize {
+        self.as_slice().len()
+    }
 }
 
 impl<const N: usize> Drop for SetCameraInfoRequestSeq<N> {
@@ -208,6 +220,18 @@ impl<const N: usize> SetCameraInfoResponseSeq<N> {
             let s = unsafe { std::slice::from_raw_parts_mut(self.data, self.size) };
             s
         }
+    }
+
+    pub fn iter<'a>(&'a self) -> std::slice::Iter<'a, SetCameraInfoResponse> {
+        self.as_slice().iter()
+    }
+
+    pub fn iter_mut<'a>(&'a mut self) -> std::slice::IterMut<'a, SetCameraInfoResponse> {
+        self.as_slice_mut().iter_mut()
+    }
+
+    pub fn len(&self) -> usize {
+        self.as_slice().len()
     }
 }
 
