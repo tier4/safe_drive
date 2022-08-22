@@ -3,7 +3,11 @@ use crate::{
     logger::{pr_error_in, Logger},
     msg::{
         interfaces::rcl_interfaces::{
-            msg::{ParameterValue, ParameterValueSeq, SetParametersResultSeq},
+            self,
+            msg::{
+                ParameterDescriptor, ParameterDescriptorSeq, ParameterValue, ParameterValueSeq,
+                SetParametersResultSeq,
+            },
             srv::{
                 DescribeParameters, DescribeParametersResponse, GetParameterTypes,
                 GetParameterTypesResponse, GetParameters, GetParametersResponse, ListParameters,
@@ -33,6 +37,7 @@ trait Contains {
     fn contains(&self, val: Self::T) -> bool;
 }
 
+#[derive(Debug, PartialEq, Eq, PartialOrd, Ord)]
 struct IntegerRange {
     min: i64,
     max: i64,
@@ -52,10 +57,31 @@ impl Contains for IntegerRange {
     }
 }
 
+impl From<&IntegerRange> for rcl_interfaces::msg::IntegerRange {
+    fn from(range: &IntegerRange) -> Self {
+        rcl_interfaces::msg::IntegerRange {
+            from_value: range.min,
+            to_value: range.max,
+            step: range.step as u64,
+        }
+    }
+}
+
+#[derive(Debug, PartialEq, PartialOrd)]
 struct FloatingPointRange {
     min: f64,
     max: f64,
     step: f64,
+}
+
+impl From<&FloatingPointRange> for rcl_interfaces::msg::FloatingPointRange {
+    fn from(range: &FloatingPointRange) -> Self {
+        rcl_interfaces::msg::FloatingPointRange {
+            from_value: range.min,
+            to_value: range.max,
+            step: range.step,
+        }
+    }
 }
 
 impl Contains for FloatingPointRange {
@@ -75,15 +101,17 @@ impl Contains for FloatingPointRange {
     }
 }
 
+#[derive(Debug)]
 struct Descriptor {
     description: String,
     additional_constraints: String,
     read_only: bool,
     dynamic_typing: bool,
-    floating_point_range: FloatingPointRange,
-    integer_range: IntegerRange,
+    floating_point_range: Option<FloatingPointRange>,
+    integer_range: Option<IntegerRange>,
 }
 
+#[derive(Debug)]
 pub struct Parameters {
     params: BTreeMap<String, Parameter>,
 }
@@ -153,8 +181,6 @@ impl Parameters {
         description: Option<String>,
     ) -> Result<(), DynError> {
         if let Some(param) = self.params.get_mut(&name) {
-            // TODO: check range
-
             if !param.descriptor.dynamic_typing {
                 let msg = format!("{} is a statically typed value", name);
                 return Err(msg.into());
@@ -193,15 +219,18 @@ impl Parameters {
         let range = FloatingPointRange { min, max, step };
 
         if let Some(param) = self.params.get_mut(name) {
-            // TODO: check range
+            if !param.check_range(&param.value) {
+                let msg = format!("{:?} is not in the range.", param.value);
+                return Err(msg.into());
+            }
 
             if param.descriptor.dynamic_typing {
-                param.descriptor.floating_point_range = range;
+                param.descriptor.floating_point_range = Some(range);
                 Ok(())
             } else {
                 match &param.value {
                     Value::F64(_) | Value::VecF64(_) => {
-                        param.descriptor.floating_point_range = range;
+                        param.descriptor.floating_point_range = Some(range);
                         Ok(())
                     }
                     _ => {
@@ -230,13 +259,18 @@ impl Parameters {
         let range = IntegerRange { min, max, step };
 
         if let Some(param) = self.params.get_mut(name) {
+            if !param.check_range(&param.value) {
+                let msg = format!("{:?} is not in the range.", param.value);
+                return Err(msg.into());
+            }
+
             if param.descriptor.dynamic_typing {
-                param.descriptor.integer_range = range;
+                param.descriptor.integer_range = Some(range);
                 Ok(())
             } else {
                 match &param.value {
                     Value::I64(_) | Value::VecI64(_) => {
-                        param.descriptor.integer_range = range;
+                        param.descriptor.integer_range = Some(range);
                         Ok(())
                     }
                     _ => {
@@ -256,6 +290,7 @@ impl Parameters {
     }
 }
 
+#[derive(Debug)]
 pub struct Parameter {
     descriptor: Descriptor,
     value: Value,
@@ -269,31 +304,23 @@ impl Parameter {
                 additional_constraints: "".to_string(),
                 read_only,
                 dynamic_typing,
-                floating_point_range: FloatingPointRange {
-                    min: f64::MIN,
-                    max: f64::MAX,
-                    step: 0.0,
-                },
-                integer_range: IntegerRange {
-                    min: i64::MIN,
-                    max: i64::MAX,
-                    step: 1,
-                },
+                floating_point_range: None,
+                integer_range: None,
             },
             value,
         }
     }
 
     fn check_range(&self, value: &Value) -> bool {
-        match value {
-            Value::I64(x) => self.descriptor.integer_range.contains(*x),
-            Value::F64(x) => self.descriptor.floating_point_range.contains(*x),
-            Value::VecI64(arr) => arr
-                .iter()
-                .all(|x| self.descriptor.integer_range.contains(*x)),
-            Value::VecF64(arr) => arr
-                .iter()
-                .all(|x| self.descriptor.floating_point_range.contains(*x)),
+        match (value, &self.descriptor.integer_range) {
+            (Value::I64(x), Some(range)) => return range.contains(*x),
+            (Value::VecI64(arr), Some(range)) => return arr.iter().all(|x| range.contains(*x)),
+            _ => (),
+        }
+
+        match (value, &self.descriptor.floating_point_range) {
+            (Value::F64(x), Some(range)) => range.contains(*x),
+            (Value::VecF64(arr), Some(range)) => return arr.iter().all(|x| range.contains(*x)),
             _ => true,
         }
     }
@@ -541,7 +568,8 @@ fn param_server(
             "set_parameters_atomically",
         )?;
         add_srv_get(&node, &mut selector, params.clone())?;
-        add_srv_get_types(&node, &mut selector, params)?;
+        add_srv_get_types(&node, &mut selector, params.clone())?;
+        add_srv_describe(&node, &mut selector, params)?;
 
         let is_halt = Rc::new(Cell::new(false));
         let is_halt_cloned = is_halt.clone();
@@ -596,7 +624,7 @@ fn add_srv_set(
                     }
 
                     if !original.check_range(&val) {
-                        let reason = format!("{} is exceeding the range", key);
+                        let reason = format!("{} is not in the range", key);
                         slice[i].reason.assign(&reason);
                         slice[i].successful = false;
                         continue;
@@ -676,7 +704,7 @@ fn add_srv_get(
 fn add_srv_describe(
     node: &Arc<Node>,
     selector: &mut Selector,
-    params: Arc<RwLock<BTreeMap<String, Value>>>,
+    params: Arc<RwLock<Parameters>>,
 ) -> RCLResult<()> {
     let name = node.get_name();
     let srv_describe = node.create_server::<DescribeParameters>(
@@ -686,21 +714,56 @@ fn add_srv_describe(
     selector.add_server(
         srv_describe,
         Box::new(move |req, _| {
-            let mut types = Vec::new();
-
             let gurad = params.read();
+
+            let mut results = Vec::new();
             for name in req.names.iter() {
                 let key = name.to_string();
-                if let Some(value) = gurad.get(&key) {
-                    let v: ParameterValue = value.into();
-                    types.push(v.type_);
-                } else {
-                    types.push(0);
+                if let Some(param) = gurad.params.get(&key) {
+                    let value: ParameterValue = (&param.value).into();
+                    let description = RosString::new(&param.descriptor.description).unwrap();
+                    let additional_constraints =
+                        RosString::new(&param.descriptor.additional_constraints).unwrap();
+
+                    let integer_range = if let Some(range) = &param.descriptor.integer_range {
+                        let mut int_range = rcl_interfaces::msg::IntegerRangeSeq::new(1).unwrap();
+                        int_range.as_slice_mut()[0] = range.into();
+                        int_range
+                    } else {
+                        rcl_interfaces::msg::IntegerRangeSeq::new(0).unwrap()
+                    };
+
+                    let floating_point_range =
+                        if let Some(range) = &param.descriptor.floating_point_range {
+                            let mut f64_range =
+                                rcl_interfaces::msg::FloatingPointRangeSeq::new(1).unwrap();
+                            f64_range.as_slice_mut()[0] = range.into();
+                            f64_range
+                        } else {
+                            rcl_interfaces::msg::FloatingPointRangeSeq::new(0).unwrap()
+                        };
+
+                    let result = ParameterDescriptor {
+                        name: RosString::new(&key).unwrap(),
+                        type_: value.type_,
+                        description,
+                        additional_constraints,
+                        read_only: param.descriptor.read_only,
+                        dynamic_typing: param.descriptor.dynamic_typing,
+                        integer_range,
+                        floating_point_range,
+                    };
+                    results.push(result);
                 }
             }
 
             let mut response = DescribeParametersResponse::new().unwrap();
-            // TODO: set response
+            response.descriptors = ParameterDescriptorSeq::new(results.len()).unwrap();
+            response
+                .descriptors
+                .iter_mut()
+                .zip(results.into_iter())
+                .for_each(|(dst, src)| *dst = src);
 
             response
         }),
