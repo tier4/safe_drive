@@ -90,6 +90,15 @@ impl<const N: usize> UInt16MultiArraySeq<N> {
         }
     }
 
+    pub fn null() -> Self {
+        let msg: UInt16MultiArraySeqRaw = unsafe { std::mem::MaybeUninit::zeroed().assume_init() };
+        Self {
+            data: msg.data,
+            size: msg.size,
+            capacity: msg.capacity,
+        }
+    }
+
     pub fn as_slice(&self) -> &[UInt16MultiArray] {
         if self.data.is_null() {
             &[]

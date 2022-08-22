@@ -109,6 +109,16 @@ impl<const N: usize> GetAvailableTransitionsRequestSeq<N> {
         }
     }
 
+    pub fn null() -> Self {
+        let msg: GetAvailableTransitionsRequestSeqRaw =
+            unsafe { std::mem::MaybeUninit::zeroed().assume_init() };
+        Self {
+            data: msg.data,
+            size: msg.size,
+            capacity: msg.capacity,
+        }
+    }
+
     pub fn as_slice(&self) -> &[GetAvailableTransitionsRequest] {
         if self.data.is_null() {
             &[]
@@ -212,6 +222,16 @@ impl<const N: usize> GetAvailableTransitionsResponseSeq<N> {
             })
         } else {
             None
+        }
+    }
+
+    pub fn null() -> Self {
+        let msg: GetAvailableTransitionsResponseSeqRaw =
+            unsafe { std::mem::MaybeUninit::zeroed().assume_init() };
+        Self {
+            data: msg.data,
+            size: msg.size,
+            capacity: msg.capacity,
         }
     }
 

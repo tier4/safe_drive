@@ -82,6 +82,15 @@ impl<const N: usize> ByteSeq<N> {
         }
     }
 
+    pub fn null() -> Self {
+        let msg: ByteSeqRaw = unsafe { std::mem::MaybeUninit::zeroed().assume_init() };
+        Self {
+            data: msg.data,
+            size: msg.size,
+            capacity: msg.capacity,
+        }
+    }
+
     pub fn as_slice(&self) -> &[Byte] {
         if self.data.is_null() {
             &[]

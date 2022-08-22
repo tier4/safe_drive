@@ -88,6 +88,15 @@ impl<const N: usize> MeshTriangleSeq<N> {
         }
     }
 
+    pub fn null() -> Self {
+        let msg: MeshTriangleSeqRaw = unsafe { std::mem::MaybeUninit::zeroed().assume_init() };
+        Self {
+            data: msg.data,
+            size: msg.size,
+            capacity: msg.capacity,
+        }
+    }
+
     pub fn as_slice(&self) -> &[MeshTriangle] {
         if self.data.is_null() {
             &[]

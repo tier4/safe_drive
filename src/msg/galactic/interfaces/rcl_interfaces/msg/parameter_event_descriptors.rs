@@ -96,6 +96,16 @@ impl<const N: usize> ParameterEventDescriptorsSeq<N> {
         }
     }
 
+    pub fn null() -> Self {
+        let msg: ParameterEventDescriptorsSeqRaw =
+            unsafe { std::mem::MaybeUninit::zeroed().assume_init() };
+        Self {
+            data: msg.data,
+            size: msg.size,
+            capacity: msg.capacity,
+        }
+    }
+
     pub fn as_slice(&self) -> &[ParameterEventDescriptors] {
         if self.data.is_null() {
             &[]

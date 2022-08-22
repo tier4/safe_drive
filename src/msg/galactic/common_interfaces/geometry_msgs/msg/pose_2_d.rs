@@ -84,6 +84,15 @@ impl<const N: usize> Pose2DSeq<N> {
         }
     }
 
+    pub fn null() -> Self {
+        let msg: Pose2DSeqRaw = unsafe { std::mem::MaybeUninit::zeroed().assume_init() };
+        Self {
+            data: msg.data,
+            size: msg.size,
+            capacity: msg.capacity,
+        }
+    }
+
     pub fn as_slice(&self) -> &[Pose2D] {
         if self.data.is_null() {
             &[]

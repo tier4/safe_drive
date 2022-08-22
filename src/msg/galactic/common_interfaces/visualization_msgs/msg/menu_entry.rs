@@ -95,6 +95,15 @@ impl<const N: usize> MenuEntrySeq<N> {
         }
     }
 
+    pub fn null() -> Self {
+        let msg: MenuEntrySeqRaw = unsafe { std::mem::MaybeUninit::zeroed().assume_init() };
+        Self {
+            data: msg.data,
+            size: msg.size,
+            capacity: msg.capacity,
+        }
+    }
+
     pub fn as_slice(&self) -> &[MenuEntry] {
         if self.data.is_null() {
             &[]

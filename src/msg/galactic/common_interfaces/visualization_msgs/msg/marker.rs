@@ -113,6 +113,15 @@ impl<const N: usize> MarkerSeq<N> {
         }
     }
 
+    pub fn null() -> Self {
+        let msg: MarkerSeqRaw = unsafe { std::mem::MaybeUninit::zeroed().assume_init() };
+        Self {
+            data: msg.data,
+            size: msg.size,
+            capacity: msg.capacity,
+        }
+    }
+
     pub fn as_slice(&self) -> &[Marker] {
         if self.data.is_null() {
             &[]

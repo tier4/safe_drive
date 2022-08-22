@@ -90,6 +90,16 @@ impl<const N: usize> TwistWithCovarianceSeq<N> {
         }
     }
 
+    pub fn null() -> Self {
+        let msg: TwistWithCovarianceSeqRaw =
+            unsafe { std::mem::MaybeUninit::zeroed().assume_init() };
+        Self {
+            data: msg.data,
+            size: msg.size,
+            capacity: msg.capacity,
+        }
+    }
+
     pub fn as_slice(&self) -> &[TwistWithCovariance] {
         if self.data.is_null() {
             &[]

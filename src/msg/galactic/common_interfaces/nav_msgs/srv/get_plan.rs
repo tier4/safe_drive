@@ -97,6 +97,15 @@ impl<const N: usize> GetPlanRequestSeq<N> {
         }
     }
 
+    pub fn null() -> Self {
+        let msg: GetPlanRequestSeqRaw = unsafe { std::mem::MaybeUninit::zeroed().assume_init() };
+        Self {
+            data: msg.data,
+            size: msg.size,
+            capacity: msg.capacity,
+        }
+    }
+
     pub fn as_slice(&self) -> &[GetPlanRequest] {
         if self.data.is_null() {
             &[]
@@ -198,6 +207,15 @@ impl<const N: usize> GetPlanResponseSeq<N> {
             })
         } else {
             None
+        }
+    }
+
+    pub fn null() -> Self {
+        let msg: GetPlanResponseSeqRaw = unsafe { std::mem::MaybeUninit::zeroed().assume_init() };
+        Self {
+            data: msg.data,
+            size: msg.size,
+            capacity: msg.capacity,
         }
     }
 

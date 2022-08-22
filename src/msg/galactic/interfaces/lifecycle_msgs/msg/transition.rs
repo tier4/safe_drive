@@ -119,6 +119,15 @@ impl<const N: usize> TransitionSeq<N> {
         }
     }
 
+    pub fn null() -> Self {
+        let msg: TransitionSeqRaw = unsafe { std::mem::MaybeUninit::zeroed().assume_init() };
+        Self {
+            data: msg.data,
+            size: msg.size,
+            capacity: msg.capacity,
+        }
+    }
+
     pub fn as_slice(&self) -> &[Transition] {
         if self.data.is_null() {
             &[]

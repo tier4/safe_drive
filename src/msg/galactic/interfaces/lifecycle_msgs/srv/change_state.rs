@@ -97,6 +97,16 @@ impl<const N: usize> ChangeStateRequestSeq<N> {
         }
     }
 
+    pub fn null() -> Self {
+        let msg: ChangeStateRequestSeqRaw =
+            unsafe { std::mem::MaybeUninit::zeroed().assume_init() };
+        Self {
+            data: msg.data,
+            size: msg.size,
+            capacity: msg.capacity,
+        }
+    }
+
     pub fn as_slice(&self) -> &[ChangeStateRequest] {
         if self.data.is_null() {
             &[]
@@ -198,6 +208,16 @@ impl<const N: usize> ChangeStateResponseSeq<N> {
             })
         } else {
             None
+        }
+    }
+
+    pub fn null() -> Self {
+        let msg: ChangeStateResponseSeqRaw =
+            unsafe { std::mem::MaybeUninit::zeroed().assume_init() };
+        Self {
+            data: msg.data,
+            size: msg.size,
+            capacity: msg.capacity,
         }
     }
 

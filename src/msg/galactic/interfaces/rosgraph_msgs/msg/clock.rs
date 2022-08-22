@@ -82,6 +82,15 @@ impl<const N: usize> ClockSeq<N> {
         }
     }
 
+    pub fn null() -> Self {
+        let msg: ClockSeqRaw = unsafe { std::mem::MaybeUninit::zeroed().assume_init() };
+        Self {
+            data: msg.data,
+            size: msg.size,
+            capacity: msg.capacity,
+        }
+    }
+
     pub fn as_slice(&self) -> &[Clock] {
         if self.data.is_null() {
             &[]

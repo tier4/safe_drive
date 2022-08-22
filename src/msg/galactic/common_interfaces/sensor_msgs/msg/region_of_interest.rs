@@ -93,6 +93,15 @@ impl<const N: usize> RegionOfInterestSeq<N> {
         }
     }
 
+    pub fn null() -> Self {
+        let msg: RegionOfInterestSeqRaw = unsafe { std::mem::MaybeUninit::zeroed().assume_init() };
+        Self {
+            data: msg.data,
+            size: msg.size,
+            capacity: msg.capacity,
+        }
+    }
+
     pub fn as_slice(&self) -> &[RegionOfInterest] {
         if self.data.is_null() {
             &[]

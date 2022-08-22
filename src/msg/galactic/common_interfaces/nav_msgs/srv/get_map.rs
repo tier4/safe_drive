@@ -94,6 +94,15 @@ impl<const N: usize> GetMapRequestSeq<N> {
         }
     }
 
+    pub fn null() -> Self {
+        let msg: GetMapRequestSeqRaw = unsafe { std::mem::MaybeUninit::zeroed().assume_init() };
+        Self {
+            data: msg.data,
+            size: msg.size,
+            capacity: msg.capacity,
+        }
+    }
+
     pub fn as_slice(&self) -> &[GetMapRequest] {
         if self.data.is_null() {
             &[]
@@ -195,6 +204,15 @@ impl<const N: usize> GetMapResponseSeq<N> {
             })
         } else {
             None
+        }
+    }
+
+    pub fn null() -> Self {
+        let msg: GetMapResponseSeqRaw = unsafe { std::mem::MaybeUninit::zeroed().assume_init() };
+        Self {
+            data: msg.data,
+            size: msg.size,
+            capacity: msg.capacity,
         }
     }
 

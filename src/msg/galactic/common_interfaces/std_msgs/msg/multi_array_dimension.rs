@@ -91,6 +91,16 @@ impl<const N: usize> MultiArrayDimensionSeq<N> {
         }
     }
 
+    pub fn null() -> Self {
+        let msg: MultiArrayDimensionSeqRaw =
+            unsafe { std::mem::MaybeUninit::zeroed().assume_init() };
+        Self {
+            data: msg.data,
+            size: msg.size,
+            capacity: msg.capacity,
+        }
+    }
+
     pub fn as_slice(&self) -> &[MultiArrayDimension] {
         if self.data.is_null() {
             &[]

@@ -100,6 +100,16 @@ impl<const N: usize> SetCameraInfoRequestSeq<N> {
         }
     }
 
+    pub fn null() -> Self {
+        let msg: SetCameraInfoRequestSeqRaw =
+            unsafe { std::mem::MaybeUninit::zeroed().assume_init() };
+        Self {
+            data: msg.data,
+            size: msg.size,
+            capacity: msg.capacity,
+        }
+    }
+
     pub fn as_slice(&self) -> &[SetCameraInfoRequest] {
         if self.data.is_null() {
             &[]
@@ -201,6 +211,16 @@ impl<const N: usize> SetCameraInfoResponseSeq<N> {
             })
         } else {
             None
+        }
+    }
+
+    pub fn null() -> Self {
+        let msg: SetCameraInfoResponseSeqRaw =
+            unsafe { std::mem::MaybeUninit::zeroed().assume_init() };
+        Self {
+            data: msg.data,
+            size: msg.size,
+            capacity: msg.capacity,
         }
     }
 

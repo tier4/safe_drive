@@ -50,6 +50,11 @@ macro_rules! def_sequence {
                 }
             }
 
+            pub fn null() -> Self {
+                let msg: $ty_seq = unsafe { std::mem::MaybeUninit::zeroed().assume_init() };
+                $ty(msg)
+            }
+
             pub fn as_slice(&self) -> &[$ty_orig] {
                 if self.0.data.is_null() {
                     &[]
@@ -226,6 +231,12 @@ impl<const N: usize> RosString<N> {
         }
     }
 
+    pub fn null() -> Self {
+        let msg: rosidl_runtime_c__String =
+            unsafe { std::mem::MaybeUninit::zeroed().assume_init() };
+        Self(msg)
+    }
+
     fn assign_string(msg: &mut rosidl_runtime_c__String, s: &str) -> bool {
         let cs = CString::new(s).unwrap();
 
@@ -315,6 +326,12 @@ impl<const STRLEN: usize, const SEQLEN: usize> RosStringSeq<STRLEN, SEQLEN> {
         } else {
             None
         }
+    }
+
+    pub fn null() -> Self {
+        let msg: rosidl_runtime_c__String__Sequence =
+            unsafe { std::mem::MaybeUninit::zeroed().assume_init() };
+        Self(msg)
     }
 
     pub fn as_slice(&self) -> &[RosString<STRLEN>] {
@@ -462,5 +479,11 @@ mod tests {
         let s1 = RosString::<0>::new("Hello, World!").unwrap();
         let s2 = RosString::<0>::new("Hello, World!").unwrap();
         assert_eq!(s1, s2);
+    }
+
+    #[test]
+    fn test_zeroed() {
+        let mut s = RosString::<0>::null();
+        s.assign("Hello, World!");
     }
 }

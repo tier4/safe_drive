@@ -90,6 +90,15 @@ impl<const N: usize> Float64MultiArraySeq<N> {
         }
     }
 
+    pub fn null() -> Self {
+        let msg: Float64MultiArraySeqRaw = unsafe { std::mem::MaybeUninit::zeroed().assume_init() };
+        Self {
+            data: msg.data,
+            size: msg.size,
+            capacity: msg.capacity,
+        }
+    }
+
     pub fn as_slice(&self) -> &[Float64MultiArray] {
         if self.data.is_null() {
             &[]

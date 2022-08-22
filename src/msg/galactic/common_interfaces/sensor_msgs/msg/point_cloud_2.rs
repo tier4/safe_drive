@@ -96,6 +96,15 @@ impl<const N: usize> PointCloud2Seq<N> {
         }
     }
 
+    pub fn null() -> Self {
+        let msg: PointCloud2SeqRaw = unsafe { std::mem::MaybeUninit::zeroed().assume_init() };
+        Self {
+            data: msg.data,
+            size: msg.size,
+            capacity: msg.capacity,
+        }
+    }
+
     pub fn as_slice(&self) -> &[PointCloud2] {
         if self.data.is_null() {
             &[]

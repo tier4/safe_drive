@@ -84,6 +84,15 @@ impl<const N: usize> Point32Seq<N> {
         }
     }
 
+    pub fn null() -> Self {
+        let msg: Point32SeqRaw = unsafe { std::mem::MaybeUninit::zeroed().assume_init() };
+        Self {
+            data: msg.data,
+            size: msg.size,
+            capacity: msg.capacity,
+        }
+    }
+
     pub fn as_slice(&self) -> &[Point32] {
         if self.data.is_null() {
             &[]

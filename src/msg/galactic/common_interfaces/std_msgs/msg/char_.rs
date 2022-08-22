@@ -82,6 +82,15 @@ impl<const N: usize> CharSeq<N> {
         }
     }
 
+    pub fn null() -> Self {
+        let msg: CharSeqRaw = unsafe { std::mem::MaybeUninit::zeroed().assume_init() };
+        Self {
+            data: msg.data,
+            size: msg.size,
+            capacity: msg.capacity,
+        }
+    }
+
     pub fn as_slice(&self) -> &[Char] {
         if self.data.is_null() {
             &[]

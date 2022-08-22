@@ -95,6 +95,15 @@ impl<const N: usize> StatisticDataTypeSeq<N> {
         }
     }
 
+    pub fn null() -> Self {
+        let msg: StatisticDataTypeSeqRaw = unsafe { std::mem::MaybeUninit::zeroed().assume_init() };
+        Self {
+            data: msg.data,
+            size: msg.size,
+            capacity: msg.capacity,
+        }
+    }
+
     pub fn as_slice(&self) -> &[StatisticDataType] {
         if self.data.is_null() {
             &[]

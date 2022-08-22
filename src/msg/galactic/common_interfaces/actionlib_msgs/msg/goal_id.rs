@@ -83,6 +83,15 @@ impl<const N: usize> GoalIDSeq<N> {
         }
     }
 
+    pub fn null() -> Self {
+        let msg: GoalIDSeqRaw = unsafe { std::mem::MaybeUninit::zeroed().assume_init() };
+        Self {
+            data: msg.data,
+            size: msg.size,
+            capacity: msg.capacity,
+        }
+    }
+
     pub fn as_slice(&self) -> &[GoalID] {
         if self.data.is_null() {
             &[]

@@ -82,6 +82,15 @@ impl<const N: usize> Int64Seq<N> {
         }
     }
 
+    pub fn null() -> Self {
+        let msg: Int64SeqRaw = unsafe { std::mem::MaybeUninit::zeroed().assume_init() };
+        Self {
+            data: msg.data,
+            size: msg.size,
+            capacity: msg.capacity,
+        }
+    }
+
     pub fn as_slice(&self) -> &[Int64] {
         if self.data.is_null() {
             &[]

@@ -88,6 +88,15 @@ impl<const N: usize> ImageSeq<N> {
         }
     }
 
+    pub fn null() -> Self {
+        let msg: ImageSeqRaw = unsafe { std::mem::MaybeUninit::zeroed().assume_init() };
+        Self {
+            data: msg.data,
+            size: msg.size,
+            capacity: msg.capacity,
+        }
+    }
+
     pub fn as_slice(&self) -> &[Image] {
         if self.data.is_null() {
             &[]

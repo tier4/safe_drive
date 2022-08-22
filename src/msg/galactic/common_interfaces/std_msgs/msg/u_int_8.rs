@@ -82,6 +82,15 @@ impl<const N: usize> UInt8Seq<N> {
         }
     }
 
+    pub fn null() -> Self {
+        let msg: UInt8SeqRaw = unsafe { std::mem::MaybeUninit::zeroed().assume_init() };
+        Self {
+            data: msg.data,
+            size: msg.size,
+            capacity: msg.capacity,
+        }
+    }
+
     pub fn as_slice(&self) -> &[UInt8] {
         if self.data.is_null() {
             &[]

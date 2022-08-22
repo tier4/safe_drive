@@ -91,6 +91,16 @@ impl<const N: usize> FloatingPointRangeSeq<N> {
         }
     }
 
+    pub fn null() -> Self {
+        let msg: FloatingPointRangeSeqRaw =
+            unsafe { std::mem::MaybeUninit::zeroed().assume_init() };
+        Self {
+            data: msg.data,
+            size: msg.size,
+            capacity: msg.capacity,
+        }
+    }
+
     pub fn as_slice(&self) -> &[FloatingPointRange] {
         if self.data.is_null() {
             &[]

@@ -89,6 +89,15 @@ impl<const N: usize> WrenchStampedSeq<N> {
         }
     }
 
+    pub fn null() -> Self {
+        let msg: WrenchStampedSeqRaw = unsafe { std::mem::MaybeUninit::zeroed().assume_init() };
+        Self {
+            data: msg.data,
+            size: msg.size,
+            capacity: msg.capacity,
+        }
+    }
+
     pub fn as_slice(&self) -> &[WrenchStamped] {
         if self.data.is_null() {
             &[]

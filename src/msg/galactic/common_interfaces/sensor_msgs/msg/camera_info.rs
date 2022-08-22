@@ -98,6 +98,15 @@ impl<const N: usize> CameraInfoSeq<N> {
         }
     }
 
+    pub fn null() -> Self {
+        let msg: CameraInfoSeqRaw = unsafe { std::mem::MaybeUninit::zeroed().assume_init() };
+        Self {
+            data: msg.data,
+            size: msg.size,
+            capacity: msg.capacity,
+        }
+    }
+
     pub fn as_slice(&self) -> &[CameraInfo] {
         if self.data.is_null() {
             &[]

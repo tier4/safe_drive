@@ -90,6 +90,15 @@ impl<const N: usize> ChannelFloat32Seq<N> {
         }
     }
 
+    pub fn null() -> Self {
+        let msg: ChannelFloat32SeqRaw = unsafe { std::mem::MaybeUninit::zeroed().assume_init() };
+        Self {
+            data: msg.data,
+            size: msg.size,
+            capacity: msg.capacity,
+        }
+    }
+
     pub fn as_slice(&self) -> &[ChannelFloat32] {
         if self.data.is_null() {
             &[]

@@ -97,6 +97,15 @@ impl<const N: usize> DiagnosticStatusSeq<N> {
         }
     }
 
+    pub fn null() -> Self {
+        let msg: DiagnosticStatusSeqRaw = unsafe { std::mem::MaybeUninit::zeroed().assume_init() };
+        Self {
+            data: msg.data,
+            size: msg.size,
+            capacity: msg.capacity,
+        }
+    }
+
     pub fn as_slice(&self) -> &[DiagnosticStatus] {
         if self.data.is_null() {
             &[]

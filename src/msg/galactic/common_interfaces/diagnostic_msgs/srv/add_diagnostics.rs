@@ -102,6 +102,16 @@ impl<const N: usize> AddDiagnosticsRequestSeq<N> {
         }
     }
 
+    pub fn null() -> Self {
+        let msg: AddDiagnosticsRequestSeqRaw =
+            unsafe { std::mem::MaybeUninit::zeroed().assume_init() };
+        Self {
+            data: msg.data,
+            size: msg.size,
+            capacity: msg.capacity,
+        }
+    }
+
     pub fn as_slice(&self) -> &[AddDiagnosticsRequest] {
         if self.data.is_null() {
             &[]
@@ -204,6 +214,16 @@ impl<const N: usize> AddDiagnosticsResponseSeq<N> {
             })
         } else {
             None
+        }
+    }
+
+    pub fn null() -> Self {
+        let msg: AddDiagnosticsResponseSeqRaw =
+            unsafe { std::mem::MaybeUninit::zeroed().assume_init() };
+        Self {
+            data: msg.data,
+            size: msg.size,
+            capacity: msg.capacity,
         }
     }
 

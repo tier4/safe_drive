@@ -82,6 +82,15 @@ impl<const N: usize> StringSeq<N> {
         }
     }
 
+    pub fn null() -> Self {
+        let msg: StringSeqRaw = unsafe { std::mem::MaybeUninit::zeroed().assume_init() };
+        Self {
+            data: msg.data,
+            size: msg.size,
+            capacity: msg.capacity,
+        }
+    }
+
     pub fn as_slice(&self) -> &[String] {
         if self.data.is_null() {
             &[]

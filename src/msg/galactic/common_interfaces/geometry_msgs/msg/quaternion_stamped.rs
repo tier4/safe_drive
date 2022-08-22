@@ -90,6 +90,15 @@ impl<const N: usize> QuaternionStampedSeq<N> {
         }
     }
 
+    pub fn null() -> Self {
+        let msg: QuaternionStampedSeqRaw = unsafe { std::mem::MaybeUninit::zeroed().assume_init() };
+        Self {
+            data: msg.data,
+            size: msg.size,
+            capacity: msg.capacity,
+        }
+    }
+
     pub fn as_slice(&self) -> &[QuaternionStamped] {
         if self.data.is_null() {
             &[]

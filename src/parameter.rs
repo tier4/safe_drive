@@ -1,6 +1,6 @@
 use crate::{
     error::{DynError, RCLResult},
-    logger::{pr_error_in, Logger},
+    logger::{pr_error_in, pr_fatal_in, Logger},
     msg::{
         interfaces::rcl_interfaces::{
             self,
@@ -414,6 +414,8 @@ impl From<&ParameterValue> for Value {
 impl From<&Value> for ParameterValue {
     fn from(var: &Value) -> Self {
         let mut result = ParameterValue::new().unwrap();
+        let logger = Logger::new("safe_drive");
+
         match var {
             Value::NotSet => result.type_ = 0,
             Value::Bool(val) => {
@@ -430,11 +432,17 @@ impl From<&Value> for ParameterValue {
             }
             Value::String(val) => {
                 result.type_ = 4;
-                result.string_value = RosString::new(&val).unwrap();
+                result.string_value = RosString::new(&val).unwrap_or_else(|| {
+                    pr_fatal_in!(logger, "{}:{}: failed allocation", file!(), line!());
+                    RosString::null()
+                });
             }
             Value::VecU8(val) => {
                 result.type_ = 5;
-                result.byte_array_value = U8Seq::new(val.len()).unwrap();
+                result.byte_array_value = U8Seq::new(val.len()).unwrap_or_else(|| {
+                    pr_fatal_in!(logger, "{}:{}: failed allocation", file!(), line!());
+                    U8Seq::null()
+                });
                 result
                     .byte_array_value
                     .iter_mut()
@@ -443,7 +451,10 @@ impl From<&Value> for ParameterValue {
             }
             Value::VecBool(val) => {
                 result.type_ = 6;
-                result.bool_array_value = BoolSeq::new(val.len()).unwrap();
+                result.bool_array_value = BoolSeq::new(val.len()).unwrap_or_else(|| {
+                    pr_fatal_in!(logger, "{}:{}: failed allocation", file!(), line!());
+                    BoolSeq::null()
+                });
                 result
                     .bool_array_value
                     .iter_mut()
@@ -452,7 +463,10 @@ impl From<&Value> for ParameterValue {
             }
             Value::VecI64(val) => {
                 result.type_ = 7;
-                result.integer_array_value = I64Seq::new(val.len()).unwrap();
+                result.integer_array_value = I64Seq::new(val.len()).unwrap_or_else(|| {
+                    pr_fatal_in!(logger, "{}:{}: failed allocation", file!(), line!());
+                    I64Seq::null()
+                });
                 result
                     .integer_array_value
                     .iter_mut()
@@ -461,7 +475,10 @@ impl From<&Value> for ParameterValue {
             }
             Value::VecF64(val) => {
                 result.type_ = 8;
-                result.double_array_value = F64Seq::new(val.len()).unwrap();
+                result.double_array_value = F64Seq::new(val.len()).unwrap_or_else(|| {
+                    pr_fatal_in!(logger, "{}:{}: failed allocation", file!(), line!());
+                    F64Seq::null()
+                });
                 result
                     .double_array_value
                     .iter_mut()
@@ -470,7 +487,10 @@ impl From<&Value> for ParameterValue {
             }
             Value::VecString(val) => {
                 result.type_ = 9;
-                result.string_array_value = RosStringSeq::new(val.len()).unwrap();
+                result.string_array_value = RosStringSeq::new(val.len()).unwrap_or_else(|| {
+                    pr_fatal_in!(logger, "{}:{}: failed allocation", file!(), line!());
+                    RosStringSeq::null()
+                });
                 result
                     .string_array_value
                     .iter_mut()
@@ -608,7 +628,13 @@ fn add_srv_set(
     selector.add_server(
         srv_set,
         Box::new(move |req, _| {
-            let mut results = SetParametersResultSeq::new(req.parameters.len()).unwrap();
+            let mut results = if let Some(seq) = SetParametersResultSeq::new(req.parameters.len()) {
+                seq
+            } else {
+                let response = SetParametersResponse::new().unwrap();
+                return response;
+            };
+
             let slice = results.as_slice_mut();
 
             let mut guard = params.write();
@@ -686,19 +712,29 @@ fn add_srv_get(
             }
 
             let mut response = GetParametersResponse::new().unwrap();
-            response.values = ParameterValueSeq::new(result.len()).unwrap();
 
-            response
-                .values
-                .iter_mut()
-                .zip(result.iter())
-                .for_each(|(dst, src)| *dst = (*src).into());
+            if let Some(mut seq) = ParameterValueSeq::new(result.len()) {
+                seq.iter_mut()
+                    .zip(result.iter())
+                    .for_each(|(dst, src)| *dst = (*src).into());
+                response.values = seq;
+            }
 
             response
         }),
     );
 
     Ok(())
+}
+
+macro_rules! unwrap_or_continue {
+    ($e:expr) => {
+        if let Some(x) = $e {
+            x
+        } else {
+            continue;
+        }
+    };
 }
 
 fn add_srv_describe(
@@ -721,30 +757,34 @@ fn add_srv_describe(
                 let key = name.to_string();
                 if let Some(param) = gurad.params.get(&key) {
                     let value: ParameterValue = (&param.value).into();
-                    let description = RosString::new(&param.descriptor.description).unwrap();
-                    let additional_constraints =
-                        RosString::new(&param.descriptor.additional_constraints).unwrap();
+                    let description =
+                        unwrap_or_continue!(RosString::new(&param.descriptor.description));
+                    let additional_constraints = unwrap_or_continue!(RosString::new(
+                        &param.descriptor.additional_constraints
+                    ));
 
                     let integer_range = if let Some(range) = &param.descriptor.integer_range {
-                        let mut int_range = rcl_interfaces::msg::IntegerRangeSeq::new(1).unwrap();
+                        let mut int_range =
+                            unwrap_or_continue!(rcl_interfaces::msg::IntegerRangeSeq::new(1));
                         int_range.as_slice_mut()[0] = range.into();
                         int_range
                     } else {
-                        rcl_interfaces::msg::IntegerRangeSeq::new(0).unwrap()
+                        unwrap_or_continue!(rcl_interfaces::msg::IntegerRangeSeq::new(0))
                     };
 
-                    let floating_point_range =
-                        if let Some(range) = &param.descriptor.floating_point_range {
-                            let mut f64_range =
-                                rcl_interfaces::msg::FloatingPointRangeSeq::new(1).unwrap();
-                            f64_range.as_slice_mut()[0] = range.into();
-                            f64_range
-                        } else {
-                            rcl_interfaces::msg::FloatingPointRangeSeq::new(0).unwrap()
-                        };
+                    let floating_point_range = if let Some(range) =
+                        &param.descriptor.floating_point_range
+                    {
+                        let mut f64_range =
+                            unwrap_or_continue!(rcl_interfaces::msg::FloatingPointRangeSeq::new(1));
+                        f64_range.as_slice_mut()[0] = range.into();
+                        f64_range
+                    } else {
+                        unwrap_or_continue!(rcl_interfaces::msg::FloatingPointRangeSeq::new(0))
+                    };
 
                     let result = ParameterDescriptor {
-                        name: RosString::new(&key).unwrap(),
+                        name: unwrap_or_continue!(RosString::new(&key)),
                         type_: value.type_,
                         description,
                         additional_constraints,
@@ -758,12 +798,12 @@ fn add_srv_describe(
             }
 
             let mut response = DescribeParametersResponse::new().unwrap();
-            response.descriptors = ParameterDescriptorSeq::new(results.len()).unwrap();
-            response
-                .descriptors
-                .iter_mut()
-                .zip(results.into_iter())
-                .for_each(|(dst, src)| *dst = src);
+            if let Some(mut seq) = ParameterDescriptorSeq::new(results.len()) {
+                seq.iter_mut()
+                    .zip(results.into_iter())
+                    .for_each(|(dst, src)| *dst = src);
+                response.descriptors = seq;
+            };
 
             response
         }),
@@ -799,11 +839,12 @@ fn add_srv_get_types(
             }
 
             let mut response = GetParameterTypesResponse::new().unwrap();
-            response
-                .types
-                .iter_mut()
-                .zip(types.iter())
-                .for_each(|(dst, src)| *dst = *src);
+            if let Some(mut seq) = U8Seq::new(types.len()) {
+                seq.iter_mut()
+                    .zip(types.iter())
+                    .for_each(|(dst, src)| *dst = *src);
+                response.types = seq;
+            }
 
             response
         }),
@@ -883,25 +924,27 @@ fn add_srv_list(
             }
 
             let mut response = ListParametersResponse::new().unwrap();
-            response.result.names = RosStringSeq::<0, 0>::new(result.len()).unwrap();
-            response
-                .result
-                .names
-                .iter_mut()
-                .zip(result.iter())
-                .for_each(|(dst, src)| {
-                    dst.assign(src);
-                });
+            if let (Some(mut seq_names), Some(mut seq_prefixes)) = (
+                RosStringSeq::<0, 0>::new(result.len()),
+                RosStringSeq::<0, 0>::new(result_prefix.len()),
+            ) {
+                seq_names
+                    .iter_mut()
+                    .zip(result.iter())
+                    .for_each(|(dst, src)| {
+                        dst.assign(src);
+                    });
 
-            response.result.prefixes = RosStringSeq::<0, 0>::new(result_prefix.len()).unwrap();
-            response
-                .result
-                .prefixes
-                .iter_mut()
-                .zip(result_prefix.iter())
-                .for_each(|(dst, src)| {
-                    dst.assign(src);
-                });
+                seq_prefixes
+                    .iter_mut()
+                    .zip(result_prefix.iter())
+                    .for_each(|(dst, src)| {
+                        dst.assign(src);
+                    });
+
+                response.result.names = seq_names;
+                response.result.prefixes = seq_prefixes;
+            }
 
             response
         }),

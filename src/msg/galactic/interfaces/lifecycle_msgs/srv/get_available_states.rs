@@ -105,6 +105,16 @@ impl<const N: usize> GetAvailableStatesRequestSeq<N> {
         }
     }
 
+    pub fn null() -> Self {
+        let msg: GetAvailableStatesRequestSeqRaw =
+            unsafe { std::mem::MaybeUninit::zeroed().assume_init() };
+        Self {
+            data: msg.data,
+            size: msg.size,
+            capacity: msg.capacity,
+        }
+    }
+
     pub fn as_slice(&self) -> &[GetAvailableStatesRequest] {
         if self.data.is_null() {
             &[]
@@ -208,6 +218,16 @@ impl<const N: usize> GetAvailableStatesResponseSeq<N> {
             })
         } else {
             None
+        }
+    }
+
+    pub fn null() -> Self {
+        let msg: GetAvailableStatesResponseSeqRaw =
+            unsafe { std::mem::MaybeUninit::zeroed().assume_init() };
+        Self {
+            data: msg.data,
+            size: msg.size,
+            capacity: msg.capacity,
         }
     }
 

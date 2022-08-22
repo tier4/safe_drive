@@ -92,6 +92,15 @@ impl<const N: usize> LaserScanSeq<N> {
         }
     }
 
+    pub fn null() -> Self {
+        let msg: LaserScanSeqRaw = unsafe { std::mem::MaybeUninit::zeroed().assume_init() };
+        Self {
+            data: msg.data,
+            size: msg.size,
+            capacity: msg.capacity,
+        }
+    }
+
     pub fn as_slice(&self) -> &[LaserScan] {
         if self.data.is_null() {
             &[]

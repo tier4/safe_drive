@@ -90,6 +90,15 @@ impl<const N: usize> Vector3StampedSeq<N> {
         }
     }
 
+    pub fn null() -> Self {
+        let msg: Vector3StampedSeqRaw = unsafe { std::mem::MaybeUninit::zeroed().assume_init() };
+        Self {
+            data: msg.data,
+            size: msg.size,
+            capacity: msg.capacity,
+        }
+    }
+
     pub fn as_slice(&self) -> &[Vector3Stamped] {
         if self.data.is_null() {
             &[]

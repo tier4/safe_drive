@@ -97,6 +97,15 @@ impl<const N: usize> SelfTestRequestSeq<N> {
         }
     }
 
+    pub fn null() -> Self {
+        let msg: SelfTestRequestSeqRaw = unsafe { std::mem::MaybeUninit::zeroed().assume_init() };
+        Self {
+            data: msg.data,
+            size: msg.size,
+            capacity: msg.capacity,
+        }
+    }
+
     pub fn as_slice(&self) -> &[SelfTestRequest] {
         if self.data.is_null() {
             &[]
@@ -198,6 +207,15 @@ impl<const N: usize> SelfTestResponseSeq<N> {
             })
         } else {
             None
+        }
+    }
+
+    pub fn null() -> Self {
+        let msg: SelfTestResponseSeqRaw = unsafe { std::mem::MaybeUninit::zeroed().assume_init() };
+        Self {
+            data: msg.data,
+            size: msg.size,
+            capacity: msg.capacity,
         }
     }
 

@@ -104,6 +104,16 @@ impl<const N: usize> GetParameterTypesRequestSeq<N> {
         }
     }
 
+    pub fn null() -> Self {
+        let msg: GetParameterTypesRequestSeqRaw =
+            unsafe { std::mem::MaybeUninit::zeroed().assume_init() };
+        Self {
+            data: msg.data,
+            size: msg.size,
+            capacity: msg.capacity,
+        }
+    }
+
     pub fn as_slice(&self) -> &[GetParameterTypesRequest] {
         if self.data.is_null() {
             &[]
@@ -207,6 +217,16 @@ impl<const N: usize> GetParameterTypesResponseSeq<N> {
             })
         } else {
             None
+        }
+    }
+
+    pub fn null() -> Self {
+        let msg: GetParameterTypesResponseSeqRaw =
+            unsafe { std::mem::MaybeUninit::zeroed().assume_init() };
+        Self {
+            data: msg.data,
+            size: msg.size,
+            capacity: msg.capacity,
         }
     }
 

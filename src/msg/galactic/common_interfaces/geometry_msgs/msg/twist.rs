@@ -83,6 +83,15 @@ impl<const N: usize> TwistSeq<N> {
         }
     }
 
+    pub fn null() -> Self {
+        let msg: TwistSeqRaw = unsafe { std::mem::MaybeUninit::zeroed().assume_init() };
+        Self {
+            data: msg.data,
+            size: msg.size,
+            capacity: msg.capacity,
+        }
+    }
+
     pub fn as_slice(&self) -> &[Twist] {
         if self.data.is_null() {
             &[]

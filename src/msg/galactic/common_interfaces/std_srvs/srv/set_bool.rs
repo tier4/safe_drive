@@ -96,6 +96,15 @@ impl<const N: usize> SetBoolRequestSeq<N> {
         }
     }
 
+    pub fn null() -> Self {
+        let msg: SetBoolRequestSeqRaw = unsafe { std::mem::MaybeUninit::zeroed().assume_init() };
+        Self {
+            data: msg.data,
+            size: msg.size,
+            capacity: msg.capacity,
+        }
+    }
+
     pub fn as_slice(&self) -> &[SetBoolRequest] {
         if self.data.is_null() {
             &[]
@@ -197,6 +206,15 @@ impl<const N: usize> SetBoolResponseSeq<N> {
             })
         } else {
             None
+        }
+    }
+
+    pub fn null() -> Self {
+        let msg: SetBoolResponseSeqRaw = unsafe { std::mem::MaybeUninit::zeroed().assume_init() };
+        Self {
+            data: msg.data,
+            size: msg.size,
+            capacity: msg.capacity,
         }
     }
 

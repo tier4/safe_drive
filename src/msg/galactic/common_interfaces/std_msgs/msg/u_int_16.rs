@@ -82,6 +82,15 @@ impl<const N: usize> UInt16Seq<N> {
         }
     }
 
+    pub fn null() -> Self {
+        let msg: UInt16SeqRaw = unsafe { std::mem::MaybeUninit::zeroed().assume_init() };
+        Self {
+            data: msg.data,
+            size: msg.size,
+            capacity: msg.capacity,
+        }
+    }
+
     pub fn as_slice(&self) -> &[UInt16] {
         if self.data.is_null() {
             &[]

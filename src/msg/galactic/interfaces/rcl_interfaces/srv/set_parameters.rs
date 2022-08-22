@@ -99,6 +99,16 @@ impl<const N: usize> SetParametersRequestSeq<N> {
         }
     }
 
+    pub fn null() -> Self {
+        let msg: SetParametersRequestSeqRaw =
+            unsafe { std::mem::MaybeUninit::zeroed().assume_init() };
+        Self {
+            data: msg.data,
+            size: msg.size,
+            capacity: msg.capacity,
+        }
+    }
+
     pub fn as_slice(&self) -> &[SetParametersRequest] {
         if self.data.is_null() {
             &[]
@@ -200,6 +210,16 @@ impl<const N: usize> SetParametersResponseSeq<N> {
             })
         } else {
             None
+        }
+    }
+
+    pub fn null() -> Self {
+        let msg: SetParametersResponseSeqRaw =
+            unsafe { std::mem::MaybeUninit::zeroed().assume_init() };
+        Self {
+            data: msg.data,
+            size: msg.size,
+            capacity: msg.capacity,
         }
     }
 

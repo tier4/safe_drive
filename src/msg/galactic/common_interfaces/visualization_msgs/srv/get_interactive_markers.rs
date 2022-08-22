@@ -110,6 +110,16 @@ impl<const N: usize> GetInteractiveMarkersRequestSeq<N> {
         }
     }
 
+    pub fn null() -> Self {
+        let msg: GetInteractiveMarkersRequestSeqRaw =
+            unsafe { std::mem::MaybeUninit::zeroed().assume_init() };
+        Self {
+            data: msg.data,
+            size: msg.size,
+            capacity: msg.capacity,
+        }
+    }
+
     pub fn as_slice(&self) -> &[GetInteractiveMarkersRequest] {
         if self.data.is_null() {
             &[]
@@ -213,6 +223,16 @@ impl<const N: usize> GetInteractiveMarkersResponseSeq<N> {
             })
         } else {
             None
+        }
+    }
+
+    pub fn null() -> Self {
+        let msg: GetInteractiveMarkersResponseSeqRaw =
+            unsafe { std::mem::MaybeUninit::zeroed().assume_init() };
+        Self {
+            data: msg.data,
+            size: msg.size,
+            capacity: msg.capacity,
         }
     }
 

@@ -82,6 +82,15 @@ impl<const N: usize> EmptySeq<N> {
         }
     }
 
+    pub fn null() -> Self {
+        let msg: EmptySeqRaw = unsafe { std::mem::MaybeUninit::zeroed().assume_init() };
+        Self {
+            data: msg.data,
+            size: msg.size,
+            capacity: msg.capacity,
+        }
+    }
+
     pub fn as_slice(&self) -> &[Empty] {
         if self.data.is_null() {
             &[]

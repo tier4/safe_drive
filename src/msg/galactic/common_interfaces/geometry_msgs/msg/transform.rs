@@ -89,6 +89,15 @@ impl<const N: usize> TransformSeq<N> {
         }
     }
 
+    pub fn null() -> Self {
+        let msg: TransformSeqRaw = unsafe { std::mem::MaybeUninit::zeroed().assume_init() };
+        Self {
+            data: msg.data,
+            size: msg.size,
+            capacity: msg.capacity,
+        }
+    }
+
     pub fn as_slice(&self) -> &[Transform] {
         if self.data.is_null() {
             &[]
