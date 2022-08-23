@@ -76,16 +76,20 @@ macro_rules! def_sequence {
                 }
             }
 
-            pub fn iter<'a>(&'a self) -> std::slice::Iter<'a, $ty_orig> {
+            pub fn iter(&self) -> std::slice::Iter<'_, $ty_orig> {
                 self.as_slice().iter()
             }
 
-            pub fn iter_mut<'a>(&'a mut self) -> std::slice::IterMut<'a, $ty_orig> {
+            pub fn iter_mut(&mut self) -> std::slice::IterMut<'_, $ty_orig> {
                 self.as_slice_mut().iter_mut()
             }
 
             pub fn len(&self) -> usize {
                 self.as_slice().len()
+            }
+
+            pub fn is_empty(&self) -> bool {
+                self.len() == 0
             }
         }
 
@@ -339,9 +343,7 @@ impl<const STRLEN: usize, const SEQLEN: usize> RosStringSeq<STRLEN, SEQLEN> {
             &[]
         } else {
             let s = unsafe { std::slice::from_raw_parts(self.0.data, self.0.size as usize) };
-            let result =
-                unsafe { transmute::<&[rosidl_runtime_c__String], &[RosString<STRLEN>]>(s) };
-            result
+            unsafe { transmute::<&[rosidl_runtime_c__String], &[RosString<STRLEN>]>(s) }
         }
     }
 
@@ -350,23 +352,24 @@ impl<const STRLEN: usize, const SEQLEN: usize> RosStringSeq<STRLEN, SEQLEN> {
             &mut []
         } else {
             let s = unsafe { std::slice::from_raw_parts_mut(self.0.data, self.0.size as usize) };
-            let result = unsafe {
-                transmute::<&mut [rosidl_runtime_c__String], &mut [RosString<STRLEN>]>(s)
-            };
-            result
+            unsafe { transmute::<&mut [rosidl_runtime_c__String], &mut [RosString<STRLEN>]>(s) }
         }
     }
 
-    pub fn iter<'a>(&'a self) -> std::slice::Iter<'a, RosString<STRLEN>> {
+    pub fn iter(&self) -> std::slice::Iter<'_, RosString<STRLEN>> {
         self.as_slice().iter()
     }
 
-    pub fn iter_mut<'a>(&'a mut self) -> std::slice::IterMut<'a, RosString<STRLEN>> {
+    pub fn iter_mut(&mut self) -> std::slice::IterMut<'_, RosString<STRLEN>> {
         self.as_slice_mut().iter_mut()
     }
 
     pub fn len(&self) -> usize {
         self.as_slice().len()
+    }
+
+    pub fn is_empty(&self) -> bool {
+        self.len() == 0
     }
 }
 

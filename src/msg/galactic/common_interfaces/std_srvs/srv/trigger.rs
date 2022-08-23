@@ -123,16 +123,20 @@ impl<const N: usize> TriggerRequestSeq<N> {
         }
     }
 
-    pub fn iter<'a>(&'a self) -> std::slice::Iter<'a, TriggerRequest> {
+    pub fn iter(&self) -> std::slice::Iter<'_, TriggerRequest> {
         self.as_slice().iter()
     }
 
-    pub fn iter_mut<'a>(&'a mut self) -> std::slice::IterMut<'a, TriggerRequest> {
+    pub fn iter_mut(&mut self) -> std::slice::IterMut<'_, TriggerRequest> {
         self.as_slice_mut().iter_mut()
     }
 
     pub fn len(&self) -> usize {
         self.as_slice().len()
+    }
+
+    pub fn is_empty(&self) -> bool {
+        self.len() == 0
     }
 }
 
@@ -236,16 +240,20 @@ impl<const N: usize> TriggerResponseSeq<N> {
         }
     }
 
-    pub fn iter<'a>(&'a self) -> std::slice::Iter<'a, TriggerResponse> {
+    pub fn iter(&self) -> std::slice::Iter<'_, TriggerResponse> {
         self.as_slice().iter()
     }
 
-    pub fn iter_mut<'a>(&'a mut self) -> std::slice::IterMut<'a, TriggerResponse> {
+    pub fn iter_mut(&mut self) -> std::slice::IterMut<'_, TriggerResponse> {
         self.as_slice_mut().iter_mut()
     }
 
     pub fn len(&self) -> usize {
         self.as_slice().len()
+    }
+
+    pub fn is_empty(&self) -> bool {
+        self.len() == 0
     }
 }
 

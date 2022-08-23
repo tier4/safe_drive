@@ -124,16 +124,20 @@ impl<const N: usize> SelfTestRequestSeq<N> {
         }
     }
 
-    pub fn iter<'a>(&'a self) -> std::slice::Iter<'a, SelfTestRequest> {
+    pub fn iter(&self) -> std::slice::Iter<'_, SelfTestRequest> {
         self.as_slice().iter()
     }
 
-    pub fn iter_mut<'a>(&'a mut self) -> std::slice::IterMut<'a, SelfTestRequest> {
+    pub fn iter_mut(&mut self) -> std::slice::IterMut<'_, SelfTestRequest> {
         self.as_slice_mut().iter_mut()
     }
 
     pub fn len(&self) -> usize {
         self.as_slice().len()
+    }
+
+    pub fn is_empty(&self) -> bool {
+        self.len() == 0
     }
 }
 
@@ -237,16 +241,20 @@ impl<const N: usize> SelfTestResponseSeq<N> {
         }
     }
 
-    pub fn iter<'a>(&'a self) -> std::slice::Iter<'a, SelfTestResponse> {
+    pub fn iter(&self) -> std::slice::Iter<'_, SelfTestResponse> {
         self.as_slice().iter()
     }
 
-    pub fn iter_mut<'a>(&'a mut self) -> std::slice::IterMut<'a, SelfTestResponse> {
+    pub fn iter_mut(&mut self) -> std::slice::IterMut<'_, SelfTestResponse> {
         self.as_slice_mut().iter_mut()
     }
 
     pub fn len(&self) -> usize {
         self.as_slice().len()
+    }
+
+    pub fn is_empty(&self) -> bool {
+        self.len() == 0
     }
 }
 

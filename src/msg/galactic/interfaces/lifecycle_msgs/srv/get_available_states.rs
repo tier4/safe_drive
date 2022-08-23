@@ -133,16 +133,20 @@ impl<const N: usize> GetAvailableStatesRequestSeq<N> {
         }
     }
 
-    pub fn iter<'a>(&'a self) -> std::slice::Iter<'a, GetAvailableStatesRequest> {
+    pub fn iter(&self) -> std::slice::Iter<'_, GetAvailableStatesRequest> {
         self.as_slice().iter()
     }
 
-    pub fn iter_mut<'a>(&'a mut self) -> std::slice::IterMut<'a, GetAvailableStatesRequest> {
+    pub fn iter_mut(&mut self) -> std::slice::IterMut<'_, GetAvailableStatesRequest> {
         self.as_slice_mut().iter_mut()
     }
 
     pub fn len(&self) -> usize {
         self.as_slice().len()
+    }
+
+    pub fn is_empty(&self) -> bool {
+        self.len() == 0
     }
 }
 
@@ -249,16 +253,20 @@ impl<const N: usize> GetAvailableStatesResponseSeq<N> {
         }
     }
 
-    pub fn iter<'a>(&'a self) -> std::slice::Iter<'a, GetAvailableStatesResponse> {
+    pub fn iter(&self) -> std::slice::Iter<'_, GetAvailableStatesResponse> {
         self.as_slice().iter()
     }
 
-    pub fn iter_mut<'a>(&'a mut self) -> std::slice::IterMut<'a, GetAvailableStatesResponse> {
+    pub fn iter_mut(&mut self) -> std::slice::IterMut<'_, GetAvailableStatesResponse> {
         self.as_slice_mut().iter_mut()
     }
 
     pub fn len(&self) -> usize {
         self.as_slice().len()
+    }
+
+    pub fn is_empty(&self) -> bool {
+        self.len() == 0
     }
 }
 

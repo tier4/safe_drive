@@ -81,7 +81,7 @@
 
         <nav id="sidebar" class="sidebar" aria-label="Table of contents">
             <div class="sidebar-scrollbox">
-                <ol class="chapter"><li class="chapter-item expanded "><a href="index.html"><strong aria-hidden="true">1.</strong> Top</a></li><li class="chapter-item expanded "><a href="tutorial.html"><strong aria-hidden="true">2.</strong> Tutorial</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="setup.html"><strong aria-hidden="true">2.1.</strong> Setting-up</a></li><li class="chapter-item expanded "><a href="pubsub.html"><strong aria-hidden="true">2.2.</strong> Publish and Subscribe</a></li><li class="chapter-item expanded "><a href="timer.html"><strong aria-hidden="true">2.3.</strong> Timer</a></li><li class="chapter-item expanded "><a href="multi_pubsub.html" class="active"><strong aria-hidden="true">2.4.</strong> Multi-threaded Publish and Subscribe</a></li><li class="chapter-item expanded "><a href="message.html"><strong aria-hidden="true">2.5.</strong> User Defined Data Structure</a></li><li class="chapter-item expanded "><a href="predefined.html"><strong aria-hidden="true">2.6.</strong> Pre-defined Data Structure</a></li><li class="chapter-item expanded "><a href="service.html"><strong aria-hidden="true">2.7.</strong> Service</a></li></ol></li></ol>
+                <ol class="chapter"><li class="chapter-item expanded "><a href="index.html"><strong aria-hidden="true">1.</strong> Top</a></li><li class="chapter-item expanded "><a href="tutorial.html"><strong aria-hidden="true">2.</strong> Tutorial</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="setup.html"><strong aria-hidden="true">2.1.</strong> Setting-up</a></li><li class="chapter-item expanded "><a href="pubsub.html"><strong aria-hidden="true">2.2.</strong> Publish and Subscribe</a></li><li class="chapter-item expanded "><a href="timer.html"><strong aria-hidden="true">2.3.</strong> Timer</a></li><li class="chapter-item expanded "><a href="multi_pubsub.html" class="active"><strong aria-hidden="true">2.4.</strong> Multi-threaded Publish and Subscribe</a></li><li class="chapter-item expanded "><a href="message.html"><strong aria-hidden="true">2.5.</strong> User Defined Data Structure</a></li><li class="chapter-item expanded "><a href="predefined.html"><strong aria-hidden="true">2.6.</strong> Pre-defined Data Structure</a></li><li class="chapter-item expanded "><a href="service.html"><strong aria-hidden="true">2.7.</strong> Service</a></li><li class="chapter-item expanded "><a href="parameter.html"><strong aria-hidden="true">2.8.</strong> Parameter</a></li></ol></li></ol>
             </div>
             <div id="sidebar-resize-handle" class="sidebar-resize-handle"></div>
         </nav>
@@ -175,21 +175,18 @@ At the moment, the following directories is present.</p>
 <tr><td>mt_pubsub/src/subscribers/Cargo.toml</td><td>for Cargo</td></tr>
 <tr><td>mt_pubsub/src/subscribers/package.xml</td><td>for ROS2</td></tr>
 <tr><td>mt_pubsub/src/subscribers/build.rs</td><td>for rustc</td></tr>
+<tr><td>mt_pubsub/src/Cargo.toml</td><td>for Cargo's workspace</td></tr>
 </tbody></table>
 </div>
-<p><code>package.xml</code> and <code>build.rs</code> are almost same as <a href="./pubsub.html">Publish and Subscribe</a>.
+<p>To enable rust-analyzer in the <code>mt_pubsub</code> directory and reduce the compilation time,
+prepare workspace's <code>Cargo.toml</code> as follows.</p>
+<pre><code class="language-toml"># mt_pubsub/src/Cargo.toml
+[workspace]
+members = [&quot;publishers&quot;, &quot;subscribers&quot;]
+</code></pre>
+<p><code>package.xml</code>s are almost same as <a href="./pubsub.html">Publish and Subscribe</a>.
 If you cannot understand what these files do,
 please go back to the previous chapter.</p>
-<pre><pre class="playground"><code class="language-rust">// build.rs
-fn main() {
-    if let Some(e) = std::env::var_os(&quot;AMENT_PREFIX_PATH&quot;) {
-        let env = e.to_str().unwrap();
-        for path in env.split(&quot;:&quot;) {
-            println!(&quot;cargo:rustc-link-search={path}/lib&quot;);
-        }
-    }
-}
-</code></pre></pre>
 <pre><code class="language-xml">&lt;!-- publishers/package.xml --&gt;
 &lt;?xml version=&quot;1.0&quot;?&gt;
 &lt;?xml-model href=&quot;http://download.ros.org/schema/package_format3.xsd&quot; schematypens=&quot;http://www.w3.org/2001/XMLSchema&quot;?&gt;
@@ -198,7 +195,7 @@ fn main() {
   &lt;version&gt;0.0.0&lt;/version&gt;
   &lt;description&gt;MT-Publishers&lt;/description&gt;
   &lt;maintainer email=&quot;yuuki.takano@tier4.jp&quot;&gt;Yuuki Takano&lt;/maintainer&gt;
-  &lt;license&gt;TODO: License declaration&lt;/license&gt;
+  &lt;license&gt;Apache License 2.0&lt;/license&gt;
 
   &lt;test_depend&gt;ament_lint_auto&lt;/test_depend&gt;
   &lt;test_depend&gt;ament_lint_common&lt;/test_depend&gt;
@@ -216,8 +213,8 @@ fn main() {
 <p>To use <code>async_std</code>, we have to update <code>Cargo.toml</code> as follows.</p>
 <pre><code class="language-toml"># Cargo.toml
 [dependencies]
-async-std = { version = &quot;1.12.0&quot;, features = [&quot;attributes&quot;] }
-safe_drive = { path = &quot;../../../safe_drive&quot; }
+async-std = { version = &quot;1&quot;, features = [&quot;attributes&quot;] }
+safe_drive = { path = &quot;path_to/safe_drive&quot; }
 </code></pre>
 <h2 id="publishers"><a class="header" href="#publishers">Publishers</a></h2>
 <p>The <code>publishers</code> publishes messages to 2 topics periodically.
@@ -290,12 +287,10 @@ Calling blocking functions should be avoided in asynchronous tasks.</p>
 <p>Then, let's implement the <code>subscribers</code>.
 The main function is almost same as previous one.</p>
 <pre><pre class="playground"><code class="language-rust">// mt_pubsub/src/subscribers/src/main
-use async_std::future::timeout;
 use safe_drive::{
     context::Context, error::DynError, logger::Logger, msg::common_interfaces::std_msgs, pr_info,
-    pr_warn, topic::subscriber::Subscriber,
+    topic::subscriber::Subscriber,
 };
-use std::time::Duration;
 
 #[async_std::main]
 async fn main() -&gt; Result&lt;(), DynError&gt; {
@@ -337,9 +332,10 @@ we can implement receiving with timeout.
 Timeout can be implemented as follows.</p>
 <pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
 </span><span class="boring">fn main() {
-</span>async fn receiver(
-    mut subscriber: Subscriber&lt;std_msgs::msg::String&gt;,
-) -&gt; Result&lt;(), DynError&gt; {
+</span>use async_std::future::timeout;
+use safe_drive::pr_warn;
+use std::time::Duration;
+async fn receiver(mut subscriber: Subscriber&lt;std_msgs::msg::String&gt;) -&gt; Result&lt;(), DynError&gt; {
     let logger = Logger::new(subscriber.get_topic_name());
 
     loop {

@@ -123,16 +123,20 @@ impl<const N: usize> SetBoolRequestSeq<N> {
         }
     }
 
-    pub fn iter<'a>(&'a self) -> std::slice::Iter<'a, SetBoolRequest> {
+    pub fn iter(&self) -> std::slice::Iter<'_, SetBoolRequest> {
         self.as_slice().iter()
     }
 
-    pub fn iter_mut<'a>(&'a mut self) -> std::slice::IterMut<'a, SetBoolRequest> {
+    pub fn iter_mut(&mut self) -> std::slice::IterMut<'_, SetBoolRequest> {
         self.as_slice_mut().iter_mut()
     }
 
     pub fn len(&self) -> usize {
         self.as_slice().len()
+    }
+
+    pub fn is_empty(&self) -> bool {
+        self.len() == 0
     }
 }
 
@@ -236,16 +240,20 @@ impl<const N: usize> SetBoolResponseSeq<N> {
         }
     }
 
-    pub fn iter<'a>(&'a self) -> std::slice::Iter<'a, SetBoolResponse> {
+    pub fn iter(&self) -> std::slice::Iter<'_, SetBoolResponse> {
         self.as_slice().iter()
     }
 
-    pub fn iter_mut<'a>(&'a mut self) -> std::slice::IterMut<'a, SetBoolResponse> {
+    pub fn iter_mut(&mut self) -> std::slice::IterMut<'_, SetBoolResponse> {
         self.as_slice_mut().iter_mut()
     }
 
     pub fn len(&self) -> usize {
         self.as_slice().len()
+    }
+
+    pub fn is_empty(&self) -> bool {
+        self.len() == 0
     }
 }
 

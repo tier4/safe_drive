@@ -127,16 +127,20 @@ impl<const N: usize> CancelGoalRequestSeq<N> {
         }
     }
 
-    pub fn iter<'a>(&'a self) -> std::slice::Iter<'a, CancelGoalRequest> {
+    pub fn iter(&self) -> std::slice::Iter<'_, CancelGoalRequest> {
         self.as_slice().iter()
     }
 
-    pub fn iter_mut<'a>(&'a mut self) -> std::slice::IterMut<'a, CancelGoalRequest> {
+    pub fn iter_mut(&mut self) -> std::slice::IterMut<'_, CancelGoalRequest> {
         self.as_slice_mut().iter_mut()
     }
 
     pub fn len(&self) -> usize {
         self.as_slice().len()
+    }
+
+    pub fn is_empty(&self) -> bool {
+        self.len() == 0
     }
 }
 
@@ -241,16 +245,20 @@ impl<const N: usize> CancelGoalResponseSeq<N> {
         }
     }
 
-    pub fn iter<'a>(&'a self) -> std::slice::Iter<'a, CancelGoalResponse> {
+    pub fn iter(&self) -> std::slice::Iter<'_, CancelGoalResponse> {
         self.as_slice().iter()
     }
 
-    pub fn iter_mut<'a>(&'a mut self) -> std::slice::IterMut<'a, CancelGoalResponse> {
+    pub fn iter_mut(&mut self) -> std::slice::IterMut<'_, CancelGoalResponse> {
         self.as_slice_mut().iter_mut()
     }
 
     pub fn len(&self) -> usize {
         self.as_slice().len()
+    }
+
+    pub fn is_empty(&self) -> bool {
+        self.len() == 0
     }
 }
 

@@ -81,7 +81,7 @@
 
         <nav id="sidebar" class="sidebar" aria-label="Table of contents">
             <div class="sidebar-scrollbox">
-                <ol class="chapter"><li class="chapter-item expanded "><a href="index.html"><strong aria-hidden="true">1.</strong> Top</a></li><li class="chapter-item expanded "><a href="tutorial.html"><strong aria-hidden="true">2.</strong> Tutorial</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="setup.html"><strong aria-hidden="true">2.1.</strong> Setting-up</a></li><li class="chapter-item expanded "><a href="pubsub.html"><strong aria-hidden="true">2.2.</strong> Publish and Subscribe</a></li><li class="chapter-item expanded "><a href="timer.html" class="active"><strong aria-hidden="true">2.3.</strong> Timer</a></li><li class="chapter-item expanded "><a href="multi_pubsub.html"><strong aria-hidden="true">2.4.</strong> Multi-threaded Publish and Subscribe</a></li><li class="chapter-item expanded "><a href="message.html"><strong aria-hidden="true">2.5.</strong> User Defined Data Structure</a></li><li class="chapter-item expanded "><a href="predefined.html"><strong aria-hidden="true">2.6.</strong> Pre-defined Data Structure</a></li><li class="chapter-item expanded "><a href="service.html"><strong aria-hidden="true">2.7.</strong> Service</a></li></ol></li></ol>
+                <ol class="chapter"><li class="chapter-item expanded "><a href="index.html"><strong aria-hidden="true">1.</strong> Top</a></li><li class="chapter-item expanded "><a href="tutorial.html"><strong aria-hidden="true">2.</strong> Tutorial</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="setup.html"><strong aria-hidden="true">2.1.</strong> Setting-up</a></li><li class="chapter-item expanded "><a href="pubsub.html"><strong aria-hidden="true">2.2.</strong> Publish and Subscribe</a></li><li class="chapter-item expanded "><a href="timer.html" class="active"><strong aria-hidden="true">2.3.</strong> Timer</a></li><li class="chapter-item expanded "><a href="multi_pubsub.html"><strong aria-hidden="true">2.4.</strong> Multi-threaded Publish and Subscribe</a></li><li class="chapter-item expanded "><a href="message.html"><strong aria-hidden="true">2.5.</strong> User Defined Data Structure</a></li><li class="chapter-item expanded "><a href="predefined.html"><strong aria-hidden="true">2.6.</strong> Pre-defined Data Structure</a></li><li class="chapter-item expanded "><a href="service.html"><strong aria-hidden="true">2.7.</strong> Service</a></li><li class="chapter-item expanded "><a href="parameter.html"><strong aria-hidden="true">2.8.</strong> Parameter</a></li></ol></li></ol>
             </div>
             <div id="sidebar-resize-handle" class="sidebar-resize-handle"></div>
         </nav>
@@ -144,11 +144,8 @@
                     <main>
                         <h1 id="timer"><a class="header" href="#timer">Timer</a></h1>
 <p>This tutorial does not use <code>colcon</code> to build.
-We use only <code>cargo</code>, which is a Rust's standard build system.
-Before starting this tutorial, please set the library path of ROS2 to a variable environment as follows.</p>
-<pre><code class="language-text">$ export LIBRARY_PATH=/opt/ros/galactic/lib:$LIBRARY_PATH
-</code></pre>
-<p>Don't forget</p>
+We use only <code>cargo</code>, which is a Rust's standard build system.</p>
+<p>Don't forget loading ROS2's environment as follows.</p>
 <pre><code class="language-text">$ . /opt/ros/galactic/setup.bash
 </code></pre>
 <h2 id="wall-timer"><a class="header" href="#wall-timer">Wall-timer</a></h2>
@@ -160,7 +157,7 @@ $ cd wall_timer
 </code></pre>
 <p>Then, add <code>safe_drive</code> to the dependencies of <code>Cargo.toml</code>.</p>
 <pre><code class="language-toml">[dependencies]
-safe_drive = { path = &quot;../safe_drive&quot; }
+safe_drive = { path = &quot;path_to/safe_drive&quot; }
 </code></pre>
 <p>The following code is an example using a wall-timer.
 The important method is <code>Selector::add_wall_timer()</code> which takes
@@ -204,7 +201,6 @@ fn main() -&gt; Result&lt;(), DynError&gt; {
         Box::new(move |msg| {
             pr_info!(logger, &quot;received: msg.data = {}&quot;, msg.data);
         }),
-        false,
     );
 
     // Spin.

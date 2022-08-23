@@ -34,30 +34,28 @@ At the moment, the following directories is present.
 
 Then, we have to create or edit the following files for basic configurations.
 
-| Files                                 | What?     |
-|---------------------------------------|-----------|
-| mt_pubsub/src/publishers/Cargo.toml   | for Cargo |
-| mt_pubsub/src/publishers/package.xml  | for ROS2  |
-| mt_pubsub/src/publishers/build.rs     | for rustc |
-| mt_pubsub/src/subscribers/Cargo.toml  | for Cargo |
-| mt_pubsub/src/subscribers/package.xml | for ROS2  |
-| mt_pubsub/src/subscribers/build.rs    | for rustc |
+| Files                                 | What?                 |
+|---------------------------------------|-----------------------|
+| mt_pubsub/src/publishers/Cargo.toml   | for Cargo             |
+| mt_pubsub/src/publishers/package.xml  | for ROS2              |
+| mt_pubsub/src/publishers/build.rs     | for rustc             |
+| mt_pubsub/src/subscribers/Cargo.toml  | for Cargo             |
+| mt_pubsub/src/subscribers/package.xml | for ROS2              |
+| mt_pubsub/src/subscribers/build.rs    | for rustc             |
+| mt_pubsub/src/Cargo.toml              | for Cargo's workspace |
 
-`package.xml` and `build.rs` are almost same as [Publish and Subscribe](./pubsub.md).
+To enable rust-analyzer in the `mt_pubsub` directory and reduce the compilation time,
+prepare workspace's `Cargo.toml` as follows.
+
+```toml
+# mt_pubsub/src/Cargo.toml
+[workspace]
+members = ["publishers", "subscribers"]
+```
+
+`package.xml`s are almost same as [Publish and Subscribe](./pubsub.md).
 If you cannot understand what these files do,
 please go back to the previous chapter.
-
-```rust
-// build.rs
-fn main() {
-    if let Some(e) = std::env::var_os("AMENT_PREFIX_PATH") {
-        let env = e.to_str().unwrap();
-        for path in env.split(":") {
-            println!("cargo:rustc-link-search={path}/lib");
-        }
-    }
-}
-```
 
 ```xml
 <!-- publishers/package.xml -->
@@ -68,7 +66,7 @@ fn main() {
   <version>0.0.0</version>
   <description>MT-Publishers</description>
   <maintainer email="yuuki.takano@tier4.jp">Yuuki Takano</maintainer>
-  <license>TODO: License declaration</license>
+  <license>Apache License 2.0</license>
 
   <test_depend>ament_lint_auto</test_depend>
   <test_depend>ament_lint_common</test_depend>
@@ -91,8 +89,8 @@ To use `async_std`, we have to update `Cargo.toml` as follows.
 ```toml
 # Cargo.toml
 [dependencies]
-async-std = { version = "1.12.0", features = ["attributes"] }
-safe_drive = { path = "../../../safe_drive" }
+async-std = { version = "1", features = ["attributes"] }
+safe_drive = { path = "path_to/safe_drive" }
 ```
 
 ## Publishers
@@ -174,12 +172,10 @@ The main function is almost same as previous one.
 
 ```rust
 // mt_pubsub/src/subscribers/src/main
-use async_std::future::timeout;
 use safe_drive::{
     context::Context, error::DynError, logger::Logger, msg::common_interfaces::std_msgs, pr_info,
-    pr_warn, topic::subscriber::Subscriber,
+    topic::subscriber::Subscriber,
 };
-use std::time::Duration;
 
 #[async_std::main]
 async fn main() -> Result<(), DynError> {
@@ -224,9 +220,10 @@ we can implement receiving with timeout.
 Timeout can be implemented as follows.
 
 ```rust
-async fn receiver(
-    mut subscriber: Subscriber<std_msgs::msg::String>,
-) -> Result<(), DynError> {
+use async_std::future::timeout;
+use safe_drive::pr_warn;
+use std::time::Duration;
+async fn receiver(mut subscriber: Subscriber<std_msgs::msg::String>) -> Result<(), DynError> {
     let logger = Logger::new(subscriber.get_topic_name());
 
     loop {

@@ -124,16 +124,20 @@ impl<const N: usize> GetPlanRequestSeq<N> {
         }
     }
 
-    pub fn iter<'a>(&'a self) -> std::slice::Iter<'a, GetPlanRequest> {
+    pub fn iter(&self) -> std::slice::Iter<'_, GetPlanRequest> {
         self.as_slice().iter()
     }
 
-    pub fn iter_mut<'a>(&'a mut self) -> std::slice::IterMut<'a, GetPlanRequest> {
+    pub fn iter_mut(&mut self) -> std::slice::IterMut<'_, GetPlanRequest> {
         self.as_slice_mut().iter_mut()
     }
 
     pub fn len(&self) -> usize {
         self.as_slice().len()
+    }
+
+    pub fn is_empty(&self) -> bool {
+        self.len() == 0
     }
 }
 
@@ -237,16 +241,20 @@ impl<const N: usize> GetPlanResponseSeq<N> {
         }
     }
 
-    pub fn iter<'a>(&'a self) -> std::slice::Iter<'a, GetPlanResponse> {
+    pub fn iter(&self) -> std::slice::Iter<'_, GetPlanResponse> {
         self.as_slice().iter()
     }
 
-    pub fn iter_mut<'a>(&'a mut self) -> std::slice::IterMut<'a, GetPlanResponse> {
+    pub fn iter_mut(&mut self) -> std::slice::IterMut<'_, GetPlanResponse> {
         self.as_slice_mut().iter_mut()
     }
 
     pub fn len(&self) -> usize {
         self.as_slice().len()
+    }
+
+    pub fn is_empty(&self) -> bool {
+        self.len() == 0
     }
 }
 

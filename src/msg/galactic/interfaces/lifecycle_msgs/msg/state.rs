@@ -121,16 +121,20 @@ impl<const N: usize> StateSeq<N> {
         }
     }
 
-    pub fn iter<'a>(&'a self) -> std::slice::Iter<'a, State> {
+    pub fn iter(&self) -> std::slice::Iter<'_, State> {
         self.as_slice().iter()
     }
 
-    pub fn iter_mut<'a>(&'a mut self) -> std::slice::IterMut<'a, State> {
+    pub fn iter_mut(&mut self) -> std::slice::IterMut<'_, State> {
         self.as_slice_mut().iter_mut()
     }
 
     pub fn len(&self) -> usize {
         self.as_slice().len()
+    }
+
+    pub fn is_empty(&self) -> bool {
+        self.len() == 0
     }
 }
 

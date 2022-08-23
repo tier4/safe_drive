@@ -127,16 +127,20 @@ impl<const N: usize> GetParametersRequestSeq<N> {
         }
     }
 
-    pub fn iter<'a>(&'a self) -> std::slice::Iter<'a, GetParametersRequest> {
+    pub fn iter(&self) -> std::slice::Iter<'_, GetParametersRequest> {
         self.as_slice().iter()
     }
 
-    pub fn iter_mut<'a>(&'a mut self) -> std::slice::IterMut<'a, GetParametersRequest> {
+    pub fn iter_mut(&mut self) -> std::slice::IterMut<'_, GetParametersRequest> {
         self.as_slice_mut().iter_mut()
     }
 
     pub fn len(&self) -> usize {
         self.as_slice().len()
+    }
+
+    pub fn is_empty(&self) -> bool {
+        self.len() == 0
     }
 }
 
@@ -241,16 +245,20 @@ impl<const N: usize> GetParametersResponseSeq<N> {
         }
     }
 
-    pub fn iter<'a>(&'a self) -> std::slice::Iter<'a, GetParametersResponse> {
+    pub fn iter(&self) -> std::slice::Iter<'_, GetParametersResponse> {
         self.as_slice().iter()
     }
 
-    pub fn iter_mut<'a>(&'a mut self) -> std::slice::IterMut<'a, GetParametersResponse> {
+    pub fn iter_mut(&mut self) -> std::slice::IterMut<'_, GetParametersResponse> {
         self.as_slice_mut().iter_mut()
     }
 
     pub fn len(&self) -> usize {
         self.as_slice().len()
+    }
+
+    pub fn is_empty(&self) -> bool {
+        self.len() == 0
     }
 }
 

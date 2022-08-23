@@ -35,6 +35,16 @@ Throughout this tutorial, we will create 4 packages as follows.
 | msgtest/src/talker           | a publisher  |
 | msgtest/src/listener         | a subscriber |
 
+## Workspace's `Cargo.toml`
+
+The workspace's `Cargo.toml` should be created as follows.
+
+```toml
+# msgtest/src/Cargo.toml
+[workspace]
+members = ["my_interfaces_rs", "talker", "listener"]
+```
+
 ## Define User Defined Type
 
 To define message types, we have to create a ROS2's package,
@@ -236,7 +246,7 @@ Then create `package.xml` as follows.
   <version>0.0.0</version>
   <description>My Interfaces in Rust</description>
   <maintainer email="yuuki.takano@tier4.jp">Yuuki Takano</maintainer>
-  <license>TODO: License declaration</license>
+  <license>Apache License 2.0</license>
 
   <test_depend>ament_lint_auto</test_depend>
   <test_depend>ament_lint_common</test_depend>
@@ -385,7 +395,7 @@ To use the generated Rust's types, we have to edit `Cargo.toml` as follows.
 ```toml
 # msgtest/src/talker/Cargo.toml
 [dependencies]
-safe_drive = { path = "/root/safe_drive" }
+safe_drive = { path = "path_to/safe_drive" }
 my_interfaces_rs = { path = "../my_interfaces_rs" }
 ```
 
@@ -402,7 +412,7 @@ Then create `package.xml` as follows.
   <version>0.0.0</version>
   <description>Talker in Rust</description>
   <maintainer email="yuuki.takano@tier4.jp">Yuuki Takano</maintainer>
-  <license>TODO: License declaration</license>
+  <license>Apache License 2.0</license>
 
   <test_depend>ament_lint_auto</test_depend>
   <test_depend>ament_lint_common</test_depend>
@@ -495,7 +505,7 @@ The listener also requires `my_interfaces_rs`, and edit `Cargo.toml` as follows.
 ```toml
 # msgtest/src/listener/Cargo.toml
 [dependencies]
-safe_drive = { path = "/root/safe_drive" }
+safe_drive = { path = "path_to/safe_drive" }
 my_interfaces_rs = { path = "../my_interfaces_rs" }
 ```
 
@@ -512,7 +522,7 @@ Then create `package.xml` as follows.
   <version>0.0.0</version>
   <description>Listener in Rust</description>
   <maintainer email="yuuki.takano@tier4.jp">Yuuki Takano</maintainer>
-  <license>TODO: License declaration</license>
+  <license>Apache License 2.0</license>
 
   <test_depend>ament_lint_auto</test_depend>
   <test_depend>ament_lint_common</test_depend>

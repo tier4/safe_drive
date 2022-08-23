@@ -35,8 +35,8 @@ $ . /opt/ros/galactic/setup.bash
 ## Install Colcon-Cargo
 
 ```text
-$ cargo install --debug cargo-ament-build
-$ pip install git+https://github.com/colcon/colcon-cargo.git
+$ cargo install --git https://github.com/tier4/cargo-ament-build.git
+$ pip install git+https://github.com/tier4/colcon-cargo.git
 $ pip install git+https://github.com/colcon/colcon-ros-cargo.git
 ```
 

@@ -125,16 +125,20 @@ impl<const N: usize> ParameterValueSeq<N> {
         }
     }
 
-    pub fn iter<'a>(&'a self) -> std::slice::Iter<'a, ParameterValue> {
+    pub fn iter(&self) -> std::slice::Iter<'_, ParameterValue> {
         self.as_slice().iter()
     }
 
-    pub fn iter_mut<'a>(&'a mut self) -> std::slice::IterMut<'a, ParameterValue> {
+    pub fn iter_mut(&mut self) -> std::slice::IterMut<'_, ParameterValue> {
         self.as_slice_mut().iter_mut()
     }
 
     pub fn len(&self) -> usize {
         self.as_slice().len()
+    }
+
+    pub fn is_empty(&self) -> bool {
+        self.len() == 0
     }
 }
 

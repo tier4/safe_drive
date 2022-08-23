@@ -39,6 +39,14 @@ $ cargo new --lib srvmsg_rs
 $ ros2 pkg create --build-type ament_cmake srvmsg
 ```
 
+In addition to that, create the workspace's `Cargo.toml` as follows.
+
+```toml
+# srvtest/src/Cargo.toml
+[workspace]
+members = ["srvmsg_rs", "client", "server"]
+```
+
 ## Define Protocol
 
 First of all, let's define a protocol for a service.
@@ -171,7 +179,7 @@ pub mod srvmsg;
 ```toml
 # srvtest/src/srvmsg_rs/Cargo.toml
 [dependencies]
-safe_drive = { path = "/root/safe_drive" }
+safe_drive = { path = "path_to/safe_drive" }
 ```
 
 ### Create `srvmsg_rs/build.rs`
@@ -207,7 +215,7 @@ fn main() {
   <version>0.0.0</version>
   <description>Protocol Definition in Rust</description>
   <maintainer email="yuuki.takano@tier4.jp">Yuuki Takano</maintainer>
-  <license>TODO: License declaration</license>
+  <license>Apache License 2.0</license>
 
   <test_depend>ament_lint_auto</test_depend>
   <test_depend>ament_lint_common</test_depend>
@@ -294,7 +302,7 @@ The callback function must take a message sent by a client and a header includin
 ```toml
 # srvtest/src/server/Cargo.toml
 [dependencies]
-safe_drive = { path = "/root/safe_drive" }
+safe_drive = { path = "path_to/safe_drive" }
 srvmsg_rs = { path = "../srvmsg_rs" }
 ```
 
@@ -311,7 +319,7 @@ srvmsg_rs = { path = "../srvmsg_rs" }
   <version>0.0.0</version>
   <description>Server in Rust</description>
   <maintainer email="yuuki.takano@tier4.jp">Yuuki Takano</maintainer>
-  <license>TODO: License declaration</license>
+  <license>Apache License 2.0</license>
 
   <test_depend>ament_lint_auto</test_depend>
   <test_depend>ament_lint_common</test_depend>
@@ -412,7 +420,7 @@ Otherwise, you encountered compilation errors.
 ```toml
 # srvtest/src/client/Cargo.toml
 [dependencies]
-safe_drive = { path = "/root/safe_drive" }
+safe_drive = { path = "path_to/safe_drive" }
 srvmsg_rs = { path = "../srvmsg_rs" }
 tokio = { version = "1", features = ["full"] }
 ```
@@ -430,7 +438,7 @@ tokio = { version = "1", features = ["full"] }
   <version>0.0.0</version>
   <description>Client in Rust</description>
   <maintainer email="yuuki.takano@tier4.jp">Yuuki Takano</maintainer>
-  <license>TODO: License declaration</license>
+  <license>Apache License 2.0</license>
 
   <test_depend>ament_lint_auto</test_depend>
   <test_depend>ament_lint_common</test_depend>
@@ -461,7 +469,7 @@ Then, in another terminal, execute a client as follows.
 ```text
 $ cd srvtest
 $ . ./install/setup.bash
-$ ros2 run server server
+$ ros2 run client client
 [WARN] [1659604527.720730018] [client]: timeout: deadline has elapsed
 [INFO] [1659604528.722220697] [client]: received AddTwoIntsResponse { result: 3 }
 [INFO] [1659604529.723525686] [client]: received AddTwoIntsResponse { result: 5 }
@@ -470,7 +478,7 @@ $ ros2 run server server
 
 Nicely done!
 We used async/await for the client,
-but it can be used for the server as follows.
+and it can be used for the server as follows.
 
 ```rust
 async { server.recv().await };

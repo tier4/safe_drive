@@ -81,7 +81,7 @@
 
         <nav id="sidebar" class="sidebar" aria-label="Table of contents">
             <div class="sidebar-scrollbox">
-                <ol class="chapter"><li class="chapter-item expanded "><a href="index.html"><strong aria-hidden="true">1.</strong> Top</a></li><li class="chapter-item expanded "><a href="tutorial.html"><strong aria-hidden="true">2.</strong> Tutorial</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="setup.html"><strong aria-hidden="true">2.1.</strong> Setting-up</a></li><li class="chapter-item expanded "><a href="pubsub.html"><strong aria-hidden="true">2.2.</strong> Publish and Subscribe</a></li><li class="chapter-item expanded "><a href="timer.html"><strong aria-hidden="true">2.3.</strong> Timer</a></li><li class="chapter-item expanded "><a href="multi_pubsub.html"><strong aria-hidden="true">2.4.</strong> Multi-threaded Publish and Subscribe</a></li><li class="chapter-item expanded "><a href="message.html" class="active"><strong aria-hidden="true">2.5.</strong> User Defined Data Structure</a></li><li class="chapter-item expanded "><a href="predefined.html"><strong aria-hidden="true">2.6.</strong> Pre-defined Data Structure</a></li><li class="chapter-item expanded "><a href="service.html"><strong aria-hidden="true">2.7.</strong> Service</a></li></ol></li></ol>
+                <ol class="chapter"><li class="chapter-item expanded "><a href="index.html"><strong aria-hidden="true">1.</strong> Top</a></li><li class="chapter-item expanded "><a href="tutorial.html"><strong aria-hidden="true">2.</strong> Tutorial</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="setup.html"><strong aria-hidden="true">2.1.</strong> Setting-up</a></li><li class="chapter-item expanded "><a href="pubsub.html"><strong aria-hidden="true">2.2.</strong> Publish and Subscribe</a></li><li class="chapter-item expanded "><a href="timer.html"><strong aria-hidden="true">2.3.</strong> Timer</a></li><li class="chapter-item expanded "><a href="multi_pubsub.html"><strong aria-hidden="true">2.4.</strong> Multi-threaded Publish and Subscribe</a></li><li class="chapter-item expanded "><a href="message.html" class="active"><strong aria-hidden="true">2.5.</strong> User Defined Data Structure</a></li><li class="chapter-item expanded "><a href="predefined.html"><strong aria-hidden="true">2.6.</strong> Pre-defined Data Structure</a></li><li class="chapter-item expanded "><a href="service.html"><strong aria-hidden="true">2.7.</strong> Service</a></li><li class="chapter-item expanded "><a href="parameter.html"><strong aria-hidden="true">2.8.</strong> Parameter</a></li></ol></li></ol>
             </div>
             <div id="sidebar-resize-handle" class="sidebar-resize-handle"></div>
         </nav>
@@ -168,6 +168,12 @@ $ cargo install --path .
 <tr><td>msgtest/src/listener</td><td>a subscriber</td></tr>
 </tbody></table>
 </div>
+<h2 id="workspaces-cargotoml"><a class="header" href="#workspaces-cargotoml">Workspace's <code>Cargo.toml</code></a></h2>
+<p>The workspace's <code>Cargo.toml</code> should be created as follows.</p>
+<pre><code class="language-toml"># msgtest/src/Cargo.toml
+[workspace]
+members = [&quot;my_interfaces_rs&quot;, &quot;talker&quot;, &quot;listener&quot;]
+</code></pre>
 <h2 id="define-user-defined-type"><a class="header" href="#define-user-defined-type">Define User Defined Type</a></h2>
 <p>To define message types, we have to create a ROS2's package,
 and create a '.msg' files.
@@ -331,7 +337,7 @@ pub mod my_interfaces;
   &lt;version&gt;0.0.0&lt;/version&gt;
   &lt;description&gt;My Interfaces in Rust&lt;/description&gt;
   &lt;maintainer email=&quot;yuuki.takano@tier4.jp&quot;&gt;Yuuki Takano&lt;/maintainer&gt;
-  &lt;license&gt;TODO: License declaration&lt;/license&gt;
+  &lt;license&gt;Apache License 2.0&lt;/license&gt;
 
   &lt;test_depend&gt;ament_lint_auto&lt;/test_depend&gt;
   &lt;test_depend&gt;ament_lint_common&lt;/test_depend&gt;
@@ -419,7 +425,7 @@ fn create_message() -&gt; Result&lt;my_interfaces::msg::MyMsg, DynError&gt; {
 
     // int32[] unbounded_integer_array
     let mut msgs = I32Seq::new(3).unwrap();
-    let ref_msgs = msgs.as_slice_mut().unwrap();
+    let ref_msgs = msgs.as_slice_mut();
     ref_msgs[0] = 6;
     ref_msgs[1] = 7;
     ref_msgs[2] = 8;
@@ -427,7 +433,7 @@ fn create_message() -&gt; Result&lt;my_interfaces::msg::MyMsg, DynError&gt; {
 
     // int32[&lt;=5] up_to_five_integers_array
     let mut msgs = I32Seq::new(2).unwrap();
-    let ref_msgs = msgs.as_slice_mut().unwrap();
+    let ref_msgs = msgs.as_slice_mut();
     ref_msgs[0] = 2;
     ref_msgs[1] = 3;
     my_msg.up_to_five_integers_array = msgs;
@@ -454,7 +460,7 @@ we can use <code>as_slice_mut()</code> or <code>as_slice()</code> methods as fol
 </span><span class="boring">fn main() {
 </span>// unbounded or unbounded array
 let mut msgs = I32Seq::new(3).unwrap();
-let ref_msgs = msgs.as_slice_mut().unwrap();
+let ref_msgs = msgs.as_slice_mut();
 <span class="boring">}
 </span></code></pre></pre>
 <p><code>as_slice_mut()</code> returns a mutable slice,
@@ -463,7 +469,7 @@ you can thus update the elements of the array via the slice.</p>
 <p>To use the generated Rust's types, we have to edit <code>Cargo.toml</code> as follows.</p>
 <pre><code class="language-toml"># msgtest/src/talker/Cargo.toml
 [dependencies]
-safe_drive = { path = &quot;/root/safe_drive&quot; }
+safe_drive = { path = &quot;path_to/safe_drive&quot; }
 my_interfaces_rs = { path = &quot;../my_interfaces_rs&quot; }
 </code></pre>
 <h3 id="create-talkerpackagexml"><a class="header" href="#create-talkerpackagexml">Create <code>talker/package.xml</code></a></h3>
@@ -476,7 +482,7 @@ my_interfaces_rs = { path = &quot;../my_interfaces_rs&quot; }
   &lt;version&gt;0.0.0&lt;/version&gt;
   &lt;description&gt;Talker in Rust&lt;/description&gt;
   &lt;maintainer email=&quot;yuuki.takano@tier4.jp&quot;&gt;Yuuki Takano&lt;/maintainer&gt;
-  &lt;license&gt;TODO: License declaration&lt;/license&gt;
+  &lt;license&gt;Apache License 2.0&lt;/license&gt;
 
   &lt;test_depend&gt;ament_lint_auto&lt;/test_depend&gt;
   &lt;test_depend&gt;ament_lint_common&lt;/test_depend&gt;
@@ -531,16 +537,14 @@ fn main() -&gt; Result&lt;(), DynError&gt; {
                 pr_info!(logger, &quot;five_integers_array: {}&quot;, msg);
             }
 
-            if let Some(slice) = msg.unbounded_integer_array.as_slice() {
-                for msg in slice {
-                    pr_info!(logger, &quot;unbounded_integer_array: {}&quot;, msg);
-                }
+            let slice = msg.unbounded_integer_array.as_slice();
+            for msg in slice {
+                pr_info!(logger, &quot;unbounded_integer_array: {}&quot;, msg);
             }
 
-            if let Some(slice) = msg.up_to_five_integers_array.as_slice() {
-                for msg in slice {
-                    pr_info!(logger, &quot;up_to_five_integers_array: {}&quot;, msg);
-                }
+            let slice = msg.up_to_five_integers_array.as_slice();
+            for msg in slice {
+                pr_info!(logger, &quot;up_to_five_integers_array: {}&quot;, msg);
             }
         }),
         false,
@@ -557,7 +561,7 @@ fn main() -&gt; Result&lt;(), DynError&gt; {
 <p>The listener also requires <code>my_interfaces_rs</code>, and edit <code>Cargo.toml</code> as follows.</p>
 <pre><code class="language-toml"># msgtest/src/listener/Cargo.toml
 [dependencies]
-safe_drive = { path = &quot;/root/safe_drive&quot; }
+safe_drive = { path = &quot;path_to/safe_drive&quot; }
 my_interfaces_rs = { path = &quot;../my_interfaces_rs&quot; }
 </code></pre>
 <h3 id="create-listenerpackagexml"><a class="header" href="#create-listenerpackagexml">Create <code>listener/package.xml</code></a></h3>
@@ -570,7 +574,7 @@ my_interfaces_rs = { path = &quot;../my_interfaces_rs&quot; }
   &lt;version&gt;0.0.0&lt;/version&gt;
   &lt;description&gt;Listener in Rust&lt;/description&gt;
   &lt;maintainer email=&quot;yuuki.takano@tier4.jp&quot;&gt;Yuuki Takano&lt;/maintainer&gt;
-  &lt;license&gt;TODO: License declaration&lt;/license&gt;
+  &lt;license&gt;Apache License 2.0&lt;/license&gt;
 
   &lt;test_depend&gt;ament_lint_auto&lt;/test_depend&gt;
   &lt;test_depend&gt;ament_lint_common&lt;/test_depend&gt;
@@ -678,7 +682,7 @@ fn _create_message_str() -&gt; Result&lt;my_interfaces::msg::MyMsgStr, DynError&
 
     // string[] dynamic_array_str
     let mut msgs = RosStringSeq::new(3).ok_or(&quot;failed to create string&quot;)?;
-    let ref_msgs = msgs.as_slice_mut().ok_or(&quot;failed to get slice&quot;)?;
+    let ref_msgs = msgs.as_slice_mut();
     ref_msgs[0].assign(&quot;dynamic array 0&quot;);
     ref_msgs[1].assign(&quot;dynamic array 1&quot;);
     ref_msgs[2].assign(&quot;dynamic array 2&quot;);
@@ -686,7 +690,7 @@ fn _create_message_str() -&gt; Result&lt;my_interfaces::msg::MyMsgStr, DynError&
 
     // string[&lt;=3] bounded_array_str
     let mut msgs = RosStringSeq::new(2).ok_or(&quot;failed to create string&quot;)?;
-    let ref_msgs = msgs.as_slice_mut().ok_or(&quot;failed to get slice&quot;)?;
+    let ref_msgs = msgs.as_slice_mut();
     ref_msgs[0].assign(&quot;bounded array 0&quot;);
     ref_msgs[1].assign(&quot;bounded array 1&quot;);
     my_msg.bounded_array_str = msgs;
@@ -700,7 +704,7 @@ fn _create_message_str() -&gt; Result&lt;my_interfaces::msg::MyMsgStr, DynError&
 
     // string&lt;=10[] dynamic_array_bounded_str
     let mut msgs = RosStringSeq::new(3).ok_or(&quot;failed to create string&quot;)?;
-    let ref_msgs = msgs.as_slice_mut().ok_or(&quot;failed to get slice&quot;)?;
+    let ref_msgs = msgs.as_slice_mut();
     ref_msgs[0].assign(&quot;msg3&quot;);
     ref_msgs[1].assign(&quot;msg4&quot;);
     ref_msgs[2].assign(&quot;msg5&quot;);
@@ -708,7 +712,7 @@ fn _create_message_str() -&gt; Result&lt;my_interfaces::msg::MyMsgStr, DynError&
 
     // string&lt;=10[&lt;=3] bounded_array_bounded_str
     let mut msgs = RosStringSeq::new(2).ok_or(&quot;failed to create string&quot;)?;
-    let ref_msgs = msgs.as_slice_mut().ok_or(&quot;failed to get slice&quot;)?;
+    let ref_msgs = msgs.as_slice_mut();
     ref_msgs[0].assign(&quot;msg3&quot;);
     ref_msgs[1].assign(&quot;msg5&quot;);
     my_msg.bounded_array_bounded_str = msgs;

@@ -132,44 +132,42 @@ impl Parameters {
     ) -> Result<(), DynError> {
         if value == Value::NotSet {
             Err("Value::NotSet cannot be used as a statically typed value".into())
-        } else {
-            if let Some(param) = self.params.get_mut(&name) {
-                if param.descriptor.dynamic_typing {
-                    let msg = format!("{} is a dynamically typed value", name);
-                    return Err(msg.into());
-                }
-
-                if param.descriptor.read_only {
-                    let msg = format!("{} is read only", name);
-                    return Err(msg.into());
-                }
-
-                if !param.check_range(&value) {
-                    let msg = format!("{} is exceeding the range", name);
-                    return Err(msg.into());
-                }
-
-                if param.value.type_check(&value) {
-                    param.value = value;
-                    Ok(())
-                } else {
-                    let msg = format!(
-                        "failed type checking: dst = {}, src = {}",
-                        param.value.type_name(),
-                        value.type_name()
-                    );
-                    Err(msg.into())
-                }
-            } else {
-                let param = Parameter::new(
-                    value,
-                    read_only,
-                    false,
-                    description.unwrap_or_else(|| name.clone()),
-                );
-                self.params.insert(name, param);
-                Ok(())
+        } else if let Some(param) = self.params.get_mut(&name) {
+            if param.descriptor.dynamic_typing {
+                let msg = format!("{} is a dynamically typed value", name);
+                return Err(msg.into());
             }
+
+            if param.descriptor.read_only {
+                let msg = format!("{} is read only", name);
+                return Err(msg.into());
+            }
+
+            if !param.check_range(&value) {
+                let msg = format!("{} is exceeding the range", name);
+                return Err(msg.into());
+            }
+
+            if param.value.type_check(&value) {
+                param.value = value;
+                Ok(())
+            } else {
+                let msg = format!(
+                    "failed type checking: dst = {}, src = {}",
+                    param.value.type_name(),
+                    value.type_name()
+                );
+                Err(msg.into())
+            }
+        } else {
+            let param = Parameter::new(
+                value,
+                read_only,
+                false,
+                description.unwrap_or_else(|| name.clone()),
+            );
+            self.params.insert(name, param);
+            Ok(())
         }
     }
 
@@ -342,18 +340,18 @@ pub enum Value {
 
 impl Value {
     fn type_check(&self, other: &Self) -> bool {
-        match (self, other) {
-            (Value::Bool(_), Value::Bool(_)) => true,
-            (Value::I64(_), Value::I64(_)) => true,
-            (Value::F64(_), Value::F64(_)) => true,
-            (Value::String(_), Value::String(_)) => true,
-            (Value::VecBool(_), Value::VecBool(_)) => true,
-            (Value::VecI64(_), Value::VecI64(_)) => true,
-            (Value::VecU8(_), Value::VecU8(_)) => true,
-            (Value::VecF64(_), Value::VecF64(_)) => true,
-            (Value::VecString(_), Value::VecString(_)) => true,
-            _ => false,
-        }
+        matches!(
+            (self, other),
+            (Value::Bool(_), Value::Bool(_))
+                | (Value::I64(_), Value::I64(_))
+                | (Value::F64(_), Value::F64(_))
+                | (Value::String(_), Value::String(_))
+                | (Value::VecBool(_), Value::VecBool(_))
+                | (Value::VecI64(_), Value::VecI64(_))
+                | (Value::VecU8(_), Value::VecU8(_))
+                | (Value::VecF64(_), Value::VecF64(_))
+                | (Value::VecString(_), Value::VecString(_))
+        )
     }
 
     fn type_name(&self) -> &str {
@@ -432,7 +430,7 @@ impl From<&Value> for ParameterValue {
             }
             Value::String(val) => {
                 result.type_ = 4;
-                result.string_value = RosString::new(&val).unwrap_or_else(|| {
+                result.string_value = RosString::new(val).unwrap_or_else(|| {
                     pr_fatal_in!(logger, "{}:{}: failed allocation", file!(), line!());
                     RosString::null()
                 });
@@ -507,38 +505,38 @@ impl From<&Value> for ParameterValue {
 impl From<&rcl_variant_t> for Value {
     fn from(var: &rcl_variant_t) -> Self {
         if !var.bool_value.is_null() {
-            return Value::Bool(unsafe { *var.bool_value });
+            Value::Bool(unsafe { *var.bool_value })
         } else if !var.integer_value.is_null() {
-            return Value::I64(unsafe { *var.integer_value });
+            Value::I64(unsafe { *var.integer_value })
         } else if !var.double_value.is_null() {
-            return Value::F64(unsafe { *var.double_value });
+            Value::F64(unsafe { *var.double_value })
         } else if !var.string_value.is_null() {
             let s = unsafe { CStr::from_ptr(var.string_value) };
-            return Value::String(s.to_str().unwrap_or("").into());
+            Value::String(s.to_str().unwrap_or("").into())
         } else if !var.bool_array_value.is_null() {
             let v = &unsafe { *var.bool_array_value };
             let s = unsafe { from_raw_parts(v.values, v.size as usize) };
-            return Value::VecBool(s.into());
+            Value::VecBool(s.into())
         } else if !var.integer_array_value.is_null() {
             let v = &unsafe { *var.integer_array_value };
             let s = unsafe { from_raw_parts(v.values, v.size as usize) };
-            return Value::VecI64(s.into());
+            Value::VecI64(s.into())
         } else if !var.byte_array_value.is_null() {
             let v = &unsafe { *var.byte_array_value };
             let s = unsafe { from_raw_parts(v.values, v.size as usize) };
-            return Value::VecU8(s.into());
+            Value::VecU8(s.into())
         } else if !var.double_array_value.is_null() {
             let v = &unsafe { *var.double_array_value };
             let s = unsafe { from_raw_parts(v.values, v.size as usize) };
-            return Value::VecF64(s.into());
+            Value::VecF64(s.into())
         } else if !var.string_array_value.is_null() {
             let v = &unsafe { *var.string_array_value };
             let s = unsafe { from_raw_parts(v.data, v.size as usize) };
             let s = s
-                .into_iter()
+                .iter()
                 .map(|p| unsafe { CStr::from_ptr(*p).to_str().unwrap_or("").into() })
                 .collect();
-            return Value::VecString(s);
+            Value::VecString(s)
         } else {
             Value::NotSet
         }
@@ -555,7 +553,7 @@ impl ParameterServer {
         let handler = std::thread::spawn(move || param_server(n, ps, cond_cloned));
 
         Ok(Self {
-            params: params,
+            params,
             handler: Some(handler),
             cond,
             _node: node,
@@ -656,10 +654,7 @@ fn add_srv_set(
                         continue;
                     }
 
-                    if original.descriptor.dynamic_typing {
-                        original.value = val;
-                        slice[i].successful = true;
-                    } else if original.value.type_check(&val) {
+                    if original.descriptor.dynamic_typing || original.value.type_check(&val) {
                         original.value = val;
                         slice[i].successful = true;
                     } else {

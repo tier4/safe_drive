@@ -81,7 +81,7 @@
 
         <nav id="sidebar" class="sidebar" aria-label="Table of contents">
             <div class="sidebar-scrollbox">
-                <ol class="chapter"><li class="chapter-item expanded "><a href="index.html"><strong aria-hidden="true">1.</strong> Top</a></li><li class="chapter-item expanded "><a href="tutorial.html"><strong aria-hidden="true">2.</strong> Tutorial</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="setup.html"><strong aria-hidden="true">2.1.</strong> Setting-up</a></li><li class="chapter-item expanded "><a href="pubsub.html"><strong aria-hidden="true">2.2.</strong> Publish and Subscribe</a></li><li class="chapter-item expanded "><a href="timer.html"><strong aria-hidden="true">2.3.</strong> Timer</a></li><li class="chapter-item expanded "><a href="multi_pubsub.html"><strong aria-hidden="true">2.4.</strong> Multi-threaded Publish and Subscribe</a></li><li class="chapter-item expanded "><a href="message.html"><strong aria-hidden="true">2.5.</strong> User Defined Data Structure</a></li><li class="chapter-item expanded "><a href="predefined.html"><strong aria-hidden="true">2.6.</strong> Pre-defined Data Structure</a></li><li class="chapter-item expanded "><a href="service.html" class="active"><strong aria-hidden="true">2.7.</strong> Service</a></li></ol></li></ol>
+                <ol class="chapter"><li class="chapter-item expanded "><a href="index.html"><strong aria-hidden="true">1.</strong> Top</a></li><li class="chapter-item expanded "><a href="tutorial.html"><strong aria-hidden="true">2.</strong> Tutorial</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="setup.html"><strong aria-hidden="true">2.1.</strong> Setting-up</a></li><li class="chapter-item expanded "><a href="pubsub.html"><strong aria-hidden="true">2.2.</strong> Publish and Subscribe</a></li><li class="chapter-item expanded "><a href="timer.html"><strong aria-hidden="true">2.3.</strong> Timer</a></li><li class="chapter-item expanded "><a href="multi_pubsub.html"><strong aria-hidden="true">2.4.</strong> Multi-threaded Publish and Subscribe</a></li><li class="chapter-item expanded "><a href="message.html"><strong aria-hidden="true">2.5.</strong> User Defined Data Structure</a></li><li class="chapter-item expanded "><a href="predefined.html"><strong aria-hidden="true">2.6.</strong> Pre-defined Data Structure</a></li><li class="chapter-item expanded "><a href="service.html" class="active"><strong aria-hidden="true">2.7.</strong> Service</a></li><li class="chapter-item expanded "><a href="parameter.html"><strong aria-hidden="true">2.8.</strong> Parameter</a></li></ol></li></ol>
             </div>
             <div id="sidebar-resize-handle" class="sidebar-resize-handle"></div>
         </nav>
@@ -172,6 +172,11 @@ $ cargo new server
 $ cargo new client
 $ cargo new --lib srvmsg_rs
 $ ros2 pkg create --build-type ament_cmake srvmsg
+</code></pre>
+<p>In addition to that, create the workspace's <code>Cargo.toml</code> as follows.</p>
+<pre><code class="language-toml"># srvtest/src/Cargo.toml
+[workspace]
+members = [&quot;srvmsg_rs&quot;, &quot;client&quot;, &quot;server&quot;]
 </code></pre>
 <h2 id="define-protocol"><a class="header" href="#define-protocol">Define Protocol</a></h2>
 <p>First of all, let's define a protocol for a service.
@@ -279,7 +284,7 @@ pub mod srvmsg;
 <p><code>safe_drive</code> must be added to <code>Cargo.toml</code> as follows.</p>
 <pre><code class="language-toml"># srvtest/src/srvmsg_rs/Cargo.toml
 [dependencies]
-safe_drive = { path = &quot;/root/safe_drive&quot; }
+safe_drive = { path = &quot;path_to/safe_drive&quot; }
 </code></pre>
 <h3 id="create-srvmsg_rsbuildrs"><a class="header" href="#create-srvmsg_rsbuildrs">Create <code>srvmsg_rs/build.rs</code></a></h3>
 <p>This crates depends on <code>srvmsg</code>'s libraries.
@@ -307,7 +312,7 @@ fn main() {
   &lt;version&gt;0.0.0&lt;/version&gt;
   &lt;description&gt;Protocol Definition in Rust&lt;/description&gt;
   &lt;maintainer email=&quot;yuuki.takano@tier4.jp&quot;&gt;Yuuki Takano&lt;/maintainer&gt;
-  &lt;license&gt;TODO: License declaration&lt;/license&gt;
+  &lt;license&gt;Apache License 2.0&lt;/license&gt;
 
   &lt;test_depend&gt;ament_lint_auto&lt;/test_depend&gt;
   &lt;test_depend&gt;ament_lint_common&lt;/test_depend&gt;
@@ -384,7 +389,7 @@ If you pass <code>None</code> instead of <code>Some(Profile::default())</code>, 
 <p><code>safe_drive</code> and <code>srvmsg_rs</code> must be added to <code>Cargo.toml</code> as follows.</p>
 <pre><code class="language-toml"># srvtest/src/server/Cargo.toml
 [dependencies]
-safe_drive = { path = &quot;/root/safe_drive&quot; }
+safe_drive = { path = &quot;path_to/safe_drive&quot; }
 srvmsg_rs = { path = &quot;../srvmsg_rs&quot; }
 </code></pre>
 <h3 id="create-serverpackagexml"><a class="header" href="#create-serverpackagexml">Create <code>server/package.xml</code></a></h3>
@@ -397,7 +402,7 @@ srvmsg_rs = { path = &quot;../srvmsg_rs&quot; }
   &lt;version&gt;0.0.0&lt;/version&gt;
   &lt;description&gt;Server in Rust&lt;/description&gt;
   &lt;maintainer email=&quot;yuuki.takano@tier4.jp&quot;&gt;Yuuki Takano&lt;/maintainer&gt;
-  &lt;license&gt;TODO: License declaration&lt;/license&gt;
+  &lt;license&gt;Apache License 2.0&lt;/license&gt;
 
   &lt;test_depend&gt;ament_lint_auto&lt;/test_depend&gt;
   &lt;test_depend&gt;ament_lint_common&lt;/test_depend&gt;
@@ -483,7 +488,7 @@ Otherwise, you encountered compilation errors.</p>
 <p><code>safe_drive</code>, <code>srvmsg_rs</code>, and <code>tokio</code> must be added to <code>Cargo.toml</code> as follows.</p>
 <pre><code class="language-toml"># srvtest/src/client/Cargo.toml
 [dependencies]
-safe_drive = { path = &quot;/root/safe_drive&quot; }
+safe_drive = { path = &quot;path_to/safe_drive&quot; }
 srvmsg_rs = { path = &quot;../srvmsg_rs&quot; }
 tokio = { version = &quot;1&quot;, features = [&quot;full&quot;] }
 </code></pre>
@@ -497,7 +502,7 @@ tokio = { version = &quot;1&quot;, features = [&quot;full&quot;] }
   &lt;version&gt;0.0.0&lt;/version&gt;
   &lt;description&gt;Client in Rust&lt;/description&gt;
   &lt;maintainer email=&quot;yuuki.takano@tier4.jp&quot;&gt;Yuuki Takano&lt;/maintainer&gt;
-  &lt;license&gt;TODO: License declaration&lt;/license&gt;
+  &lt;license&gt;Apache License 2.0&lt;/license&gt;
 
   &lt;test_depend&gt;ament_lint_auto&lt;/test_depend&gt;
   &lt;test_depend&gt;ament_lint_common&lt;/test_depend&gt;
@@ -520,7 +525,7 @@ $ ros2 run server server
 <p>Then, in another terminal, execute a client as follows.</p>
 <pre><code class="language-text">$ cd srvtest
 $ . ./install/setup.bash
-$ ros2 run server server
+$ ros2 run client client
 [WARN] [1659604527.720730018] [client]: timeout: deadline has elapsed
 [INFO] [1659604528.722220697] [client]: received AddTwoIntsResponse { result: 3 }
 [INFO] [1659604529.723525686] [client]: received AddTwoIntsResponse { result: 5 }
@@ -528,7 +533,7 @@ $ ros2 run server server
 </code></pre>
 <p>Nicely done!
 We used async/await for the client,
-but it can be used for the server as follows.</p>
+and it can be used for the server as follows.</p>
 <pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
 </span><span class="boring">fn main() {
 </span>async { server.recv().await };
@@ -543,6 +548,9 @@ but it can be used for the server as follows.</p>
                                 <i class="fa fa-angle-left"></i>
                             </a>
 
+                            <a rel="next" href="parameter.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <i class="fa fa-angle-right"></i>
+                            </a>
 
                         <div style="clear: both"></div>
                     </nav>
@@ -554,6 +562,9 @@ but it can be used for the server as follows.</p>
                         <i class="fa fa-angle-left"></i>
                     </a>
 
+                    <a rel="next" href="parameter.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <i class="fa fa-angle-right"></i>
+                    </a>
             </nav>
 
         </div>

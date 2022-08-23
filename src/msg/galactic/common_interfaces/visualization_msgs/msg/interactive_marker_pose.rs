@@ -124,16 +124,20 @@ impl<const N: usize> InteractiveMarkerPoseSeq<N> {
         }
     }
 
-    pub fn iter<'a>(&'a self) -> std::slice::Iter<'a, InteractiveMarkerPose> {
+    pub fn iter(&self) -> std::slice::Iter<'_, InteractiveMarkerPose> {
         self.as_slice().iter()
     }
 
-    pub fn iter_mut<'a>(&'a mut self) -> std::slice::IterMut<'a, InteractiveMarkerPose> {
+    pub fn iter_mut(&mut self) -> std::slice::IterMut<'_, InteractiveMarkerPose> {
         self.as_slice_mut().iter_mut()
     }
 
     pub fn len(&self) -> usize {
         self.as_slice().len()
+    }
+
+    pub fn is_empty(&self) -> bool {
+        self.len() == 0
     }
 }
 

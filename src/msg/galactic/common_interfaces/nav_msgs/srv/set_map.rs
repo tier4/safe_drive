@@ -122,16 +122,20 @@ impl<const N: usize> SetMapRequestSeq<N> {
         }
     }
 
-    pub fn iter<'a>(&'a self) -> std::slice::Iter<'a, SetMapRequest> {
+    pub fn iter(&self) -> std::slice::Iter<'_, SetMapRequest> {
         self.as_slice().iter()
     }
 
-    pub fn iter_mut<'a>(&'a mut self) -> std::slice::IterMut<'a, SetMapRequest> {
+    pub fn iter_mut(&mut self) -> std::slice::IterMut<'_, SetMapRequest> {
         self.as_slice_mut().iter_mut()
     }
 
     pub fn len(&self) -> usize {
         self.as_slice().len()
+    }
+
+    pub fn is_empty(&self) -> bool {
+        self.len() == 0
     }
 }
 
@@ -235,16 +239,20 @@ impl<const N: usize> SetMapResponseSeq<N> {
         }
     }
 
-    pub fn iter<'a>(&'a self) -> std::slice::Iter<'a, SetMapResponse> {
+    pub fn iter(&self) -> std::slice::Iter<'_, SetMapResponse> {
         self.as_slice().iter()
     }
 
-    pub fn iter_mut<'a>(&'a mut self) -> std::slice::IterMut<'a, SetMapResponse> {
+    pub fn iter_mut(&mut self) -> std::slice::IterMut<'_, SetMapResponse> {
         self.as_slice_mut().iter_mut()
     }
 
     pub fn len(&self) -> usize {
         self.as_slice().len()
+    }
+
+    pub fn is_empty(&self) -> bool {
+        self.len() == 0
     }
 }
 

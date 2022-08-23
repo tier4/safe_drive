@@ -2,13 +2,8 @@
 
 This tutorial does not use `colcon` to build.
 We use only `cargo`, which is a Rust's standard build system.
-Before starting this tutorial, please set the library path of ROS2 to a variable environment as follows.
 
-```text
-$ export LIBRARY_PATH=/opt/ros/galactic/lib:$LIBRARY_PATH
-```
-
-Don't forget
+Don't forget loading ROS2's environment as follows.
 
 ```text
 $ . /opt/ros/galactic/setup.bash
@@ -30,7 +25,7 @@ Then, add `safe_drive` to the dependencies of `Cargo.toml`.
 
 ```toml
 [dependencies]
-safe_drive = { path = "../safe_drive" }
+safe_drive = { path = "path_to/safe_drive" }
 ```
 
 The following code is an example using a wall-timer.
@@ -77,7 +72,6 @@ fn main() -> Result<(), DynError> {
         Box::new(move |msg| {
             pr_info!(logger, "received: msg.data = {}", msg.data);
         }),
-        false,
     );
 
     // Spin.

@@ -32,18 +32,18 @@ If `Publisher2` of `TopicA` send a message,
 First of all, create working directories as follows.
 
 ```text
-$ mkdir ros2rust
-$ mkdir ros2rust/src
+$ mkdir pubsub
+$ mkdir pubsub/src
 ```
 
 Following directories are important directories
 we will create throughout this tutorial.
 
-| Directories                  | What?              |
-|------------------------------|--------------------|
-| ros2rust/src/my_talker       | publisher in Rust  |
-| ros2rust/src/my_listener     | subscriber in Rust |
-| ros2rust/install             | created by colcon  |
+| Directories            | What?              |
+|------------------------|--------------------|
+| pubsub/src/my_talker   | publisher in Rust  |
+| pubsub/src/my_listener | subscriber in Rust |
+| pubsub/install         | created by colcon  |
 
 ---
 
@@ -54,7 +54,7 @@ We can use `cargo`, which is a standard package manager of Rust,
 to create a project as follows.
 
 ```text
-$ cd ros2rust/src
+$ cd pubsub/src
 $ cargo new my_talker
 $ ls -R my_talker
 my_talker:
@@ -66,12 +66,11 @@ main.rs
 
 We create(d) and edit files of the talker as follows.
 
-| Files                 | What?                                |
-|-----------------------|--------------------------------------|
-| my_talker/Cargo.toml  | for Cargo                            |
-| my_talker/build.rs    | to specify library path for a linker |
-| my_talker/package.xml | for ROS2                             |
-| my_talker/src/main.rs | source code                          |
+| Files                 | What?       |
+|-----------------------|-------------|
+| my_talker/Cargo.toml  | for Cargo   |
+| my_talker/package.xml | for ROS2    |
+| my_talker/src/main.rs | source code |
 
 ### Edit `my_talker/Cargo.toml`
 
@@ -81,7 +80,7 @@ Currently, safe_drive's repository is private,
 and we need to specify the path as follows.
 
 ```toml
-# ros2rust/src/my_talker/Cargo.toml
+# pubsub/src/my_talker/Cargo.toml
 [dependencies]
 safe_drive = { path = "path_to/safe_drive" }
 ```
@@ -122,7 +121,7 @@ The following is a code of my_talker.
 You should also understand what this code is doing.
 
 ```rust
-// ros2rust/src/my_talker/src/main.rs
+// pubsub/src/my_talker/src/main.rs
 use safe_drive::{
     context::Context, error::DynError, logger::Logger,
     msg::common_interfaces::std_msgs, pr_info
@@ -224,34 +223,13 @@ There are macros for logging as follows.
 - `pr_fatal!` : fatal
 
 
-### Create `my_talker/build.rs`
-
-`build.rs` is used to tell somewhat to the Rust compiler or the linker.
-ROS2 provides libraries under `lib` directories of `AMENT_PREFIX_PATH`,
-which is an environment variable provided by ROS2.
-So, we have to tell link paths to the compiler as follows.
-
-```rust
-// ros2rust/src/my_talker/build.rs
-fn main() {
-    if let Some(e) = std::env::var_os("AMENT_PREFIX_PATH") {
-        let env = e.to_str().unwrap();
-        for path in env.split(':') {
-            println!("cargo:rustc-link-search={path}/lib");
-        }
-    }
-}
-```
-
-Just do copy and paste this.
-
 ### Create `my_talker/package.xml`
 
 `package.xml` is used by colcon, which is a build tool used by ROS2.
 It contains the package name, maintainer, description, etc, as follows.
 
 ```xml
-<!-- ros2rust/src/my_talker/package.xml -->
+<!-- pubsub/src/my_talker/package.xml -->
 <?xml version="1.0"?>
 <?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
 <package format="3">
@@ -259,7 +237,7 @@ It contains the package name, maintainer, description, etc, as follows.
   <version>0.0.0</version>
   <description>My Talker in Rust</description>
   <maintainer email="yuuki.takano@tier4.jp">Yuuki Takano</maintainer>
-  <license>TODO: License declaration</license>
+  <license>Apache License 2.0</license>
 
   <test_depend>ament_lint_auto</test_depend>
   <test_depend>ament_lint_common</test_depend>
@@ -281,11 +259,11 @@ $ . /opt/ros/galactic/setup.bash
 ```
 
 Then compile by using colcon as follows.
-Before compiling, change the current directory to `ros2rust`,
+Before compiling, change the current directory to `pubsub`,
 which is the top directory of our project.
 
 ```text
-$ cd ros2rust
+$ cd pubsub
 $ colcon build --cargo-args --release
 ```
 
@@ -311,18 +289,17 @@ Let's then implement a listener.
 First, create a project by using `cargo` as follows.
 
 ```text
-$ cd ros2rust/src
+$ cd pubsub/src
 $ cargo new my_listener
 ```
 
 The following files will be created throughout this tutorial.
 
-| Files                   | What?                                |
-|-------------------------|--------------------------------------|
-| my_listener/Cargo.toml  | for Cargo                            |
-| my_listener/build.rs    | to specify library path for a linker |
-| my_listener/package.xml | for ROS2                             |
-| my_listener/src/main.rs | source code                          |
+| Files                   | What?       |
+|-------------------------|-------------|
+| my_listener/Cargo.toml  | for Cargo   |
+| my_listener/package.xml | for ROS2    |
+| my_listener/src/main.rs | source code |
 
 ### Edit `my_listener/Cargo.toml`
 
@@ -330,7 +307,7 @@ The following files will be created throughout this tutorial.
 Add safe_drive to the dependencies as follows.
 
 ```toml
-# ros2rust/src/my_listener/Cargo.toml
+# pubsub/src/my_listener/Cargo.toml
 [dependencies]
 safe_drive = { path = "path_to/safe_drive" }
 ```
@@ -342,7 +319,7 @@ we have to prepare a callback function of the subscriber.
 This is the main difference from `my_talker`.
 
 ```rust
-// ros2rust/src/my_listener/src/main.rs
+// pubsub/src/my_listener/src/main.rs
 use safe_drive::{
     context::Context, error::DynError, logger::Logger,
     msg::common_interfaces::std_msgs, pr_info,
@@ -427,23 +404,6 @@ The arguments of `add_subscriber` method are as follows.
 `selector.wait()` wait events.
 To receive events forever, use infinite loop.
 
-### Create `my_listener/build.rs`
-
-`build.rs` is completely same as above.
-Just copy and paste this.
-
-```rust
-// ros2rust/src/my_talker/build.rs
-fn main() {
-    if let Some(e) = std::env::var_os("AMENT_PREFIX_PATH") {
-        let env = e.to_str().unwrap();
-        for path in env.split(':') {
-            println!("cargo:rustc-link-search={path}/lib");
-        }
-    }
-}
-```
-
 ### Create `my_listener/package.xml`
 
 `package.xml` is almost same as above.
@@ -451,7 +411,7 @@ The only difference is the name of the package,
 which is `my_listener`.
 
 ```xml
-<!-- ros2rust/src/my_listener/package.xml -->
+<!-- pubsub/src/my_listener/package.xml -->
 <?xml version="1.0"?>
 <?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
 <package format="3">
@@ -459,7 +419,7 @@ which is `my_listener`.
   <version>0.0.0</version>
   <description>My Listener in Rust</description>
   <maintainer email="yuuki.takano@tier4.jp">Yuuki Takano</maintainer>
-  <license>TODO: License declaration</license>
+  <license>Apache License 2.0</license>
 
   <test_depend>ament_lint_auto</test_depend>
   <test_depend>ament_lint_common</test_depend>
@@ -477,7 +437,7 @@ and don't forget to load the setting of ROS2 as mentioned above.
 The compilation can be done as follows.
 
 ```text
-$ cd ros2rust
+$ cd pubsub
 $ colcon build --cargo-args --release
 ```
 
@@ -494,3 +454,14 @@ $ ros2 run my_talker my_talker
 
 Nicely done!
 We are receiving messages sent from `my_talker`.
+
+## Workspace's `Cargo.toml`
+
+To enable rust-analyzer in the `pubsub` directory and reduce the compilation time,
+we recommend to prepare `Cargo.toml` for Rust's workspace as follows.
+
+```toml
+# pubsub/src/Cargo.toml
+[workspace]
+members = ["my_talker", "my_listener"]
+```

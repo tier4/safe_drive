@@ -130,16 +130,20 @@ impl<const N: usize> AddDiagnosticsRequestSeq<N> {
         }
     }
 
-    pub fn iter<'a>(&'a self) -> std::slice::Iter<'a, AddDiagnosticsRequest> {
+    pub fn iter(&self) -> std::slice::Iter<'_, AddDiagnosticsRequest> {
         self.as_slice().iter()
     }
 
-    pub fn iter_mut<'a>(&'a mut self) -> std::slice::IterMut<'a, AddDiagnosticsRequest> {
+    pub fn iter_mut(&mut self) -> std::slice::IterMut<'_, AddDiagnosticsRequest> {
         self.as_slice_mut().iter_mut()
     }
 
     pub fn len(&self) -> usize {
         self.as_slice().len()
+    }
+
+    pub fn is_empty(&self) -> bool {
+        self.len() == 0
     }
 }
 
@@ -245,16 +249,20 @@ impl<const N: usize> AddDiagnosticsResponseSeq<N> {
         }
     }
 
-    pub fn iter<'a>(&'a self) -> std::slice::Iter<'a, AddDiagnosticsResponse> {
+    pub fn iter(&self) -> std::slice::Iter<'_, AddDiagnosticsResponse> {
         self.as_slice().iter()
     }
 
-    pub fn iter_mut<'a>(&'a mut self) -> std::slice::IterMut<'a, AddDiagnosticsResponse> {
+    pub fn iter_mut(&mut self) -> std::slice::IterMut<'_, AddDiagnosticsResponse> {
         self.as_slice_mut().iter_mut()
     }
 
     pub fn len(&self) -> usize {
         self.as_slice().len()
+    }
+
+    pub fn is_empty(&self) -> bool {
+        self.len() == 0
     }
 }
 

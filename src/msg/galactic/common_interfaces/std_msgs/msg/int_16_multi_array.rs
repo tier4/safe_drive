@@ -117,16 +117,20 @@ impl<const N: usize> Int16MultiArraySeq<N> {
         }
     }
 
-    pub fn iter<'a>(&'a self) -> std::slice::Iter<'a, Int16MultiArray> {
+    pub fn iter(&self) -> std::slice::Iter<'_, Int16MultiArray> {
         self.as_slice().iter()
     }
 
-    pub fn iter_mut<'a>(&'a mut self) -> std::slice::IterMut<'a, Int16MultiArray> {
+    pub fn iter_mut(&mut self) -> std::slice::IterMut<'_, Int16MultiArray> {
         self.as_slice_mut().iter_mut()
     }
 
     pub fn len(&self) -> usize {
         self.as_slice().len()
+    }
+
+    pub fn is_empty(&self) -> bool {
+        self.len() == 0
     }
 }
 

@@ -81,7 +81,7 @@
 
         <nav id="sidebar" class="sidebar" aria-label="Table of contents">
             <div class="sidebar-scrollbox">
-                <ol class="chapter"><li class="chapter-item expanded "><a href="index.html"><strong aria-hidden="true">1.</strong> Top</a></li><li class="chapter-item expanded "><a href="tutorial.html"><strong aria-hidden="true">2.</strong> Tutorial</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="setup.html"><strong aria-hidden="true">2.1.</strong> Setting-up</a></li><li class="chapter-item expanded "><a href="pubsub.html" class="active"><strong aria-hidden="true">2.2.</strong> Publish and Subscribe</a></li><li class="chapter-item expanded "><a href="timer.html"><strong aria-hidden="true">2.3.</strong> Timer</a></li><li class="chapter-item expanded "><a href="multi_pubsub.html"><strong aria-hidden="true">2.4.</strong> Multi-threaded Publish and Subscribe</a></li><li class="chapter-item expanded "><a href="message.html"><strong aria-hidden="true">2.5.</strong> User Defined Data Structure</a></li><li class="chapter-item expanded "><a href="predefined.html"><strong aria-hidden="true">2.6.</strong> Pre-defined Data Structure</a></li><li class="chapter-item expanded "><a href="service.html"><strong aria-hidden="true">2.7.</strong> Service</a></li></ol></li></ol>
+                <ol class="chapter"><li class="chapter-item expanded "><a href="index.html"><strong aria-hidden="true">1.</strong> Top</a></li><li class="chapter-item expanded "><a href="tutorial.html"><strong aria-hidden="true">2.</strong> Tutorial</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="setup.html"><strong aria-hidden="true">2.1.</strong> Setting-up</a></li><li class="chapter-item expanded "><a href="pubsub.html" class="active"><strong aria-hidden="true">2.2.</strong> Publish and Subscribe</a></li><li class="chapter-item expanded "><a href="timer.html"><strong aria-hidden="true">2.3.</strong> Timer</a></li><li class="chapter-item expanded "><a href="multi_pubsub.html"><strong aria-hidden="true">2.4.</strong> Multi-threaded Publish and Subscribe</a></li><li class="chapter-item expanded "><a href="message.html"><strong aria-hidden="true">2.5.</strong> User Defined Data Structure</a></li><li class="chapter-item expanded "><a href="predefined.html"><strong aria-hidden="true">2.6.</strong> Pre-defined Data Structure</a></li><li class="chapter-item expanded "><a href="service.html"><strong aria-hidden="true">2.7.</strong> Service</a></li><li class="chapter-item expanded "><a href="parameter.html"><strong aria-hidden="true">2.8.</strong> Parameter</a></li></ol></li></ol>
             </div>
             <div id="sidebar-resize-handle" class="sidebar-resize-handle"></div>
         </nav>
@@ -167,15 +167,15 @@ If <code>Publisher2</code> of <code>TopicA</code> send a message,
 <code>Publisher3-5</code>.</p>
 <h2 id="directories"><a class="header" href="#directories">Directories</a></h2>
 <p>First of all, create working directories as follows.</p>
-<pre><code class="language-text">$ mkdir ros2rust
-$ mkdir ros2rust/src
+<pre><code class="language-text">$ mkdir pubsub
+$ mkdir pubsub/src
 </code></pre>
 <p>Following directories are important directories
 we will create throughout this tutorial.</p>
 <div class="table-wrapper"><table><thead><tr><th>Directories</th><th>What?</th></tr></thead><tbody>
-<tr><td>ros2rust/src/my_talker</td><td>publisher in Rust</td></tr>
-<tr><td>ros2rust/src/my_listener</td><td>subscriber in Rust</td></tr>
-<tr><td>ros2rust/install</td><td>created by colcon</td></tr>
+<tr><td>pubsub/src/my_talker</td><td>publisher in Rust</td></tr>
+<tr><td>pubsub/src/my_listener</td><td>subscriber in Rust</td></tr>
+<tr><td>pubsub/install</td><td>created by colcon</td></tr>
 </tbody></table>
 </div>
 <hr />
@@ -183,7 +183,7 @@ we will create throughout this tutorial.</p>
 <p>Let's start implementing a publisher.
 We can use <code>cargo</code>, which is a standard package manager of Rust,
 to create a project as follows.</p>
-<pre><code class="language-text">$ cd ros2rust/src
+<pre><code class="language-text">$ cd pubsub/src
 $ cargo new my_talker
 $ ls -R my_talker
 my_talker:
@@ -195,7 +195,6 @@ main.rs
 <p>We create(d) and edit files of the talker as follows.</p>
 <div class="table-wrapper"><table><thead><tr><th>Files</th><th>What?</th></tr></thead><tbody>
 <tr><td>my_talker/Cargo.toml</td><td>for Cargo</td></tr>
-<tr><td>my_talker/build.rs</td><td>to specify library path for a linker</td></tr>
 <tr><td>my_talker/package.xml</td><td>for ROS2</td></tr>
 <tr><td>my_talker/src/main.rs</td><td>source code</td></tr>
 </tbody></table>
@@ -205,7 +204,7 @@ main.rs
 Add safe_drive to the dependencies of <code>Cargo.toml</code> to use it.
 Currently, safe_drive's repository is private,
 and we need to specify the path as follows.</p>
-<pre><code class="language-toml"># ros2rust/src/my_talker/Cargo.toml
+<pre><code class="language-toml"># pubsub/src/my_talker/Cargo.toml
 [dependencies]
 safe_drive = { path = &quot;path_to/safe_drive&quot; }
 </code></pre>
@@ -237,7 +236,7 @@ and subscribers and publishers are created by the node.</p>
 <p>Now, we have understood the basics of ROS2.
 The following is a code of my_talker.
 You should also understand what this code is doing.</p>
-<pre><pre class="playground"><code class="language-rust">// ros2rust/src/my_talker/src/main.rs
+<pre><pre class="playground"><code class="language-rust">// pubsub/src/my_talker/src/main.rs
 use safe_drive::{
     context::Context, error::DynError, logger::Logger,
     msg::common_interfaces::std_msgs, pr_info
@@ -340,26 +339,10 @@ To print a message, use <code>pr_*</code> macros as follows.</p>
 <li><code>pr_err!</code> : error</li>
 <li><code>pr_fatal!</code> : fatal</li>
 </ul>
-<h3 id="create-my_talkerbuildrs"><a class="header" href="#create-my_talkerbuildrs">Create <code>my_talker/build.rs</code></a></h3>
-<p><code>build.rs</code> is used to tell somewhat to the Rust compiler or the linker.
-ROS2 provides libraries under <code>lib</code> directories of <code>AMENT_PREFIX_PATH</code>,
-which is an environment variable provided by ROS2.
-So, we have to tell link paths to the compiler as follows.</p>
-<pre><pre class="playground"><code class="language-rust">// ros2rust/src/my_talker/build.rs
-fn main() {
-    if let Some(e) = std::env::var_os(&quot;AMENT_PREFIX_PATH&quot;) {
-        let env = e.to_str().unwrap();
-        for path in env.split(':') {
-            println!(&quot;cargo:rustc-link-search={path}/lib&quot;);
-        }
-    }
-}
-</code></pre></pre>
-<p>Just do copy and paste this.</p>
 <h3 id="create-my_talkerpackagexml"><a class="header" href="#create-my_talkerpackagexml">Create <code>my_talker/package.xml</code></a></h3>
 <p><code>package.xml</code> is used by colcon, which is a build tool used by ROS2.
 It contains the package name, maintainer, description, etc, as follows.</p>
-<pre><code class="language-xml">&lt;!-- ros2rust/src/my_talker/package.xml --&gt;
+<pre><code class="language-xml">&lt;!-- pubsub/src/my_talker/package.xml --&gt;
 &lt;?xml version=&quot;1.0&quot;?&gt;
 &lt;?xml-model href=&quot;http://download.ros.org/schema/package_format3.xsd&quot; schematypens=&quot;http://www.w3.org/2001/XMLSchema&quot;?&gt;
 &lt;package format=&quot;3&quot;&gt;
@@ -367,7 +350,7 @@ It contains the package name, maintainer, description, etc, as follows.</p>
   &lt;version&gt;0.0.0&lt;/version&gt;
   &lt;description&gt;My Talker in Rust&lt;/description&gt;
   &lt;maintainer email=&quot;yuuki.takano@tier4.jp&quot;&gt;Yuuki Takano&lt;/maintainer&gt;
-  &lt;license&gt;TODO: License declaration&lt;/license&gt;
+  &lt;license&gt;Apache License 2.0&lt;/license&gt;
 
   &lt;test_depend&gt;ament_lint_auto&lt;/test_depend&gt;
   &lt;test_depend&gt;ament_lint_common&lt;/test_depend&gt;
@@ -383,9 +366,9 @@ It contains the package name, maintainer, description, etc, as follows.</p>
 <pre><code class="language-text">$ . /opt/ros/galactic/setup.bash
 </code></pre>
 <p>Then compile by using colcon as follows.
-Before compiling, change the current directory to <code>ros2rust</code>,
+Before compiling, change the current directory to <code>pubsub</code>,
 which is the top directory of our project.</p>
-<pre><code class="language-text">$ cd ros2rust
+<pre><code class="language-text">$ cd pubsub
 $ colcon build --cargo-args --release
 </code></pre>
 <p><code>--cargo-args --release</code> is a option to pass the <code>--release</code> argument to <code>cargo</code>.
@@ -402,13 +385,12 @@ $ ros2 run my_talker my_talker
 <h2 id="listener-in-rust"><a class="header" href="#listener-in-rust">Listener in Rust</a></h2>
 <p>Let's then implement a listener.
 First, create a project by using <code>cargo</code> as follows.</p>
-<pre><code class="language-text">$ cd ros2rust/src
+<pre><code class="language-text">$ cd pubsub/src
 $ cargo new my_listener
 </code></pre>
 <p>The following files will be created throughout this tutorial.</p>
 <div class="table-wrapper"><table><thead><tr><th>Files</th><th>What?</th></tr></thead><tbody>
 <tr><td>my_listener/Cargo.toml</td><td>for Cargo</td></tr>
-<tr><td>my_listener/build.rs</td><td>to specify library path for a linker</td></tr>
 <tr><td>my_listener/package.xml</td><td>for ROS2</td></tr>
 <tr><td>my_listener/src/main.rs</td><td>source code</td></tr>
 </tbody></table>
@@ -416,7 +398,7 @@ $ cargo new my_listener
 <h3 id="edit-my_listenercargotoml"><a class="header" href="#edit-my_listenercargotoml">Edit <code>my_listener/Cargo.toml</code></a></h3>
 <p><code>my_listener</code> also requires safe_drive.
 Add safe_drive to the dependencies as follows.</p>
-<pre><code class="language-toml"># ros2rust/src/my_listener/Cargo.toml
+<pre><code class="language-toml"># pubsub/src/my_listener/Cargo.toml
 [dependencies]
 safe_drive = { path = &quot;path_to/safe_drive&quot; }
 </code></pre>
@@ -424,7 +406,7 @@ safe_drive = { path = &quot;path_to/safe_drive&quot; }
 <p>To implement subscriber,
 we have to prepare a callback function of the subscriber.
 This is the main difference from <code>my_talker</code>.</p>
-<pre><pre class="playground"><code class="language-rust">// ros2rust/src/my_listener/src/main.rs
+<pre><pre class="playground"><code class="language-rust">// pubsub/src/my_listener/src/main.rs
 use safe_drive::{
     context::Context, error::DynError, logger::Logger,
     msg::common_interfaces::std_msgs, pr_info,
@@ -506,24 +488,11 @@ loop {
 </ul>
 <p><code>selector.wait()</code> wait events.
 To receive events forever, use infinite loop.</p>
-<h3 id="create-my_listenerbuildrs"><a class="header" href="#create-my_listenerbuildrs">Create <code>my_listener/build.rs</code></a></h3>
-<p><code>build.rs</code> is completely same as above.
-Just copy and paste this.</p>
-<pre><pre class="playground"><code class="language-rust">// ros2rust/src/my_talker/build.rs
-fn main() {
-    if let Some(e) = std::env::var_os(&quot;AMENT_PREFIX_PATH&quot;) {
-        let env = e.to_str().unwrap();
-        for path in env.split(':') {
-            println!(&quot;cargo:rustc-link-search={path}/lib&quot;);
-        }
-    }
-}
-</code></pre></pre>
 <h3 id="create-my_listenerpackagexml"><a class="header" href="#create-my_listenerpackagexml">Create <code>my_listener/package.xml</code></a></h3>
 <p><code>package.xml</code> is almost same as above.
 The only difference is the name of the package,
 which is <code>my_listener</code>.</p>
-<pre><code class="language-xml">&lt;!-- ros2rust/src/my_listener/package.xml --&gt;
+<pre><code class="language-xml">&lt;!-- pubsub/src/my_listener/package.xml --&gt;
 &lt;?xml version=&quot;1.0&quot;?&gt;
 &lt;?xml-model href=&quot;http://download.ros.org/schema/package_format3.xsd&quot; schematypens=&quot;http://www.w3.org/2001/XMLSchema&quot;?&gt;
 &lt;package format=&quot;3&quot;&gt;
@@ -531,7 +500,7 @@ which is <code>my_listener</code>.</p>
   &lt;version&gt;0.0.0&lt;/version&gt;
   &lt;description&gt;My Listener in Rust&lt;/description&gt;
   &lt;maintainer email=&quot;yuuki.takano@tier4.jp&quot;&gt;Yuuki Takano&lt;/maintainer&gt;
-  &lt;license&gt;TODO: License declaration&lt;/license&gt;
+  &lt;license&gt;Apache License 2.0&lt;/license&gt;
 
   &lt;test_depend&gt;ament_lint_auto&lt;/test_depend&gt;
   &lt;test_depend&gt;ament_lint_common&lt;/test_depend&gt;
@@ -545,7 +514,7 @@ which is <code>my_listener</code>.</p>
 <p>Before compiling and executing, execute <code>my_talker</code> in other terminal,
 and don't forget to load the setting of ROS2 as mentioned above.
 The compilation can be done as follows.</p>
-<pre><code class="language-text">$ cd ros2rust
+<pre><code class="language-text">$ cd pubsub
 $ colcon build --cargo-args --release
 </code></pre>
 <p>To execute <code>my_listener</code>, load the setting of our projects and
@@ -558,6 +527,13 @@ $ ros2 run my_talker my_talker
 </code></pre>
 <p>Nicely done!
 We are receiving messages sent from <code>my_talker</code>.</p>
+<h2 id="workspaces-cargotoml"><a class="header" href="#workspaces-cargotoml">Workspace's <code>Cargo.toml</code></a></h2>
+<p>To enable rust-analyzer in the <code>pubsub</code> directory and reduce the compilation time,
+we recommend to prepare <code>Cargo.toml</code> for Rust's workspace as follows.</p>
+<pre><code class="language-toml"># pubsub/src/Cargo.toml
+[workspace]
+members = [&quot;my_talker&quot;, &quot;my_listener&quot;]
+</code></pre>
 
                     </main>
 

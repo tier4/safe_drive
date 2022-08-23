@@ -18,6 +18,13 @@
 | stereo_msgs/*               | msg::common_interfaces::stereo_msgs::msg::*            |
 | trajectory_msgs/*           | msg::common_interfaces::trajectory_msgs::msg::*        |
 | visualization_msgs/*        | msg::common_interfaces::visualization_msgs::msg::*     |
+| action_msgs/*               | msg::interfaces::action_msgs::msg::*                   |
+| composition_interfaces/*    | msg::interfaces::composition_interfaces::msg::*        |
+| lifecycle_msgs/*            | msg::interfaces::lifecycle_msgs::msg::*                |
+| rcl_interfaces/*            | msg::interfaces::rcl_interfaces::msg::*                |
+| rosgraph_msgs/*             | msg::interfaces::rosgraph_msgs::msg::*                 |
+| statistics_msgs/*           | msg::interfaces::statistics_msgs::msg::*               |
+| test_msgs/*                 | msg::interfaces::test_msgs::msg::*                     |
 
 There are `msg` and `srv` modules like `sensor_msgs::msg` and `sensor_msgs::srv`.
 `msg`s include data types of topics discussed in previous chapters,
