@@ -60,6 +60,7 @@ use crate::{
     error::{DynError, RCLError, RCLResult},
     logger::{pr_error_in, pr_fatal_in, Logger},
     msg::{ServiceMsg, TopicMsg},
+    parameter::ParameterServer,
     rcl,
     service::{
         client::{ClientData, ClientRecv},
@@ -141,6 +142,7 @@ pub struct Statistics {
 /// let mut selector = ctx.create_selector(); // Create a new selector.
 /// ```
 pub struct Selector {
+    param_server: Option<ParameterServer>,
     timer: DeltaList<ConditionHandler<TimerType>>,
     base_time: SystemTime,
     signal_cond: Arc<GuardCondition>,
@@ -187,6 +189,7 @@ impl Selector {
 
         let signal_cond = GuardCondition::new(context.clone())?;
         let mut selector = Selector {
+            param_server: None,
             timer: DeltaList::Nil,
             base_time: SystemTime::now(),
             signal_cond: signal_cond.clone(),

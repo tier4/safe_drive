@@ -23,12 +23,20 @@ use crate::{
 };
 use num_traits::Zero;
 use parking_lot::RwLock;
-use std::{cell::Cell, collections::BTreeMap, ffi::CStr, rc::Rc, slice::from_raw_parts, sync::Arc};
+use std::{
+    cell::Cell,
+    collections::{BTreeMap, BTreeSet},
+    ffi::CStr,
+    rc::Rc,
+    slice::from_raw_parts,
+    sync::Arc,
+};
 
 pub struct ParameterServer {
     pub params: Arc<RwLock<Parameters>>,
     handler: Option<std::thread::JoinHandle<Result<(), DynError>>>,
-    cond: Arc<GuardCondition>,
+    cond_halt: Arc<GuardCondition>,
+    pub(crate) cond_callback: Arc<GuardCondition>,
     _node: Arc<Node>,
 }
 
@@ -114,12 +122,14 @@ struct Descriptor {
 #[derive(Debug)]
 pub struct Parameters {
     params: BTreeMap<String, Parameter>,
+    updated: BTreeSet<String>,
 }
 
 impl Parameters {
     fn new() -> Self {
         Self {
             params: BTreeMap::new(),
+            updated: BTreeSet::new(),
         }
     }
 
@@ -548,14 +558,21 @@ impl ParameterServer {
         let params = Arc::new(RwLock::new(Parameters::new()));
         let ps = params.clone();
         let n = node.clone();
-        let cond = GuardCondition::new(node.context.clone())?;
-        let cond_cloned = cond.clone();
-        let handler = std::thread::spawn(move || param_server(n, ps, cond_cloned));
+
+        let cond_halt = GuardCondition::new(node.context.clone())?;
+        let cond_halt_cloned = cond_halt.clone();
+
+        let cond_callback = GuardCondition::new(node.context.clone())?;
+        let cond_callback_cloned = cond_callback.clone();
+
+        let handler =
+            std::thread::spawn(move || param_server(n, ps, cond_halt_cloned, cond_callback_cloned));
 
         Ok(Self {
             params,
             handler: Some(handler),
-            cond,
+            cond_halt,
+            cond_callback,
             _node: node,
         })
     }
@@ -563,7 +580,7 @@ impl ParameterServer {
 
 impl Drop for ParameterServer {
     fn drop(&mut self) {
-        if self.cond.trigger().is_ok() {
+        if self.cond_halt.trigger().is_ok() {
             if let Some(handler) = self.handler.take() {
                 let _ = handler.join();
             }
@@ -574,16 +591,24 @@ impl Drop for ParameterServer {
 fn param_server(
     node: Arc<Node>,
     params: Arc<RwLock<Parameters>>,
-    guard: Arc<GuardCondition>,
+    cond_halt: Arc<GuardCondition>,
+    cond_callback: Arc<GuardCondition>,
 ) -> Result<(), DynError> {
     if let Ok(mut selector) = node.context.create_selector() {
         add_srv_list(&node, &mut selector, params.clone())?;
-        add_srv_set(&node, &mut selector, params.clone(), "set_parameters")?;
+        add_srv_set(
+            &node,
+            &mut selector,
+            params.clone(),
+            "set_parameters",
+            cond_callback.clone(),
+        )?;
         add_srv_set(
             &node,
             &mut selector,
             params.clone(),
             "set_parameters_atomically",
+            cond_callback,
         )?;
         add_srv_get(&node, &mut selector, params.clone())?;
         add_srv_get_types(&node, &mut selector, params.clone())?;
@@ -593,7 +618,7 @@ fn param_server(
         let is_halt_cloned = is_halt.clone();
 
         selector.add_guard_condition(
-            guard.as_ref(),
+            cond_halt.as_ref(),
             Some(Box::new(move || {
                 is_halt_cloned.set(true);
                 CallbackResult::Remove
@@ -616,6 +641,7 @@ fn add_srv_set(
     selector: &mut Selector,
     params: Arc<RwLock<Parameters>>,
     service_name: &str,
+    cond_callback: Arc<GuardCondition>,
 ) -> RCLResult<()> {
     let name = node.get_name();
     let srv_set = node.create_server::<SetParameters>(
@@ -635,41 +661,58 @@ fn add_srv_set(
 
             let slice = results.as_slice_mut();
 
-            let mut guard = params.write();
-            for (i, param) in req.parameters.iter().enumerate() {
-                let key = param.name.to_string();
-                let val: Value = (&param.value).into();
+            let mut updated = 0;
+            {
+                let mut guard = params.write();
+                for (i, param) in req.parameters.iter().enumerate() {
+                    let key = param.name.to_string();
+                    let val: Value = (&param.value).into();
 
-                if let Some(original) = guard.params.get_mut(&key) {
-                    if original.descriptor.read_only {
-                        let reason = format!("{} is read only", key);
-                        slice[i].reason.assign(&reason);
-                        continue;
-                    }
+                    if let Some(original) = guard.params.get_mut(&key) {
+                        if original.descriptor.read_only {
+                            let reason = format!("{} is read only", key);
+                            slice[i].reason.assign(&reason);
+                            continue;
+                        }
 
-                    if !original.check_range(&val) {
-                        let reason = format!("{} is not in the range", key);
-                        slice[i].reason.assign(&reason);
-                        slice[i].successful = false;
-                        continue;
-                    }
+                        if !original.check_range(&val) {
+                            let reason = format!("{} is not in the range", key);
+                            slice[i].reason.assign(&reason);
+                            slice[i].successful = false;
+                            continue;
+                        }
 
-                    if original.descriptor.dynamic_typing || original.value.type_check(&val) {
-                        original.value = val;
-                        slice[i].successful = true;
+                        if original.descriptor.dynamic_typing || original.value.type_check(&val) {
+                            original.value = val;
+                            slice[i].successful = true;
+                            updated += 1;
+                            guard.updated.insert(key);
+                        } else {
+                            let reason = format!(
+                                "failed type checking: dst = {}, src = {}",
+                                original.value.type_name(),
+                                val.type_name()
+                            );
+                            slice[i].reason.assign(&reason);
+                            slice[i].successful = false;
+                        }
                     } else {
-                        let reason = format!(
-                            "failed type checking: dst = {}, src = {}",
-                            original.value.type_name(),
-                            val.type_name()
-                        );
+                        let reason = format!("no such parameter: name = {}", key);
                         slice[i].reason.assign(&reason);
                         slice[i].successful = false;
                     }
-                } else {
-                    let reason = format!("no such parameter: name = {}", key);
-                    slice[i].reason.assign(&reason);
-                    slice[i].successful = false;
+                }
+            }
+
+            if updated > 0 {
+                if cond_callback.trigger().is_err() {
+                    let logger = Logger::new("safe_drive");
+                    pr_fatal_in!(
+                        logger,
+                        "{}:{}: failed to trigger a condition variable",
+                        file!(),
+                        line!()
+                    );
                 }
             }
 
