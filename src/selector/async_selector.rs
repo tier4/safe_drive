@@ -34,14 +34,19 @@ pub(crate) enum Command {
         Box<dyn FnMut() -> CallbackResult + Send + Sync + 'static>,
     ),
     RemoveClient(Arc<ClientData>),
+    ConditionVar(
+        GuardCondition,
+        Box<dyn FnMut() -> CallbackResult + Send + Sync + 'static>,
+    ),
+    RemoveConditionVar(GuardCondition),
     Halt,
 }
 
 struct SelectorData {
     tx: Sender<Command>,
-    _context: Arc<Context>,
-    cond: Arc<GuardCondition>,
+    cond: GuardCondition,
     th: JoinHandle<Result<(), DynError>>,
+    _context: Arc<Context>,
 }
 
 pub(crate) struct AsyncSelector {
@@ -104,12 +109,12 @@ impl AsyncSelector {
 
 fn select(
     context: Arc<Context>,
-    guard: Arc<GuardCondition>,
+    guard: GuardCondition,
     rx: Receiver<Command>,
 ) -> Result<(), DynError> {
     let mut selector = super::Selector::new(context)?;
 
-    selector.add_guard_condition(&guard, None);
+    selector.add_guard_condition(&guard, None, false);
 
     loop {
         for cmd in rx.try_iter() {
@@ -120,6 +125,8 @@ fn select(
                 Command::RemoveServer(s) => selector.remove_server_data(&s),
                 Command::Client(c, h) => selector.add_client_data(c, Some(h), true),
                 Command::RemoveClient(c) => selector.remove_client_data(&c),
+                Command::ConditionVar(c, h) => selector.add_guard_condition(&c, Some(h), true),
+                Command::RemoveConditionVar(c) => selector.remove_guard_condition(&c),
                 Command::Halt => return Ok(()),
             }
         }

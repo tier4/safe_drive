@@ -23,12 +23,13 @@ impl Drop for RCLGuardCondition {
     }
 }
 
+#[derive(Clone)]
 pub(crate) struct GuardCondition {
     pub(crate) cond: Arc<RCLGuardCondition>,
 }
 
 impl GuardCondition {
-    pub(crate) fn new(context: Arc<Context>) -> RCLResult<Arc<Self>> {
+    pub(crate) fn new(context: Arc<Context>) -> RCLResult<Self> {
         let mut guard_condition = rcl::MTSafeFn::rcl_get_zero_initialized_guard_condition();
         let allocator = rcl::MTSafeFn::rcutils_get_default_allocator();
 
@@ -45,7 +46,7 @@ impl GuardCondition {
             cond: Box::new(guard_condition),
             _context: context,
         });
-        Ok(Arc::new(GuardCondition { cond }))
+        Ok(GuardCondition { cond })
     }
 
     pub(crate) fn trigger(&self) -> RCLResult<()> {

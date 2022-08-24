@@ -1,5 +1,6 @@
 use crate::{
     error::{DynError, RCLResult},
+    is_halt,
     logger::{pr_error_in, pr_fatal_in, Logger},
     msg::{
         interfaces::rcl_interfaces::{
@@ -19,7 +20,12 @@ use crate::{
     node::Node,
     qos::Profile,
     rcl::rcl_variant_t,
-    selector::{guard_condition::GuardCondition, CallbackResult, Selector},
+    selector::{
+        async_selector::{Command, SELECTOR},
+        guard_condition::GuardCondition,
+        CallbackResult, Selector,
+    },
+    signal_handler::Signaled,
 };
 use num_traits::Zero;
 use parking_lot::RwLock;
@@ -27,17 +33,19 @@ use std::{
     cell::Cell,
     collections::{BTreeMap, BTreeSet},
     ffi::CStr,
+    future::Future,
     rc::Rc,
     slice::from_raw_parts,
     sync::Arc,
+    task::Poll,
 };
 
 pub struct ParameterServer {
     pub params: Arc<RwLock<Parameters>>,
     handler: Option<std::thread::JoinHandle<Result<(), DynError>>>,
-    cond_halt: Arc<GuardCondition>,
-    pub(crate) cond_callback: Arc<GuardCondition>,
-    _node: Arc<Node>,
+    cond_halt: GuardCondition,
+    pub(crate) cond_callback: GuardCondition,
+    node: Arc<Node>,
 }
 
 trait Contains {
@@ -131,6 +139,10 @@ impl Parameters {
             params: BTreeMap::new(),
             updated: BTreeSet::new(),
         }
+    }
+
+    pub(crate) fn take_updated(&mut self) -> BTreeSet<String> {
+        std::mem::take(&mut self.updated)
     }
 
     pub fn set_parameter(
@@ -573,8 +585,15 @@ impl ParameterServer {
             handler: Some(handler),
             cond_halt,
             cond_callback,
-            _node: node,
+            node,
         })
+    }
+
+    pub fn wait(&mut self) -> AsyncWait {
+        AsyncWait {
+            param_server: self,
+            state: WaitState::Init,
+        }
     }
 }
 
@@ -591,8 +610,8 @@ impl Drop for ParameterServer {
 fn param_server(
     node: Arc<Node>,
     params: Arc<RwLock<Parameters>>,
-    cond_halt: Arc<GuardCondition>,
-    cond_callback: Arc<GuardCondition>,
+    cond_halt: GuardCondition,
+    cond_callback: GuardCondition,
 ) -> Result<(), DynError> {
     if let Ok(mut selector) = node.context.create_selector() {
         add_srv_list(&node, &mut selector, params.clone())?;
@@ -618,11 +637,12 @@ fn param_server(
         let is_halt_cloned = is_halt.clone();
 
         selector.add_guard_condition(
-            cond_halt.as_ref(),
+            &cond_halt,
             Some(Box::new(move || {
                 is_halt_cloned.set(true);
                 CallbackResult::Remove
             })),
+            false,
         );
 
         while !is_halt.get() {
@@ -641,7 +661,7 @@ fn add_srv_set(
     selector: &mut Selector,
     params: Arc<RwLock<Parameters>>,
     service_name: &str,
-    cond_callback: Arc<GuardCondition>,
+    cond_callback: GuardCondition,
 ) -> RCLResult<()> {
     let name = node.get_name();
     let srv_set = node.create_server::<SetParameters>(
@@ -704,16 +724,14 @@ fn add_srv_set(
                 }
             }
 
-            if updated > 0 {
-                if cond_callback.trigger().is_err() {
-                    let logger = Logger::new("safe_drive");
-                    pr_fatal_in!(
-                        logger,
-                        "{}:{}: failed to trigger a condition variable",
-                        file!(),
-                        line!()
-                    );
-                }
+            if updated > 0 && cond_callback.trigger().is_err() {
+                let logger = Logger::new("safe_drive");
+                pr_fatal_in!(
+                    logger,
+                    "{}:{}: failed to trigger a condition variable",
+                    file!(),
+                    line!()
+                );
             }
 
             let mut response = SetParametersResponse::new().unwrap();
@@ -989,4 +1007,65 @@ fn add_srv_list(
     );
 
     Ok(())
+}
+
+#[derive(Clone, Copy, Debug)]
+enum WaitState {
+    Init,
+    Waiting,
+}
+
+pub struct AsyncWait<'a> {
+    param_server: &'a ParameterServer,
+    state: WaitState,
+}
+
+impl<'a> Future for AsyncWait<'a> {
+    type Output = Result<BTreeSet<String>, DynError>;
+    fn poll(self: std::pin::Pin<&mut Self>, cx: &mut std::task::Context<'_>) -> Poll<Self::Output> {
+        if is_halt() {
+            return Poll::Ready(Err(Signaled.into()));
+        }
+
+        match self.state {
+            WaitState::Init => {
+                let mut waker = Some(cx.waker().clone());
+                let mut guard = SELECTOR.lock();
+
+                if let Err(e) = guard.send_command(
+                    &self.param_server.node.context,
+                    Command::ConditionVar(
+                        self.param_server.cond_callback.clone(),
+                        Box::new(move || {
+                            let w = waker.take().unwrap();
+                            w.wake();
+                            CallbackResult::Remove
+                        }),
+                    ),
+                ) {
+                    Poll::Ready(Err(e))
+                } else {
+                    self.get_mut().state = WaitState::Waiting;
+                    Poll::Pending
+                }
+            }
+            WaitState::Waiting => {
+                let mut guard = self.param_server.params.write();
+                let updated = guard.take_updated();
+                Poll::Ready(Ok(updated))
+            }
+        }
+    }
+}
+
+impl<'a> Drop for AsyncWait<'a> {
+    fn drop(&mut self) {
+        let mut guard = SELECTOR.lock();
+        guard
+            .send_command(
+                &self.param_server.node.context,
+                Command::RemoveConditionVar(self.param_server.cond_callback.clone()),
+            )
+            .unwrap();
+    }
 }

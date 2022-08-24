@@ -60,7 +60,7 @@ use crate::{
     error::{DynError, RCLError, RCLResult},
     logger::{pr_error_in, pr_fatal_in, Logger},
     msg::{ServiceMsg, TopicMsg},
-    parameter::ParameterServer,
+    parameter::{ParameterServer, Parameters},
     rcl,
     service::{
         client::{ClientData, ClientRecv},
@@ -72,7 +72,7 @@ use crate::{
     PhantomUnsend, PhantomUnsync, RecvResult, ST,
 };
 use std::{
-    collections::BTreeMap,
+    collections::{BTreeMap, BTreeSet},
     mem::replace,
     ptr::null_mut,
     rc::Rc,
@@ -88,6 +88,10 @@ use crate::helper::statistics::{SerializableTimeStat, TimeStatistics};
 
 pub(crate) mod async_selector;
 pub(crate) mod guard_condition;
+
+type ServerCallback<T> =
+    Box<dyn FnMut(<T as ServiceMsg>::Request, Header) -> <T as ServiceMsg>::Response>;
+type ParameterCallback = Box<dyn FnMut(&mut Parameters, BTreeSet<String>)>;
 
 #[derive(Debug, Eq, PartialEq)]
 pub(crate) enum CallbackResult {
@@ -145,7 +149,7 @@ pub struct Selector {
     param_server: Option<ParameterServer>,
     timer: DeltaList<ConditionHandler<TimerType>>,
     base_time: SystemTime,
-    signal_cond: Arc<GuardCondition>,
+    signal_cond: GuardCondition,
     wait_set: rcl::rcl_wait_set_t,
     services: BTreeMap<*const rcl::rcl_service_t, ConditionHandler<Arc<ServerData>>>,
     clients: BTreeMap<*const rcl::rcl_client_t, ConditionHandler<Arc<ClientData>>>,
@@ -206,7 +210,7 @@ impl Selector {
             _unused: (Default::default(), Default::default()),
         };
 
-        selector.add_guard_condition(signal_cond.as_ref(), None);
+        selector.add_guard_condition(&signal_cond, None, false);
         signal_handler::register_guard_condition(signal_cond);
 
         Ok(selector)
@@ -355,7 +359,27 @@ impl Selector {
         );
     }
 
-    /// Register the subscriber with callback function.
+    pub fn add_parameter_server(
+        &mut self,
+        param_server: ParameterServer,
+        mut handler: ParameterCallback,
+    ) {
+        let params = param_server.params.clone();
+
+        self.add_guard_condition(
+            &param_server.cond_callback,
+            Some(Box::new(move || {
+                let mut guard = params.write();
+                let updated = guard.take_updated();
+                handler(&mut guard, updated);
+                CallbackResult::Ok
+            })),
+            false,
+        );
+        self.param_server = Some(param_server);
+    }
+
+    /// Register a subscriber with callback function.
     /// The callback function will be invoked when arriving data.
     ///
     /// The callback function must take `ServiceMsg::Request` and `Header` and
@@ -392,7 +416,7 @@ impl Selector {
     pub fn add_server<T: ServiceMsg + 'static>(
         &mut self,
         server: Server<T>,
-        mut handler: Box<dyn FnMut(T::Request, Header) -> T::Response>,
+        mut handler: ServerCallback<T>,
     ) -> bool {
         let context_ptr = server.data.node.context.as_ptr();
         let srv = server.data.clone();
@@ -533,15 +557,20 @@ impl Selector {
         &mut self,
         cond: &GuardCondition,
         handler: Option<Box<dyn FnMut() -> CallbackResult>>,
+        is_once: bool,
     ) {
         self.cond.insert(
             cond.cond.cond.as_ref(),
             ConditionHandler {
                 event: cond.cond.clone(),
                 handler,
-                is_once: false,
+                is_once,
             },
         );
+    }
+
+    pub(crate) fn remove_guard_condition(&mut self, cond: &GuardCondition) {
+        self.cond.remove(&(cond.cond.cond.as_ref() as *const _));
     }
 
     pub(crate) fn remove_rcl_subscription(&mut self, subscription: &Arc<RCLSubscription>) {
@@ -883,7 +912,7 @@ impl Selector {
 
 impl Drop for Selector {
     fn drop(&mut self) {
-        signal_handler::unregister_guard_condition(self.signal_cond.as_ref());
+        signal_handler::unregister_guard_condition(&self.signal_cond);
         let guard = rcl::MT_UNSAFE_FN.lock();
         guard.rcl_wait_set_fini(&mut self.wait_set).unwrap()
     }
@@ -970,6 +999,7 @@ mod test {
                     println!("triggerd!");
                     CallbackResult::Ok
                 })),
+                false,
             );
             selector.wait().unwrap();
         });

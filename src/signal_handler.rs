@@ -16,10 +16,7 @@ use std::{
     collections::BTreeMap,
     error::Error,
     fmt::Display,
-    sync::{
-        atomic::{AtomicBool, Ordering},
-        Arc,
-    },
+    sync::atomic::{AtomicBool, Ordering},
     thread::{self, JoinHandle},
 };
 
@@ -29,7 +26,7 @@ struct KeyCond(*const rcl::rcl_guard_condition_t);
 unsafe impl Sync for KeyCond {}
 unsafe impl Send for KeyCond {}
 
-type ConditionSet = BTreeMap<KeyCond, Arc<GuardCondition>>;
+type ConditionSet = BTreeMap<KeyCond, GuardCondition>;
 
 static INITIALIZER: InitOnce = InitOnce::new();
 static GUARD_COND: Lazy<Mutex<ConditionSet>> = Lazy::new(|| Mutex::new(ConditionSet::new()));
@@ -64,7 +61,7 @@ pub(crate) fn init() {
     );
 }
 
-pub(crate) fn register_guard_condition(cond: Arc<GuardCondition>) {
+pub(crate) fn register_guard_condition(cond: GuardCondition) {
     let mut guard = get_guard_condition();
     guard.insert(KeyCond(cond.cond.as_ptr()), cond);
 }
