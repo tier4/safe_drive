@@ -2028,6 +2028,168 @@ and it can be used for the server as follows.</p>
 <span class="boring">}
 </span></code></pre></pre>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="parameter"><a class="header" href="#parameter">Parameter</a></h1>
+<pre><code class="language-text">$ mkdir params
+$ cd params
+$ cargo new param_server
+$ cargo new async_param_server
+</code></pre>
+<pre><code class="language-toml"># params/Cargo.toml
+[workspace]
+members = [&quot;param_server&quot;, &quot;async_param_server&quot;]
+</code></pre>
+<h2 id="type-of-parameter"><a class="header" href="#type-of-parameter">Type of Parameter</a></h2>
+<p><code>safe_drive::parameter::Value</code></p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>pub enum Value {
+    NotSet,
+    Bool(bool),
+    I64(i64),
+    F64(f64),
+    String(String),
+    VecBool(Vec&lt;bool&gt;),
+    VecI64(Vec&lt;i64&gt;),
+    VecU8(Vec&lt;u8&gt;),
+    VecF64(Vec&lt;f64&gt;),
+    VecString(Vec&lt;String&gt;),
+}
+<span class="boring">}
+</span></code></pre></pre>
+<p><code>safe_drive::parameter::Descriptor</code></p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>pub struct Descriptor {
+    pub description: String,
+    pub additional_constraints: String,
+    pub read_only: bool,
+    pub dynamic_typing: bool,
+    pub floating_point_range: Option&lt;FloatingPointRange&gt;,
+    pub integer_range: Option&lt;IntegerRange&gt;,
+}
+<span class="boring">}
+</span></code></pre></pre>
+<p><code>safe_drive::parameter::{Parameter, Parameters, ParameterServer}</code></p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>pub struct Parameter {
+    pub descriptor: Descriptor,
+    pub value: Value,
+}
+
+pub struct Parameters { /* omitted private fields */ }
+
+pub struct ParameterServer {
+    pub params: Arc&lt;RwLock&lt;Parameters&gt;&gt;
+    // omitted private fields
+}
+<span class="boring">}
+</span></code></pre></pre>
+<h2 id="parameter-setting-and-waiting-update-by-callback"><a class="header" href="#parameter-setting-and-waiting-update-by-callback">Parameter Setting and Waiting Update by Callback</a></h2>
+<pre><pre class="playground"><code class="language-rust">use safe_drive::{context::Context, error::DynError, logger::Logger, parameter::Value, pr_info};
+
+fn main() -&gt; Result&lt;(), DynError&gt; {
+    // Create a context and a node.
+    let ctx = Context::new()?;
+    let node = ctx.create_node(&quot;param_server&quot;, None, Default::default())?;
+
+    // Create a parameter server.
+    let param_server = node.create_parameter_server()?;
+    {
+        // Set parameters.
+        let mut params = param_server.params.write(); // Write lock
+
+        // Statically typed parameter.
+        params.set_parameter(
+            &quot;my_flag&quot;.to_string(),                     // parameter name
+            Value::Bool(false),                        // value
+            false,                                     // read only?
+            Some(&quot;my flag's description&quot;.to_string()), // description
+        )?;
+
+        // Dynamically typed parameter.
+        params.set_dynamically_typed_parameter(
+            &quot;my_dynamic_type_flag&quot;.to_string(), // parameter name
+            Value::Bool(false),                 // value
+            false,                              // read only?
+            Some(&quot;my dynamic type flag's description&quot;.to_string()), // description
+        )?;
+    }
+
+    // Create a logger and a selector.
+    let logger = Logger::new(&quot;param_server&quot;);
+    let mut selector = ctx.create_selector()?;
+
+    // Add a callback function to the parameter server.
+    selector.add_parameter_server(
+        param_server,
+        Box::new(move |params, updated| {
+            // Print updated parameters.
+            let mut keys = String::new();
+            for key in updated.iter() {
+                let value = &amp;params.get_parameter(key).unwrap().value;
+                keys = format!(&quot;{keys}{key} = {}, &quot;, value);
+            }
+            pr_info!(logger, &quot;updated parameters: {keys}&quot;);
+        }),
+    );
+
+    // Spin.
+    loop {
+        selector.wait()?;
+    }
+}
+</code></pre></pre>
+<h2 id="asynchronous-wait"><a class="header" href="#asynchronous-wait">Asynchronous Wait</a></h2>
+<pre><pre class="playground"><code class="language-rust">use safe_drive::{context::Context, error::DynError, logger::Logger, parameter::Value, pr_info};
+
+#[tokio::main]
+async fn main() -&gt; Result&lt;(), DynError&gt; {
+    // Create a context and a node.
+    let ctx = Context::new()?;
+    let node = ctx.create_node(&quot;async_param_server&quot;, None, Default::default())?;
+
+    // Create a parameter server.
+    let mut param_server = node.create_parameter_server()?;
+    {
+        // Set parameters.
+        let mut params = param_server.params.write(); // Write lock
+
+        // Statically typed parameter.
+        params.set_parameter(
+            &quot;my_flag&quot;.to_string(),                     // parameter name
+            Value::Bool(false),                        // value
+            false,                                     // read only?
+            Some(&quot;my flag's description&quot;.to_string()), // description
+        )?;
+
+        // Dynamically typed parameter.
+        params.set_dynamically_typed_parameter(
+            &quot;my_dynamic_type_flag&quot;.to_string(), // parameter name
+            Value::Bool(false),                 // value
+            false,                              // read only?
+            Some(&quot;my dynamic type flag's description&quot;.to_string()), // description
+        )?;
+    }
+
+    // Create a logger.
+    let logger = Logger::new(&quot;async_param_server&quot;);
+
+    loop {
+        // Wait update asynchronously.
+        let updated = param_server.wait().await?;
+
+        let params = param_server.params.read(); // Read lock
+
+        // Print updated parameters.
+        let mut keys = String::new();
+        for key in updated.iter() {
+            let value = &amp;params.get_parameter(key).unwrap().value;
+            keys = format!(&quot;{keys}{key} = {}, &quot;, value);
+        }
+        pr_info!(logger, &quot;updated parameters: {keys}&quot;);
+    }
+}
+</code></pre></pre>
 
                     </main>
 

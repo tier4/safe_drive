@@ -17,8 +17,10 @@
 
 use crate::{
     context::Context,
-    error::RCLResult,
+    error::{DynError, RCLResult},
+    helper::InitOnce,
     msg::{ServiceMsg, TopicMsg},
+    parameter::ParameterServer,
     qos, rcl,
     service::{client::Client, server::Server},
     topic::publisher::Publisher,
@@ -31,6 +33,7 @@ pub struct Node {
     node: rcl::rcl_node_t,
     name: String,
     namespace: Option<String>,
+    init_param_server: InitOnce,
     pub(crate) context: Arc<Context>,
 }
 
@@ -61,6 +64,7 @@ impl Node {
             node,
             name: name.to_string(),
             namespace: namespace.map_or_else(|| None, |v| Some(v.to_string())),
+            init_param_server: InitOnce::new(),
             context,
         }))
     }
@@ -79,6 +83,13 @@ impl Node {
 
     pub fn get_namespace(&self) -> &Option<String> {
         &self.namespace
+    }
+
+    pub fn create_parameter_server(self: &Arc<Self>) -> Result<ParameterServer, DynError> {
+        self.init_param_server.init(
+            || ParameterServer::new(self.clone()),
+            Err("a parameter server has been already created".into()),
+        )
     }
 
     /// Create a publisher.

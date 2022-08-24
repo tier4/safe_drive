@@ -7,7 +7,6 @@
 //! ```
 //! use safe_drive::{
 //!     context::Context,
-//!     error::DynError,
 //!     logger::Logger,
 //!     parameter::{ParameterServer, Value},
 //!     pr_info,
@@ -18,7 +17,7 @@
 //! let node = ctx.create_node("param_server", None, Default::default()).unwrap();
 //!
 //! // Create a parameter server.
-//! let param_server = ParameterServer::new(node).unwrap();
+//! let param_server = node.create_parameter_server().unwrap();
 //! {
 //!     // Set parameters.
 //!     let mut params = param_server.params.write(); // Write lock
@@ -80,7 +79,7 @@
 //! let node = ctx.create_node("async_param_server", None, Default::default()).unwrap();
 //!
 //! // Create a parameter server.
-//! let mut param_server = ParameterServer::new(node).unwrap();
+//! let mut param_server = node.create_parameter_server().unwrap();
 //! {
 //!     // Set parameters.
 //!     let mut params = param_server.params.write(); // Write lock
@@ -168,6 +167,43 @@ use std::{
     task::Poll,
 };
 
+/// Parameter server.
+///
+/// # Example
+///
+/// ```
+/// use safe_drive::{
+///     context::Context,
+///     parameter::{ParameterServer, Value},
+/// };
+///
+/// // Create a context and a node.
+/// let ctx = Context::new().unwrap();
+/// let node = ctx.create_node("param_server_ex", None, Default::default()).unwrap();
+///
+/// // Create a parameter server.
+/// let param_server = node.create_parameter_server().unwrap();
+/// {
+///     // Set parameters.
+///     let mut params = param_server.params.write(); // Write lock
+///
+///     // Statically typed parameter.
+///     params.set_parameter(
+///         "my_flag".to_string(),                     // parameter name
+///         Value::Bool(false),                        // value
+///         false,                                     // read only?
+///         Some("my flag's description".to_string()), // description
+///     ).unwrap();
+///
+///     // Dynamically typed parameter.
+///     params.set_dynamically_typed_parameter(
+///         "my_dynamic_type_flag".to_string(), // parameter name
+///         Value::Bool(false),                 // value
+///         false,                              // read only?
+///         Some("my dynamic type flag's description".to_string()), // description
+///     ).unwrap();
+/// }
+/// ```
 pub struct ParameterServer {
     pub params: Arc<RwLock<Parameters>>,
     handler: Option<std::thread::JoinHandle<Result<(), DynError>>>,
@@ -181,6 +217,18 @@ pub trait Contains {
     fn contains(&self, val: Self::T) -> bool;
 }
 
+/// Describe a range of integer.
+///
+/// # Example
+///
+/// ```
+/// use safe_drive::parameter::{IntegerRange, Contains};
+/// let range = IntegerRange { min: -5, max: 10, step: 3 };
+/// assert!(range.contains(-5));
+/// assert!(range.contains(-2));
+/// assert!(range.contains(10));
+/// assert!(!range.contains(9));
+/// ```
 #[derive(Debug, PartialEq, Eq, PartialOrd, Ord)]
 pub struct IntegerRange {
     pub min: i64,
@@ -211,6 +259,18 @@ impl From<&IntegerRange> for rcl_interfaces::msg::IntegerRange {
     }
 }
 
+/// Describe a range of integer.
+///
+/// # Example
+///
+/// ```
+/// use safe_drive::parameter::{FloatingPointRange, Contains};
+/// let range = FloatingPointRange { min: -5.0, max: 10.0, step: 3.0 };
+/// assert!(range.contains(-5.0));
+/// assert!(range.contains(-2.0));
+/// assert!(range.contains(10.0));
+/// assert!(!range.contains(9.0));
+/// ```
 #[derive(Debug, PartialEq, PartialOrd)]
 pub struct FloatingPointRange {
     pub min: f64,
@@ -255,6 +315,23 @@ pub struct Descriptor {
     pub integer_range: Option<IntegerRange>,
 }
 
+/// Parameters.
+///
+/// # Example
+///
+/// ```
+/// use safe_drive::{error::DynError, parameter::{Parameters, Parameter, Value}};
+///
+/// fn get_param<'a>(params: &'a Parameters, name: &str) -> Option<&'a Parameter>
+/// {
+///     params.get_parameter(name)
+/// }
+///
+/// fn set_param(params: &mut Parameters, name: String, value: Value) -> Result<(), DynError>
+/// {
+///     params.set_parameter(name, value, false /* read_only */, Some("description".to_string()))
+/// }
+/// ```
 #[derive(Debug)]
 pub struct Parameters {
     params: BTreeMap<String, Parameter>,
@@ -273,8 +350,8 @@ impl Parameters {
         std::mem::take(&mut self.updated)
     }
 
-    pub fn get_parameter(&self, key: &str) -> Option<&Parameter> {
-        self.params.get(key)
+    pub fn get_parameter(&self, name: &str) -> Option<&Parameter> {
+        self.params.get(name)
     }
 
     pub fn set_parameter(
@@ -715,7 +792,7 @@ impl From<&rcl_variant_t> for Value {
 }
 
 impl ParameterServer {
-    pub fn new(node: Arc<Node>) -> RCLResult<Self> {
+    pub(crate) fn new(node: Arc<Node>) -> Result<Self, DynError> {
         let params = Arc::new(RwLock::new(Parameters::new()));
         let ps = params.clone();
         let n = node.clone();
