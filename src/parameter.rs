@@ -1,3 +1,130 @@
+//! Parameter server.
+//!
+//! # Examples
+//!
+//! ## Wait update by callback
+//!
+//! ```
+//! use safe_drive::{
+//!     context::Context,
+//!     error::DynError,
+//!     logger::Logger,
+//!     parameter::{ParameterServer, Value},
+//!     pr_info,
+//! };
+//!
+//! // Create a context and a node.
+//! let ctx = Context::new().unwrap();
+//! let node = ctx.create_node("param_server", None, Default::default()).unwrap();
+//!
+//! // Create a parameter server.
+//! let param_server = ParameterServer::new(node).unwrap();
+//! {
+//!     // Set parameters.
+//!     let mut params = param_server.params.write(); // Write lock
+//!
+//!     // Statically typed parameter.
+//!     params.set_parameter(
+//!         "my_flag".to_string(),                     // parameter name
+//!         Value::Bool(false),                        // value
+//!         false,                                     // read only?
+//!         Some("my flag's description".to_string()), // description
+//!     ).unwrap();
+//!
+//!     // Dynamically typed parameter.
+//!     params.set_dynamically_typed_parameter(
+//!         "my_dynamic_type_flag".to_string(), // parameter name
+//!         Value::Bool(false),                 // value
+//!         false,                              // read only?
+//!         Some("my dynamic type flag's description".to_string()), // description
+//!     ).unwrap();
+//! }
+//!
+//! // Create a logger and a selector.
+//! let logger = Logger::new("param_server");
+//! let mut selector = ctx.create_selector().unwrap();
+//!
+//! // Add a callback function to the parameter server.
+//! selector.add_parameter_server(
+//!     param_server,
+//!     Box::new(move |params, updated| {
+//!         // Print updated parameters.
+//!         let mut keys = String::new();
+//!         for key in updated.iter() {
+//!             let value = &params.get_parameter(key).unwrap().value;
+//!             keys = format!("{keys}{key} = {}, ", value);
+//!         }
+//!         pr_info!(logger, "updated parameters: {keys}");
+//!     }),
+//! );
+//!
+//! // Do spin to wait update.
+//! // loop {
+//! //    selector.wait()?;
+//! // }
+//! ```
+//!
+//! ## Asynchronous wait
+//!
+//! ```
+//! use safe_drive::{
+//!     context::Context,
+//!     error::DynError,
+//!     logger::Logger,
+//!     parameter::{ParameterServer, Value},
+//!     pr_info,
+//! };
+//!
+//! // Create a context and a node.
+//! let ctx = Context::new().unwrap();
+//! let node = ctx.create_node("async_param_server", None, Default::default()).unwrap();
+//!
+//! // Create a parameter server.
+//! let mut param_server = ParameterServer::new(node).unwrap();
+//! {
+//!     // Set parameters.
+//!     let mut params = param_server.params.write(); // Write lock
+//!
+//!     // Statically typed parameter.
+//!     params.set_parameter(
+//!         "my_flag".to_string(),                     // parameter name
+//!         Value::Bool(false),                        // value
+//!         false,                                     // read only?
+//!         Some("my flag's description".to_string()), // description
+//!     ).unwrap();
+//!
+//!     // Dynamically typed parameter.
+//!     params.set_dynamically_typed_parameter(
+//!         "my_dynamic_type_flag".to_string(), // parameter name
+//!         Value::Bool(false),                 // value
+//!         false,                              // read only?
+//!         Some("my dynamic type flag's description".to_string()), // description
+//!     ).unwrap();
+//! }
+//!
+//! async fn run_wait(mut param_server: ParameterServer) {
+//!     loop {
+//!         // Create a logger.
+//!         let logger = Logger::new("async_param_server");
+//!
+//!         // Wait update asynchronously.
+//!         let updated = param_server.wait().await.unwrap();
+//!
+//!         let params = param_server.params.read(); // Read lock
+//!
+//!         // Print updated parameters.
+//!         let mut keys = String::new();
+//!         for key in updated.iter() {
+//!             let value = &params.get_parameter(key).unwrap().value;
+//!             keys = format!("{keys}{key} = {}, ", value);
+//!         }
+//!         pr_info!(logger, "updated parameters: {keys}");
+//!     }
+//! }
+//!
+//! // async_std::task::block_on(run_wait(param_server)); // Spawn an asynchronous task.
+//! ```
+
 use crate::{
     error::{DynError, RCLResult},
     is_halt,
@@ -33,6 +160,7 @@ use std::{
     cell::Cell,
     collections::{BTreeMap, BTreeSet},
     ffi::CStr,
+    fmt::Display,
     future::Future,
     rc::Rc,
     slice::from_raw_parts,
@@ -48,16 +176,16 @@ pub struct ParameterServer {
     node: Arc<Node>,
 }
 
-trait Contains {
+pub trait Contains {
     type T;
     fn contains(&self, val: Self::T) -> bool;
 }
 
 #[derive(Debug, PartialEq, Eq, PartialOrd, Ord)]
-struct IntegerRange {
-    min: i64,
-    max: i64,
-    step: usize,
+pub struct IntegerRange {
+    pub min: i64,
+    pub max: i64,
+    pub step: usize,
 }
 
 impl Contains for IntegerRange {
@@ -84,10 +212,10 @@ impl From<&IntegerRange> for rcl_interfaces::msg::IntegerRange {
 }
 
 #[derive(Debug, PartialEq, PartialOrd)]
-struct FloatingPointRange {
-    min: f64,
-    max: f64,
-    step: f64,
+pub struct FloatingPointRange {
+    pub min: f64,
+    pub max: f64,
+    pub step: f64,
 }
 
 impl From<&FloatingPointRange> for rcl_interfaces::msg::FloatingPointRange {
@@ -118,13 +246,13 @@ impl Contains for FloatingPointRange {
 }
 
 #[derive(Debug)]
-struct Descriptor {
-    description: String,
-    additional_constraints: String,
-    read_only: bool,
-    dynamic_typing: bool,
-    floating_point_range: Option<FloatingPointRange>,
-    integer_range: Option<IntegerRange>,
+pub struct Descriptor {
+    pub description: String,
+    pub additional_constraints: String,
+    pub read_only: bool,
+    pub dynamic_typing: bool,
+    pub floating_point_range: Option<FloatingPointRange>,
+    pub integer_range: Option<IntegerRange>,
 }
 
 #[derive(Debug)]
@@ -143,6 +271,10 @@ impl Parameters {
 
     pub(crate) fn take_updated(&mut self) -> BTreeSet<String> {
         std::mem::take(&mut self.updated)
+    }
+
+    pub fn get_parameter(&self, key: &str) -> Option<&Parameter> {
+        self.params.get(key)
     }
 
     pub fn set_parameter(
@@ -312,8 +444,8 @@ impl Parameters {
 
 #[derive(Debug)]
 pub struct Parameter {
-    descriptor: Descriptor,
-    value: Value,
+    pub descriptor: Descriptor,
+    pub value: Value,
 }
 
 impl Parameter {
@@ -388,6 +520,23 @@ impl Value {
             Value::VecF64(_) => "VecF64",
             Value::VecString(_) => "VecString",
             Value::NotSet => "NotSet",
+        }
+    }
+}
+
+impl Display for Value {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Value::Bool(x) => write!(f, "{x}"),
+            Value::I64(x) => write!(f, "{x}"),
+            Value::F64(x) => write!(f, "{x}"),
+            Value::String(x) => write!(f, "{x}"),
+            Value::VecBool(x) => write!(f, "{:?}", x),
+            Value::VecI64(x) => write!(f, "{:?}", x),
+            Value::VecU8(x) => write!(f, "{:?}", x),
+            Value::VecF64(x) => write!(f, "{:?}", x),
+            Value::VecString(x) => write!(f, "{:?}", x),
+            Value::NotSet => write!(f, "NotSet"),
         }
     }
 }
