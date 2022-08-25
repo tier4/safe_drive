@@ -1,5 +1,6 @@
 pub mod common;
 
+use common::msgs::example_msg::msg::Num;
 use safe_drive::{self, node::Node};
 use std::{cell::Cell, error::Error, rc::Rc, sync::Arc, thread, time::Duration};
 
@@ -76,7 +77,7 @@ fn pub_thread(node: Arc<Node>, topic_name: &str, dur: Duration, init: i64) {
     for i in 0..COUNT {
         thread::sleep(dur);
         let n = init + i as i64;
-        let msg = common::num::example_msg__msg__Num { num: n };
+        let msg = Num { num: n };
         publisher.send(&msg).unwrap(); // send message
     }
 }

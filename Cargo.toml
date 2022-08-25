@@ -31,6 +31,8 @@ version = "1.11.0"
 features = ["attributes"]
 
 [features]
-default = []
+default = ["humble"]
 statistics = ["serde", "serde_json"]
 rcl_stat = ["statistics"]
+humble = []
+galactic = []

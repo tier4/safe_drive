@@ -8,8 +8,15 @@
 #![allow(clippy::upper_case_acronyms)]
 #![allow(clippy::too_many_arguments)]
 
+#[cfg(feature = "galactic")]
 mod galactic;
+#[cfg(feature = "galactic")]
 pub use galactic::*;
+
+#[cfg(feature = "humble")]
+mod humble;
+#[cfg(feature = "humble")]
+pub use humble::*;
 
 use crate::rcl;
 use std::{ffi::CString, fmt::Display, intrinsics::transmute};

@@ -35,6 +35,7 @@ fn main() {
 
     if std::env::var_os("SAFE_DRIVE_TEST").is_some() {
         println!("cargo:rustc-link-lib=example_msg__rosidl_typesupport_c");
+        println!("cargo:rustc-link-lib=example_msg__rosidl_generator_c");
         println!("cargo:rustc-link-search=supplements/ros2/install/example_msg/lib");
     }
 

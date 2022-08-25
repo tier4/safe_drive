@@ -182,12 +182,12 @@ use parking_lot::Mutex;
 
 pub(crate) struct RCLSubscription {
     pub subscription: Box<rcl::rcl_subscription_t>,
-    pub node: Arc<Node>,
 
     topic_name: String,
 
     #[cfg(feature = "rcl_stat")]
     pub latency_take: Mutex<TimeStatistics<4096>>,
+    pub node: Arc<Node>,
 }
 
 #[cfg(feature = "rcl_stat")]
@@ -476,12 +476,16 @@ fn rcl_take<T>(subscription: &rcl::rcl_subscription_t) -> RCLResult<T> {
     let mut ros_message: T = unsafe { MaybeUninit::zeroed().assume_init() };
 
     let guard = rcl::MT_UNSAFE_FN.lock();
-    guard.rcl_take(
+    match guard.rcl_take(
         subscription,
         &mut ros_message as *mut _ as *mut c_void,
         null_mut(),
         null_mut(),
-    )?;
-
-    Ok(ros_message)
+    ) {
+        Ok(_) => Ok(ros_message),
+        Err(e) => {
+            guard.rcutils_reset_error();
+            Err(e)
+        }
+    }
 }

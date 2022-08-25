@@ -10,7 +10,6 @@ use crossbeam_channel::{self, Receiver, Sender};
 use once_cell::sync::Lazy;
 use parking_lot::Mutex;
 use std::{
-    collections::BTreeMap,
     sync::Arc,
     thread::{self, JoinHandle},
 };
@@ -45,12 +44,12 @@ pub(crate) enum Command {
 struct SelectorData {
     tx: Sender<Command>,
     cond: GuardCondition,
-    th: JoinHandle<Result<(), DynError>>,
+    th: Option<JoinHandle<Result<(), DynError>>>,
     _context: Arc<Context>,
 }
 
 pub(crate) struct AsyncSelector {
-    contexts: BTreeMap<usize, SelectorData>,
+    data: Option<SelectorData>,
 }
 
 unsafe impl Sync for AsyncSelector {}
@@ -58,16 +57,16 @@ unsafe impl Send for AsyncSelector {}
 
 impl AsyncSelector {
     fn new() -> Self {
-        AsyncSelector {
-            contexts: Default::default(),
-        }
+        AsyncSelector { data: None }
     }
 
-    pub(crate) fn halt(&mut self, context: &Context) -> Result<(), DynError> {
-        if let Some(SelectorData { tx, cond, th, .. }) = self.contexts.remove(&context.id) {
+    pub(crate) fn halt(&mut self) -> Result<(), DynError> {
+        if let Some(SelectorData { tx, cond, th, .. }) = &mut self.data {
             tx.send(Command::Halt)?;
             cond.trigger()?;
-            let _ = th.join();
+            if let Some(th) = th.take() {
+                let _ = th.join();
+            }
         }
 
         Ok(())
@@ -79,7 +78,7 @@ impl AsyncSelector {
         cmd: Command,
     ) -> Result<(), DynError> {
         loop {
-            if let Some(SelectorData { tx, cond, .. }) = self.contexts.get(&context.id) {
+            if let Some(SelectorData { tx, cond, .. }) = &self.data {
                 tx.send(cmd)?;
                 cond.trigger()?;
                 return Ok(());
@@ -93,15 +92,12 @@ impl AsyncSelector {
                 let ctx = context.clone();
                 let guard2 = guard.clone();
                 let th = thread::spawn(move || select(ctx, guard2, rx));
-                self.contexts.insert(
-                    context.id,
-                    SelectorData {
-                        tx,
-                        _context: context.clone(),
-                        cond: guard,
-                        th,
-                    },
-                );
+                self.data = Some(SelectorData {
+                    tx,
+                    _context: context.clone(),
+                    cond: guard,
+                    th: Some(th),
+                });
             }
         }
     }

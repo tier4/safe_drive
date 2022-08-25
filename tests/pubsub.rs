@@ -1,5 +1,6 @@
 pub mod common;
 
+use common::msgs::example_msg::msg::Num;
 use safe_drive::{self, context::Context, msg::common_interfaces::std_msgs};
 use std::error::Error;
 
@@ -22,7 +23,7 @@ fn test_pubsub() -> Result<(), Box<dyn Error + Sync + Send + 'static>> {
 
     // publish a message
     let n = 100;
-    let msg = common::num::example_msg__msg__Num { num: n };
+    let msg = Num { num: n };
     publisher.send(&msg)?; // send message
 
     // wait messages
@@ -44,18 +45,19 @@ const PUBSUB_MSG: &str = "Hello, World!";
 fn test_pubsub_string() -> Result<(), Box<dyn Error + Sync + Send + 'static>> {
     // create a context
     let ctx = Context::new()?;
-
-    // create a publish node
-    let node_pub = ctx.create_node("test_pubusub_string_pub_node", None, Default::default())?;
+    let mut selector = ctx.create_selector()?;
 
     // create a subscribe node
     let node_sub = ctx.create_node("test_pubusub_string_sub_node", None, Default::default())?;
 
+    // create a publish node
+    let node_pub = ctx.create_node("test_pubusub_string_pub_node", None, Default::default())?;
+
     // create a publisher and a subscriber
-    let publisher =
-        node_pub.create_publisher::<std_msgs::msg::String>("test_pubsub_string", None)?;
     let subscriber =
         node_sub.create_subscriber::<std_msgs::msg::String>("test_pubsub_string", None)?;
+    let publisher =
+        node_pub.create_publisher::<std_msgs::msg::String>("test_pubsub_string", None)?;
 
     // publish a message
     let mut msg = std_msgs::msg::String::new().unwrap();
@@ -63,7 +65,6 @@ fn test_pubsub_string() -> Result<(), Box<dyn Error + Sync + Send + 'static>> {
     publisher.send(&msg)?; // send message
 
     // wait messages
-    let mut selector = ctx.create_selector()?;
     selector.add_subscriber(
         subscriber,
         Box::new(|msg| {

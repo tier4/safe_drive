@@ -1,9 +1,8 @@
 SUBDIRS = tests/common supplements/bindgen
 
-NUM_LIBDIR=supplements/ros2/install/example_msg/lib
-AddThreeInts_LIBDIR=supplements/ros2/install/example_msg/lib
+LIBDIR=supplements/ros2/install/example_msg/lib
 
-export LD_LIBRARY_PATH := $(NUM_LIBDIR):$(AddThreeInts_LIBDIR):$(LD_LIBRARY_PATH)
+export LD_LIBRARY_PATH := $(LIBDIR):$(LD_LIBRARY_PATH)
 export SAFE_DRIVE_TEST := 1
 
 all: $(SUBDIRS)

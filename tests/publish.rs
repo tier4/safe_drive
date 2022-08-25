@@ -1,5 +1,6 @@
 pub mod common;
 
+use common::msgs::example_msg::msg::Num;
 use safe_drive::{self, context::Context};
 use std::error::Error;
 
@@ -10,12 +11,9 @@ fn test_publish() -> Result<(), Box<dyn Error + Sync + Send + 'static>> {
         .create_node("test_publish_node", None, Default::default())
         .unwrap();
 
-    let publisher = node.create_publisher::<common::num::example_msg__msg__Num>(
-        "test_publish",
-        Default::default(),
-    )?;
+    let publisher = node.create_publisher::<Num>("test_publish", Default::default())?;
 
-    let msg = common::num::example_msg__msg__Num { num: 100 };
+    let msg = Num { num: 100 };
     publisher.send(&msg)?;
 
     Ok(())

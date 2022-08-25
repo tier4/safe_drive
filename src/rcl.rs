@@ -13,10 +13,21 @@
 #![allow(clippy::upper_case_acronyms)]
 #![allow(clippy::too_many_arguments)]
 
+#[cfg(feature = "galactic")]
 mod galactic;
 
+#[cfg(feature = "galactic")]
 pub(crate) use galactic::*;
+#[cfg(feature = "galactic")]
 pub use galactic::{rosidl_message_type_support_t, rosidl_service_type_support_t};
+
+#[cfg(feature = "humble")]
+mod humble;
+
+#[cfg(feature = "humble")]
+pub(crate) use humble::*;
+#[cfg(feature = "humble")]
+pub use humble::{rosidl_message_type_support_t, rosidl_service_type_support_t};
 
 use crate::error::{ret_val_to_err, RCLResult};
 use once_cell::sync::Lazy;
@@ -318,6 +329,10 @@ impl MTUnsafeFn {
         index: *mut size_t,
     ) -> RCLResult<()> {
         ret_val_to_err(unsafe { self::rcl_wait_set_add_service(wait_set, service, index) })
+    }
+
+    pub fn rcutils_reset_error(&self) {
+        unsafe { self::rcutils_reset_error() };
     }
 }
 

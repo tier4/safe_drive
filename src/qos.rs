@@ -1,6 +1,14 @@
 //! QoS of ROS2.
 
+#[cfg(feature = "galactic")]
+pub mod galactic;
+
+#[cfg(feature = "humble")]
+pub mod humble;
+
 pub mod policy;
+
+// pub mod policy;
 
 use crate::rcl;
 use num_traits::{FromPrimitive, ToPrimitive};
@@ -171,6 +179,7 @@ impl From<&rcl::rmw_qos_profile_t> for Profile {
 }
 
 impl From<&Profile> for rcl::rmw_qos_profile_t {
+    #[cfg(feature = "galactic")]
     fn from(qos: &Profile) -> Self {
         rcl::rmw_qos_profile_t {
             history: ToPrimitive::to_u32(&qos.history)
@@ -182,6 +191,25 @@ impl From<&Profile> for rcl::rmw_qos_profile_t {
                 .unwrap_or(rcl::rmw_qos_durability_policy_t_RMW_QOS_POLICY_DURABILITY_UNKNOWN),
             liveliness: ToPrimitive::to_u32(&qos.liveliness)
                 .unwrap_or(rcl::rmw_qos_liveliness_policy_t_RMW_QOS_POLICY_LIVELINESS_UNKNOWN),
+            deadline: qos.deadline.into(),
+            lifespan: qos.lifespan.into(),
+            liveliness_lease_duration: qos.liveliness_lease_duration.into(),
+            avoid_ros_namespace_conventions: qos.avoid_ros_namespace_conventions,
+        }
+    }
+
+    #[cfg(feature = "humble")]
+    fn from(qos: &Profile) -> Self {
+        rcl::rmw_qos_profile_t {
+            history: ToPrimitive::to_u32(&qos.history)
+                .unwrap_or(rcl::rmw_qos_history_policy_e_RMW_QOS_POLICY_HISTORY_UNKNOWN),
+            depth: qos.depth as u64,
+            reliability: ToPrimitive::to_u32(&qos.reliability)
+                .unwrap_or(rcl::rmw_qos_reliability_policy_e_RMW_QOS_POLICY_RELIABILITY_UNKNOWN),
+            durability: ToPrimitive::to_u32(&qos.durability)
+                .unwrap_or(rcl::rmw_qos_durability_policy_e_RMW_QOS_POLICY_DURABILITY_UNKNOWN),
+            liveliness: ToPrimitive::to_u32(&qos.liveliness)
+                .unwrap_or(rcl::rmw_qos_liveliness_policy_e_RMW_QOS_POLICY_LIVELINESS_UNKNOWN),
             deadline: qos.deadline.into(),
             lifespan: qos.lifespan.into(),
             liveliness_lease_duration: qos.liveliness_lease_duration.into(),

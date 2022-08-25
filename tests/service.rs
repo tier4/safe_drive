@@ -1,5 +1,6 @@
 pub mod common;
 
+use common::msgs::example_msg::srv::{AddThreeIntsRequest, AddThreeIntsResponse};
 use safe_drive::{self, context::Context, error::DynError, RecvResult, ST};
 use std::time::Duration;
 
@@ -26,7 +27,7 @@ fn test_service() -> Result<(), DynError> {
     let mut selector = ctx.create_selector()?;
 
     // Client: send a request
-    let req = common::Request { a: 1, b: 2, c: 5 };
+    let req = AddThreeIntsRequest { a: 1, b: 2, c: 5 };
     let rcv_client = match client.send_ret_seq(&req) {
         Ok((c, seq)) => {
             println!("Client: seq = {seq}");
@@ -45,7 +46,7 @@ fn test_service() -> Result<(), DynError> {
                 "Server: received: data = {:?}, header = {:?}",
                 request, header
             );
-            common::Response {
+            AddThreeIntsResponse {
                 sum: request.a + request.b + request.c,
             }
         }),
@@ -88,7 +89,7 @@ fn test_client_wait() -> Result<(), DynError> {
     let mut selector = ctx.create_selector()?;
 
     // Client: send a request
-    let req = common::Request { a: 1, b: 2, c: 5 };
+    let req = AddThreeIntsRequest { a: 1, b: 2, c: 5 };
     let rcv_client = match client.send_ret_seq(&req) {
         Ok((c, seq)) => {
             println!("Client: seq = {seq}");
@@ -113,7 +114,7 @@ fn test_client_wait() -> Result<(), DynError> {
                 "Server: received: data = {:?}, header = {:?}",
                 request, header
             );
-            common::Response {
+            AddThreeIntsResponse {
                 sum: request.a + request.b + request.c,
             }
         }),
@@ -152,7 +153,7 @@ fn test_no_server() -> Result<(), DynError> {
 
     std::thread::sleep(Duration::from_millis(500));
 
-    let req = common::Request { a: 1, b: 2, c: 5 };
+    let req = AddThreeIntsRequest { a: 1, b: 2, c: 5 };
     let (client, seq) = client.send_ret_seq(&req).unwrap();
     println!("clinet:send: seq = {seq}");
 
@@ -173,13 +174,13 @@ fn test_no_server() -> Result<(), DynError> {
     let client = client.give_up();
     println!("client: gave up!");
 
-    let req = common::Request { a: 4, b: 8, c: 10 };
+    let req = AddThreeIntsRequest { a: 4, b: 8, c: 10 };
     let (client, seq) = client.send_ret_seq(&req).unwrap();
     println!("clinet:send: seq = {seq}");
 
     std::thread::sleep(Duration::from_millis(50));
 
-    let resp = common::Response {
+    let resp = AddThreeIntsResponse {
         sum: request.a + request.b + request.c,
     };
     let _ = srv.send(&resp);

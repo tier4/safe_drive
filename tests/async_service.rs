@@ -2,6 +2,7 @@ pub mod common;
 
 #[allow(unused_imports)]
 use async_std::{future, prelude::*};
+use common::msgs::example_msg::srv::{AddThreeInts, AddThreeIntsRequest, AddThreeIntsResponse};
 use safe_drive::{
     self,
     context::Context,
@@ -42,13 +43,13 @@ fn test_async() -> Result<(), Box<dyn Error + Sync + Send + 'static>> {
 }
 
 /// The server
-async fn run_server(mut server: Server<common::ServiceType>) -> Result<(), DynError> {
+async fn run_server(mut server: Server<AddThreeInts>) -> Result<(), DynError> {
     for _ in 0..3 {
         // receive a request
         let (sender, request, _) = server.recv().await?;
         println!("Server: request = {:?}", request);
 
-        let response = common::Response {
+        let response = AddThreeIntsResponse {
             sum: request.a + request.b + request.c,
         };
 
@@ -65,10 +66,10 @@ async fn run_server(mut server: Server<common::ServiceType>) -> Result<(), DynEr
 }
 
 /// The client
-async fn run_client(mut client: Client<common::ServiceType>) -> Result<(), DynError> {
+async fn run_client(mut client: Client<AddThreeInts>) -> Result<(), DynError> {
     let dur = Duration::from_millis(500);
     for n in 0..3 {
-        let data = common::Request {
+        let data = AddThreeIntsRequest {
             a: n,
             b: n * 10,
             c: n * 100,

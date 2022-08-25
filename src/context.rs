@@ -27,14 +27,14 @@ use crate::{
 };
 use once_cell::sync::Lazy;
 use parking_lot::Mutex;
-use std::{collections::BTreeSet, env, ffi::CString, sync::Arc};
+use std::{env, ffi::CString, sync::Arc};
 
-static ID_CONTEXT: Lazy<Mutex<BTreeSet<usize>>> = Lazy::new(|| Mutex::new(BTreeSet::new()));
+// static ID_CONTEXT: Lazy<Mutex<BTreeSet<usize>>> = Lazy::new(|| Mutex::new(BTreeSet::new()));
+static CONTEXT: Lazy<Mutex<Option<Arc<Context>>>> = Lazy::new(|| Mutex::new(None));
 
 /// Context of ROS2.
 pub struct Context {
     context: rcl::rcl_context_t,
-    pub(crate) id: usize,
 }
 
 impl Context {
@@ -50,6 +50,13 @@ impl Context {
     /// ```
     pub fn new() -> Result<Arc<Self>, DynError> {
         signal_handler::init();
+
+        {
+            let guard = CONTEXT.lock();
+            if let Some(ctx) = guard.as_ref() {
+                return Ok(ctx.clone());
+            }
+        }
 
         // allocate context
         let mut context = rcl::MTSafeFn::rcl_get_zero_initialized_context();
@@ -72,21 +79,13 @@ impl Context {
             )?;
         }
 
-        let id;
+        let context = Arc::new(Context { context });
         {
-            let mut guard = ID_CONTEXT.lock();
-            let mut n = 0;
-            loop {
-                if !guard.contains(&n) {
-                    id = n;
-                    guard.insert(n);
-                    break;
-                }
-                n += 1;
-            }
+            let mut guard = CONTEXT.lock();
+            *guard = Some(context.clone());
         }
 
-        Ok(Arc::new(Context { context, id }))
+        Ok(context)
     }
 
     /// Create a new node of ROS2.
@@ -162,12 +161,8 @@ impl Context {
 impl Drop for Context {
     fn drop(&mut self) {
         {
-            let mut guard = ID_CONTEXT.lock();
-            guard.remove(&self.id);
-            if guard.is_empty() {
-                SELECTOR.lock().halt(self).unwrap();
-                signal_handler::halt();
-            }
+            SELECTOR.lock().halt().unwrap();
+            signal_handler::halt();
         };
 
         rcl::MTSafeFn::rcl_shutdown(&mut self.context).unwrap();

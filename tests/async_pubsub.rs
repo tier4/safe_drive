@@ -2,6 +2,7 @@ pub mod common;
 
 #[allow(unused_imports)]
 use async_std::{future, prelude::*};
+use common::msgs::example_msg::msg::Num;
 use safe_drive::{
     self,
     context::Context,
@@ -34,16 +35,21 @@ fn test_async() -> Result<(), Box<dyn Error + Sync + Send + 'static>> {
         s.await;
     });
 
+    println!("finished");
+
     Ok(())
 }
 
 /// The publisher
-async fn run_publisher(p: Publisher<common::num::example_msg__msg__Num>) {
+async fn run_publisher(p: Publisher<Num>) {
     let dur = Duration::from_millis(100);
     for n in 0..3 {
         // publish a message periodically
-        let msg = common::num::example_msg__msg__Num { num: n };
-        p.send(&msg).unwrap();
+        let msg = Num { num: n };
+        if let Err(e) = p.send(&msg) {
+            println!("error: {e}");
+            return;
+        }
 
         // sleep 100[ms]
         async_std::task::sleep(dur).await;
@@ -52,7 +58,7 @@ async fn run_publisher(p: Publisher<common::num::example_msg__msg__Num>) {
 }
 
 /// The subscriber
-async fn run_subscriber(mut s: Subscriber<common::num::example_msg__msg__Num>) {
+async fn run_subscriber(mut s: Subscriber<Num>) {
     let dur = Duration::from_millis(500);
     for n in 0.. {
         // receive a message specifying timeout of 500ms

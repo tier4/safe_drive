@@ -86,13 +86,13 @@ use parking_lot::Mutex;
 /// ```
 pub struct Publisher<T> {
     publisher: rcl::rcl_publisher_t,
-    node: Arc<Node>,
     topic_name: String,
 
     #[cfg(feature = "rcl_stat")]
     latency_publish: Mutex<TimeStatistics<4096>>,
 
     _phantom: PhantomData<T>,
+    node: Arc<Node>,
 }
 
 impl<T: TopicMsg> Publisher<T> {
@@ -166,7 +166,13 @@ impl<T: TopicMsg> Publisher<T> {
         #[cfg(feature = "rcl_stat")]
         let start = std::time::SystemTime::now();
 
-        rcl::MTSafeFn::rcl_publish(&self.publisher, msg as *const T as _, null_mut())?;
+        if let Err(e) =
+            rcl::MTSafeFn::rcl_publish(&self.publisher, msg as *const T as _, null_mut())
+        {
+            let guard = rcl::MT_UNSAFE_FN.lock();
+            guard.rcutils_reset_error();
+            return Err(e.into());
+        }
 
         #[cfg(feature = "rcl_stat")]
         {
