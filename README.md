@@ -30,15 +30,21 @@ We specified and tested as follows.
 
 TODO.
 
+## Supported ROS2
+
+- [x] Humble
+- [x] Glactic
+
 ## Progress
 
+- [ ] Zero copy
 - [x] Topic (Pub/Sub)
 - [x] Service (Client/Server)
 - [x] Asynchronous programming (async/await)
 - [x] Callback based programming
 - [x] Logging
 - [x] Signal handling
-- [ ] Parameter
+- [x] Parameter
 - [x] Timer
 - [ ] Action (service + topic)
 - [x] Rust code generation from .msg and .srv files

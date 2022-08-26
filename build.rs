@@ -45,4 +45,12 @@ fn main() {
             println!("cargo:rustc-link-search={path}/lib");
         }
     }
+
+    if let Some(e) = std::env::var_os("ROS_DISTRO") {
+        match e.to_str().unwrap() {
+            "humble" => println!("cargo:rustc-cfg=feature=\"humble\""),
+            "galactic" => println!("cargo:rustc-cfg=feature=\"galactic\""),
+            _ => (),
+        }
+    }
 }

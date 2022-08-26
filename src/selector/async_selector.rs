@@ -143,6 +143,7 @@ fn select(
 
                 for (_, h) in selector.clients.iter_mut() {
                     if let Some(handler) = &mut h.handler {
+                        println!("callback client");
                         (*handler)();
                     }
                 }
@@ -152,6 +153,8 @@ fn select(
                         (*handler)();
                     }
                 }
+
+                return Ok(());
             }
         }
     }

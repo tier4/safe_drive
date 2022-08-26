@@ -29,7 +29,6 @@ use once_cell::sync::Lazy;
 use parking_lot::Mutex;
 use std::{env, ffi::CString, sync::Arc};
 
-// static ID_CONTEXT: Lazy<Mutex<BTreeSet<usize>>> = Lazy::new(|| Mutex::new(BTreeSet::new()));
 static CONTEXT: Lazy<Mutex<Option<Arc<Context>>>> = Lazy::new(|| Mutex::new(None));
 
 /// Context of ROS2.

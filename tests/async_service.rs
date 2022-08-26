@@ -17,7 +17,7 @@ use std::{error::Error, time::Duration};
 const SERVICE_NAME: &str = "test_async_service";
 
 #[test]
-fn test_async() -> Result<(), Box<dyn Error + Sync + Send + 'static>> {
+fn test_async_service() -> Result<(), Box<dyn Error + Sync + Send + 'static>> {
     // create a context
     let ctx = Context::new()?;
 
@@ -33,11 +33,15 @@ fn test_async() -> Result<(), Box<dyn Error + Sync + Send + 'static>> {
 
     // create tasks
     async_std::task::block_on(async {
-        let p = async_std::task::spawn(run_server(server));
+        let p = async_std::task::spawn(async {
+            let _ = async_std::future::timeout(Duration::from_secs(3), run_server(server)).await;
+        });
         let s = async_std::task::spawn(run_client(client));
-        p.await.unwrap();
+        p.await;
         s.await.unwrap();
     });
+
+    println!("finished test_async_service");
 
     Ok(())
 }
@@ -79,13 +83,28 @@ async fn run_client(mut client: Client<AddThreeInts>) -> Result<(), DynError> {
         println!("Client: request = {:?}", data);
         let receiver = client.send(&data)?;
 
-        // receive a response
-        let (c, response, _header) = receiver.recv().await?;
-        println!("Client: response = {:?}", response);
-        assert_eq!(response.sum, n + n * 10 + n * 100);
+        // Create a logger.
+        let logger = Logger::new("test_async_service::run_client");
 
-        // got a new client to send the next request
-        client = c;
+        // receive a response
+        let mut receiver = receiver.recv();
+        match async_std::future::timeout(dur, &mut receiver).await {
+            Ok(Ok((c, response, _header))) => {
+                pr_info!(logger, "received: {:?}", response);
+                assert_eq!(response.sum, n + n * 10 + n * 100);
+
+                // got a new client to send the next request
+                client = c;
+            }
+            Ok(Err(e)) => {
+                pr_error!(logger, "error: {e}");
+                break;
+            }
+            Err(_) => {
+                client = receiver.give_up();
+                continue;
+            }
+        }
 
         // sleep 500[ms]
         async_std::task::sleep(dur).await;
@@ -119,6 +138,8 @@ fn test_client_rs() {
         loop {
             let request = std_srvs::srv::EmptyRequest::new().unwrap();
             let mut receiver = client.send(&request).unwrap().recv();
+
+            pr_info!(logger, "receiving");
             match async_std::future::timeout(dur, &mut receiver).await {
                 Ok(Ok((c, response, _header))) => {
                     pr_info!(logger, "received: {:?}", response);
@@ -129,8 +150,8 @@ fn test_client_rs() {
                     break;
                 }
                 Err(_) => {
-                    pr_info!(logger, "timeout");
                     n_timeout += 1;
+                    pr_info!(logger, "timeout: n = {n_timeout}");
                     if n_timeout > 10 {
                         return;
                     }
@@ -141,4 +162,6 @@ fn test_client_rs() {
     }
 
     async_std::task::block_on(run_client(client, logger)); // Spawn an asynchronous task.
+
+    println!("finished test_client_rs");
 }

@@ -19,7 +19,7 @@ RUN echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/r
     tee /etc/apt/sources.list.d/ros2.list > /dev/null
 
 RUN apt-get -y update && \
-    apt-get -y install ros-humble-desktop python3-colcon-common-extensions python3-rosdep libclang-dev python3-pip python3-vcstool
+    apt-get -y install ros-humble-desktop python3-colcon-common-extensions python3-rosdep libclang-dev python3-pip python3-vcstool ros-humble-rmw-cyclonedds-cpp
 
 RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
 RUN . /root/.cargo/env && \

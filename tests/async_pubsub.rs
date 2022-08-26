@@ -13,7 +13,7 @@ use std::{error::Error, time::Duration};
 const TOPIC_NAME: &str = "test_async_pubsub";
 
 #[test]
-fn test_async() -> Result<(), Box<dyn Error + Sync + Send + 'static>> {
+fn test_async_pubsub() -> Result<(), Box<dyn Error + Sync + Send + 'static>> {
     // create a context
     let ctx = Context::new()?;
 
