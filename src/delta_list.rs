@@ -61,6 +61,13 @@ impl<T> DeltaList<T> {
     pub fn is_empty(&self) -> bool {
         matches!(self, DeltaList::Nil)
     }
+
+    pub fn filter<U>(&mut self, f: U)
+    where
+        U: Fn(&T) -> bool,
+    {
+        filter_delta(self, f);
+    }
 }
 
 fn insert_delta<T>(mut list: &mut DeltaList<T>, delta: Duration, data: T) {
@@ -80,6 +87,30 @@ fn insert_delta<T>(mut list: &mut DeltaList<T>, delta: Duration, data: T) {
                     return;
                 } else {
                     list = unsafe { &mut (*front).2 };
+                }
+            }
+        }
+    }
+}
+
+fn filter_delta<T, U>(mut list: &mut DeltaList<T>, f: U)
+where
+    U: Fn(&T) -> bool,
+{
+    loop {
+        match list {
+            DeltaList::Nil => {
+                return;
+            }
+            DeltaList::Cons(e) => {
+                let front = e.get();
+                let d_mut = unsafe { &mut (*front).1 };
+                if f(d_mut) {
+                    list = unsafe { &mut (*front).2 };
+                } else {
+                    let next = unsafe { &mut (*front).2 };
+                    let next = std::mem::replace(next, DeltaList::Nil);
+                    *list = next;
                 }
             }
         }

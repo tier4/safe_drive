@@ -72,6 +72,7 @@ use crate::{
     PhantomUnsend, PhantomUnsync, RecvResult, ST,
 };
 use std::{
+    cell::Cell,
     collections::{BTreeMap, BTreeSet},
     mem::replace,
     ptr::null_mut,
@@ -147,7 +148,7 @@ pub struct Statistics {
 /// ```
 pub struct Selector {
     param_server: Option<ParameterServer>,
-    timer: DeltaList<ConditionHandler<TimerType>>,
+    timer: DeltaList<(ConditionHandler<TimerType>, u64)>,
     base_time: SystemTime,
     signal_cond: GuardCondition,
     wait_set: rcl::rcl_wait_set_t,
@@ -155,6 +156,8 @@ pub struct Selector {
     clients: BTreeMap<*const rcl::rcl_client_t, ConditionHandler<Arc<ClientData>>>,
     subscriptions: BTreeMap<*const rcl::rcl_subscription_t, ConditionHandler<Arc<RCLSubscription>>>,
     cond: BTreeMap<*const rcl::rcl_guard_condition_t, ConditionHandler<Arc<RCLGuardCondition>>>,
+    timer_ids: BTreeSet<u64>,
+    timer_id: u64,
     context: Arc<Context>,
 
     #[cfg(feature = "statistics")]
@@ -202,6 +205,9 @@ impl Selector {
             services: Default::default(),
             clients: Default::default(),
             cond: Default::default(),
+            timer_ids: Default::default(),
+            timer_id: 0,
+
             context,
 
             #[cfg(feature = "statistics")]
@@ -590,6 +596,10 @@ impl Selector {
     /// The `handler` is called after `t` seconds later.
     /// The `handler` is called just once.
     ///
+    /// # Return Value
+    ///
+    /// The identifier of the timer.
+    ///
     /// # Example
     ///
     /// ```
@@ -604,7 +614,7 @@ impl Selector {
     ///     );
     /// }
     /// ```
-    pub fn add_timer(&mut self, t: Duration, mut handler: Box<dyn FnMut()>) {
+    pub fn add_timer(&mut self, t: Duration, mut handler: Box<dyn FnMut()>) -> u64 {
         self.add_timer_inner(
             t,
             Box::new(move || {
@@ -612,13 +622,17 @@ impl Selector {
                 CallbackResult::Ok
             }),
             TimerType::OneShot,
-        );
+        )
     }
 
     /// Add a wall timer.
     /// The `handler` is called after `t` seconds later.
     /// The `handler` will be automatically reloaded after calling it.
     /// It means the `handler` is called periodically.
+    ///
+    /// # Return Value
+    ///
+    /// The identifier of the timer.
     ///
     /// # Example
     ///
@@ -629,13 +643,18 @@ impl Selector {
     /// fn add_new_wall_timer(selector: &mut Selector) {
     ///     // Add a timer.
     ///     selector.add_wall_timer(
-    ///         "tinmer_name",
+    ///         "timer_name",
     ///         Duration::from_millis(100),
     ///         Box::new(|| /* some tasks */ ()), // Callback function.
     ///     );
     /// }
     /// ```
-    pub fn add_wall_timer(&mut self, name: &str, t: Duration, mut handler: Box<dyn FnMut()>) {
+    pub fn add_wall_timer(
+        &mut self,
+        name: &str,
+        t: Duration,
+        mut handler: Box<dyn FnMut()>,
+    ) -> u64 {
         #[cfg(feature = "statistics")]
         self.time_stat
             .wall_timer
@@ -648,7 +667,7 @@ impl Selector {
                 CallbackResult::Ok
             }),
             TimerType::WallTimer(Rc::new(name.to_string()), t),
-        );
+        )
     }
 
     fn add_timer_inner(
@@ -656,7 +675,7 @@ impl Selector {
         t: Duration,
         handler: Box<dyn FnMut() -> CallbackResult>,
         timer_type: TimerType,
-    ) {
+    ) -> u64 {
         let now_time = SystemTime::now();
 
         if self.timer.is_empty() {
@@ -679,14 +698,78 @@ impl Selector {
             t
         };
 
+        let timer_id = self.new_timer_id();
+
         self.timer.insert(
             delta,
-            ConditionHandler {
-                is_once: true,
-                event: timer_type,
-                handler: Some(handler),
-            },
+            (
+                ConditionHandler {
+                    is_once: true,
+                    event: timer_type,
+                    handler: Some(handler),
+                },
+                timer_id,
+            ),
         );
+
+        timer_id
+    }
+
+    /// Wait events and invoke registered callback functions.
+    /// This function returns after `t` duration; timeout.
+    ///
+    /// # Return Value
+    ///
+    /// - Some events has fired: `Ok(true)`
+    /// - Timeout: `Ok(false)`
+    /// - Error: `Err(DynError)`
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// use safe_drive::{error::DynError, selector::Selector};
+    ///
+    /// fn wait_events(selector: &mut Selector) -> Result<(), DynError> {
+    ///     if selector.wait_timeout(std::time::Duration::from_millis(10))? {
+    ///         // Some events has fired.
+    ///     } else {
+    ///         // Timeout.
+    ///     }
+    ///
+    ///     Ok(())
+    /// }
+    /// ```
+    pub fn wait_timeout(&mut self, t: Duration) -> Result<bool, DynError> {
+        let flag = Rc::new(Cell::new(false));
+        let flag_cloned = flag.clone();
+
+        let id = self.add_timer(t, Box::new(move || flag_cloned.set(true)));
+
+        let result = self.wait();
+
+        if flag.get() {
+            Ok(false) // timeout
+        } else {
+            // event fired
+            self.remove_timer(id);
+            result?;
+            Ok(true)
+        }
+    }
+
+    pub fn remove_timer(&mut self, id: u64) {
+        self.timer.filter(|e| e.1 != id);
+    }
+
+    fn new_timer_id(&mut self) -> u64 {
+        loop {
+            if !self.timer_ids.contains(&self.timer_id) {
+                self.timer_ids.insert(self.timer_id);
+                let id = self.timer_id;
+                self.timer_id += 1;
+                return id;
+            }
+        }
     }
 
     /// Wait events and invoke registered callback functions.
@@ -749,7 +832,7 @@ impl Selector {
         }
 
         // wait events
-        self.wait_timeout()?;
+        self.wait_timer()?;
 
         // notify timers
         self.notify_timer();
@@ -791,7 +874,7 @@ impl Selector {
         Ok(())
     }
 
-    fn wait_timeout(&mut self) -> Result<(), DynError> {
+    fn wait_timer(&mut self) -> Result<(), DynError> {
         if signal_handler::is_halt() {
             return Err(Signaled.into());
         }
@@ -872,7 +955,7 @@ impl Selector {
                     let head = dlist.front_mut().unwrap();
                     self.base_time += *head.0;
 
-                    let handler = replace(&mut head.1.handler, None);
+                    let handler = replace(&mut head.1 .0.handler, None);
                     if let Some(mut handler) = handler {
                         #[cfg(feature = "statistics")]
                         let start = std::time::SystemTime::now();
@@ -880,7 +963,7 @@ impl Selector {
                         handler(); // invoke the callback function
 
                         // register the wall timer again.
-                        if let TimerType::WallTimer(name, dur) = &head.1.event {
+                        if let TimerType::WallTimer(name, dur) = &head.1 .0.event {
                             let elapsed = now_time.elapsed().unwrap();
 
                             if let Some(dur) = dur.checked_sub(elapsed) {
@@ -895,6 +978,8 @@ impl Selector {
                                     v.add(elapsed);
                                 }
                             }
+                        } else {
+                            self.timer_ids.remove(&head.1 .1);
                         }
                     }
                 } else {

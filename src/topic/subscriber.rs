@@ -483,9 +483,6 @@ fn rcl_take<T>(subscription: &rcl::rcl_subscription_t) -> RCLResult<T> {
         null_mut(),
     ) {
         Ok(_) => Ok(ros_message),
-        Err(e) => {
-            guard.rcutils_reset_error();
-            Err(e)
-        }
+        Err(e) => Err(e),
     }
 }

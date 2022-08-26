@@ -169,8 +169,6 @@ impl<T: TopicMsg> Publisher<T> {
         if let Err(e) =
             rcl::MTSafeFn::rcl_publish(&self.publisher, msg as *const T as _, null_mut())
         {
-            let guard = rcl::MT_UNSAFE_FN.lock();
-            guard.rcutils_reset_error();
             return Err(e.into());
         }
 
