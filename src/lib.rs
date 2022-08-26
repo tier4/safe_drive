@@ -295,4 +295,9 @@ impl<T: msg::ServiceMsg> ST<ClientRecv<T>> {
             RecvResult::Err(e) => RecvResult::Err(e),
         }
     }
+
+    /// Consume `ST<ClientRecv<T>>` and return `Client<T>`.
+    pub fn give_up(self) -> Client<T> {
+        self.data.give_up()
+    }
 }

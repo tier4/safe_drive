@@ -497,45 +497,76 @@ impl Selector {
     }
 
     /// Wait a response from a server.
+    /// After waking up, the registered client is removed from the selector.
+    /// You have to register every time when you wait events.
     ///
     /// # Example
     ///
     /// ```
-    /// use safe_drive::{
-    ///     error::DynError, msg::common_interfaces::std_srvs, selector::Selector, service::client::Client,
-    ///     RecvResult, ST,
-    /// };
-    ///
     /// fn worker(
     ///     mut selector: Selector,
-    ///     mut sender: Client<std_srvs::srv::Empty>,
+    ///     mut selector_client: Selector,
+    ///     subscriber: Subscriber<std_msgs::msg::Empty>,
+    ///     client: Client<std_srvs::srv::Empty>,
     /// ) -> Result<(), DynError> {
-    ///     let msg = std_srvs::srv::EmptyRequest::new().unwrap();
-    ///     loop {
-    ///         // Send a request.
-    ///         let receiver = sender.send(&msg)?;
+    ///     let mut client = Some(client);
+    ///     let logger = Logger::new("listen_client");
     ///
-    ///         // Make it single-threaded data.
-    ///         let mut receiver = ST::new(receiver);
+    ///     selector.add_subscriber(
+    ///         subscriber,
+    ///         Box::new(move |_msg| {
+    ///             let request = std_srvs::srv::EmptyRequest::new().unwrap();
     ///
-    ///         // Register the receiver to wait a response.
-    ///         selector.add_client_recv(&receiver);
+    ///             // Take the client.
+    ///             let c = client.take().unwrap();
     ///
-    ///         loop {
-    ///             selector.wait()?; // Wait a response.
+    ///             // Send a request.
+    ///             match c.send(&request) {
+    ///                 Ok(receiver) => {
+    ///                     // Make receiver single threaded.
+    ///                     let receiver = ST::new(receiver);
     ///
-    ///             // Receive a message
-    ///             match receiver.try_recv() {
-    ///                 RecvResult::Ok((s, _response, _header)) => {
-    ///                     sender = s;
-    ///                     break;
+    ///                     // Add the receiver.
+    ///                     selector_client.add_client_recv(&receiver);
+    ///
+    ///                     // Wait a response with timeout.
+    ///                     match selector_client.wait_timeout(Duration::from_millis(100)) {
+    ///                         Ok(true) => match receiver.try_recv() {
+    ///                             RecvResult::Ok((c, _response, _header)) => {
+    ///                                 // Received a response.
+    ///                                 client = Some(c);
+    ///                             }
+    ///                             RecvResult::RetryLater(receiver) => {
+    ///                                 // No correspondent response.
+    ///                                 client = Some(receiver.give_up());
+    ///                             }
+    ///                             RecvResult::Err(e) => {
+    ///                                 // Failed to receive.
+    ///                                 pr_fatal!(logger, "{e}");
+    ///                                 panic!();
+    ///                             }
+    ///                         },
+    ///                         Ok(false) => {
+    ///                             // Timeout.
+    ///                             client = Some(receiver.give_up());
+    ///                         }
+    ///                         Err(e) => {
+    ///                             // Failed to wait.
+    ///                             pr_error!(logger, "{e}");
+    ///                             client = Some(receiver.give_up());
+    ///                         }
+    ///                     }
     ///                 }
-    ///                 RecvResult::RetryLater(r) => {
-    ///                     receiver = r;
+    ///                 Err(e) => {
+    ///                     pr_fatal!(logger, "{e}");
+    ///                     panic!()
     ///                 }
-    ///                 RecvResult::Err(e) => return Err(e.into()),
     ///             }
-    ///         }
+    ///         }),
+    ///     );
+    ///
+    ///     loop {
+    ///         selector.wait()?;
     ///     }
     /// }
     /// ```
@@ -720,9 +751,9 @@ impl Selector {
     ///
     /// # Return Value
     ///
-    /// - Some events has fired: `Ok(true)`
-    /// - Timeout: `Ok(false)`
-    /// - Error: `Err(DynError)`
+    /// - `Ok(true)`: Some events has fired
+    /// - `Ok(false)`: Timeout
+    /// - `Err(DynError)`: Error
     ///
     /// # Example
     ///
