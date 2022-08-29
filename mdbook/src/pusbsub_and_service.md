@@ -8,11 +8,11 @@ use safe_drive::{
     error::DynError,
     logger::Logger,
     msg::common_interfaces::{std_msgs, std_srvs},
-    pr_error, pr_fatal,
+    pr_fatal,
     selector::Selector,
     service::client::Client,
     topic::subscriber::Subscriber,
-    RecvResult, ST,
+    RecvResult,
 };
 use std::time::Duration;
 
@@ -46,49 +46,19 @@ fn worker(
     selector.add_subscriber(
         subscriber,
         Box::new(move |_msg| {
-            let request = std_srvs::srv::EmptyRequest::new().unwrap();
-
             // Take the client.
             let c = client.take().unwrap();
 
+            let request = std_srvs::srv::EmptyRequest::new().unwrap();
+
             // Send a request.
-            match c.send(&request) {
-                Ok(receiver) => {
-                    // Make receiver single threaded.
-                    let receiver = ST::new(receiver);
+            let receiver = c.send(&request).unwrap();
 
-                    // Add the receiver.
-                    selector_client.add_client_recv(&receiver);
-
-                    // Wait a response with timeout.
-                    match selector_client.wait_timeout(Duration::from_millis(100)) {
-                        Ok(true) => match receiver.try_recv() {
-                            RecvResult::Ok((c, _response, _header)) => {
-                                // Received a response.
-                                client = Some(c);
-                            }
-                            RecvResult::RetryLater(receiver) => {
-                                // No correspondent response.
-                                client = Some(receiver.give_up());
-                            }
-                            RecvResult::Err(e) => {
-                                // Failed to receive.
-                                pr_fatal!(logger, "{e}");
-                                panic!();
-                            }
-                        },
-                        Ok(false) => {
-                            // Timeout.
-                            client = Some(receiver.give_up());
-                        }
-                        Err(e) => {
-                            // Failed to wait.
-                            pr_error!(logger, "{e}");
-                            client = Some(receiver.give_up());
-                        }
-                    }
-                }
-                Err(e) => {
+            // Receive a response.
+            match receiver.recv_timeout(Duration::from_millis(20), &mut selector_client) {
+                RecvResult::Ok((c, _response, _header)) => client = Some(c),
+                RecvResult::RetryLater(r) => client = Some(r.give_up()),
+                RecvResult::Err(e) => {
                     pr_fatal!(logger, "{e}");
                     panic!()
                 }

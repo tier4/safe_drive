@@ -238,7 +238,7 @@ mod time;
 type PhantomUnsync = PhantomData<Cell<()>>;
 type PhantomUnsend = PhantomData<MutexGuard<'static, ()>>;
 
-use error::RCLError;
+use error::DynError;
 use msg::ServiceMsg;
 use service::{
     client::{Client, ClientRecv},
@@ -251,7 +251,7 @@ pub use signal_handler::is_halt;
 pub enum RecvResult<T, U> {
     Ok(T),
     RetryLater(U),
-    Err(RCLError),
+    Err(DynError),
 }
 
 /// Single-threaded container.
@@ -267,6 +267,10 @@ impl<T> ST<T> {
             data,
             _phantom: Default::default(),
         }
+    }
+
+    pub fn unwrap(self) -> T {
+        self.data
     }
 }
 

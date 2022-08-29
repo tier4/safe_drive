@@ -100,12 +100,6 @@ fn test_client_wait() -> Result<(), DynError> {
         }
     };
 
-    // Make the client a single-threaded data.
-    let rcv_client = ST::new(rcv_client);
-
-    // Register the client
-    selector.add_client_recv(&rcv_client);
-
     // Server: wait the request
     selector.add_server(
         server,
@@ -123,9 +117,7 @@ fn test_client_wait() -> Result<(), DynError> {
 
     std::thread::sleep(Duration::from_millis(1));
 
-    selector.wait()?; // Wait the response.
-
-    match rcv_client.try_recv() {
+    match rcv_client.recv_timeout(Duration::from_millis(20), &mut selector) {
         RecvResult::Ok((_client, response, _)) => {
             println!("received: {}", response.sum);
             Ok(())

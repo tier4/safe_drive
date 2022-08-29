@@ -220,7 +220,7 @@ impl<T: ServiceMsg> Server<T> {
             match rcl_take_request_with_info::<<T as ServiceMsg>::Request>(&self.data.service) {
                 Ok(data) => data,
                 Err(RCLError::ServiceTakeFailed) => return RecvResult::RetryLater(self),
-                Err(e) => return RecvResult::Err(e),
+                Err(e) => return RecvResult::Err(e.into()),
             };
 
         RecvResult::Ok((

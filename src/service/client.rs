@@ -64,14 +64,14 @@ use crate::{
     rcl,
     selector::{
         async_selector::{self, SELECTOR},
-        CallbackResult,
+        CallbackResult, Selector,
     },
     signal_handler::Signaled,
-    PhantomUnsync, RecvResult,
+    PhantomUnsync, RecvResult, ST,
 };
 use std::{
     ffi::CString, future::Future, marker::PhantomData, mem::MaybeUninit, os::raw::c_void,
-    sync::Arc, task::Poll,
+    sync::Arc, task::Poll, time::Duration,
 };
 
 pub(crate) struct ClientData {
@@ -267,7 +267,7 @@ impl<T: ServiceMsg> ClientRecv<T> {
         ) {
             Ok(data) => data,
             Err(RCLError::ClientTakeFailed) => return RecvResult::RetryLater(self),
-            Err(e) => return RecvResult::Err(e),
+            Err(e) => return RecvResult::Err(e.into()),
         };
 
         if header.request_id.sequence_number != self.seq {
@@ -329,6 +329,97 @@ impl<T: ServiceMsg> ClientRecv<T> {
         AsyncReceiver {
             client: self,
             is_waiting: false,
+        }
+    }
+
+    /// Receive a message.
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// use safe_drive::{
+    ///     error::DynError,
+    ///     logger::Logger,
+    ///     msg::common_interfaces::{std_msgs, std_srvs},
+    ///     pr_fatal,
+    ///     selector::Selector,
+    ///     service::client::Client,
+    ///     topic::subscriber::Subscriber,
+    ///     RecvResult,
+    /// };
+    /// use std::time::Duration;
+    ///
+    /// fn worker(
+    ///     mut selector: Selector,
+    ///     mut selector_client: Selector,
+    ///     subscriber: Subscriber<std_msgs::msg::Empty>,
+    ///     client: Client<std_srvs::srv::Empty>,
+    /// ) -> Result<(), DynError> {
+    ///     let mut client = Some(client);
+    ///     let logger = Logger::new("listen_client");
+    ///
+    ///     selector.add_subscriber(
+    ///         subscriber,
+    ///         Box::new(move |_msg| {
+    ///             // Take the client.
+    ///             let c = client.take().unwrap();
+    ///
+    ///             let request = std_srvs::srv::EmptyRequest::new().unwrap();
+    ///
+    ///             // Send a request.
+    ///             let receiver = c.send(&request).unwrap();
+    ///
+    ///             // Receive a response.
+    ///             match receiver.recv_timeout(Duration::from_millis(20), &mut selector_client) {
+    ///                 RecvResult::Ok((c, _response, _header)) => client = Some(c),
+    ///                 RecvResult::RetryLater(r) => client = Some(r.give_up()),
+    ///                 RecvResult::Err(e) => {
+    ///                     pr_fatal!(logger, "{e}");
+    ///                     panic!()
+    ///                 }
+    ///             }
+    ///         }),
+    ///     );
+    ///
+    ///     loop {
+    ///         selector.wait()?;
+    ///     }
+    /// }
+    /// ```
+    pub fn recv_timeout(
+        self,
+        t: Duration,
+        selector: &mut Selector,
+    ) -> RecvResult<(Client<T>, <T as ServiceMsg>::Response, Header), Self> {
+        let receiver = ST::new(self);
+
+        // Add the receiver.
+        selector.add_client_recv(&receiver);
+
+        // Wait a response with timeout.
+        match selector.wait_timeout(t) {
+            Ok(true) => match receiver.try_recv() {
+                RecvResult::Ok((c, response, header)) => {
+                    // Received a response.
+                    RecvResult::Ok((c, response, header))
+                }
+                RecvResult::RetryLater(receiver) => {
+                    // No correspondent response.
+                    RecvResult::RetryLater(receiver.unwrap())
+                }
+                RecvResult::Err(e) => {
+                    // Failed to receive.
+                    RecvResult::Err(e)
+                }
+            },
+            Ok(false) => {
+                // Timeout.
+                RecvResult::RetryLater(receiver.unwrap())
+            }
+            Err(e) => {
+                // Failed to wait.
+                RecvResult::Err(e)
+            }
         }
     }
 

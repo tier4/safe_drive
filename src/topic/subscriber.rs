@@ -310,7 +310,7 @@ impl<T: TopicMsg> Subscriber<T> {
 
                 RecvResult::RetryLater(())
             }
-            Err(e) => RecvResult::Err(e),
+            Err(e) => RecvResult::Err(e.into()),
         }
     }
 

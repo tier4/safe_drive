@@ -499,78 +499,7 @@ impl Selector {
     /// Wait a response from a server.
     /// After waking up, the registered client is removed from the selector.
     /// You have to register every time when you wait events.
-    ///
-    /// # Example
-    ///
-    /// ```
-    /// fn worker(
-    ///     mut selector: Selector,
-    ///     mut selector_client: Selector,
-    ///     subscriber: Subscriber<std_msgs::msg::Empty>,
-    ///     client: Client<std_srvs::srv::Empty>,
-    /// ) -> Result<(), DynError> {
-    ///     let mut client = Some(client);
-    ///     let logger = Logger::new("listen_client");
-    ///
-    ///     selector.add_subscriber(
-    ///         subscriber,
-    ///         Box::new(move |_msg| {
-    ///             let request = std_srvs::srv::EmptyRequest::new().unwrap();
-    ///
-    ///             // Take the client.
-    ///             let c = client.take().unwrap();
-    ///
-    ///             // Send a request.
-    ///             match c.send(&request) {
-    ///                 Ok(receiver) => {
-    ///                     // Make receiver single threaded.
-    ///                     let receiver = ST::new(receiver);
-    ///
-    ///                     // Add the receiver.
-    ///                     selector_client.add_client_recv(&receiver);
-    ///
-    ///                     // Wait a response with timeout.
-    ///                     match selector_client.wait_timeout(Duration::from_millis(100)) {
-    ///                         Ok(true) => match receiver.try_recv() {
-    ///                             RecvResult::Ok((c, _response, _header)) => {
-    ///                                 // Received a response.
-    ///                                 client = Some(c);
-    ///                             }
-    ///                             RecvResult::RetryLater(receiver) => {
-    ///                                 // No correspondent response.
-    ///                                 client = Some(receiver.give_up());
-    ///                             }
-    ///                             RecvResult::Err(e) => {
-    ///                                 // Failed to receive.
-    ///                                 pr_fatal!(logger, "{e}");
-    ///                                 panic!();
-    ///                             }
-    ///                         },
-    ///                         Ok(false) => {
-    ///                             // Timeout.
-    ///                             client = Some(receiver.give_up());
-    ///                         }
-    ///                         Err(e) => {
-    ///                             // Failed to wait.
-    ///                             pr_error!(logger, "{e}");
-    ///                             client = Some(receiver.give_up());
-    ///                         }
-    ///                     }
-    ///                 }
-    ///                 Err(e) => {
-    ///                     pr_fatal!(logger, "{e}");
-    ///                     panic!()
-    ///                 }
-    ///             }
-    ///         }),
-    ///     );
-    ///
-    ///     loop {
-    ///         selector.wait()?;
-    ///     }
-    /// }
-    /// ```
-    pub fn add_client_recv<T>(&mut self, client: &ST<ClientRecv<T>>) {
+    pub(crate) fn add_client_recv<T>(&mut self, client: &ST<ClientRecv<T>>) {
         self.add_client_data(client.data.data.clone(), None, true);
     }
 
