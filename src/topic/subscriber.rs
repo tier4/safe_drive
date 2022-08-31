@@ -204,10 +204,7 @@ impl Drop for RCLSubscription {
     fn drop(&mut self) {
         let (node, subscription) = (&mut self.node, &mut self.subscription);
         let guard = rcl::MT_UNSAFE_FN.lock();
-
-        guard
-            .rcl_subscription_fini(subscription.as_mut(), unsafe { node.as_ptr_mut() })
-            .unwrap();
+        let _ = guard.rcl_subscription_fini(subscription.as_mut(), unsafe { node.as_ptr_mut() });
     }
 }
 
@@ -442,12 +439,10 @@ impl<'a, T> Drop for AsyncReceiver<'a, T> {
     fn drop(&mut self) {
         if self.is_waiting {
             let mut guard = SELECTOR.lock();
-            guard
-                .send_command(
-                    &self.subscription.node.context,
-                    async_selector::Command::RemoveSubscription(self.subscription.clone()),
-                )
-                .unwrap();
+            let _ = guard.send_command(
+                &self.subscription.node.context,
+                async_selector::Command::RemoveSubscription(self.subscription.clone()),
+            );
         }
     }
 }

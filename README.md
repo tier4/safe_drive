@@ -30,7 +30,7 @@ We specified and tested as follows.
 
 TODO.
 
-## Supported ROS2
+## Supporting ROS2
 
 - [x] Humble
 - [x] Glactic

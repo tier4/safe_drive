@@ -195,9 +195,7 @@ impl<T> Drop for Publisher<T> {
     fn drop(&mut self) {
         let (node, publisher) = (&mut self.node, &mut self.publisher);
         let guard = rcl::MT_UNSAFE_FN.lock();
-        guard
-            .rcl_publisher_fini(publisher, unsafe { node.as_ptr_mut() })
-            .unwrap();
+        let _ = guard.rcl_publisher_fini(publisher, unsafe { node.as_ptr_mut() });
     }
 }
 

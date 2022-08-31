@@ -116,9 +116,7 @@ pub(crate) struct ServerData {
 impl Drop for ServerData {
     fn drop(&mut self) {
         let guard = rcl::MT_UNSAFE_FN.lock();
-        guard
-            .rcl_service_fini(&mut self.service, unsafe { self.node.as_ptr_mut() })
-            .unwrap();
+        let _ = guard.rcl_service_fini(&mut self.service, unsafe { self.node.as_ptr_mut() });
     }
 }
 
@@ -450,12 +448,10 @@ impl<T> Drop for AsyncReceiver<T> {
     fn drop(&mut self) {
         if self.is_waiting {
             let mut guard = SELECTOR.lock();
-            guard
-                .send_command(
-                    &self.server.data.node.context,
-                    async_selector::Command::RemoveServer(self.server.data.clone()),
-                )
-                .unwrap();
+            let _ = guard.send_command(
+                &self.server.data.node.context,
+                async_selector::Command::RemoveServer(self.server.data.clone()),
+            );
         }
     }
 }

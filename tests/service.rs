@@ -1,7 +1,7 @@
 pub mod common;
 
 use common::msgs::example_msg::srv::{AddThreeIntsRequest, AddThreeIntsResponse};
-use safe_drive::{self, context::Context, error::DynError, RecvResult, ST};
+use safe_drive::{self, context::Context, error::DynError, RecvResult};
 use std::time::Duration;
 
 const SERVICE_NAME1: &str = "test_service1";

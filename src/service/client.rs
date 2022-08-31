@@ -82,9 +82,7 @@ pub(crate) struct ClientData {
 impl Drop for ClientData {
     fn drop(&mut self) {
         let guard = rcl::MT_UNSAFE_FN.lock();
-        guard
-            .rcl_client_fini(&mut self.client, unsafe { self.node.as_ptr_mut() })
-            .unwrap();
+        let _ = guard.rcl_client_fini(&mut self.client, unsafe { self.node.as_ptr_mut() });
     }
 }
 
@@ -531,12 +529,10 @@ impl<T> Drop for AsyncReceiver<T> {
     fn drop(&mut self) {
         if self.is_waiting {
             let mut guard = SELECTOR.lock();
-            guard
-                .send_command(
-                    &self.client.data.node.context,
-                    async_selector::Command::RemoveClient(self.client.data.clone()),
-                )
-                .unwrap();
+            let _ = guard.send_command(
+                &self.client.data.node.context,
+                async_selector::Command::RemoveClient(self.client.data.clone()),
+            );
         }
     }
 }

@@ -192,7 +192,7 @@ impl Node {
 impl Drop for Node {
     fn drop(&mut self) {
         let guard = rcl::MT_UNSAFE_FN.lock();
-        guard.rcl_node_fini(&mut self.node).unwrap();
+        let _ = guard.rcl_node_fini(&mut self.node);
     }
 }
 
@@ -223,7 +223,7 @@ impl NodeOptions {
 impl Drop for NodeOptions {
     fn drop(&mut self) {
         let guard = rcl::MT_UNSAFE_FN.lock();
-        guard.rcl_node_options_fini(&mut self.options).unwrap();
+        let _ = guard.rcl_node_options_fini(&mut self.options);
     }
 }
 
