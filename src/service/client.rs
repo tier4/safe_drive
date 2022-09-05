@@ -57,7 +57,7 @@
 use super::Header;
 use crate::{
     error::{DynError, RCLError, RCLResult},
-    is_halt,
+    get_allocator, is_halt,
     msg::ServiceMsg,
     node::Node,
     qos::Profile,
@@ -107,7 +107,7 @@ impl<T: ServiceMsg> Client<T> {
         let profile = qos.unwrap_or_else(Profile::services_default);
         let options = rcl::rcl_client_options_t {
             qos: (&profile).into(),
-            allocator: rcl::MTSafeFn::rcutils_get_default_allocator(),
+            allocator: get_allocator(),
         };
 
         let guard = rcl::MT_UNSAFE_FN.lock();

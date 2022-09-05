@@ -308,3 +308,27 @@ impl<T: msg::ServiceMsg> ST<ClientRecv<T>> {
         self.data.give_up()
     }
 }
+
+#[cfg(feature = "galactic")]
+type RcutilsAllocator = rcl::rcutils_allocator_t;
+
+#[cfg(feature = "humble")]
+type RcutilsAllocator = rcl::rcutils_allocator_s;
+
+#[cfg(feature = "custom_alloc")]
+pub(crate) fn get_allocator() -> RcutilsAllocator {
+    use std::ptr::null_mut;
+
+    RcutilsAllocator {
+        allocate: Some(allocator::allocate),
+        deallocate: Some(allocator::deallocate),
+        reallocate: Some(allocator::reallocate),
+        zero_allocate: Some(allocator::zero_allocate),
+        state: null_mut(),
+    }
+}
+
+#[cfg(not(feature = "custom_alloc"))]
+pub(crate) fn get_allocator() -> RcutilsAllocator {
+    crate::rcl::MTSafeFn::rcutils_get_default_allocator()
+}

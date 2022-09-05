@@ -1,4 +1,4 @@
-use crate::{context::Context, error::RCLResult, rcl};
+use crate::{context::Context, error::RCLResult, get_allocator, rcl};
 use std::sync::Arc;
 
 pub(crate) struct RCLGuardCondition {
@@ -31,7 +31,7 @@ pub(crate) struct GuardCondition {
 impl GuardCondition {
     pub(crate) fn new(context: Arc<Context>) -> RCLResult<Self> {
         let mut guard_condition = rcl::MTSafeFn::rcl_get_zero_initialized_guard_condition();
-        let allocator = rcl::MTSafeFn::rcutils_get_default_allocator();
+        let allocator = get_allocator();
 
         {
             let guard = rcl::MT_UNSAFE_FN.lock();

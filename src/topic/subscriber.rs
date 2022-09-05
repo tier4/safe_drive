@@ -151,7 +151,7 @@
 
 use crate::{
     error::{DynError, RCLError, RCLResult},
-    is_halt,
+    get_allocator, is_halt,
     msg::TopicMsg,
     node::Node,
     qos, rcl,
@@ -456,7 +456,7 @@ impl Options {
     fn new(qos: &qos::Profile) -> Self {
         let options = rcl::rcl_subscription_options_t {
             qos: qos.into(),
-            allocator: rcl::MTSafeFn::rcutils_get_default_allocator(),
+            allocator: get_allocator(),
             rmw_subscription_options: rcl::MTSafeFn::rmw_get_default_subscription_options(),
         };
         Options { options }

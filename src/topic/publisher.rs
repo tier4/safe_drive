@@ -49,6 +49,7 @@
 
 use crate::{
     error::{DynError, RCLResult},
+    get_allocator,
     msg::TopicMsg,
     node::Node,
     qos, rcl,
@@ -208,7 +209,7 @@ impl Options {
     fn new(qos: &qos::Profile) -> Self {
         let options = rcl::rcl_publisher_options_t {
             qos: qos.into(),
-            allocator: rcl::MTSafeFn::rcutils_get_default_allocator(),
+            allocator: get_allocator(),
             rmw_publisher_options: rcl::MTSafeFn::rmw_get_default_publisher_options(),
         };
         Options { options }

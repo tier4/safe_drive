@@ -20,6 +20,7 @@
 
 use crate::{
     error::*,
+    get_allocator,
     node::{Node, NodeOptions},
     rcl,
     selector::{async_selector::SELECTOR, Selector},
@@ -186,10 +187,7 @@ impl InitOptions {
         // initialize options
         {
             let guard = rcl::MT_UNSAFE_FN.lock();
-            guard.rcl_init_options_init(
-                &mut options,
-                rcl::MTSafeFn::rcutils_get_default_allocator(),
-            )?;
+            guard.rcl_init_options_init(&mut options, get_allocator())?;
         }
 
         Ok(InitOptions { options })

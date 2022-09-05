@@ -58,6 +58,7 @@ use crate::{
     context::Context,
     delta_list::DeltaList,
     error::{DynError, RCLError, RCLResult},
+    get_allocator,
     logger::{pr_error_in, pr_fatal_in, Logger},
     msg::{ServiceMsg, TopicMsg},
     parameter::{ParameterServer, Parameters},
@@ -181,7 +182,7 @@ impl Selector {
                 0,
                 0,
                 unsafe { context.as_ptr_mut() },
-                rcl::MTSafeFn::rcutils_get_default_allocator(),
+                get_allocator(),
             )?;
         }
 
