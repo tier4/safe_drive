@@ -218,8 +218,12 @@ use std::{
     sync::MutexGuard,
 };
 
+#[cfg(feature = "custom_alloc")]
+pub mod allocator;
+
 pub mod context;
 pub mod error;
+pub mod helper;
 pub mod logger;
 pub mod msg;
 pub mod node;
@@ -231,7 +235,6 @@ pub mod service;
 pub mod topic;
 
 mod delta_list;
-mod helper;
 mod signal_handler;
 mod time;
 

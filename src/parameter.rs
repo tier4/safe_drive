@@ -126,6 +126,7 @@
 
 use crate::{
     error::{DynError, RCLResult},
+    helper::Contains,
     is_halt,
     logger::{pr_error_in, pr_fatal_in, Logger},
     msg::{
@@ -212,17 +213,12 @@ pub struct ParameterServer {
     node: Arc<Node>,
 }
 
-pub trait Contains {
-    type T;
-    fn contains(&self, val: Self::T) -> bool;
-}
-
 /// Describe a range of integer.
 ///
 /// # Example
 ///
 /// ```
-/// use safe_drive::parameter::{IntegerRange, Contains};
+/// use safe_drive::{helper::Contains, parameter::IntegerRange};
 /// let range = IntegerRange { min: -5, max: 10, step: 3 };
 /// assert!(range.contains(-5));
 /// assert!(range.contains(-2));
@@ -264,7 +260,7 @@ impl From<&IntegerRange> for rcl_interfaces::msg::IntegerRange {
 /// # Example
 ///
 /// ```
-/// use safe_drive::parameter::{FloatingPointRange, Contains};
+/// use safe_drive::{helper::Contains, parameter::FloatingPointRange};
 /// let range = FloatingPointRange { min: -5.0, max: 10.0, step: 3.0 };
 /// assert!(range.contains(-5.0));
 /// assert!(range.contains(-2.0));

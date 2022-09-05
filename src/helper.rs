@@ -1,6 +1,11 @@
 use std::sync::atomic::{AtomicBool, Ordering};
 
-pub struct InitOnce {
+pub trait Contains {
+    type T;
+    fn contains(&self, val: Self::T) -> bool;
+}
+
+pub(crate) struct InitOnce {
     lock: AtomicBool,
     is_init: AtomicBool,
 }
@@ -35,7 +40,7 @@ impl InitOnce {
 }
 
 #[cfg(feature = "statistics")]
-pub mod statistics {
+pub(crate) mod statistics {
     use serde::Serialize;
     use std::time::Duration;
 
