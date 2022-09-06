@@ -7,7 +7,7 @@
 //! ```
 //! use safe_drive::allocator::ALLOCATOR;
 //! fn main() {
-//!     unsafe { ALLOCATOR.init(128) }; // 32 * 64KiB = 8MiB
+//!     unsafe { ALLOCATOR.init(128) }; // 128 * 64KiB = 8MiB
 //! }
 //! ```
 

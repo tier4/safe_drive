@@ -4837,9 +4837,9 @@ extern "C" {
 extern "C" {
     pub fn abort();
 }
-extern "C" {
-    pub fn atexit(__func: ::std::option::Option<unsafe extern "C" fn()>) -> ::std::os::raw::c_int;
-}
+// extern "C" {
+//     pub fn atexit(__func: ::std::option::Option<unsafe extern "C" fn()>) -> ::std::os::raw::c_int;
+// }
 extern "C" {
     pub fn at_quick_exit(
         __func: ::std::option::Option<unsafe extern "C" fn()>,
