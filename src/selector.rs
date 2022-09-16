@@ -959,8 +959,10 @@ impl Selector {
 impl Drop for Selector {
     fn drop(&mut self) {
         signal_handler::unregister_guard_condition(&self.signal_cond);
-        let guard = rcl::MT_UNSAFE_FN.lock();
-        guard.rcl_wait_set_fini(&mut self.wait_set).unwrap()
+        {
+            let guard = rcl::MT_UNSAFE_FN.lock();
+            guard.rcl_wait_set_fini(&mut self.wait_set).unwrap();
+        }
     }
 }
 

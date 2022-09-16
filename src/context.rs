@@ -215,6 +215,15 @@ unsafe impl Send for Context {}
 
 #[dtor]
 unsafe fn remove_context() {
-    let mut guard = CONTEXT.lock();
-    let _ = guard.take();
+    {
+        {
+            SELECTOR.lock().halt().unwrap();
+        }
+        signal_handler::halt();
+    };
+
+    {
+        let mut guard = CONTEXT.lock();
+        let _ = guard.take();
+    }
 }

@@ -11,7 +11,8 @@ use once_cell::sync::Lazy;
 use parking_lot::Mutex;
 use std::{
     sync::Arc,
-    thread::{self, JoinHandle},
+    thread,
+    time::Duration,
 };
 
 pub(crate) static SELECTOR: Lazy<Mutex<AsyncSelector>> =
@@ -44,7 +45,6 @@ pub(crate) enum Command {
 struct SelectorData {
     tx: Sender<Command>,
     cond: GuardCondition,
-    th: Option<JoinHandle<Result<(), DynError>>>,
     _context: Arc<Context>,
 }
 
@@ -61,12 +61,12 @@ impl AsyncSelector {
     }
 
     pub(crate) fn halt(&mut self) -> Result<(), DynError> {
-        if let Some(SelectorData { tx, cond, th, .. }) = &mut self.data {
+        if let Some(SelectorData { tx, cond, .. }) = self.data.take() {
             tx.send(Command::Halt)?;
             cond.trigger()?;
-            if let Some(th) = th.take() {
-                let _ = th.join();
-            }
+
+            // wait 10ms because join() will block out of main().
+            std::thread::sleep(Duration::from_micros(10));
         }
 
         Ok(())
@@ -91,12 +91,11 @@ impl AsyncSelector {
                 let guard = super::guard_condition::GuardCondition::new(context.clone())?;
                 let ctx = context.clone();
                 let guard2 = guard.clone();
-                let th = thread::spawn(move || select(ctx, guard2, rx));
+                thread::spawn(move || select(ctx, guard2, rx));
                 self.data = Some(SelectorData {
                     tx,
                     _context: context.clone(),
                     cond: guard,
-                    th: Some(th),
                 });
             }
         }
@@ -143,7 +142,6 @@ fn select(
 
                 for (_, h) in selector.clients.iter_mut() {
                     if let Some(handler) = &mut h.handler {
-                        println!("callback client");
                         (*handler)();
                     }
                 }
