@@ -14,7 +14,8 @@ $(SUBDIRS): FORCE
 
 FORCE:
 
-test: all
+test:
+	# cargo test test_async_service -- --nocapture --exact
 	cargo test -- --nocapture
 
 check:

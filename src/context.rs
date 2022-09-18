@@ -161,11 +161,6 @@ impl Context {
 
 impl Drop for Context {
     fn drop(&mut self) {
-        {
-            SELECTOR.lock().halt().unwrap();
-            signal_handler::halt();
-        };
-
         rcl::MTSafeFn::rcl_shutdown(&mut self.context).unwrap();
         {
             let guard = rcl::MT_UNSAFE_FN.lock();
@@ -216,11 +211,9 @@ unsafe impl Send for Context {}
 #[dtor]
 unsafe fn remove_context() {
     {
-        {
-            SELECTOR.lock().halt().unwrap();
-        }
-        signal_handler::halt();
-    };
+        SELECTOR.lock().halt().unwrap();
+    }
+    signal_handler::halt();
 
     {
         let mut guard = CONTEXT.lock();
