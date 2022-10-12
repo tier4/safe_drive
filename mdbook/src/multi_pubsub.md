@@ -68,6 +68,8 @@ please go back to the previous chapter.
   <maintainer email="yuuki.takano@tier4.jp">Yuuki Takano</maintainer>
   <license>Apache License 2.0</license>
 
+  <build_depend>std_msgs</build_depend>
+
   <test_depend>ament_lint_auto</test_depend>
   <test_depend>ament_lint_common</test_depend>
 
@@ -90,7 +92,13 @@ To use `async_std`, we have to update `Cargo.toml` as follows.
 # Cargo.toml
 [dependencies]
 async-std = { version = "1", features = ["attributes"] }
-safe_drive = { path = "path_to/safe_drive" }
+safe_drive = { path = "path_to/safe_drive", default-features = false, features = ["galactic"] }
+std_msgs = { path = "/tmp/safe_drive_tutorial/mt_pubsub/std_msgs" }
+
+[package.metadata.ros]
+msg = ["std_msgs"]
+msg_dir = "/tmp/safe_drive_tutorial/mt_pubsub"
+safe_drive_path = "path_to/safe_drive"
 ```
 
 ## Publishers
@@ -103,7 +111,7 @@ The code of the `publishers` is as follows.
 
 ```rust
 // mt_pubsub/src/publishers/src/main.rs
-use safe_drive::{context::Context, error::DynError, msg::common_interfaces::std_msgs};
+use safe_drive::{context::Context, error::DynError};
 use std::time::Duration;
 
 #[async_std::main]
@@ -173,8 +181,7 @@ The main function is almost same as previous one.
 ```rust
 // mt_pubsub/src/subscribers/src/main
 use safe_drive::{
-    context::Context, error::DynError, logger::Logger, msg::common_interfaces::std_msgs, pr_info,
-    topic::subscriber::Subscriber,
+    context::Context, error::DynError, logger::Logger, pr_info, topic::subscriber::Subscriber,
 };
 
 #[async_std::main]

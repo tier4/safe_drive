@@ -89,7 +89,7 @@ and we need to specify the path as follows.
 ```toml
 # pubsub/src/my_talker/Cargo.toml
 [dependencies]
-safe_drive = { path = "path_to/safe_drive" }
+safe_drive = { path = "/tmp/safe_drive", default-features = false, features = ["galactic"] }
 std_msgs = { path = "/tmp/safe_drive_tutorial/pubsub/std_msgs" }
 
 [package.metadata.ros]
@@ -251,6 +251,8 @@ It contains the package name, maintainer, description, etc, as follows.
   <maintainer email="yuuki.takano@tier4.jp">Yuuki Takano</maintainer>
   <license>Apache License 2.0</license>
 
+  <build_depend>std_msgs</build_depend>
+
   <test_depend>ament_lint_auto</test_depend>
   <test_depend>ament_lint_common</test_depend>
 
@@ -314,7 +316,7 @@ Add safe_drive to the dependencies as follows.
 ```toml
 # pubsub/src/my_listener/Cargo.toml
 [dependencies]
-safe_drive = { path = "path_to/safe_drive" }
+safe_drive = { path = "/tmp/safe_drive", default-features = false, features = ["galactic"] }
 std_msgs = { path = "/tmp/safe_drive_tutorial/pubsub/std_msgs" }
 
 [package.metadata.ros]
@@ -430,6 +432,8 @@ which is `my_listener`.
   <description>My Listener in Rust</description>
   <maintainer email="yuuki.takano@tier4.jp">Yuuki Takano</maintainer>
   <license>Apache License 2.0</license>
+
+  <build_depend>std_msgs</build_depend>
 
   <test_depend>ament_lint_auto</test_depend>
   <test_depend>ament_lint_common</test_depend>

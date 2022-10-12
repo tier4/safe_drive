@@ -3,21 +3,6 @@
 Until previous tutorial, we used pre-defined message types.
 In this tutorial, we will describe how to define user defined types.
 
-## Install `ros2msg_to_rs`
-
-ROS2 provides a special format to define types,
-and it can be translated into C or C++ header files.
-Because they do not provide a translator of Rust,
-`safe_drive` provides a translator called `ros2msg_to_rs`.
-So, please install `ros2msg_to_rs` in advance as follows.
-
-```text
-$ git clone https://github.com/tier4/ros2msg_to_rs.git
-$ cd ros2msg_to_rs
-$ cargo build --release
-$ cargo install --path .
-```
-
 ## Create Project Directory
 
 Then create a project directory as follows.
@@ -31,9 +16,8 @@ Throughout this tutorial, we will create 4 packages as follows.
 | packages                     | description            |
 |------------------------------|------------------------|
 | msgtest/src/my_interfaces    | defining types of ROS2 |
-| msgtest/src/my_interfaces_rs | Rust's types generated from `my_interfaces` |
-| msgtest/src/talker           | a publisher  |
-| msgtest/src/listener         | a subscriber |
+| msgtest/src/talker           | a publisher            |
+| msgtest/src/listener         | a subscriber           |
 
 ## Workspace's `Cargo.toml`
 
@@ -42,7 +26,15 @@ The workspace's `Cargo.toml` should be created as follows.
 ```toml
 # msgtest/src/Cargo.toml
 [workspace]
-members = ["my_interfaces_rs", "talker", "listener"]
+members = ["talker", "listener"]
+```
+
+Then, create projects as follows.
+
+```text
+$ cd msgtest/src
+$ cargo new talker
+$ cargo new listener
 ```
 
 ## Define User Defined Type
@@ -140,7 +132,7 @@ We also have to edit `package.xml` as follows.
 
 ## User Defined Type in Rust
 
-Primitive types are translated into Rust's types as follows by `ros2msg_to_rs`.
+Primitive types are translated into Rust's types as follows.
 
 | ROS2    | Rust                       |
 |---------|----------------------------|
@@ -159,39 +151,53 @@ Primitive types are translated into Rust's types as follows by `ros2msg_to_rs`.
 | float64 | f64                        |
 | string  | safe_drive::msg::RosString |
 
-### Generate Rust's Files
-
-To generate Rust's files, just use `ros2msg_to_rs` as follows.
-
-```text
-$ cd msgtest/src
-$ cargo new --lib my_interfaces_rs
-$ ros2msg_to_rs  -i ./ -o ./my_interfaces_rs/src
-generating: my_interfaces_rs/src/msg/msg/my_msg.rs
-generating: my_interfaces_rs/src/msg/msg/my_msg_str.rs
-generating: my_interfaces_rs/src/msg/msg.rs
-generating: my_interfaces_rs/src/mod.rs
-generating: my_interfaces_rs/src/msg/mod.rs
-```
-
-`ros2msg_to_rs` search the directory specified by the `-i` option,
-and under `my_interfaces_rs/src` specified by the `-o` option.
-
 ### Generated Types
 
 Array types are generated as follows.
 
-| ROS2      | Rust                       |
-|-----------|----------------------------|
-| int32[5]  | [i32; 5]                   |
-| int32[]   | safe_drive::msg::I32Seq<0> |
-| int32[<=] | safe_drive::msg::I32Seq<5> |
+| ROS2       | Rust                       |
+|------------|----------------------------|
+| int32[5]   | [i32; 5]                   |
+| int32[]    | safe_drive::msg::I32Seq<0> |
+| int32[<=5] | safe_drive::msg::I32Seq<5> |
 
 `0` of `I32Seq<0>` indicates unbounded, and `5` of `I32Seq<5>` indicates less than or equal to 5.
 So, `MyMsg` and `MyMsgs` are generated as follows.
 
+## Talker
+
+Let's implement a talker which publishes `MyMsgs` periodically.
+
+### Edit `talker/Cargo.toml`
+
+To use the generated types in Rust, we have to edit `Cargo.toml` as follows.
+The most important thing is to add `my_interfaces`, which defines message types we use.
+
+```toml
+# msgtest/src/talker/Cargo.toml
+[dependencies]
+safe_drive = { path = "/tmp/safe_drive", default-features = false, features = ["galactic"] }
+my_interfaces = { path = "/tmp/safe_drive_tutorial/msgtest/my_interfaces" }
+
+[package.metadata.ros]
+msg = ["my_interfaces"]
+msg_dir = "/tmp/safe_drive_tutorial/msgtest"
+safe_drive_path = "/tmp/safe_drive"
+```
+
+### Generated Files
+
+When you run `colcon`, it generate `my_interfaces` in Rust.
+
+```text
+$ cd msgtest
+$ colcon build --cargo-args --release
+```
+
+Then, you can find Rust's files as follows.
+
 ```rust
-// msgtest/src/my_interfaces_rs/src/my_interfaces/msg/my_msg.rs
+// /tmp/safe_drive_tutorial/msgtest/my_interfaces/src/msg/my_msg.rs
 #[repr(C)]
 #[derive(Debug)]
 pub struct MyMsg {
@@ -203,86 +209,13 @@ pub struct MyMsg {
 ```
 
 ```rust
-// msgtest/src/my_interfaces_rs/src/my_interfaces/msg/my_msgs.rs
+// /tmp/safe_drive_tutorial/msgtest/my_interfaces/src/msg/my_msgs.rs
 #[repr(C)]
 #[derive(Debug)]
 pub struct MyMsgs {
-    pub msg1: MyMsg,
-    pub msg2: MyMsg,
+    pub msg1: crate::msg::my_msg::MyMsg,
+    pub msg2: crate::msg::my_msg::MyMsg,
 }
-```
-
-### Edit `my_interfaces_rs/src/lib.rs`
-
-To use generated files, `my_interfaces` must be imported in `lib.rs` as follows.
-Some warning will be generated when compiling,
-we recommend to add some attributes as follows.
-
-```rust
-// msgtest/src/my_interfaces_rs/src/lib.rs
-#![allow(dead_code)]
-#![allow(non_upper_case_globals)]
-#![allow(non_camel_case_types)]
-#![allow(deref_nullptr)]
-#![allow(non_snake_case)]
-#![allow(improper_ctypes)]
-#![allow(unused_imports)]
-#![allow(clippy::upper_case_acronyms)]
-#![allow(clippy::too_many_arguments)]
-
-pub mod my_interfaces;
-```
-
-### Create `my_interfaces_rs/package.xml`
-
-Then create `package.xml` as follows.
-
-```xml
-<!-- msgtest/src/my_interfaces_rs/package.xml -->
-<?xml version="1.0"?>
-<?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
-<package format="3">
-  <name>my_interfaces_rs</name>
-  <version>0.0.0</version>
-  <description>My Interfaces in Rust</description>
-  <maintainer email="yuuki.takano@tier4.jp">Yuuki Takano</maintainer>
-  <license>Apache License 2.0</license>
-
-  <test_depend>ament_lint_auto</test_depend>
-  <test_depend>ament_lint_common</test_depend>
-
-  <export>
-    <build_type>ament_cargo</build_type>
-  </export>
-</package>
-```
-
-### `my_interfaces_rs/build.rs`
-
-The following `build.rs` is required because generated files depends libraries generated by ROS2.
-
-```rust
-// msgtest/src/my_interfaces_rs/build.rs
-fn main() {
-    println!("cargo:rustc-link-lib=my_interfaces__rosidl_generator_c");
-    println!("cargo:rustc-link-lib=my_interfaces__rosidl_typesupport_c");
-
-    if let Some(e) = std::env::var_os("AMENT_PREFIX_PATH") {
-        let env = e.to_str().unwrap();
-        for path in env.split(':') {
-            println!("cargo:rustc-link-search={path}/lib");
-        }
-    }
-}
-```
-
-## Talker
-
-Let's create a talker which publishes `MyMsgs` periodically. To create the package, use `cargo` as follows.
-
-```text
-$ cd msgtest/src
-$ cargo new talker
 ```
 
 ### Edit `talker/src/main.rs`
@@ -291,7 +224,6 @@ If you want to know how to implement a subscriber or a publisher, please see [a 
 
 ```rust
 // msgtest/src/talker/src/main.rs
-use my_interfaces_rs::my_interfaces;
 use safe_drive::{
     context::Context,
     error::DynError,
@@ -388,17 +320,6 @@ let ref_msgs = msgs.as_slice_mut();
 `as_slice_mut()` returns a mutable slice,
 you can thus update the elements of the array via the slice.
 
-### Edit `talker/Cargo.toml`
-
-To use the generated Rust's types, we have to edit `Cargo.toml` as follows.
-
-```toml
-# msgtest/src/talker/Cargo.toml
-[dependencies]
-safe_drive = { path = "path_to/safe_drive" }
-my_interfaces_rs = { path = "../my_interfaces_rs" }
-```
-
 ### Create `talker/package.xml`
 
 Then create `package.xml` as follows.
@@ -429,12 +350,22 @@ Don't forget `<depend>my_interfaces</depend>`.
 
 ## Listener
 
-Let's then create a listener which receive messages published by the talker.
-Create a package as follows.
+Let's then implement a listener which receive messages published by the talker.
 
-```text
-$ cd msgtest/src
-$ cargo new listener
+### Edit `listener/Cargo.toml`
+
+The listener also requires `my_interfaces`, and edit `Cargo.toml` as follows.
+
+```toml
+# msgtest/src/listener/Cargo.toml
+[dependencies]
+safe_drive = { path = "/tmp/safe_drive", default-features = false, features = ["galactic"] }
+my_interfaces = { path = "/tmp/safe_drive_tutorial/msgtest/my_interfaces" }
+
+[package.metadata.ros]
+msg = ["my_interfaces"]
+msg_dir = "/tmp/safe_drive_tutorial/msgtest"
+safe_drive_path = "/tmp/safe_drive"
 ```
 
 ### Edit `listener/src/main.rs`
@@ -476,13 +407,11 @@ fn main() -> Result<(), DynError> {
                 pr_info!(logger, "five_integers_array: {}", msg);
             }
 
-            let slice = msg.unbounded_integer_array.as_slice();
-            for msg in slice {
+            for msg in msg.unbounded_integer_array.iter() {
                 pr_info!(logger, "unbounded_integer_array: {}", msg);
             }
 
-            let slice = msg.up_to_five_integers_array.as_slice();
-            for msg in slice {
+            for msg in msg.up_to_five_integers_array.iter() {
                 pr_info!(logger, "up_to_five_integers_array: {}", msg);
             }
         }),
@@ -494,19 +423,6 @@ fn main() -> Result<(), DynError> {
         selector.wait()?;
     }
 }
-```
-
-To access to elements of an array, we used `as_slice` as above.
-
-### Edit `listener/Cargo.toml`
-
-The listener also requires `my_interfaces_rs`, and edit `Cargo.toml` as follows.
-
-```toml
-# msgtest/src/listener/Cargo.toml
-[dependencies]
-safe_drive = { path = "path_to/safe_drive" }
-my_interfaces_rs = { path = "../my_interfaces_rs" }
 ```
 
 ### Create `listener/package.xml`
@@ -620,7 +536,7 @@ string<=10[<=3] bounded_array_bounded_str
 ```
 
 ```rust
-// msgtest/src/my_interfaces_rs/src/my_interfaces/msg/my_msg_str.rs
+// /tmp/safe_drive_tutorial/msgtest/my_interfaces/src/msg/my_msg_str.rs
 #[repr(C)]
 #[derive(Debug)]
 pub struct MyMsgStr {
@@ -639,7 +555,6 @@ To access to elements of string arrays,
 we can use `as_slice_mut()` or `as_slice_mut()` as follows.
 
 ```rust
-use my_interfaces_rs::my_interfaces;
 fn _create_message_str() -> Result<my_interfaces::msg::MyMsgStr, DynError> {
     let mut my_msg = my_interfaces::msg::MyMsgStr::new().unwrap();
 
