@@ -35,14 +35,20 @@ $ . /opt/ros/galactic/setup.bash
 ## Install Colcon-Cargo
 
 ```text
-$ cargo install --git https://github.com/tier4/cargo-ament-build.git
 $ pip install git+https://github.com/tier4/colcon-cargo.git
 $ pip install git+https://github.com/colcon/colcon-ros-cargo.git
 ```
 
+```text
+$ git clone git@github.com:tier4/safe_drive_msg.git
+$ git clone https://github.com/tier4/cargo-ament-build.git
+$ cd cargo-ament-build
+$ cargo install --path .
+```
+
 ## Get safe_drive
 
-This is required because safe_drive is private currently.
+This is required because safe_drive and safe_drive_msg are private currently.
 
 ```text
 $ git clone git@github.com:tier4/safe_drive.git

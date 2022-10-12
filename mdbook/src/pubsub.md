@@ -36,8 +36,16 @@ $ mkdir pubsub
 $ mkdir pubsub/src
 ```
 
+Then create projects of Rust by using `cargo` as follows.
+
+```text
+$ cd pubsub/src
+$ cargo new my_talker
+$ cargo new my_listener
+```
+
 Following directories are important directories
-we will create throughout this tutorial.
+we will use throughout this tutorial.
 
 | Directories            | What?              |
 |------------------------|--------------------|
@@ -45,26 +53,25 @@ we will create throughout this tutorial.
 | pubsub/src/my_listener | subscriber in Rust |
 | pubsub/install         | created by colcon  |
 
+## Workspace of Rust
+
+To handle multiple projects of `cargo`, we recommend to prepare `Cargo.toml` for the workspace as follows.
+
+```toml
+# pubsub/src/Cargo.toml
+[workspace]
+members = ["my_talker", "my_listener"]
+```
+
+The workspace enables `rust-analyzer` and reduces compilation time.
+
 ---
 
 ## Talker in Rust
 
 Let's start implementing a publisher.
-We can use `cargo`, which is a standard package manager of Rust,
-to create a project as follows.
-
-```text
-$ cd pubsub/src
-$ cargo new my_talker
-$ ls -R my_talker
-my_talker:
-Cargo.toml  src/
-
-my_talker/src:
-main.rs
-```
-
-We create(d) and edit files of the talker as follows.
+We created and will edit files of the talker as follows.
+These files will automatically created when you do `cargo new` as described before.
 
 | Files                 | What?       |
 |-----------------------|-------------|
@@ -83,6 +90,12 @@ and we need to specify the path as follows.
 # pubsub/src/my_talker/Cargo.toml
 [dependencies]
 safe_drive = { path = "path_to/safe_drive" }
+std_msgs = { path = "/tmp/safe_drive_tutorial/pubsub/std_msgs" }
+
+[package.metadata.ros]
+msg = ["std_msgs"]
+msg_dir = "/tmp/safe_drive_tutorial/pubsub"
+safe_drive_path = "path_to/safe_drive"
 ```
 
 ### Edit `my_talker/src/main.rs`
@@ -123,8 +136,7 @@ You should also understand what this code is doing.
 ```rust
 // pubsub/src/my_talker/src/main.rs
 use safe_drive::{
-    context::Context, error::DynError, logger::Logger,
-    msg::common_interfaces::std_msgs, pr_info
+    context::Context, error::DynError, logger::Logger, pr_info
 };
 use std::time::Duration;
 
@@ -286,14 +298,7 @@ $ ros2 run my_talker my_talker
 ## Listener in Rust
 
 Let's then implement a listener.
-First, create a project by using `cargo` as follows.
-
-```text
-$ cd pubsub/src
-$ cargo new my_listener
-```
-
-The following files will be created throughout this tutorial.
+We created and will edit files of the listener as follows.
 
 | Files                   | What?       |
 |-------------------------|-------------|
@@ -310,6 +315,12 @@ Add safe_drive to the dependencies as follows.
 # pubsub/src/my_listener/Cargo.toml
 [dependencies]
 safe_drive = { path = "path_to/safe_drive" }
+std_msgs = { path = "/tmp/safe_drive_tutorial/pubsub/std_msgs" }
+
+[package.metadata.ros]
+msg = ["std_msgs"]
+msg_dir = "/tmp/safe_drive_tutorial/pubsub"
+safe_drive_path = "path_to/safe_drive"
 ```
 
 ### Edit `my_listener/src/main.rs`
@@ -321,8 +332,7 @@ This is the main difference from `my_talker`.
 ```rust
 // pubsub/src/my_listener/src/main.rs
 use safe_drive::{
-    context::Context, error::DynError, logger::Logger,
-    msg::common_interfaces::std_msgs, pr_info,
+    context::Context, error::DynError, logger::Logger, pr_info,
 };
 
 fn main() -> Result<(), DynError> {
@@ -454,14 +464,3 @@ $ ros2 run my_talker my_talker
 
 Nicely done!
 We are receiving messages sent from `my_talker`.
-
-## Workspace's `Cargo.toml`
-
-To enable rust-analyzer in the `pubsub` directory and reduce the compilation time,
-we recommend to prepare `Cargo.toml` for Rust's workspace as follows.
-
-```toml
-# pubsub/src/Cargo.toml
-[workspace]
-members = ["my_talker", "my_listener"]
-```

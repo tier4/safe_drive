@@ -49,7 +49,7 @@ TODO.
 - [x] Timer
 - [ ] Action (service + topic)
 - [x] Rust code generation from .msg and .srv files
-  - [ros2msg_to_rs](https://github.com/tier4/ros2msg_to_rs)
+  - [safe_drive_msg](https://github.com/tier4/safe_drive_msg)
 - [x] Formal Specification
   - [x] Single threaded callback based executer
   - [x] Async/await scheduler
