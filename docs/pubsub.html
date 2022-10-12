@@ -81,7 +81,7 @@
 
         <nav id="sidebar" class="sidebar" aria-label="Table of contents">
             <div class="sidebar-scrollbox">
-                <ol class="chapter"><li class="chapter-item expanded "><a href="index.html"><strong aria-hidden="true">1.</strong> Top</a></li><li class="chapter-item expanded "><a href="tutorial.html"><strong aria-hidden="true">2.</strong> Tutorial</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="setup.html"><strong aria-hidden="true">2.1.</strong> Setting-up</a></li><li class="chapter-item expanded "><a href="pubsub.html" class="active"><strong aria-hidden="true">2.2.</strong> Publish and Subscribe</a></li><li class="chapter-item expanded "><a href="timer.html"><strong aria-hidden="true">2.3.</strong> Timer</a></li><li class="chapter-item expanded "><a href="multi_pubsub.html"><strong aria-hidden="true">2.4.</strong> Multi-threaded Publish and Subscribe</a></li><li class="chapter-item expanded "><a href="message.html"><strong aria-hidden="true">2.5.</strong> User Defined Data Structure</a></li><li class="chapter-item expanded "><a href="predefined.html"><strong aria-hidden="true">2.6.</strong> Pre-defined Data Structure</a></li><li class="chapter-item expanded "><a href="service.html"><strong aria-hidden="true">2.7.</strong> Service</a></li><li class="chapter-item expanded "><a href="pusbsub_and_service.html"><strong aria-hidden="true">2.8.</strong> Using Both Topic and Service with Callback Based Execution</a></li><li class="chapter-item expanded "><a href="parameter.html"><strong aria-hidden="true">2.9.</strong> Parameter</a></li></ol></li></ol>
+                <ol class="chapter"><li class="chapter-item expanded "><a href="index.html"><strong aria-hidden="true">1.</strong> Top</a></li><li class="chapter-item expanded "><a href="tutorial.html"><strong aria-hidden="true">2.</strong> Tutorial</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="setup.html"><strong aria-hidden="true">2.1.</strong> Setting-up</a></li><li class="chapter-item expanded "><a href="pubsub.html" class="active"><strong aria-hidden="true">2.2.</strong> Publish and Subscribe</a></li><li class="chapter-item expanded "><a href="timer.html"><strong aria-hidden="true">2.3.</strong> Timer</a></li></ol></li></ol>
             </div>
             <div id="sidebar-resize-handle" class="sidebar-resize-handle"></div>
         </nav>
@@ -170,29 +170,31 @@ If <code>Publisher2</code> of <code>TopicA</code> send a message,
 <pre><code class="language-text">$ mkdir pubsub
 $ mkdir pubsub/src
 </code></pre>
+<p>Then create projects of Rust by using <code>cargo</code> as follows.</p>
+<pre><code class="language-text">$ cd pubsub/src
+$ cargo new my_talker
+$ cargo new my_listener
+</code></pre>
 <p>Following directories are important directories
-we will create throughout this tutorial.</p>
+we will use throughout this tutorial.</p>
 <div class="table-wrapper"><table><thead><tr><th>Directories</th><th>What?</th></tr></thead><tbody>
 <tr><td>pubsub/src/my_talker</td><td>publisher in Rust</td></tr>
 <tr><td>pubsub/src/my_listener</td><td>subscriber in Rust</td></tr>
 <tr><td>pubsub/install</td><td>created by colcon</td></tr>
 </tbody></table>
 </div>
+<h2 id="workspace-of-rust"><a class="header" href="#workspace-of-rust">Workspace of Rust</a></h2>
+<p>To handle multiple projects of <code>cargo</code>, we recommend to prepare <code>Cargo.toml</code> for the workspace as follows.</p>
+<pre><code class="language-toml"># pubsub/src/Cargo.toml
+[workspace]
+members = [&quot;my_talker&quot;, &quot;my_listener&quot;]
+</code></pre>
+<p>The workspace enables <code>rust-analyzer</code> and reduces compilation time.</p>
 <hr />
 <h2 id="talker-in-rust"><a class="header" href="#talker-in-rust">Talker in Rust</a></h2>
 <p>Let's start implementing a publisher.
-We can use <code>cargo</code>, which is a standard package manager of Rust,
-to create a project as follows.</p>
-<pre><code class="language-text">$ cd pubsub/src
-$ cargo new my_talker
-$ ls -R my_talker
-my_talker:
-Cargo.toml  src/
-
-my_talker/src:
-main.rs
-</code></pre>
-<p>We create(d) and edit files of the talker as follows.</p>
+We created and will edit files of the talker as follows.
+These files will automatically created when you do <code>cargo new</code> as described before.</p>
 <div class="table-wrapper"><table><thead><tr><th>Files</th><th>What?</th></tr></thead><tbody>
 <tr><td>my_talker/Cargo.toml</td><td>for Cargo</td></tr>
 <tr><td>my_talker/package.xml</td><td>for ROS2</td></tr>
@@ -207,6 +209,12 @@ and we need to specify the path as follows.</p>
 <pre><code class="language-toml"># pubsub/src/my_talker/Cargo.toml
 [dependencies]
 safe_drive = { path = &quot;path_to/safe_drive&quot; }
+std_msgs = { path = &quot;/tmp/safe_drive_tutorial/pubsub/std_msgs&quot; }
+
+[package.metadata.ros]
+msg = [&quot;std_msgs&quot;]
+msg_dir = &quot;/tmp/safe_drive_tutorial/pubsub&quot;
+safe_drive_path = &quot;path_to/safe_drive&quot;
 </code></pre>
 <h3 id="edit-my_talkersrcmainrs"><a class="header" href="#edit-my_talkersrcmainrs">Edit <code>my_talker/src/main.rs</code></a></h3>
 <p>my_talker is very simple.
@@ -238,8 +246,7 @@ The following is a code of my_talker.
 You should also understand what this code is doing.</p>
 <pre><pre class="playground"><code class="language-rust">// pubsub/src/my_talker/src/main.rs
 use safe_drive::{
-    context::Context, error::DynError, logger::Logger,
-    msg::common_interfaces::std_msgs, pr_info
+    context::Context, error::DynError, logger::Logger, pr_info
 };
 use std::time::Duration;
 
@@ -384,11 +391,7 @@ $ ros2 run my_talker my_talker
 <hr />
 <h2 id="listener-in-rust"><a class="header" href="#listener-in-rust">Listener in Rust</a></h2>
 <p>Let's then implement a listener.
-First, create a project by using <code>cargo</code> as follows.</p>
-<pre><code class="language-text">$ cd pubsub/src
-$ cargo new my_listener
-</code></pre>
-<p>The following files will be created throughout this tutorial.</p>
+We created and will edit files of the listener as follows.</p>
 <div class="table-wrapper"><table><thead><tr><th>Files</th><th>What?</th></tr></thead><tbody>
 <tr><td>my_listener/Cargo.toml</td><td>for Cargo</td></tr>
 <tr><td>my_listener/package.xml</td><td>for ROS2</td></tr>
@@ -401,6 +404,12 @@ Add safe_drive to the dependencies as follows.</p>
 <pre><code class="language-toml"># pubsub/src/my_listener/Cargo.toml
 [dependencies]
 safe_drive = { path = &quot;path_to/safe_drive&quot; }
+std_msgs = { path = &quot;/tmp/safe_drive_tutorial/pubsub/std_msgs&quot; }
+
+[package.metadata.ros]
+msg = [&quot;std_msgs&quot;]
+msg_dir = &quot;/tmp/safe_drive_tutorial/pubsub&quot;
+safe_drive_path = &quot;path_to/safe_drive&quot;
 </code></pre>
 <h3 id="edit-my_listenersrcmainrs"><a class="header" href="#edit-my_listenersrcmainrs">Edit <code>my_listener/src/main.rs</code></a></h3>
 <p>To implement subscriber,
@@ -408,8 +417,7 @@ we have to prepare a callback function of the subscriber.
 This is the main difference from <code>my_talker</code>.</p>
 <pre><pre class="playground"><code class="language-rust">// pubsub/src/my_listener/src/main.rs
 use safe_drive::{
-    context::Context, error::DynError, logger::Logger,
-    msg::common_interfaces::std_msgs, pr_info,
+    context::Context, error::DynError, logger::Logger, pr_info,
 };
 
 fn main() -&gt; Result&lt;(), DynError&gt; {
@@ -527,13 +535,6 @@ $ ros2 run my_talker my_talker
 </code></pre>
 <p>Nicely done!
 We are receiving messages sent from <code>my_talker</code>.</p>
-<h2 id="workspaces-cargotoml"><a class="header" href="#workspaces-cargotoml">Workspace's <code>Cargo.toml</code></a></h2>
-<p>To enable rust-analyzer in the <code>pubsub</code> directory and reduce the compilation time,
-we recommend to prepare <code>Cargo.toml</code> for Rust's workspace as follows.</p>
-<pre><code class="language-toml"># pubsub/src/Cargo.toml
-[workspace]
-members = [&quot;my_talker&quot;, &quot;my_listener&quot;]
-</code></pre>
 
                     </main>
 
