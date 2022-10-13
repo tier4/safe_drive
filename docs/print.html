@@ -82,7 +82,7 @@
 
         <nav id="sidebar" class="sidebar" aria-label="Table of contents">
             <div class="sidebar-scrollbox">
-                <ol class="chapter"><li class="chapter-item expanded "><a href="index.html"><strong aria-hidden="true">1.</strong> Top</a></li><li class="chapter-item expanded "><a href="tutorial.html"><strong aria-hidden="true">2.</strong> Tutorial</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="parameter.html"><strong aria-hidden="true">2.1.</strong> Parameter</a></li></ol></li></ol>
+                <ol class="chapter"><li class="chapter-item expanded "><a href="index.html"><strong aria-hidden="true">1.</strong> Top</a></li><li class="chapter-item expanded "><a href="tutorial.html"><strong aria-hidden="true">2.</strong> Tutorial</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="setup.html"><strong aria-hidden="true">2.1.</strong> Setting-up</a></li><li class="chapter-item expanded "><a href="pubsub.html"><strong aria-hidden="true">2.2.</strong> Publish and Subscribe</a></li><li class="chapter-item expanded "><a href="timer.html"><strong aria-hidden="true">2.3.</strong> Timer</a></li><li class="chapter-item expanded "><a href="multi_pubsub.html"><strong aria-hidden="true">2.4.</strong> Multi-threaded Publish and Subscribe</a></li><li class="chapter-item expanded "><a href="message.html"><strong aria-hidden="true">2.5.</strong> User Defined Data Structure</a></li><li class="chapter-item expanded "><a href="service.html"><strong aria-hidden="true">2.6.</strong> Service</a></li><li class="chapter-item expanded "><a href="parameter.html"><strong aria-hidden="true">2.7.</strong> Parameter</a></li></ol></li></ol>
             </div>
             <div id="sidebar-resize-handle" class="sidebar-resize-handle"></div>
         </nav>
@@ -179,6 +179,1716 @@ formal verification.</p>
 <p>This chapter explain how to use <code>safe_drive</code> and
 interoperability of existing ROS2's project written in C++ or Python
 by using <code>colcon</code>.</p>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="setting-up"><a class="header" href="#setting-up">Setting-up</a></h1>
+<h2 id="install-dependencies"><a class="header" href="#install-dependencies">Install Dependencies</a></h2>
+<pre><code class="language-text">$ sudo apt install curl gnupg2 lsb-release python3-pip git
+</code></pre>
+<h2 id="install-rust"><a class="header" href="#install-rust">Install Rust</a></h2>
+<pre><code class="language-text">$ sudo curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
+$ source $HOME/.cargo/env
+</code></pre>
+<p>Choose <code>Default</code> when installing Rust.</p>
+<h2 id="install-ros2"><a class="header" href="#install-ros2">Install ROS2</a></h2>
+<pre><code class="language-text">$ curl -s https://raw.githubusercontent.com/ros/rosdistro/master/ros.asc | sudo apt-key add -
+$ sudo sh -c 'echo &quot;deb [arch=$(dpkg --print-architecture)] http://packages.ros.org/ros2/ubuntu $(lsb_release -cs) main&quot; &gt; /etc/apt/sources.list.d/ros2-latest.list'
+$ sudo curl -sSL https://raw.githubusercontent.com/ros/rosdistro/master/ros.key -o /usr/share/keyrings/ros-archive-keyring.gpg
+</code></pre>
+<pre><code class="language-text">$ sudo apt update
+$ sudo apt install ros-galactic-desktop python3-colcon-common-extensions
+</code></pre>
+<pre><code class="language-text">$ . /opt/ros/galactic/setup.bash
+</code></pre>
+<h2 id="install-colcon-cargo"><a class="header" href="#install-colcon-cargo">Install Colcon-cargo</a></h2>
+<pre><code class="language-text">$ pip install git+https://github.com/tier4/colcon-cargo.git
+$ pip install git+https://github.com/colcon/colcon-ros-cargo.git
+</code></pre>
+<h2 id="install-cargo-ament"><a class="header" href="#install-cargo-ament">Install Cargo-ament</a></h2>
+<pre><code class="language-text">$ git clone git@github.com:tier4/safe_drive_msg.git
+$ git clone https://github.com/tier4/cargo-ament-build.git
+$ cd cargo-ament-build
+$ cargo install --path .
+</code></pre>
+<h2 id="get-safe_drive"><a class="header" href="#get-safe_drive">Get safe_drive</a></h2>
+<p>This is required because safe_drive and safe_drive_msg are private currently.</p>
+<pre><code class="language-text">$ git clone git@github.com:tier4/safe_drive.git
+</code></pre>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="publish-and-subscribe"><a class="header" href="#publish-and-subscribe">Publish and Subscribe</a></h1>
+<p>This chapter introduces a simple example of publish and subscribe communication.
+This communication is so-called topic by ROS2.
+There are <code>N</code> senders and <code>M</code> receivers in a topic.
+This tutorial implements 1 sender (in Rust) and 2 receivers (in Rust and C++).</p>
+<p>The following figure is a example topology.</p>
+<pre class="mermaid">graph TD;
+    Publisher1--&gt;TopicA;
+    Publisher2--&gt;TopicA;
+    TopicA--&gt;Subscriber1;
+    TopicA--&gt;Subscriber2;
+    TopicA--&gt;Subscriber3;
+    Publisher3--&gt;TopicB;
+    Publisher4--&gt;TopicB;
+    Publisher5--&gt;TopicB;
+    TopicB--&gt;Subscriber4;
+    TopicB--&gt;Subscriber5;
+</pre>
+<p>There are 2 topics, <code>TopicA</code> and <code>TopicB</code> in this figure.
+If <code>Publisher2</code> of <code>TopicA</code> send a message,
+<code>Subscriber1-3</code> subscribing <code>TopicA</code> receive the message.
+<code>Subscriber4</code> and <code>Subscriber5</code> can receive messages sent from
+<code>Publisher3-5</code>.</p>
+<h2 id="directories"><a class="header" href="#directories">Directories</a></h2>
+<p>First of all, create working directories as follows.</p>
+<pre><code class="language-text">$ mkdir pubsub
+$ mkdir pubsub/src
+</code></pre>
+<p>Then create projects of Rust by using <code>cargo</code> as follows.</p>
+<pre><code class="language-text">$ cd pubsub/src
+$ cargo new my_talker
+$ cargo new my_listener
+</code></pre>
+<p>Following directories are important directories
+we will use throughout this tutorial.</p>
+<div class="table-wrapper"><table><thead><tr><th>Directories</th><th>What?</th></tr></thead><tbody>
+<tr><td>pubsub/src/my_talker</td><td>publisher in Rust</td></tr>
+<tr><td>pubsub/src/my_listener</td><td>subscriber in Rust</td></tr>
+<tr><td>pubsub/install</td><td>created by colcon</td></tr>
+</tbody></table>
+</div>
+<h2 id="workspace-of-rust"><a class="header" href="#workspace-of-rust">Workspace of Rust</a></h2>
+<p>To handle multiple projects of <code>cargo</code>, we recommend to prepare <code>Cargo.toml</code> for the workspace as follows.</p>
+<pre><code class="language-toml"># pubsub/src/Cargo.toml
+[workspace]
+members = [&quot;my_talker&quot;, &quot;my_listener&quot;]
+</code></pre>
+<p>The workspace enables <code>rust-analyzer</code> and reduces compilation time.</p>
+<hr />
+<h2 id="talker-in-rust"><a class="header" href="#talker-in-rust">Talker in Rust</a></h2>
+<p>Let's start implementing a publisher.
+We created and will edit files of the talker as follows.
+These files will automatically created when you do <code>cargo new</code> as described before.</p>
+<div class="table-wrapper"><table><thead><tr><th>Files</th><th>What?</th></tr></thead><tbody>
+<tr><td>my_talker/Cargo.toml</td><td>for Cargo</td></tr>
+<tr><td>my_talker/package.xml</td><td>for ROS2</td></tr>
+<tr><td>my_talker/src/main.rs</td><td>source code</td></tr>
+</tbody></table>
+</div>
+<h3 id="edit-my_talkercargotoml"><a class="header" href="#edit-my_talkercargotoml">Edit <code>my_talker/Cargo.toml</code></a></h3>
+<p><code>Cargo.toml</code> is used to describe a project of Rust.
+Add safe_drive to the dependencies of <code>Cargo.toml</code> to use it.
+Currently, safe_drive's repository is private,
+and we need to specify the path as follows.</p>
+<pre><code class="language-toml"># pubsub/src/my_talker/Cargo.toml
+[dependencies]
+safe_drive = { path = &quot;/tmp/safe_drive&quot;, default-features = false, features = [&quot;galactic&quot;] }
+std_msgs = { path = &quot;/tmp/safe_drive_tutorial/pubsub/std_msgs&quot; }
+
+[package.metadata.ros]
+msg = [&quot;std_msgs&quot;]
+msg_dir = &quot;/tmp/safe_drive_tutorial/pubsub&quot;
+safe_drive_path = &quot;path_to/safe_drive&quot;
+</code></pre>
+<h3 id="edit-my_talkersrcmainrs"><a class="header" href="#edit-my_talkersrcmainrs">Edit <code>my_talker/src/main.rs</code></a></h3>
+<p>my_talker is very simple.
+This does as follows.</p>
+<ol>
+<li>Create a context.</li>
+<li>Create a node from the context.</li>
+<li>Create a publisher from the node.</li>
+<li>Send a message periodically.</li>
+</ol>
+<p>A context is a resource manager of ROS2,
+and it must be created first of all.
+A node contains publishers, subscribers, servers, and clients.
+A node is a functional unit of ROS2.
+Publishers and subscribers can be created by a node.</p>
+<p>The following figure is an example hierarchy.</p>
+<pre class="mermaid">graph TD;
+    Context--&gt;NodeA
+    NodeA--&gt;SubscriberA
+    NodeA--&gt;SubscriberB
+    NodeA--&gt;PublisherA
+    NodeA--&gt;PublisherB
+    NodeA--&gt;PublisherC
+</pre>
+<p>In this figure, <code>NodeA</code> is created by a context,
+and subscribers and publishers are created by the node.</p>
+<p>Now, we have understood the basics of ROS2.
+The following is a code of my_talker.
+You should also understand what this code is doing.</p>
+<pre><pre class="playground"><code class="language-rust">// pubsub/src/my_talker/src/main.rs
+use safe_drive::{
+    context::Context, error::DynError, logger::Logger, pr_info
+};
+use std::time::Duration;
+
+fn main() -&gt; Result&lt;(), DynError&gt; {
+    // Create a context.
+    let ctx = Context::new()?;
+
+    // Create a node.
+    let node = ctx.create_node(&quot;my_talker&quot;, None, Default::default())?;
+
+    // Create a publisher.
+    let publisher = node.create_publisher::&lt;std_msgs::msg::String&gt;(&quot;my_topic&quot;, None)?;
+
+    // Create a logger.
+    let logger = Logger::new(&quot;my_talker&quot;);
+
+    let mut cnt = 0; // Counter.
+    let mut msg = std_msgs::msg::String::new().unwrap();
+    loop {
+        // Create a message to be sent.
+        let data = format!(&quot;Hello, World!: cnt = {cnt}&quot;);
+        msg.data.assign(&amp;data);
+
+        pr_info!(logger, &quot;send: {}&quot;, msg.data); // Print log.
+
+        // Send a message.
+        publisher.send(&amp;msg)?;
+
+        // Sleep 1s.
+        cnt += 1;
+        std::thread::sleep(Duration::from_secs(1));
+    }
+}
+</code></pre></pre>
+<h4 id="my_talker-in-detail"><a class="header" href="#my_talker-in-detail">my_talker in Detail</a></h4>
+<p><code>create_node</code> creates a node.</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>// Create a node.
+let node = ctx.create_node(&quot;my_talker&quot;, None, Default::default())?;
+<span class="boring">}
+</span></code></pre></pre>
+<p>The arguments indicate as follows.</p>
+<ul>
+<li><code>&quot;my_talker&quot;</code> : the name of the node.</li>
+<li>Node : namespace.
+<ul>
+<li>We can pass a namespace like <code>Some(&quot;namespace&quot;)</code>.</li>
+<li>If <code>None</code> is passed, the node has no namespace.</li>
+</ul>
+</li>
+<li><code>Default::default()</code> : option of node.</li>
+</ul>
+<p><code>create_publisher</code> creates a publisher.</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>// Create a publisher.
+let publisher = node.create_publisher::&lt;std_msgs::msg::String&gt;(&quot;my_topic&quot;, None)?;
+<span class="boring">}
+</span></code></pre></pre>
+<ul>
+<li><code>&lt;std_msgs::msg::String&gt;</code> : the publisher can send values of <code>std_msgs::msg::String</code>.</li>
+<li><code>&quot;my_topic&quot;</code> : the topic name to which the publisher send messages.</li>
+<li><code>None</code> : QoS of the publisher. QoS will be described in a later chapter.</li>
+</ul>
+<p>A message can be sent by <code>send</code> method as follows.</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>// Create a message to be sent.
+let data = format!(&quot;Hello, World!: cnt = {cnt}&quot;);
+msg.data.assign(&amp;data);
+
+// Send a message.
+publisher.send(&amp;msg)?;
+<span class="boring">}
+</span></code></pre></pre>
+<p><code>Logger</code> is used to print some messages.
+It can be created as follows.</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>// Create a logger.
+let logger = Logger::new(&quot;my_talker&quot;);
+<span class="boring">}
+</span></code></pre></pre>
+<p>The argument of <code>&quot;my_talker&quot;</code> is the name of the logger.
+To print a message, use <code>pr_*</code> macros as follows.</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>pr_info!(logger, &quot;send: {}&quot;, msg.data); // Print log.
+<span class="boring">}
+</span></code></pre></pre>
+<p>There are macros for logging as follows.</p>
+<ul>
+<li><code>pr_debug!</code> : debug</li>
+<li><code>pr_info!</code> : information</li>
+<li><code>pr_warn!</code> : warning</li>
+<li><code>pr_err!</code> : error</li>
+<li><code>pr_fatal!</code> : fatal</li>
+</ul>
+<h3 id="create-my_talkerpackagexml"><a class="header" href="#create-my_talkerpackagexml">Create <code>my_talker/package.xml</code></a></h3>
+<p><code>package.xml</code> is used by colcon, which is a build tool used by ROS2.
+It contains the package name, maintainer, description, etc, as follows.</p>
+<pre><code class="language-xml">&lt;!-- pubsub/src/my_talker/package.xml --&gt;
+&lt;?xml version=&quot;1.0&quot;?&gt;
+&lt;?xml-model href=&quot;http://download.ros.org/schema/package_format3.xsd&quot; schematypens=&quot;http://www.w3.org/2001/XMLSchema&quot;?&gt;
+&lt;package format=&quot;3&quot;&gt;
+  &lt;name&gt;my_talker&lt;/name&gt;
+  &lt;version&gt;0.0.0&lt;/version&gt;
+  &lt;description&gt;My Talker in Rust&lt;/description&gt;
+  &lt;maintainer email=&quot;yuuki.takano@tier4.jp&quot;&gt;Yuuki Takano&lt;/maintainer&gt;
+  &lt;license&gt;Apache License 2.0&lt;/license&gt;
+
+  &lt;build_depend&gt;std_msgs&lt;/build_depend&gt;
+
+  &lt;test_depend&gt;ament_lint_auto&lt;/test_depend&gt;
+  &lt;test_depend&gt;ament_lint_common&lt;/test_depend&gt;
+
+  &lt;export&gt;
+    &lt;build_type&gt;ament_cargo&lt;/build_type&gt;
+  &lt;/export&gt;
+&lt;/package&gt;
+</code></pre>
+<p>Copy and paste this, then edit it if you want.</p>
+<h3 id="execute-the-talker"><a class="header" href="#execute-the-talker">Execute the Talker</a></h3>
+<p>Before compiling, ensure that you load setting of ROS2 as follows.</p>
+<pre><code class="language-text">$ . /opt/ros/galactic/setup.bash
+</code></pre>
+<p>Then compile by using colcon as follows.
+Before compiling, change the current directory to <code>pubsub</code>,
+which is the top directory of our project.</p>
+<pre><code class="language-text">$ cd pubsub
+$ colcon build --cargo-args --release
+</code></pre>
+<p><code>--cargo-args --release</code> is a option to pass the <code>--release</code> argument to <code>cargo</code>.
+<code>cargo</code> optimizes the code when <code>--release</code> is specified.</p>
+<p>To launch <code>my_talker</code>,
+load the setting and use <code>ros2</code> command as follows.</p>
+<pre><code class="language-text">$ . ./install/setup.bash
+$ ros2 run my_talker my_talker
+[INFO] [1656048392.368568500] [my_talker]: send: Hello, World!: cnt = 0
+[INFO] [1656048393.368787500] [my_talker]: send: Hello, World!: cnt = 1
+[INFO] [1656048394.368994200] [my_talker]: send: Hello, World!: cnt = 2
+</code></pre>
+<hr />
+<h2 id="listener-in-rust"><a class="header" href="#listener-in-rust">Listener in Rust</a></h2>
+<p>Let's then implement a listener.
+We created and will edit files of the listener as follows.</p>
+<div class="table-wrapper"><table><thead><tr><th>Files</th><th>What?</th></tr></thead><tbody>
+<tr><td>my_listener/Cargo.toml</td><td>for Cargo</td></tr>
+<tr><td>my_listener/package.xml</td><td>for ROS2</td></tr>
+<tr><td>my_listener/src/main.rs</td><td>source code</td></tr>
+</tbody></table>
+</div>
+<h3 id="edit-my_listenercargotoml"><a class="header" href="#edit-my_listenercargotoml">Edit <code>my_listener/Cargo.toml</code></a></h3>
+<p><code>my_listener</code> also requires safe_drive.
+Add safe_drive to the dependencies as follows.</p>
+<pre><code class="language-toml"># pubsub/src/my_listener/Cargo.toml
+[dependencies]
+safe_drive = { path = &quot;/tmp/safe_drive&quot;, default-features = false, features = [&quot;galactic&quot;] }
+std_msgs = { path = &quot;/tmp/safe_drive_tutorial/pubsub/std_msgs&quot; }
+
+[package.metadata.ros]
+msg = [&quot;std_msgs&quot;]
+msg_dir = &quot;/tmp/safe_drive_tutorial/pubsub&quot;
+safe_drive_path = &quot;path_to/safe_drive&quot;
+</code></pre>
+<h3 id="edit-my_listenersrcmainrs"><a class="header" href="#edit-my_listenersrcmainrs">Edit <code>my_listener/src/main.rs</code></a></h3>
+<p>To implement subscriber,
+we have to prepare a callback function of the subscriber.
+This is the main difference from <code>my_talker</code>.</p>
+<pre><pre class="playground"><code class="language-rust">// pubsub/src/my_listener/src/main.rs
+use safe_drive::{
+    context::Context, error::DynError, logger::Logger, pr_info,
+};
+
+fn main() -&gt; Result&lt;(), DynError&gt; {
+    // Create a context.
+    let ctx = Context::new()?;
+
+    // Create a node.
+    let node = ctx.create_node(&quot;my_listener&quot;, None, Default::default())?;
+
+    // Create a subscriber.
+    let subscriber = node.create_subscriber::&lt;std_msgs::msg::String&gt;(&quot;my_topic&quot;, None)?;
+
+    // Create a logger.
+    let logger = Logger::new(&quot;my_listener&quot;);
+
+    // Create a selector.
+    let mut selector = ctx.create_selector()?;
+
+    // Add a callback function.
+    selector.add_subscriber(
+        subscriber,
+        Box::new(move |msg| {
+            pr_info!(logger, &quot;receive: {}&quot;, msg.data);
+        }),
+    );
+
+    // Spin.
+    loop {
+        selector.wait()?;
+    }
+}
+</code></pre></pre>
+<h4 id="my_listener-in-detail"><a class="header" href="#my_listener-in-detail"><code>my_listener</code> in Detail</a></h4>
+<p>Similar to the publisher,
+<code>create_subscriber</code> creates a subscriber.</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>// Create a subscriber.
+let subscriber = node.create_subscriber::&lt;std_msgs::msg::String&gt;(&quot;my_topic&quot;, None)?;
+<span class="boring">}
+</span></code></pre></pre>
+<p>The arguments are as follows.</p>
+<ul>
+<li><code>&quot;my_topic&quot;</code> : the name of the topic to which the subscriber is subscribing.</li>
+<li><code>None</code> : QoS of the subscriber. Discussed in a later chapter.</li>
+</ul>
+<p>To add and invoke a callback function.
+We need to create a selector,
+which can wait some events and invoke callback functions of the events.
+A selector is similar to <code>select</code> or <code>epoll</code> function,
+and equivalent to a executer of ROS2.</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>// Create a selector.
+let mut selector = ctx.create_selector()?;
+
+// Add a callback function.
+selector.add_subscriber(
+    subscriber,
+    Box::new(move |msg| {
+        pr_info!(logger, &quot;receive: {}&quot;, msg.data);
+    }),
+);
+
+// Spin.
+loop {
+    selector.wait()?;
+}
+<span class="boring">}
+</span></code></pre></pre>
+<p>The arguments of <code>add_subscriber</code> method are as follows.</p>
+<ul>
+<li><code>subscriber</code> : the subscriber.</li>
+<li><code>Box::new(move |msg| { pr_info!(logger, &quot;receive: {}&quot;, msg.data); })</code> : the callback function.</li>
+<li><code>false</code> : the callback function is called only once or not. If <code>false</code> is passed, the callback function is invoked every time and forever.</li>
+</ul>
+<p><code>selector.wait()</code> wait events.
+To receive events forever, use infinite loop.</p>
+<h3 id="create-my_listenerpackagexml"><a class="header" href="#create-my_listenerpackagexml">Create <code>my_listener/package.xml</code></a></h3>
+<p><code>package.xml</code> is almost same as above.
+The only difference is the name of the package,
+which is <code>my_listener</code>.</p>
+<pre><code class="language-xml">&lt;!-- pubsub/src/my_listener/package.xml --&gt;
+&lt;?xml version=&quot;1.0&quot;?&gt;
+&lt;?xml-model href=&quot;http://download.ros.org/schema/package_format3.xsd&quot; schematypens=&quot;http://www.w3.org/2001/XMLSchema&quot;?&gt;
+&lt;package format=&quot;3&quot;&gt;
+  &lt;name&gt;my_listener&lt;/name&gt;
+  &lt;version&gt;0.0.0&lt;/version&gt;
+  &lt;description&gt;My Listener in Rust&lt;/description&gt;
+  &lt;maintainer email=&quot;yuuki.takano@tier4.jp&quot;&gt;Yuuki Takano&lt;/maintainer&gt;
+  &lt;license&gt;Apache License 2.0&lt;/license&gt;
+
+  &lt;build_depend&gt;std_msgs&lt;/build_depend&gt;
+
+  &lt;test_depend&gt;ament_lint_auto&lt;/test_depend&gt;
+  &lt;test_depend&gt;ament_lint_common&lt;/test_depend&gt;
+
+  &lt;export&gt;
+    &lt;build_type&gt;ament_cargo&lt;/build_type&gt;
+  &lt;/export&gt;
+&lt;/package&gt;
+</code></pre>
+<h3 id="execute-the-listener"><a class="header" href="#execute-the-listener">Execute the Listener</a></h3>
+<p>Before compiling and executing, execute <code>my_talker</code> in other terminal,
+and don't forget to load the setting of ROS2 as mentioned above.
+The compilation can be done as follows.</p>
+<pre><code class="language-text">$ cd pubsub
+$ colcon build --cargo-args --release
+</code></pre>
+<p>To execute <code>my_listener</code>, load the setting of our projects and
+execute it by using <code>ros2</code> command as follows.</p>
+<pre><code class="language-text">$ . ./install/setup.bash
+$ ros2 run my_talker my_talker
+[INFO] [1656050459.231579900] [my_listener]: receive: Hello, World!: cnt = 4
+[INFO] [1656050460.231831200] [my_listener]: receive: Hello, World!: cnt = 5
+[INFO] [1656050461.232120000] [my_listener]: receive: Hello, World!: cnt = 6
+</code></pre>
+<p>Nicely done!
+We are receiving messages sent from <code>my_talker</code>.</p>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="timer"><a class="header" href="#timer">Timer</a></h1>
+<p>This tutorial does not use <code>colcon</code> to build.
+We use only <code>cargo</code>, which is a Rust's standard build system.</p>
+<p>Don't forget loading ROS2's environment as follows.</p>
+<pre><code class="language-text">$ . /opt/ros/galactic/setup.bash
+</code></pre>
+<h2 id="wall-timer"><a class="header" href="#wall-timer">Wall-timer</a></h2>
+<p>A wall-timer is a timer which periodically invoked.
+This section describes how to use a wall-timer.</p>
+<p>Let's create a package by using a <code>cargo</code> as follows.</p>
+<pre><code class="language-text">$ cargo new wall_timer
+$ cd wall_timer
+</code></pre>
+<p>Then, add <code>safe_drive</code> to the dependencies of <code>Cargo.toml</code>.</p>
+<pre><code class="language-toml">[dependencies]
+safe_drive = { path = &quot;path_to/safe_drive&quot; }
+</code></pre>
+<p>The following code is an example using a wall-timer.
+The important method is <code>Selector::add_wall_timer()</code> which takes
+a name, a duration, and a callback function.</p>
+<pre><pre class="playground"><code class="language-rust">use safe_drive::{
+    context::Context, error::DynError, logger::Logger, msg::common_interfaces::std_msgs, pr_info,
+};
+use std::{rc::Rc, time::Duration};
+
+fn main() -&gt; Result&lt;(), DynError&gt; {
+    // Create a context, a node, a subscriber, a publisher, and a selector.
+    let ctx = Context::new()?;
+    let node = ctx.create_node(&quot;my_node&quot;, None, Default::default())?;
+    let subscriber = node.create_subscriber::&lt;std_msgs::msg::UInt64&gt;(&quot;my_topic&quot;, None)?;
+    let publisher = node.create_publisher::&lt;std_msgs::msg::UInt64&gt;(&quot;my_topic&quot;, None)?;
+    let mut selector = ctx.create_selector()?;
+
+    // Create a logger.
+    // To share this by multiple callback functions, use Rc.
+    let logger = Rc::new(Logger::new(&quot;wall timer example&quot;));
+
+    // Add a wall timer to publish periodically.
+    let mut cnt = Box::new(0);
+    let mut msg = std_msgs::msg::UInt64::new().unwrap();
+    let logger1 = logger.clone();
+
+    selector.add_wall_timer(
+        &quot;publisher&quot;, // the name of timer
+        Duration::from_secs(1),
+        Box::new(move || {
+            msg.data = *cnt;
+            *cnt += 1;
+            publisher.send(&amp;msg).unwrap();
+            pr_info!(logger1, &quot;send: msg.data = {}&quot;, msg.data);
+        }),
+    );
+
+    // Add a subscriber.
+    selector.add_subscriber(
+        subscriber,
+        Box::new(move |msg| {
+            pr_info!(logger, &quot;received: msg.data = {}&quot;, msg.data);
+        }),
+    );
+
+    // Spin.
+    loop {
+        selector.wait()?;
+    }
+}
+</code></pre></pre>
+<p>Timers can be set by a method of selector as follows,
+and the timers will be invoked when calling the <code>Selector::wait()</code> methods.</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>selector.add_wall_timer(
+    &quot;publisher&quot;, // the name of timer
+    Duration::from_secs(1),
+    Box::new(move || {
+        msg.data = *cnt;
+        *cnt += 1;
+        publisher.send(&amp;msg).unwrap();
+        pr_info!(logger1, &quot;send: msg.data = {}&quot;, msg.data);
+    }),
+);
+<span class="boring">}
+</span></code></pre></pre>
+<ul>
+<li><code>&quot;publisher&quot;</code> is the name of this timer. The name is used for statistics. You can use any name.</li>
+<li><code>Duration::from_secs(1)</code> is the duration for periodic invoking. This argument means the callback function is invoked every 1 second.</li>
+<li><code>Box::new(move || ...)</code> is the callback function.</li>
+</ul>
+<p>There is a publisher invoked by a timer, and a subscriber in this code.
+When executing this, transmission and reception will be confirmed as follows.</p>
+<pre><code class="language-text">$ cargo run
+[INFO] [1656557242.842509800] [wall timer example]: send: msg.data = 0
+[INFO] [1656557242.842953300] [wall timer example]: received: msg.data = 0
+[INFO] [1656557243.843103800] [wall timer example]: send: msg.data = 1
+[INFO] [1656557243.843272900] [wall timer example]: received: msg.data = 1
+[INFO] [1656557244.843574600] [wall timer example]: send: msg.data = 2
+[INFO] [1656557244.844021200] [wall timer example]: received: msg.data = 2
+[INFO] [1656557245.844349800] [wall timer example]: send: msg.data = 3
+[INFO] [1656557245.844702900] [wall timer example]: received: msg.data = 3
+</code></pre>
+<h2 id="one-shot-timer"><a class="header" href="#one-shot-timer">One-shot Timer</a></h2>
+<p>A wall-timer is invoked periodically,
+but one-shot timer is invoked only once.
+A one-shot can be set by the <code>Selector::add_timer()</code> method as follows.</p>
+<pre><pre class="playground"><code class="language-rust">use safe_drive::{context::Context, error::DynError, logger::Logger, pr_info};
+use std::{cell::RefCell, collections::VecDeque, rc::Rc, time::Duration};
+
+pub fn main() -&gt; Result&lt;(), DynError&gt; {
+    // Create a context, a publisher, and a logger.
+    let ctx = Context::new()?;
+    let mut selector = ctx.create_selector()?;
+    let logger = Rc::new(Logger::new(&quot;one-shot timer example&quot;));
+
+    let queue = Rc::new(RefCell::new(VecDeque::new()));
+
+    // Add a one-shot timer.
+    let queue1 = queue.clone();
+    selector.add_timer(
+        Duration::from_secs(2),
+        Box::new(move || {
+            pr_info!(logger, &quot;fired!&quot;);
+
+            // Insert a timer to the queue.
+            let mut q = queue1.borrow_mut();
+            let logger1 = logger.clone();
+            q.push_back((
+                Duration::from_secs(2),
+                (Box::new(move || pr_info!(logger1, &quot;fired! again!&quot;))),
+            ));
+        }),
+    );
+
+    // Spin.
+    loop {
+        {
+            // Set timers.
+            let mut q = queue.borrow_mut();
+            while let Some((dur, f)) = q.pop_front() {
+                selector.add_timer(dur, f);
+            }
+        }
+
+        selector.wait()?;
+    }
+}
+</code></pre></pre>
+<p><code>Selector::add_timer()</code> does not take the name,
+but other arguments are same as <code>Selector::add_wall_timer()</code>.</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>selector.add_timer(
+    Duration::from_secs(2),
+    Box::new(move || ...),
+);
+<span class="boring">}
+</span></code></pre></pre>
+<ul>
+<li><code>Duration::from_secs(2)</code> is a duration indicating when the timer will be invoked.</li>
+<li><code>Box::new(move || ...)</code> is the callback function.</li>
+</ul>
+<p>This code reenables a timer in the callback function.
+To reenable, the callback takes a <code>queue</code> and
+timers in the <code>queue</code> is reenabled in the spin as follows.</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>// Spin.
+loop {
+    {
+        // Set timers.
+        let mut q = queue.borrow_mut();
+        while let Some((dur, f)) = q.pop_front() {
+            selector.add_timer(dur, f);
+        }
+    }
+
+    selector.wait()?;
+}
+<span class="boring">}
+</span></code></pre></pre>
+<p>The important thing is that the borrowed resources must be released.
+To release definitely, the code fraction borrowing the <code>queue</code> is surrounded by braces.</p>
+<p>The following is a execution result of this code.</p>
+<pre><code>$ cargo run
+[INFO] [1657070943.324438900] [one-shot timer example]: fired!
+[INFO] [1657070945.324675600] [one-shot timer example]: fired! again!
+</code></pre>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="multi-threaded-publish-and-subscribe"><a class="header" href="#multi-threaded-publish-and-subscribe">Multi-threaded Publish and Subscribe</a></h1>
+<p>Previous chapters use a selector to wait messages.
+A selector can be used by only a single thread.
+This means previous implementation is single-threaded.</p>
+<p>To execute tasks concurrently, we can use the async/await feature of Rust.
+By using this, we can implement multi-threaded applications.
+In this chapter, we will describe how to use <code>safe_drive</code> with async/await.
+We use <code>async_std</code> as a asynchronous library,
+but you can use <code>Tokio</code> instead.</p>
+<h2 id="creating-projects"><a class="header" href="#creating-projects">Creating Projects</a></h2>
+<p>Before implementing, we need to prepare projects as follows.</p>
+<pre><code class="language-text">$ mkdir -p mt_pubsub/src
+$ cd mt_pubsub/src
+$ cargo new publishers
+$ cargo new subscribers
+</code></pre>
+<p>The <code>mt_pubsub</code> is the root directory of this project,
+and we created <code>publishers</code> and <code>subscribers</code> of Rust's projects.
+At the moment, the following directories is present.</p>
+<div class="table-wrapper"><table><thead><tr><th>Directories</th><th>What?</th></tr></thead><tbody>
+<tr><td>mt_pubsub/src/publishers</td><td>publishers in Rust</td></tr>
+<tr><td>mt_pubsub/src/subscribers</td><td>subscribers in Rust</td></tr>
+</tbody></table>
+</div>
+<h2 id="common-configuration"><a class="header" href="#common-configuration">Common Configuration</a></h2>
+<p>Then, we have to create or edit the following files for basic configurations.</p>
+<div class="table-wrapper"><table><thead><tr><th>Files</th><th>What?</th></tr></thead><tbody>
+<tr><td>mt_pubsub/src/publishers/Cargo.toml</td><td>for Cargo</td></tr>
+<tr><td>mt_pubsub/src/publishers/package.xml</td><td>for ROS2</td></tr>
+<tr><td>mt_pubsub/src/publishers/build.rs</td><td>for rustc</td></tr>
+<tr><td>mt_pubsub/src/subscribers/Cargo.toml</td><td>for Cargo</td></tr>
+<tr><td>mt_pubsub/src/subscribers/package.xml</td><td>for ROS2</td></tr>
+<tr><td>mt_pubsub/src/subscribers/build.rs</td><td>for rustc</td></tr>
+<tr><td>mt_pubsub/src/Cargo.toml</td><td>for Cargo's workspace</td></tr>
+</tbody></table>
+</div>
+<p>To enable rust-analyzer in the <code>mt_pubsub</code> directory and reduce the compilation time,
+prepare workspace's <code>Cargo.toml</code> as follows.</p>
+<pre><code class="language-toml"># mt_pubsub/src/Cargo.toml
+[workspace]
+members = [&quot;publishers&quot;, &quot;subscribers&quot;]
+</code></pre>
+<p><code>package.xml</code>s are almost same as <a href="./pubsub.html">Publish and Subscribe</a>.
+If you cannot understand what these files do,
+please go back to the previous chapter.</p>
+<pre><code class="language-xml">&lt;!-- publishers/package.xml --&gt;
+&lt;?xml version=&quot;1.0&quot;?&gt;
+&lt;?xml-model href=&quot;http://download.ros.org/schema/package_format3.xsd&quot; schematypens=&quot;http://www.w3.org/2001/XMLSchema&quot;?&gt;
+&lt;package format=&quot;3&quot;&gt;
+  &lt;name&gt;publishers&lt;/name&gt;
+  &lt;version&gt;0.0.0&lt;/version&gt;
+  &lt;description&gt;MT-Publishers&lt;/description&gt;
+  &lt;maintainer email=&quot;yuuki.takano@tier4.jp&quot;&gt;Yuuki Takano&lt;/maintainer&gt;
+  &lt;license&gt;Apache License 2.0&lt;/license&gt;
+
+  &lt;build_depend&gt;std_msgs&lt;/build_depend&gt;
+
+  &lt;test_depend&gt;ament_lint_auto&lt;/test_depend&gt;
+  &lt;test_depend&gt;ament_lint_common&lt;/test_depend&gt;
+
+  &lt;export&gt;
+    &lt;build_type&gt;ament_cargo&lt;/build_type&gt;
+  &lt;/export&gt;
+&lt;/package&gt;
+</code></pre>
+<pre><code class="language-xml">&lt;!-- subscribers/package.xml --&gt;
+&lt;!-- other entries are omitted --&gt;
+  &lt;name&gt;subscribers&lt;/name&gt;
+  &lt;description&gt;MT-Subscribers&lt;/description&gt;
+</code></pre>
+<p>To use <code>async_std</code>, we have to update <code>Cargo.toml</code> as follows.</p>
+<pre><code class="language-toml"># Cargo.toml
+[dependencies]
+async-std = { version = &quot;1&quot;, features = [&quot;attributes&quot;] }
+safe_drive = { path = &quot;path_to/safe_drive&quot;, default-features = false, features = [&quot;galactic&quot;] }
+std_msgs = { path = &quot;/tmp/safe_drive_tutorial/mt_pubsub/std_msgs&quot; }
+
+[package.metadata.ros]
+msg = [&quot;std_msgs&quot;]
+msg_dir = &quot;/tmp/safe_drive_tutorial/mt_pubsub&quot;
+safe_drive_path = &quot;path_to/safe_drive&quot;
+</code></pre>
+<h2 id="publishers"><a class="header" href="#publishers">Publishers</a></h2>
+<p>The <code>publishers</code> publishes messages to 2 topics periodically.
+This create 2 tasks.
+One is send a message every 500ms,
+and another is send a message every 250ms.
+The code of the <code>publishers</code> is as follows.</p>
+<pre><pre class="playground"><code class="language-rust">// mt_pubsub/src/publishers/src/main.rs
+use safe_drive::{context::Context, error::DynError};
+use std::time::Duration;
+
+#[async_std::main]
+async fn main() -&gt; Result&lt;(), DynError&gt; {
+    // Create a context and a node.
+    let ctx = Context::new()?;
+    let node = ctx.create_node(&quot;publishers&quot;, None, Default::default())?;
+
+    // Create publishers.
+    let publisher1 = node.create_publisher::&lt;std_msgs::msg::String&gt;(&quot;topic1&quot;, None)?;
+    let publisher2 = node.create_publisher::&lt;std_msgs::msg::String&gt;(&quot;topic2&quot;, None)?;
+
+    // Create a task which sends &quot;Hello, World!&quot;.
+    let task1 = async_std::task::spawn(async move {
+        let mut msg = std_msgs::msg::String::new().unwrap();
+        msg.data.assign(&quot;Hello, World!&quot;);
+        for _ in 0..50 {
+            publisher1.send(&amp;msg).unwrap(); // Send a message.
+            async_std::task::sleep(Duration::from_millis(500)).await; // Sleep 500ms.
+        }
+    });
+
+    // Create a task which sends &quot;Hello, Universe!&quot;.
+    let task2 = async_std::task::spawn(async move {
+        let mut msg = std_msgs::msg::String::new().unwrap();
+        msg.data.assign(&quot;Hello, Universe!&quot;);
+        for _ in 0..100 {
+            publisher2.send(&amp;msg).unwrap(); // Send a message.
+            async_std::task::sleep(Duration::from_millis(250)).await; // Sleep 250ms.
+        }
+    });
+
+    task1.await;
+    task2.await;
+
+    Ok(())
+}
+</code></pre></pre>
+<p>The <code>async_std::task::spawn</code> creates a asynchronous task,
+which is similar to a thread.
+The following is a excerpt creating a task which sends &quot;Hello, World!&quot;
+to &quot;topic1&quot; every 500ms.</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>// Create a task which sends &quot;Hello, World!&quot;.
+let task1 = async_std::task::spawn(async move {
+    let mut msg = std_msgs::msg::String::new().unwrap();
+    msg.data.assign(&quot;Hello, World!&quot;);
+    for _ in 0..50 {
+        publisher1.send(&amp;msg).unwrap(); // Send a message.
+        async_std::task::sleep(Duration::from_millis(500)).await; // Sleep 500ms.
+    }
+});
+<span class="boring">}
+</span></code></pre></pre>
+<p>This excerpt sends a message by <code>Publisher::send</code> and sleep by <code>async_std::task::sleep</code>.
+Note that this uses <code>async_std::task::sleep</code> instead of <code>std::thread::sleep</code>,
+because the former is non-blocking but the the latter is blocking.
+Calling blocking functions should be avoided in asynchronous tasks.</p>
+<h2 id="subscribers"><a class="header" href="#subscribers">Subscribers</a></h2>
+<p>Then, let's implement the <code>subscribers</code>.
+The main function is almost same as previous one.</p>
+<pre><pre class="playground"><code class="language-rust">// mt_pubsub/src/subscribers/src/main
+use safe_drive::{
+    context::Context, error::DynError, logger::Logger, pr_info, topic::subscriber::Subscriber,
+};
+
+#[async_std::main]
+async fn main() -&gt; Result&lt;(), DynError&gt; {
+    // Create a context and a node.
+    let ctx = Context::new()?;
+    let node = ctx.create_node(&quot;subscribers&quot;, None, Default::default())?;
+
+    // Create subscribers.
+    let subscriber1 = node.create_subscriber::&lt;std_msgs::msg::String&gt;(&quot;topic1&quot;, None)?;
+    let subscriber2 = node.create_subscriber::&lt;std_msgs::msg::String&gt;(&quot;topic2&quot;, None)?;
+
+    // Receive messages.
+    let task1 = async_std::task::spawn(receiver(subscriber1));
+    let task2 = async_std::task::spawn(receiver(subscriber2));
+
+    task1.await?;
+    task2.await?;
+
+    Ok(())
+}
+
+async fn receiver(mut subscriber: Subscriber&lt;std_msgs::msg::String&gt;) -&gt; Result&lt;(), DynError&gt; {
+    let logger = Logger::new(subscriber.get_topic_name());
+
+    loop {
+        // Receive a message
+        let msg = subscriber.recv().await?;
+        pr_info!(logger, &quot;{}&quot;, msg.data);
+    }
+}
+</code></pre></pre>
+<p><code>Subscriber::recv</code> is an asynchronous function to receive a message.
+To receive asynchronously, use the <code>.await</code> keyword.
+If there is a message to be received, <code>recv().await</code> returns the message immediately.
+Otherwise, it yields the execution to another task and sleeps until arriving a message.</p>
+<h3 id="modification-for-timeout"><a class="header" href="#modification-for-timeout">Modification for Timeout</a></h3>
+<p>By using a timeout mechanism provided by asynchronous libraries,
+we can implement receiving with timeout.
+Timeout can be implemented as follows.</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>use async_std::future::timeout;
+use safe_drive::pr_warn;
+use std::time::Duration;
+async fn receiver(mut subscriber: Subscriber&lt;std_msgs::msg::String&gt;) -&gt; Result&lt;(), DynError&gt; {
+    let logger = Logger::new(subscriber.get_topic_name());
+
+    loop {
+        // Receive a message with 3s timeout.
+        match timeout(Duration::from_secs(3), subscriber.recv()).await {
+            Ok(result) =&gt; pr_info!(logger, &quot;received: {}&quot;, result?.data),
+            Err(_) =&gt; {
+                // Timed out. Finish receiving.
+                pr_warn!(logger, &quot;timeout&quot;);
+                break;
+            }
+        }
+    }
+
+    Ok(())
+}
+<span class="boring">}
+</span></code></pre></pre>
+<p><code>async_std::timeout</code> is a function to represent timeout.
+<code>timeout(Duration::from_secs(3), subscriber.recv()).await</code> calls <code>subscriber.recv()</code> asynchronously,
+but it will be timed out after 3s later.</p>
+<h2 id="execution"><a class="header" href="#execution">Execution</a></h2>
+<p>First, execute <code>publishers</code> in a terminal application window as follows.</p>
+<pre><code class="language-text">$ cd mt_pubsub
+$ colcon build --cargo-args --release
+$ . ./install/setup.bash
+$ ros2 run publishers publishers
+</code></pre>
+<p>Then, execute <code>subscribers</code> in another terminal application window as follows.
+This uses timeout for receiving.</p>
+<pre><code class="language-text">$ cd mt_pubsub.
+$ . ./install/setup.bash
+$ ros2 run subscribers subscribers
+[INFO] [1657076046.969809600] [topic2]: received: Hello, Universe!
+[INFO] [1657076047.220104100] [topic2]: received: Hello, Universe!
+[INFO] [1657076047.447426100] [topic1]: received: Hello, World!
+[INFO] [1657076047.470348600] [topic2]: received: Hello, Universe!
+[INFO] [1657076047.721980900] [topic2]: received: Hello, Universe!
+[WARN] [1657076050.448393200] [topic1]: timeout
+[WARN] [1657076050.722433800] [topic2]: timeout
+</code></pre>
+<p>Nicely done!
+We are sending and receiving messages asynchronously.
+In addition to that, the timeouts work correctly.</p>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="user-defined-data-structure"><a class="header" href="#user-defined-data-structure">User Defined Data Structure</a></h1>
+<p>Until previous tutorial, we used pre-defined message types.
+In this tutorial, we will describe how to define user defined types.</p>
+<h2 id="create-project-directory"><a class="header" href="#create-project-directory">Create Project Directory</a></h2>
+<p>Then create a project directory as follows.</p>
+<pre><code class="language-text">$ mkdir -p msgtest/src
+</code></pre>
+<p>Throughout this tutorial, we will create 4 packages as follows.</p>
+<div class="table-wrapper"><table><thead><tr><th>packages</th><th>description</th></tr></thead><tbody>
+<tr><td>msgtest/src/my_interfaces</td><td>defining types of ROS2</td></tr>
+<tr><td>msgtest/src/talker</td><td>a publisher</td></tr>
+<tr><td>msgtest/src/listener</td><td>a subscriber</td></tr>
+</tbody></table>
+</div>
+<h2 id="workspaces-cargotoml"><a class="header" href="#workspaces-cargotoml">Workspace's <code>Cargo.toml</code></a></h2>
+<p>The workspace's <code>Cargo.toml</code> should be created as follows.</p>
+<pre><code class="language-toml"># msgtest/src/Cargo.toml
+[workspace]
+members = [&quot;talker&quot;, &quot;listener&quot;]
+</code></pre>
+<p>Then, create projects as follows.</p>
+<pre><code class="language-text">$ cd msgtest/src
+$ cargo new talker
+$ cargo new listener
+</code></pre>
+<h2 id="define-user-defined-type"><a class="header" href="#define-user-defined-type">Define User Defined Type</a></h2>
+<p>To define message types, we have to create a ROS2's package,
+and create a '.msg' files.
+The package can be created in the ordinary way of ROS2 as follows.</p>
+<pre><code class="language-text">$ cd msgtest/src
+$ ros2 pkg create --build-type ament_cmake my_interfaces
+$ cd my_interfaces
+$ mkdir msg
+$ cd msg
+</code></pre>
+<h3 id="primitive-type-my_interfacesmsgmymsgmsg"><a class="header" href="#primitive-type-my_interfacesmsgmymsgmsg">Primitive Type: <code>my_interfaces/msg/MyMsg.msg</code></a></h3>
+<p>Then create a file, <code>msgtest/src/my_interfaces/msg</code>, as follows.</p>
+<pre><code class="language-text">int32 integer_value
+int32[] unbounded_integer_array
+int32[5] five_integers_array
+int32[&lt;=5] up_to_five_integers_array
+</code></pre>
+<p>There are 4 values in this type.</p>
+<ul>
+<li><code>integer_value</code> : a value of the <code>int32</code> type</li>
+<li><code>unbounded_integer_array</code> : an unbounded array of the <code>int32</code> type</li>
+<li><code>five_integers_array</code> : an array which size is 5 of the <code>int32</code> type</li>
+<li><code>up_to_five_integers_array</code> : an array whose size is up to 5 of the <code>int32</code> type</li>
+</ul>
+<h3 id="using-user-defiend-type-my_interfacesmsgmymsgsmsg"><a class="header" href="#using-user-defiend-type-my_interfacesmsgmymsgsmsg">Using User Defiend Type: <code>my_interfaces/msg/MyMsgs.msg</code></a></h3>
+<p>We can use the <code>MyMsg</code> previously defined in another message type, <code>msgtest/src/my_interfaces/msg/MyMsgs.msg</code>, as follows.</p>
+<pre><code class="language-text">MyMsg msg1
+MyMsg msg2
+</code></pre>
+<h3 id="string-type-my_interfacesmsgmymsgstrmsg"><a class="header" href="#string-type-my_interfacesmsgmymsgstrmsg">String Type: <code>my_interfaces/msg/MyMsgStr.msg</code></a></h3>
+<p>A size of an array can be specified as described above,
+a length of a string can be also specified.
+For example, <code>string&lt;=10</code> is a type of string,
+but its length is up to 10.</p>
+<p>We prepare <code>msgtest/src/my_interfaces/msg/MyMsgStr.msg</code> as follows.</p>
+<pre><code class="language-text">string message
+string[2] static_array_str
+string[] dynamic_array_str
+string[&lt;=3] bounded_array_str
+
+string&lt;=10 bounded_str
+string&lt;=10[2] static_array_bounded_str
+string&lt;=10[] dynamic_array_bounded_str
+string&lt;=10[&lt;=3] bounded_array_bounded_str
+</code></pre>
+<h3 id="edit-my_interfacescmakeliststxt"><a class="header" href="#edit-my_interfacescmakeliststxt">Edit <code>my_interfaces/CMakeLists.txt</code></a></h3>
+<p>To generate C or C++ files and libraries for used defined types,
+we have to edit <code>CMakeLists.txt</code> as follows.</p>
+<pre><code class="language-cmake"># msgtest/src/my_interfaces/CMakeLists.txt
+find_package(rosidl_default_generators REQUIRED)
+
+rosidl_generate_interfaces(${PROJECT_NAME}
+  &quot;msg/MyMsg.msg&quot;
+  &quot;msg/MyMsgs.msg&quot;
+  &quot;msg/MyMsgStr.msg&quot;
+)
+</code></pre>
+<p>We have to specify messages files in <code>CMakeLists.txt</code>.</p>
+<h3 id="edit-my_interfacespackagexml"><a class="header" href="#edit-my_interfacespackagexml">Edit <code>my_interfaces/package.xml</code></a></h3>
+<p>We also have to edit <code>package.xml</code> as follows.</p>
+<pre><code class="language-xml">&lt;!-- msgtest/src/my_interfaces/package.xml --&gt;
+&lt;build_depend&gt;rosidl_default_generators&lt;/build_depend&gt;
+
+&lt;exec_depend&gt;rosidl_default_runtime&lt;/exec_depend&gt;
+
+&lt;member_of_group&gt;rosidl_interface_packages&lt;/member_of_group&gt;
+</code></pre>
+<h2 id="user-defined-type-in-rust"><a class="header" href="#user-defined-type-in-rust">User Defined Type in Rust</a></h2>
+<p>Primitive types are translated into Rust's types as follows.</p>
+<div class="table-wrapper"><table><thead><tr><th>ROS2</th><th>Rust</th></tr></thead><tbody>
+<tr><td>bool</td><td>bool</td></tr>
+<tr><td>byte</td><td>u8</td></tr>
+<tr><td>char</td><td>i8</td></tr>
+<tr><td>int8</td><td>i8</td></tr>
+<tr><td>uint8</td><td>u8</td></tr>
+<tr><td>int16</td><td>i16</td></tr>
+<tr><td>uint16</td><td>u16</td></tr>
+<tr><td>int32</td><td>i32</td></tr>
+<tr><td>uint32</td><td>u32</td></tr>
+<tr><td>int64</td><td>i64</td></tr>
+<tr><td>uint64</td><td>u64</td></tr>
+<tr><td>float32</td><td>f32</td></tr>
+<tr><td>float64</td><td>f64</td></tr>
+<tr><td>string</td><td>safe_drive::msg::RosString</td></tr>
+</tbody></table>
+</div>
+<h3 id="generated-types"><a class="header" href="#generated-types">Generated Types</a></h3>
+<p>Array types are generated as follows.</p>
+<div class="table-wrapper"><table><thead><tr><th>ROS2</th><th>Rust</th></tr></thead><tbody>
+<tr><td>int32[5]</td><td>[i32; 5]</td></tr>
+<tr><td>int32[]</td><td>safe_drive::msg::I32Seq&lt;0&gt;</td></tr>
+<tr><td>int32[&lt;=5]</td><td>safe_drive::msg::I32Seq&lt;5&gt;</td></tr>
+</tbody></table>
+</div>
+<p><code>0</code> of <code>I32Seq&lt;0&gt;</code> indicates unbounded, and <code>5</code> of <code>I32Seq&lt;5&gt;</code> indicates less than or equal to 5.
+So, <code>MyMsg</code> and <code>MyMsgs</code> are generated as follows.</p>
+<h2 id="talker"><a class="header" href="#talker">Talker</a></h2>
+<p>Let's implement a talker which publishes <code>MyMsgs</code> periodically.</p>
+<h3 id="edit-talkercargotoml"><a class="header" href="#edit-talkercargotoml">Edit <code>talker/Cargo.toml</code></a></h3>
+<p>To use the generated types in Rust, we have to edit <code>Cargo.toml</code> as follows.
+The most important thing is to add <code>my_interfaces</code>, which defines message types we use.</p>
+<pre><code class="language-toml"># msgtest/src/talker/Cargo.toml
+[dependencies]
+safe_drive = { path = &quot;/tmp/safe_drive&quot;, default-features = false, features = [&quot;galactic&quot;] }
+my_interfaces = { path = &quot;/tmp/safe_drive_tutorial/msgtest/my_interfaces&quot; }
+
+[package.metadata.ros]
+msg = [&quot;my_interfaces&quot;]
+msg_dir = &quot;/tmp/safe_drive_tutorial/msgtest&quot;
+safe_drive_path = &quot;/tmp/safe_drive&quot;
+</code></pre>
+<h3 id="create-talkerpackagexml"><a class="header" href="#create-talkerpackagexml">Create <code>talker/package.xml</code></a></h3>
+<p>Then create <code>package.xml</code> as follows.</p>
+<pre><code class="language-xml">&lt;!-- msgtest/src/talker/package.xml --&gt;
+&lt;?xml version=&quot;1.0&quot;?&gt;
+&lt;?xml-model href=&quot;http://download.ros.org/schema/package_format3.xsd&quot; schematypens=&quot;http://www.w3.org/2001/XMLSchema&quot;?&gt;
+&lt;package format=&quot;3&quot;&gt;
+  &lt;name&gt;talker&lt;/name&gt;
+  &lt;version&gt;0.0.0&lt;/version&gt;
+  &lt;description&gt;Talker in Rust&lt;/description&gt;
+  &lt;maintainer email=&quot;yuuki.takano@tier4.jp&quot;&gt;Yuuki Takano&lt;/maintainer&gt;
+  &lt;license&gt;Apache License 2.0&lt;/license&gt;
+
+  &lt;test_depend&gt;ament_lint_auto&lt;/test_depend&gt;
+  &lt;test_depend&gt;ament_lint_common&lt;/test_depend&gt;
+
+  &lt;depend&gt;my_interfaces&lt;/depend&gt;
+
+  &lt;export&gt;
+    &lt;build_type&gt;ament_cargo&lt;/build_type&gt;
+  &lt;/export&gt;
+&lt;/package&gt;
+</code></pre>
+<p>Don't forget <code>&lt;depend&gt;my_interfaces&lt;/depend&gt;</code>.</p>
+<h3 id="generated-files"><a class="header" href="#generated-files">Generated Files</a></h3>
+<p>When you run <code>colcon</code>, it generate <code>my_interfaces</code> in Rust.</p>
+<pre><code class="language-text">$ cd msgtest
+$ colcon build --cargo-args --release
+</code></pre>
+<p>Then, you can find Rust's files as follows.</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>// /tmp/safe_drive_tutorial/msgtest/my_interfaces/src/msg/my_msg.rs
+#[repr(C)]
+#[derive(Debug)]
+pub struct MyMsg {
+    pub integer_value: i32,
+    pub unbounded_integer_array: safe_drive::msg::I32Seq&lt;0&gt;,
+    pub five_integers_array: [i32; 5],
+    pub up_to_five_integers_array: safe_drive::msg::I32Seq&lt;5&gt;,
+}
+<span class="boring">}
+</span></code></pre></pre>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>// /tmp/safe_drive_tutorial/msgtest/my_interfaces/src/msg/my_msgs.rs
+#[repr(C)]
+#[derive(Debug)]
+pub struct MyMsgs {
+    pub msg1: crate::msg::my_msg::MyMsg,
+    pub msg2: crate::msg::my_msg::MyMsg,
+}
+<span class="boring">}
+</span></code></pre></pre>
+<h3 id="edit-talkersrcmainrs"><a class="header" href="#edit-talkersrcmainrs">Edit <code>talker/src/main.rs</code></a></h3>
+<p>If you want to know how to implement a subscriber or a publisher, please see <a href="./pubsub.html">a tutorial of Pub/Sub</a>. This section describes how to handle a messages generated by <code>ros2msg_to_rs</code>.</p>
+<pre><pre class="playground"><code class="language-rust">// msgtest/src/talker/src/main.rs
+use safe_drive::{
+    context::Context,
+    error::DynError,
+    logger::Logger,
+    msg::{I32Seq, RosStringSeq},
+    pr_info,
+};
+use std::time::Duration;
+
+fn main() -&gt; Result&lt;(), DynError&gt; {
+    // Create a context.
+    let ctx = Context::new()?;
+
+    // Create a node.
+    let node = ctx.create_node(&quot;talker&quot;, None, Default::default())?;
+
+    // Create a publisher.
+    let publisher = node.create_publisher::&lt;my_interfaces::msg::MyMsgs&gt;(&quot;my_topic&quot;, None)?;
+
+    // Create a logger.
+    let logger = Logger::new(&quot;talker&quot;);
+
+    // Create a message
+    let my_msg1 = create_message()?;
+    let my_msg2 = create_message()?;
+
+    let mut my_msgs = my_interfaces::msg::MyMsgs::new().ok_or(&quot;failed to create MyMsgs&quot;)?;
+    my_msgs.msg1 = my_msg1;
+    my_msgs.msg2 = my_msg2;
+
+    loop {
+        pr_info!(logger, &quot;send: {:?}&quot;, my_msgs); // Print log.
+
+        // Send a message.
+        publisher.send(&amp;my_msgs)?;
+
+        std::thread::sleep(Duration::from_secs(1));
+    }
+}
+
+fn create_message() -&gt; Result&lt;my_interfaces::msg::MyMsg, DynError&gt; {
+    let mut my_msg = my_interfaces::msg::MyMsg::new().unwrap();
+
+    my_msg.integer_value = 10;
+
+    // int32[5] five_integers_array
+    my_msg.five_integers_array[0] = 11;
+    my_msg.five_integers_array[1] = 13;
+    my_msg.five_integers_array[2] = 49;
+    my_msg.five_integers_array[3] = 55;
+    my_msg.five_integers_array[4] = 19;
+
+    // int32[] unbounded_integer_array
+    let mut msgs = I32Seq::new(3).unwrap();
+    let ref_msgs = msgs.as_slice_mut();
+    ref_msgs[0] = 6;
+    ref_msgs[1] = 7;
+    ref_msgs[2] = 8;
+    my_msg.unbounded_integer_array = msgs;
+
+    // int32[&lt;=5] up_to_five_integers_array
+    let mut msgs = I32Seq::new(2).unwrap();
+    let ref_msgs = msgs.as_slice_mut();
+    ref_msgs[0] = 2;
+    ref_msgs[1] = 3;
+    my_msg.up_to_five_integers_array = msgs;
+
+    Ok(my_msg)
+}
+</code></pre></pre>
+<p>Primitive types and arrays can be handles in the ordinary way of Rust as follows.</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>my_msg.integer_value = 10;
+
+// int32[5] five_integers_array
+my_msg.five_integers_array[0] = 11;
+my_msg.five_integers_array[1] = 13;
+my_msg.five_integers_array[2] = 49;
+my_msg.five_integers_array[3] = 55;
+my_msg.five_integers_array[4] = 19;
+<span class="boring">}
+</span></code></pre></pre>
+<p>To access elements of unbounded or bounded arrays,
+we can use <code>as_slice_mut()</code> or <code>as_slice()</code> methods as follows.</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>// unbounded or unbounded array
+let mut msgs = I32Seq::new(3).unwrap();
+let ref_msgs = msgs.as_slice_mut();
+<span class="boring">}
+</span></code></pre></pre>
+<p><code>as_slice_mut()</code> returns a mutable slice,
+you can thus update the elements of the array via the slice.</p>
+<h2 id="listener"><a class="header" href="#listener">Listener</a></h2>
+<p>Let's then implement a listener which receive messages published by the talker.</p>
+<h3 id="edit-listenercargotoml"><a class="header" href="#edit-listenercargotoml">Edit <code>listener/Cargo.toml</code></a></h3>
+<p>The listener also requires <code>my_interfaces</code>, and edit <code>Cargo.toml</code> as follows.</p>
+<pre><code class="language-toml"># msgtest/src/listener/Cargo.toml
+[dependencies]
+safe_drive = { path = &quot;/tmp/safe_drive&quot;, default-features = false, features = [&quot;galactic&quot;] }
+my_interfaces = { path = &quot;/tmp/safe_drive_tutorial/msgtest/my_interfaces&quot; }
+
+[package.metadata.ros]
+msg = [&quot;my_interfaces&quot;]
+msg_dir = &quot;/tmp/safe_drive_tutorial/msgtest&quot;
+safe_drive_path = &quot;/tmp/safe_drive&quot;
+</code></pre>
+<h3 id="create-listenerpackagexml"><a class="header" href="#create-listenerpackagexml">Create <code>listener/package.xml</code></a></h3>
+<p>Then create <code>package.xml</code> as follows.</p>
+<pre><code class="language-xml">&lt;!-- msgtest/src/listener/package.xml --&gt;
+&lt;?xml version=&quot;1.0&quot;?&gt;
+&lt;?xml-model href=&quot;http://download.ros.org/schema/package_format3.xsd&quot; schematypens=&quot;http://www.w3.org/2001/XMLSchema&quot;?&gt;
+&lt;package format=&quot;3&quot;&gt;
+  &lt;name&gt;listener&lt;/name&gt;
+  &lt;version&gt;0.0.0&lt;/version&gt;
+  &lt;description&gt;Listener in Rust&lt;/description&gt;
+  &lt;maintainer email=&quot;yuuki.takano@tier4.jp&quot;&gt;Yuuki Takano&lt;/maintainer&gt;
+  &lt;license&gt;Apache License 2.0&lt;/license&gt;
+
+  &lt;test_depend&gt;ament_lint_auto&lt;/test_depend&gt;
+  &lt;test_depend&gt;ament_lint_common&lt;/test_depend&gt;
+
+  &lt;depend&gt;my_interfaces&lt;/depend&gt;
+
+  &lt;export&gt;
+    &lt;build_type&gt;ament_cargo&lt;/build_type&gt;
+  &lt;/export&gt;
+&lt;/package&gt;
+</code></pre>
+<p>Don't forget <code>&lt;depend&gt;my_interfaces&lt;/depend&gt;</code>.</p>
+<h3 id="edit-listenersrcmainrs"><a class="header" href="#edit-listenersrcmainrs">Edit <code>listener/src/main.rs</code></a></h3>
+<p>The listener can also be implemented straightforwardly as follows.</p>
+<pre><pre class="playground"><code class="language-rust">// msgtest/src/listener/src/main.rs
+use my_interfaces_rs::my_interfaces;
+use safe_drive::{context::Context, error::DynError, logger::Logger, pr_info};
+
+fn main() -&gt; Result&lt;(), DynError&gt; {
+    // Create a context.
+    let ctx = Context::new()?;
+
+    // Create a node.
+    let node = ctx.create_node(&quot;listener&quot;, None, Default::default())?;
+
+    // Create a subscriber.
+    let subscriber = node.create_subscriber::&lt;my_interfaces::msg::MyMsgs&gt;(&quot;my_topic&quot;, None)?;
+
+    // Create a logger.
+    let logger = Logger::new(&quot;listener&quot;);
+
+    // Create a selector.
+    let mut selector = ctx.create_selector()?;
+
+    pr_info!(logger, &quot;listening&quot;);
+
+    // Add a callback function.
+    selector.add_subscriber(
+        subscriber,
+        Box::new(move |msg| {
+            let msg = &amp;msg.msg1;
+
+            pr_info!(logger, &quot;message: {}&quot;, msg.integer_value);
+
+            for msg in msg.five_integers_array.iter() {
+                pr_info!(logger, &quot;five_integers_array: {}&quot;, msg);
+            }
+
+            for msg in msg.unbounded_integer_array.iter() {
+                pr_info!(logger, &quot;unbounded_integer_array: {}&quot;, msg);
+            }
+
+            for msg in msg.up_to_five_integers_array.iter() {
+                pr_info!(logger, &quot;up_to_five_integers_array: {}&quot;, msg);
+            }
+        }),
+        false,
+    );
+
+    // Spin.
+    loop {
+        selector.wait()?;
+    }
+}
+</code></pre></pre>
+<h2 id="compilation-and-execution"><a class="header" href="#compilation-and-execution">Compilation and Execution</a></h2>
+<p>Now, we can compile and execute the talker and listener. Let's do it!</p>
+<h3 id="compile"><a class="header" href="#compile">Compile</a></h3>
+<p>The compilation can be performed by using <code>colcon</code> as follows.</p>
+<pre><code class="language-text">$ cd msgtest
+$ colcon build --cargo-args --release
+$ . ./install/setup.bash
+</code></pre>
+<h3 id="execute-listener"><a class="header" href="#execute-listener">Execute Listener</a></h3>
+<p>The listener can be executed by using <code>ros2</code> as follows.
+After executing the talker, it receives messages as follows.</p>
+<pre><code class="language-text">$ ros2 run listener listener
+[INFO] [1658305910.013449534] [listener]: listening
+[INFO] [1658305914.359791460] [listener]: message: 10
+[INFO] [1658305914.359839382] [listener]: five_integers_array: 11
+[INFO] [1658305914.359867532] [listener]: five_integers_array: 13
+[INFO] [1658305914.359880763] [listener]: five_integers_array: 49
+[INFO] [1658305914.359889731] [listener]: five_integers_array: 55
+[INFO] [1658305914.359900913] [listener]: five_integers_array: 19
+[INFO] [1658305914.359912534] [listener]: unbounded_integer_array: 6
+[INFO] [1658305914.359924084] [listener]: unbounded_integer_array: 7
+[INFO] [1658305914.359936971] [listener]: unbounded_integer_array: 8
+[INFO] [1658305914.359946479] [listener]: up_to_five_integers_array: 2
+[INFO] [1658305914.359959422] [listener]: up_to_five_integers_array: 3
+</code></pre>
+<h3 id="execute-talker"><a class="header" href="#execute-talker">Execute Talker</a></h3>
+<p>To execute the talker, open a new terminal window and execute it as follows.</p>
+<pre><code class="language-text">$ cd msgtest
+$ . ./install/setup.bash
+$ ros2 run talker talker
+[INFO] [1658305913.359250753] [talker]: send: MyMsgs { msg1: MyMsg { integer_value: 10, unbounded_integer_array: I32Seq(rosidl_runtime_c__int32__Sequence { data: 0x55a0653f7aa0, size: 3, capacity: 3 }), five_integers_array: [11, 13, 49, 55, 19], up_to_five_integers_array: I32Seq(rosidl_runtime_c__int32__Sequence { data: 0x55a0653efaa0, size: 2, capacity: 2 }) }, msg2: MyMsg { integer_value: 10, unbounded_integer_array: I32Seq(rosidl_runtime_c__int32__Sequence { data: 0x55a0653f7e30, size: 3, capacity: 3 }), five_integers_array: [11, 13, 49, 55, 19], up_to_five_integers_array: I32Seq(rosidl_runtime_c__int32__Sequence { data: 0x55a0653f7e50, size: 2, capacity: 2 }) }
+</code></pre>
+<p>Nicely done! Now, we can define new types and handle the types in Rust.</p>
+<h2 id="string-type"><a class="header" href="#string-type">String Type</a></h2>
+<p>Arrays of string are bit different from arrays of primitive types.
+<code>string</code> is unbounded string, and <code>string&lt;=5</code> is bounded string whose length is up to 5.
+So, there are arrays for unbounded and bounded strings as follows; <code>msg</code> is <code>safe_drive::msg</code>.</p>
+<div class="table-wrapper"><table><thead><tr><th>ROS</th><th>Rust</th></tr></thead><tbody>
+<tr><td>string</td><td>msg::RosString&lt;0&gt;</td></tr>
+<tr><td>string[]</td><td>msg::StringSeq&lt;0, 0&gt;</td></tr>
+<tr><td>string[&lt;=5]</td><td>msg::StringSeq&lt;0, 5&gt;</td></tr>
+<tr><td>string[10]</td><td>[msg::RosString&lt;0&gt;; 10]</td></tr>
+<tr><td>string&lt;=5</td><td>msg::RosString&lt;5&gt;</td></tr>
+<tr><td>string&lt;=5[&lt;=10]</td><td>msg::StringSeq&lt;5, 10&gt;</td></tr>
+<tr><td>string&lt;=5[10]</td><td>[msg::RosString&lt;5&gt;; 10]</td></tr>
+</tbody></table>
+</div>
+<p><code>RosString&lt;0&gt;</code> is a type of unbounded string, and <code>RosString&lt;5&gt;</code> is a type of bounded string whose length is less than or equal to 5.
+<code>5</code> of <code>StringSeq&lt;5, 10&gt;</code> indicates the length of a string is less than or equal to 5,
+and <code>10</code> of it indicates the length of the array is less than or equal to 10.</p>
+<p>For example, the following ROS2 message type can be translated into the <code>MyMsgStr</code> as follows.</p>
+<pre><code class="language-text">string message
+string[2] static_array_str
+string[] dynamic_array_str
+string[&lt;=3] bounded_array_str
+
+string&lt;=10 bounded_str
+string&lt;=10[2] static_array_bounded_str
+string&lt;=10[] dynamic_array_bounded_str
+string&lt;=10[&lt;=3] bounded_array_bounded_str
+</code></pre>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>// /tmp/safe_drive_tutorial/msgtest/my_interfaces/src/msg/my_msg_str.rs
+#[repr(C)]
+#[derive(Debug)]
+pub struct MyMsgStr {
+    pub message: safe_drive::msg::RosString&lt;0&gt;,
+    pub static_array_str: [safe_drive::msg::RosString&lt;0&gt;; 2],
+    pub dynamic_array_str: safe_drive::msg::RosStringSeq&lt;0, 0&gt;,
+    pub bounded_array_str: safe_drive::msg::RosStringSeq&lt;0, 3&gt;,
+    pub bounded_str: safe_drive::msg::RosString&lt;10&gt;,
+    pub static_array_bounded_str: [safe_drive::msg::RosString&lt;10&gt;; 2],
+    pub dynamic_array_bounded_str: safe_drive::msg::RosStringSeq&lt;10, 0&gt;,
+    pub bounded_array_bounded_str: safe_drive::msg::RosStringSeq&lt;10, 3&gt;,
+}
+<span class="boring">}
+</span></code></pre></pre>
+<p>To access to elements of string arrays,
+we can use <code>as_slice_mut()</code> or <code>as_slice_mut()</code> as follows.</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>fn _create_message_str() -&gt; Result&lt;my_interfaces::msg::MyMsgStr, DynError&gt; {
+    let mut my_msg = my_interfaces::msg::MyMsgStr::new().unwrap();
+
+    // string message
+    my_msg.message.assign(&quot;Hello, World!&quot;);
+
+    // string[2] static_array_str
+    my_msg.static_array_str[0].assign(&quot;static array 0&quot;);
+    my_msg.static_array_str[1].assign(&quot;static array 1&quot;);
+
+    // string[] dynamic_array_str
+    let mut msgs = RosStringSeq::new(3).ok_or(&quot;failed to create string&quot;)?;
+    let ref_msgs = msgs.as_slice_mut();
+    ref_msgs[0].assign(&quot;dynamic array 0&quot;);
+    ref_msgs[1].assign(&quot;dynamic array 1&quot;);
+    ref_msgs[2].assign(&quot;dynamic array 2&quot;);
+    my_msg.dynamic_array_str = msgs;
+
+    // string[&lt;=3] bounded_array_str
+    let mut msgs = RosStringSeq::new(2).ok_or(&quot;failed to create string&quot;)?;
+    let ref_msgs = msgs.as_slice_mut();
+    ref_msgs[0].assign(&quot;bounded array 0&quot;);
+    ref_msgs[1].assign(&quot;bounded array 1&quot;);
+    my_msg.bounded_array_str = msgs;
+
+    // string&lt;=10 bounded_str
+    my_msg.bounded_str.assign(&quot;Hello!&quot;);
+
+    // string&lt;=10[2] static_array_bounded_str
+    my_msg.static_array_bounded_str[0].assign(&quot;msg1&quot;);
+    my_msg.static_array_bounded_str[1].assign(&quot;msg2&quot;);
+
+    // string&lt;=10[] dynamic_array_bounded_str
+    let mut msgs = RosStringSeq::new(3).ok_or(&quot;failed to create string&quot;)?;
+    let ref_msgs = msgs.as_slice_mut();
+    ref_msgs[0].assign(&quot;msg3&quot;);
+    ref_msgs[1].assign(&quot;msg4&quot;);
+    ref_msgs[2].assign(&quot;msg5&quot;);
+    my_msg.dynamic_array_bounded_str = msgs;
+
+    // string&lt;=10[&lt;=3] bounded_array_bounded_str
+    let mut msgs = RosStringSeq::new(2).ok_or(&quot;failed to create string&quot;)?;
+    let ref_msgs = msgs.as_slice_mut();
+    ref_msgs[0].assign(&quot;msg3&quot;);
+    ref_msgs[1].assign(&quot;msg5&quot;);
+    my_msg.bounded_array_bounded_str = msgs;
+
+    Ok(my_msg)
+}
+<span class="boring">}
+</span></code></pre></pre>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="service"><a class="header" href="#service">Service</a></h1>
+<p>A service is a communication consisting requests and responses.
+There are a server and clients for a service as follows.</p>
+<pre class="mermaid">graph TD;
+    Server--response--&gt;Client1;
+    Server--response--&gt;Client2;
+    Server--response--&gt;Client3;
+    Client1--request--&gt;Server;
+    Client2--request--&gt;Server;
+    Client3--request--&gt;Server;
+</pre>
+<p>A client sends a request and the server replies the request.
+In this tutorial, we will describe how to implement a client and a server in Rust by using <code>safe_drive</code>.</p>
+<h2 id="create-base-files"><a class="header" href="#create-base-files">Create Base Files</a></h2>
+<p>In this tutorial, we prepare 3 Rust's projects and 1 C's project.
+The following table shows the directories we use.</p>
+<div class="table-wrapper"><table><thead><tr><th>Directories</th><th>Description</th></tr></thead><tbody>
+<tr><td>srvtest/src/server</td><td>server in Rust</td></tr>
+<tr><td>srvtest/src/client</td><td>client in Rust</td></tr>
+<tr><td>srvtest/src/srvmsg</td><td>message type</td></tr>
+</tbody></table>
+</div>
+<p><code>srvmsg</code> is a ROS2's project to define a user defined type for a service we implement.</p>
+<pre><code class="language-text">$ mkdir -p srvtest/src
+$ cd srvtest/src
+$ cargo new server
+$ cargo new client
+$ ros2 pkg create --build-type ament_cmake srvmsg
+</code></pre>
+<p>In addition to that, create the workspace's <code>Cargo.toml</code> as follows.</p>
+<pre><code class="language-toml"># srvtest/src/Cargo.toml
+[workspace]
+members = [ &quot;client&quot;, &quot;server&quot;]
+</code></pre>
+<h2 id="define-protocol"><a class="header" href="#define-protocol">Define Protocol</a></h2>
+<p>First of all, let's define a protocol for a service.
+ROS2 provides a special format to define a protocol,
+and it should be described in a <code>.srv</code> file.</p>
+<p>Usually, <code>.srv</code> files are placed in a <code>srv</code> directory.
+So, we create <code>srv</code> directory as follows.</p>
+<pre><code class="language-text">$ cd srvtest/src/srvmsg
+$ mkdir srv
+</code></pre>
+<h3 id="create-srvmsgsrvaddtwointssrv"><a class="header" href="#create-srvmsgsrvaddtwointssrv">Create <code>srvmsg/srv/AddTwoInts.srv</code></a></h3>
+<p>Then, create <code>AddTwoInts.srv</code> file in which a protocol is specified as follows.</p>
+<pre><code class="language-text">uint32 x
+uint32 y
+---
+uint32 result
+</code></pre>
+<p><code>uint32 x</code> and <code>uint32 y</code> above <code>--</code> are types which must be
+included in a request, and <code>uint32 result</code> is a type which must be
+included in a response.
+We will implement a server which takes 2 integer values
+and returns the summation of the values.</p>
+<h3 id="edit-srvmsgcmakeliststxt"><a class="header" href="#edit-srvmsgcmakeliststxt">Edit <code>srvmsg/CMakeLists.txt</code></a></h3>
+<p>To generate shared libraries from <code>AddTwoInts.srv</code>,
+<code>CMakeLists.txt</code> must be updated as follows.</p>
+<pre><code class="language-cmake"># srvtest/src/srvmsg/CMakeLists.txt
+find_package(rosidl_default_generators REQUIRED)
+
+rosidl_generate_interfaces(${PROJECT_NAME}
+  &quot;srv/AddTwoInts.srv&quot;
+)
+</code></pre>
+<h3 id="edit-srvmsgpackagexml"><a class="header" href="#edit-srvmsgpackagexml">Edit <code>srvmsg/package.xml</code></a></h3>
+<p>In addition to that, the following lines must be added to <code>package.xml</code>.</p>
+<pre><code class="language-xml">&lt;!-- srvtest/src/srvmsg/package.xml --&gt;
+&lt;build_depend&gt;rosidl_default_generators&lt;/build_depend&gt;
+&lt;exec_depend&gt;rosidl_default_runtime&lt;/exec_depend&gt;
+&lt;member_of_group&gt;rosidl_interface_packages&lt;/member_of_group&gt;
+</code></pre>
+<h2 id="server"><a class="header" href="#server">Server</a></h2>
+<p>A server can be implemented in a straightforward way.</p>
+<h3 id="edit-servercargotoml"><a class="header" href="#edit-servercargotoml">Edit <code>server/Cargo.toml</code></a></h3>
+<p>To generate Rust types from <code>.srv</code> files,
+we have to edit <code>Cargo.toml</code> as follows.</p>
+<pre><code class="language-toml">[dependencies]
+safe_drive = { path = &quot;/tmp/safe_drive&quot;, default-features = false, features = [&quot;galactic&quot;] }
+srvmsg = { path = &quot;/tmp/safe_drive_tutorial/srvtest/srvmsg&quot; }
+tokio = { version = &quot;1&quot;, features = [&quot;full&quot;] }
+
+[package.metadata.ros]
+msg = [&quot;srvmsg&quot;]
+msg_dir = &quot;/tmp/safe_drive_tutorial/srvtest&quot;
+safe_drive_path = &quot;/tmp/safe_drive&quot;
+</code></pre>
+<h3 id="create-serverpackagexml"><a class="header" href="#create-serverpackagexml">Create <code>server/package.xml</code></a></h3>
+<p><code>package.xml</code> is also required as follows.</p>
+<pre><code class="language-xml">&lt;!-- srvtest/src/server/package.xml --&gt;
+&lt;?xml version=&quot;1.0&quot;?&gt;
+&lt;?xml-model href=&quot;http://download.ros.org/schema/package_format3.xsd&quot; schematypens=&quot;http://www.w3.org/2001/XMLSchema&quot;?&gt;
+&lt;package format=&quot;3&quot;&gt;
+  &lt;name&gt;server&lt;/name&gt;
+  &lt;version&gt;0.0.0&lt;/version&gt;
+  &lt;description&gt;Server in Rust&lt;/description&gt;
+  &lt;maintainer email=&quot;yuuki.takano@tier4.jp&quot;&gt;Yuuki Takano&lt;/maintainer&gt;
+  &lt;license&gt;Apache License 2.0&lt;/license&gt;
+
+  &lt;test_depend&gt;ament_lint_auto&lt;/test_depend&gt;
+  &lt;test_depend&gt;ament_lint_common&lt;/test_depend&gt;
+
+  &lt;depend&gt;srvmsg&lt;/depend&gt;
+
+  &lt;export&gt;
+    &lt;build_type&gt;ament_cargo&lt;/build_type&gt;
+  &lt;/export&gt;
+&lt;/package&gt;
+</code></pre>
+<p>Don't forget <code>&lt;depend&gt;srvmsg&lt;/depend&gt;</code>.</p>
+<h2 id="generate-types"><a class="header" href="#generate-types">Generate Types</a></h2>
+<p><code>AddTwoInts.srv</code> will be translated to <code>struct AddTwoInts</code> as follows.</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>pub struct AddTwoInts;
+
+impl ServiceMsg for AddTwoInts {
+    type Request = AddTwoIntsRequest;
+    type Response = AddTwoIntsResponse;
+    fn type_support() -&gt; *const rcl::rosidl_service_type_support_t {
+        unsafe {
+            rosidl_typesupport_c__get_service_type_support_handle__srvmsg__srv__AddTwoInts()
+        }
+    }
+}
+<span class="boring">}
+</span></code></pre></pre>
+<p><code>struct AddTwoInts</code> implements <code>ServiceMsg trait</code>.
+<code>ServiceMsg::Request</code> and <code>ServiceMsg::Response</code> are types of request and response, respectively.
+<code>AddTwoIntsRequest</code> and <code>AddTowIntsResponse</code> are as follows.</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>#[repr(C)]
+#[derive(Debug)]
+pub struct AddTwoIntsRequest {
+    pub x: u32,
+    pub y: u32,
+}
+
+#[repr(C)]
+#[derive(Debug)]
+pub struct AddTwoIntsResponse {
+    pub result: u32,
+}
+<span class="boring">}
+</span></code></pre></pre>
+<h3 id="edit-serversrcmainrs"><a class="header" href="#edit-serversrcmainrs">Edit <code>server/src/main.rs</code></a></h3>
+<p>You have to create a server by <code>create_server()</code> method and register a callback function to a selector as follows.</p>
+<pre><pre class="playground"><code class="language-rust">use safe_drive::{context::Context, error::DynError, logger::Logger, pr_error, qos::Profile};
+use srvmsg_rs::srvmsg::srv::{AddTwoInts, AddTwoIntsResponse};
+
+fn main() -&gt; Result&lt;(), DynError&gt; {
+    // Create a context.
+    let ctx = Context::new()?;
+
+    // Create a node.
+    let node = ctx.create_node(&quot;server_node&quot;, None, Default::default())?;
+
+    // Create a server.
+    let server = node.create_server::&lt;AddTwoInts&gt;(&quot;my_service&quot;, Some(Profile::default()))?;
+
+    // Create a selector.
+    let mut selector = ctx.create_selector()?;
+
+    // Create a logger.
+    let logger = Logger::new(&quot;server&quot;);
+
+    selector.add_server(
+        server,
+        Box::new(move |msg, _header| {
+            let mut response = AddTwoIntsResponse::new().unwrap();
+            pr_error!(logger, &quot;recv: {:?}&quot;, msg);
+            response.result = msg.x + msg.y;
+            response
+        }),
+    );
+
+    loop {
+        selector.wait()?; // Spin.
+    }
+}
+</code></pre></pre>
+<p>Let's dig into detail.</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>// Create a server.
+let server = node.create_server::&lt;AddTwoInts&gt;(&quot;my_service&quot;, Some(Profile::default()))?;
+<span class="boring">}
+</span></code></pre></pre>
+<p><code>AddTwoInts</code> of <code>create_server::&lt;AddTwoInts&gt;</code> indicates the protocol of the server.
+The arguments of <code>&quot;my_service&quot;</code> and <code>Some(Profile::default())</code> are the service name and QoS.
+If you pass <code>None</code> instead of <code>Some(Profile::default())</code>, <code>Profile::default()</code> is used.</p>
+<p>The callback was passed as follows.</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>selector.add_server(
+    server,
+    Box::new(move |msg, _header| {
+        let mut response = AddTwoIntsResponse::new().unwrap();
+        pr_error!(logger, &quot;recv: {:?}&quot;, msg);
+        response.result = msg.x + msg.y;
+        response
+    }),
+);
+<span class="boring">}
+</span></code></pre></pre>
+<p>The callback function must take a message sent by a client and a header including sequence number, time, etc.
+<code>msg</code>'s types is <code>AddTwoIntsRequest</code> and a value of <code>AddTwoIntsResponse</code>, which is a response, must be returned.</p>
+<h2 id="client"><a class="header" href="#client">Client</a></h2>
+<h3 id="edit-clientcargotoml"><a class="header" href="#edit-clientcargotoml">Edit <code>client/Cargo.toml</code></a></h3>
+<p><code>safe_drive</code>, and <code>tokio</code> must be added to <code>Cargo.toml</code> as follows.</p>
+<pre><code class="language-toml"># srvtest/src/client/Cargo.toml
+[dependencies]
+safe_drive = { path = &quot;/tmp/safe_drive&quot;, default-features = false, features = [&quot;galactic&quot;] }
+srvmsg = { path = &quot;/tmp/safe_drive_tutorial/srvtest/srvmsg&quot; }
+tokio = { version = &quot;1&quot;, features = [&quot;full&quot;] }
+
+[package.metadata.ros]
+msg = [&quot;srvmsg&quot;]
+msg_dir = &quot;/tmp/safe_drive_tutorial/srvtest&quot;
+safe_drive_path = &quot;/tmp/safe_drive&quot;
+</code></pre>
+<h3 id="create-clientpackagexml"><a class="header" href="#create-clientpackagexml">Create <code>client/package.xml</code></a></h3>
+<p><code>package.xml</code> is also required as follows.</p>
+<pre><code class="language-xml">&lt;!-- srvtest/src/client/package.xml --&gt;
+&lt;?xml version=&quot;1.0&quot;?&gt;
+&lt;?xml-model href=&quot;http://download.ros.org/schema/package_format3.xsd&quot; schematypens=&quot;http://www.w3.org/2001/XMLSchema&quot;?&gt;
+&lt;package format=&quot;3&quot;&gt;
+  &lt;name&gt;client&lt;/name&gt;
+  &lt;version&gt;0.0.0&lt;/version&gt;
+  &lt;description&gt;Client in Rust&lt;/description&gt;
+  &lt;maintainer email=&quot;yuuki.takano@tier4.jp&quot;&gt;Yuuki Takano&lt;/maintainer&gt;
+  &lt;license&gt;Apache License 2.0&lt;/license&gt;
+
+  &lt;test_depend&gt;ament_lint_auto&lt;/test_depend&gt;
+  &lt;test_depend&gt;ament_lint_common&lt;/test_depend&gt;
+
+  &lt;depend&gt;srvmsg&lt;/depend&gt;
+
+  &lt;export&gt;
+    &lt;build_type&gt;ament_cargo&lt;/build_type&gt;
+  &lt;/export&gt;
+&lt;/package&gt;
+</code></pre>
+<p>Don't forget <code>&lt;depend&gt;srvmsg&lt;/depend&gt;</code>.</p>
+<h3 id="edit-clientsrcmainrs"><a class="header" href="#edit-clientsrcmainrs">Edit <code>client/src/main.rs</code></a></h3>
+<p>We recommend to use async/await to implement a client,
+because a client wait a response, but when the response is replied is unpredictable.
+In this tutorial, we use <a href="https://tokio.rs/">Tokio</a>, which is the most popular asynchronous library of Rust.</p>
+<pre><pre class="playground"><code class="language-rust">use safe_drive::{
+    context::Context, error::DynError, logger::Logger, pr_error, pr_info, pr_warn, qos::Profile,
+};
+use srvmsg_rs::srvmsg::srv::{AddTwoInts, AddTwoIntsRequest};
+use std::time::Duration;
+use tokio::time::timeout;
+
+#[tokio::main]
+async fn main() -&gt; Result&lt;(), DynError&gt; {
+    // Create a context and a node.
+    let ctx = Context::new()?;
+    let node = ctx.create_node(&quot;client&quot;, None, Default::default())?;
+
+    let logger = Logger::new(&quot;client&quot;);
+
+    // Create a client.
+    let mut client = node.create_client::&lt;AddTwoInts&gt;(&quot;my_service&quot;, Some(Profile::default()))?;
+
+    let mut n = 0;
+    loop {
+        let mut request = AddTwoIntsRequest::new().unwrap();
+        request.x = n;
+        request.y = n + 1;
+        n += 1;
+
+        // Send a request.
+        let client_rcv = client.send(&amp;request)?;
+
+        // Receive a request.
+        let mut receiver = client_rcv.recv();
+
+        match timeout(Duration::from_secs(1), &amp;mut receiver).await {
+            Ok(Ok((c, response, _header))) =&gt; {
+                pr_info!(logger, &quot;received {:?}&quot;, response);
+                client = c;
+            }
+            Ok(Err(e)) =&gt; {
+                pr_error!(logger, &quot;error: {e}&quot;);
+                return Err(e);
+            }
+            Err(elapsed) =&gt; {
+                pr_warn!(logger, &quot;timeout: {elapsed}&quot;);
+                client = receiver.give_up();
+            }
+        }
+
+        tokio::time::sleep(Duration::from_secs(1)).await;
+    }
+}
+</code></pre></pre>
+<p>Because a response will be never returned,
+we use <code>tokio::time::timeout</code> to receive a response.
+<code>timeout(Duration::from_secs(1), &amp;mut receiver).await</code>
+takes a duration and a awaitable future.
+The awaitable future can be taken by <code>client_rcv.recv()</code>.</p>
+<p>Note that it uses <code>tokio::time::sleep</code> instead of
+<code>std::thread::sleep</code> because to avoid calling blocking functions.</p>
+<p><code>client.send()</code> consumes <code>client</code> and it returns <code>client_recv</code>
+to receive a response.
+<code>client_rcv.recv()</code> consumes  <code>client_recv</code> and <code>client_rcv.recv().await</code>
+returns new client, a response, and a header.
+The new client must be used to send next request.</p>
+<p>This means that you cannot ignore receiving a response.
+If you forget to receive a response,
+you cannot send any request again,
+because you need to get a new client by receiving a response..
+Otherwise, you encountered compilation errors.</p>
+<h2 id="execution-1"><a class="header" href="#execution-1">Execution</a></h2>
+<p>First of all, you have to compile it and execute a server as follows.</p>
+<pre><code class="language-text">$ cd srvtest
+$ colcon build --cargo-args --release
+$ . ./install/setup.bash
+$ ros2 run server server
+</code></pre>
+<p>Then, in another terminal, execute a client as follows.</p>
+<pre><code class="language-text">$ cd srvtest
+$ . ./install/setup.bash
+$ ros2 run client client
+[WARN] [1659604527.720730018] [client]: timeout: deadline has elapsed
+[INFO] [1659604528.722220697] [client]: received AddTwoIntsResponse { result: 3 }
+[INFO] [1659604529.723525686] [client]: received AddTwoIntsResponse { result: 5 }
+[INFO] [1659604530.724820326] [client]: received AddTwoIntsResponse { result: 7 }
+</code></pre>
+<p>Nicely done!
+We used async/await for the client,
+and it can be used for the server as follows.</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>async { server.recv().await };
+<span class="boring">}
+</span></code></pre></pre>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="parameter"><a class="header" href="#parameter">Parameter</a></h1>
 <pre><code class="language-text">$ mkdir params
 $ cd params
