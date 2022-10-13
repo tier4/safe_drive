@@ -63,6 +63,16 @@ pub struct ParameterServer {
 
 ## Parameter Setting and Waiting Update by Callback
 
+
+### Edit `param_server/Cargo.toml`
+
+```toml
+[dependencies]
+safe_drive = { path = "path_to/safe_drive", default-features = false, features = ["galactic"] }
+```
+
+### Edit `param_server/src/main.rs`
+
 ```rust
 use safe_drive::{context::Context, error::DynError, logger::Logger, parameter::Value, pr_info};
 
@@ -120,6 +130,16 @@ fn main() -> Result<(), DynError> {
 ```
 
 ## Asynchronous Wait
+
+### Edit `async_param_server/Cargo.toml`
+
+```toml
+[dependencies]
+safe_drive = { path = "path_to/safe_drive", default-features = false, features = ["galactic"] }
+tokio = { version = "1", features = ["full"] }
+```
+
+### Edit `async_param_server/src/main.rs`
 
 ```rust
 use safe_drive::{context::Context, error::DynError, logger::Logger, parameter::Value, pr_info};
