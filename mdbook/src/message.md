@@ -185,6 +185,34 @@ msg_dir = "/tmp/safe_drive_tutorial/msgtest"
 safe_drive_path = "/tmp/safe_drive"
 ```
 
+### Create `talker/package.xml`
+
+Then create `package.xml` as follows.
+
+```xml
+<!-- msgtest/src/talker/package.xml -->
+<?xml version="1.0"?>
+<?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
+<package format="3">
+  <name>talker</name>
+  <version>0.0.0</version>
+  <description>Talker in Rust</description>
+  <maintainer email="yuuki.takano@tier4.jp">Yuuki Takano</maintainer>
+  <license>Apache License 2.0</license>
+
+  <test_depend>ament_lint_auto</test_depend>
+  <test_depend>ament_lint_common</test_depend>
+
+  <depend>my_interfaces</depend>
+
+  <export>
+    <build_type>ament_cargo</build_type>
+  </export>
+</package>
+```
+
+Don't forget `<depend>my_interfaces</depend>`.
+
 ### Generated Files
 
 When you run `colcon`, it generate `my_interfaces` in Rust.
@@ -320,34 +348,6 @@ let ref_msgs = msgs.as_slice_mut();
 `as_slice_mut()` returns a mutable slice,
 you can thus update the elements of the array via the slice.
 
-### Create `talker/package.xml`
-
-Then create `package.xml` as follows.
-
-```xml
-<!-- msgtest/src/talker/package.xml -->
-<?xml version="1.0"?>
-<?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
-<package format="3">
-  <name>talker</name>
-  <version>0.0.0</version>
-  <description>Talker in Rust</description>
-  <maintainer email="yuuki.takano@tier4.jp">Yuuki Takano</maintainer>
-  <license>Apache License 2.0</license>
-
-  <test_depend>ament_lint_auto</test_depend>
-  <test_depend>ament_lint_common</test_depend>
-
-  <depend>my_interfaces</depend>
-
-  <export>
-    <build_type>ament_cargo</build_type>
-  </export>
-</package>
-```
-
-Don't forget `<depend>my_interfaces</depend>`.
-
 ## Listener
 
 Let's then implement a listener which receive messages published by the talker.
@@ -367,6 +367,34 @@ msg = ["my_interfaces"]
 msg_dir = "/tmp/safe_drive_tutorial/msgtest"
 safe_drive_path = "/tmp/safe_drive"
 ```
+
+### Create `listener/package.xml`
+
+Then create `package.xml` as follows.
+
+```xml
+<!-- msgtest/src/listener/package.xml -->
+<?xml version="1.0"?>
+<?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
+<package format="3">
+  <name>listener</name>
+  <version>0.0.0</version>
+  <description>Listener in Rust</description>
+  <maintainer email="yuuki.takano@tier4.jp">Yuuki Takano</maintainer>
+  <license>Apache License 2.0</license>
+
+  <test_depend>ament_lint_auto</test_depend>
+  <test_depend>ament_lint_common</test_depend>
+
+  <depend>my_interfaces</depend>
+
+  <export>
+    <build_type>ament_cargo</build_type>
+  </export>
+</package>
+```
+
+Don't forget `<depend>my_interfaces</depend>`.
 
 ### Edit `listener/src/main.rs`
 
@@ -424,34 +452,6 @@ fn main() -> Result<(), DynError> {
     }
 }
 ```
-
-### Create `listener/package.xml`
-
-Then create `package.xml` as follows.
-
-```xml
-<!-- msgtest/src/listener/package.xml -->
-<?xml version="1.0"?>
-<?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
-<package format="3">
-  <name>listener</name>
-  <version>0.0.0</version>
-  <description>Listener in Rust</description>
-  <maintainer email="yuuki.takano@tier4.jp">Yuuki Takano</maintainer>
-  <license>Apache License 2.0</license>
-
-  <test_depend>ament_lint_auto</test_depend>
-  <test_depend>ament_lint_common</test_depend>
-
-  <depend>my_interfaces</depend>
-
-  <export>
-    <build_type>ament_cargo</build_type>
-  </export>
-</package>
-```
-
-Don't forget `<depend>my_interfaces</depend>`.
 
 ## Compilation and Execution
 

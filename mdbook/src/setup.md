@@ -32,12 +32,14 @@ $ sudo apt install ros-galactic-desktop python3-colcon-common-extensions
 $ . /opt/ros/galactic/setup.bash
 ```
 
-## Install Colcon-Cargo
+## Install Colcon-cargo
 
 ```text
 $ pip install git+https://github.com/tier4/colcon-cargo.git
 $ pip install git+https://github.com/colcon/colcon-ros-cargo.git
 ```
+
+## Install Cargo-ament
 
 ```text
 $ git clone git@github.com:tier4/safe_drive_msg.git
