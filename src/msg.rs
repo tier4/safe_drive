@@ -21,6 +21,10 @@ pub use humble::*;
 use crate::rcl;
 use std::{ffi::CString, fmt::Display, intrinsics::transmute};
 
+pub trait TypeSupport {
+    fn type_support() -> *const rcl::rosidl_message_type_support_t;
+}
+
 pub trait TopicMsg {
     fn type_support() -> *const rcl::rosidl_message_type_support_t;
 }
