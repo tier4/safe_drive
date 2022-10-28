@@ -23,8 +23,7 @@ RUN apt-get -y update && \
 
 RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
 RUN . /root/.cargo/env && \
-    cargo install bindgen && \
-    cargo install --git https://github.com/tier4/cargo-ament-build.git && \
+    cargo install bindgen-cli && \
     cargo install mdbook && \
     cargo install mdbook-mermaid
 

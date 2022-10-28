@@ -7,11 +7,11 @@ all: msg.rs rcl.rs
 	cp rcl.rs ../../src/rcl/$(ROS_DISTRO).rs
 
 .c.rs:
-	bindgen --blocklist-function atexit $< -o $@ -- -I/opt/ros/$(ROS_DISTRO)/include
+	bindgen --blocklist-function atexit $< -o $@ -- -I/opt/ros/$(ROS_DISTRO)/include/rcl -I/opt/ros/$(ROS_DISTRO)/include/rcutils -I/opt/ros/$(ROS_DISTRO)/include/rmw -I/opt/ros/$(ROS_DISTRO)/include/rcl_yaml_param_parser -I/opt/ros/$(ROS_DISTRO)/include/rosidl_runtime_c -I/opt/ros/$(ROS_DISTRO)/include/rosidl_typesupport_interface -I/opt/ros/$(ROS_DISTRO)/include/rcl_action  -I/opt/ros/$(ROS_DISTRO)/include/action_msgs -I/opt/ros/$(ROS_DISTRO)/include/unique_identifier_msgs -I/opt/ros/$(ROS_DISTRO)/include/builtin_interfaces
 	sed -i -e 's/"\* */"a /'  $@
 
 msg.rs: msg.c
-	bindgen --blocklist-function atexit $< -o $@ -- -I/opt/ros/$(ROS_DISTRO)/include
+	bindgen --blocklist-function atexit $< -o $@ -- -I/opt/ros/$(ROS_DISTRO)/include/rosidl_runtime_c -I/opt/ros/$(ROS_DISTRO)/include/builtin_interfaces  -I/opt/ros/$(ROS_DISTRO)/include/rcl -I/opt/ros/$(ROS_DISTRO)/include/rcutils -I/opt/ros/$(ROS_DISTRO)/include/rosidl_typesupport_interface
 	sh sed_crate.sh $@
 
 clean:
