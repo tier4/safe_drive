@@ -8,7 +8,7 @@ all: msg.rs rcl.rs
 
 .c.rs:
 	bindgen --blocklist-function atexit $< -o $@ -- -I/opt/ros/$(ROS_DISTRO)/include
-	sed -i -e 's/"\* */"a /'  $@
+	sed -i -e 's/"\* */"\* /'  $@
 
 msg.rs: msg.c
 	bindgen --blocklist-function atexit $< -o $@ -- -I/opt/ros/$(ROS_DISTRO)/include

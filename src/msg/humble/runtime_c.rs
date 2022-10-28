@@ -328,10 +328,10 @@ pub type uint_fast64_t = ::std::os::raw::c_ulong;
 pub type intmax_t = __intmax_t;
 pub type uintmax_t = __uintmax_t;
 #[doc = " Struct defined in msg/Time in the package builtin_interfaces."]
-#[doc = "a *"]
-#[doc = "a This message communicates ROS Time defined here:"]
-#[doc = "a https://design.ros2.org/articles/clock_and_time.html"]
-#[doc = "a /"]
+#[doc = "* *"]
+#[doc = "* This message communicates ROS Time defined here:"]
+#[doc = "* https://design.ros2.org/articles/clock_and_time.html"]
+#[doc = "* /"]
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
 pub struct builtin_interfaces__msg__Time {
@@ -2381,55 +2381,55 @@ extern "C" {
 }
 extern "C" {
     #[doc = " Initialize msg/Time message."]
-    #[doc = "a *"]
-    #[doc = "a If the init function is called twice for the same message without"]
-    #[doc = "a calling fini inbetween previously allocated memory will be leaked."]
-    #[doc = "a \\param[in,out] msg The previously allocated message pointer."]
-    #[doc = "a Fields without a default value will not be initialized by this function."]
-    #[doc = "a You might want to call memset(msg, 0, sizeof("]
-    #[doc = "a builtin_interfaces__msg__Time"]
-    #[doc = "a )) before or use"]
-    #[doc = "a builtin_interfaces__msg__Time__create()"]
-    #[doc = "a to allocate and initialize the message."]
-    #[doc = "a \\return true if initialization was successful, otherwise false"]
-    #[doc = "a /"]
+    #[doc = "* *"]
+    #[doc = "* If the init function is called twice for the same message without"]
+    #[doc = "* calling fini inbetween previously allocated memory will be leaked."]
+    #[doc = "* \\param[in,out] msg The previously allocated message pointer."]
+    #[doc = "* Fields without a default value will not be initialized by this function."]
+    #[doc = "* You might want to call memset(msg, 0, sizeof("]
+    #[doc = "* builtin_interfaces__msg__Time"]
+    #[doc = "* )) before or use"]
+    #[doc = "* builtin_interfaces__msg__Time__create()"]
+    #[doc = "* to allocate and initialize the message."]
+    #[doc = "* \\return true if initialization was successful, otherwise false"]
+    #[doc = "* /"]
     pub fn builtin_interfaces__msg__Time__init(msg: *mut builtin_interfaces__msg__Time) -> bool;
 }
 extern "C" {
     #[doc = " Finalize msg/Time message."]
-    #[doc = "a *"]
-    #[doc = "a \\param[in,out] msg The allocated message pointer."]
-    #[doc = "a /"]
+    #[doc = "* *"]
+    #[doc = "* \\param[in,out] msg The allocated message pointer."]
+    #[doc = "* /"]
     pub fn builtin_interfaces__msg__Time__fini(msg: *mut builtin_interfaces__msg__Time);
 }
 extern "C" {
     #[doc = " Create msg/Time message."]
-    #[doc = "a *"]
-    #[doc = "a It allocates the memory for the message, sets the memory to zero, and"]
-    #[doc = "a calls"]
-    #[doc = "a builtin_interfaces__msg__Time__init()."]
-    #[doc = "a \\return The pointer to the initialized message if successful,"]
-    #[doc = "a otherwise NULL"]
-    #[doc = "a /"]
+    #[doc = "* *"]
+    #[doc = "* It allocates the memory for the message, sets the memory to zero, and"]
+    #[doc = "* calls"]
+    #[doc = "* builtin_interfaces__msg__Time__init()."]
+    #[doc = "* \\return The pointer to the initialized message if successful,"]
+    #[doc = "* otherwise NULL"]
+    #[doc = "* /"]
     pub fn builtin_interfaces__msg__Time__create() -> *mut builtin_interfaces__msg__Time;
 }
 extern "C" {
     #[doc = " Destroy msg/Time message."]
-    #[doc = "a *"]
-    #[doc = "a It calls"]
-    #[doc = "a builtin_interfaces__msg__Time__fini()"]
-    #[doc = "a and frees the memory of the message."]
-    #[doc = "a \\param[in,out] msg The allocated message pointer."]
-    #[doc = "a /"]
+    #[doc = "* *"]
+    #[doc = "* It calls"]
+    #[doc = "* builtin_interfaces__msg__Time__fini()"]
+    #[doc = "* and frees the memory of the message."]
+    #[doc = "* \\param[in,out] msg The allocated message pointer."]
+    #[doc = "* /"]
     pub fn builtin_interfaces__msg__Time__destroy(msg: *mut builtin_interfaces__msg__Time);
 }
 extern "C" {
     #[doc = " Check for msg/Time message equality."]
-    #[doc = "a *"]
-    #[doc = "a \\param[in] lhs The message on the left hand size of the equality operator."]
-    #[doc = "a \\param[in] rhs The message on the right hand size of the equality operator."]
-    #[doc = "a \\return true if messages are equal, otherwise false."]
-    #[doc = "a /"]
+    #[doc = "* *"]
+    #[doc = "* \\param[in] lhs The message on the left hand size of the equality operator."]
+    #[doc = "* \\param[in] rhs The message on the right hand size of the equality operator."]
+    #[doc = "* \\return true if messages are equal, otherwise false."]
+    #[doc = "* /"]
     pub fn builtin_interfaces__msg__Time__are_equal(
         lhs: *const builtin_interfaces__msg__Time,
         rhs: *const builtin_interfaces__msg__Time,
@@ -2437,16 +2437,16 @@ extern "C" {
 }
 extern "C" {
     #[doc = " Copy a msg/Time message."]
-    #[doc = "a *"]
-    #[doc = "a This functions performs a deep copy, as opposed to the shallow copy that"]
-    #[doc = "a plain assignment yields."]
-    #[doc = "a "]
-    #[doc = "a \\param[in] input The source message pointer."]
-    #[doc = "a \\param[out] output The target message pointer, which must"]
-    #[doc = "a have been initialized before calling this function."]
-    #[doc = "a \\return true if successful, or false if either pointer is null"]
-    #[doc = "a or memory allocation fails."]
-    #[doc = "a /"]
+    #[doc = "* *"]
+    #[doc = "* This functions performs a deep copy, as opposed to the shallow copy that"]
+    #[doc = "* plain assignment yields."]
+    #[doc = "* "]
+    #[doc = "* \\param[in] input The source message pointer."]
+    #[doc = "* \\param[out] output The target message pointer, which must"]
+    #[doc = "* have been initialized before calling this function."]
+    #[doc = "* \\return true if successful, or false if either pointer is null"]
+    #[doc = "* or memory allocation fails."]
+    #[doc = "* /"]
     pub fn builtin_interfaces__msg__Time__copy(
         input: *const builtin_interfaces__msg__Time,
         output: *mut builtin_interfaces__msg__Time,
@@ -2454,16 +2454,16 @@ extern "C" {
 }
 extern "C" {
     #[doc = " Initialize array of msg/Time messages."]
-    #[doc = "a *"]
-    #[doc = "a It allocates the memory for the number of elements and calls"]
-    #[doc = "a builtin_interfaces__msg__Time__init()"]
-    #[doc = "a for each element of the array."]
-    #[doc = "a \\param[in,out] array The allocated array pointer."]
-    #[doc = "a \\param[in] size The size / capacity of the array."]
-    #[doc = "a \\return true if initialization was successful, otherwise false"]
-    #[doc = "a If the array pointer is valid and the size is zero it is guaranteed"]
+    #[doc = "* *"]
+    #[doc = "* It allocates the memory for the number of elements and calls"]
+    #[doc = "* builtin_interfaces__msg__Time__init()"]
+    #[doc = "* for each element of the array."]
+    #[doc = "* \\param[in,out] array The allocated array pointer."]
+    #[doc = "* \\param[in] size The size / capacity of the array."]
+    #[doc = "* \\return true if initialization was successful, otherwise false"]
+    #[doc = "* If the array pointer is valid and the size is zero it is guaranteed"]
     #[doc = "# to return true."]
-    #[doc = "a /"]
+    #[doc = "* /"]
     pub fn builtin_interfaces__msg__Time__Sequence__init(
         array: *mut builtin_interfaces__msg__Time__Sequence,
         size: usize,
@@ -2471,49 +2471,49 @@ extern "C" {
 }
 extern "C" {
     #[doc = " Finalize array of msg/Time messages."]
-    #[doc = "a *"]
-    #[doc = "a It calls"]
-    #[doc = "a builtin_interfaces__msg__Time__fini()"]
-    #[doc = "a for each element of the array and frees the memory for the number of"]
-    #[doc = "a elements."]
-    #[doc = "a \\param[in,out] array The initialized array pointer."]
-    #[doc = "a /"]
+    #[doc = "* *"]
+    #[doc = "* It calls"]
+    #[doc = "* builtin_interfaces__msg__Time__fini()"]
+    #[doc = "* for each element of the array and frees the memory for the number of"]
+    #[doc = "* elements."]
+    #[doc = "* \\param[in,out] array The initialized array pointer."]
+    #[doc = "* /"]
     pub fn builtin_interfaces__msg__Time__Sequence__fini(
         array: *mut builtin_interfaces__msg__Time__Sequence,
     );
 }
 extern "C" {
     #[doc = " Create array of msg/Time messages."]
-    #[doc = "a *"]
-    #[doc = "a It allocates the memory for the array and calls"]
-    #[doc = "a builtin_interfaces__msg__Time__Sequence__init()."]
-    #[doc = "a \\param[in] size The size / capacity of the array."]
-    #[doc = "a \\return The pointer to the initialized array if successful, otherwise NULL"]
-    #[doc = "a /"]
+    #[doc = "* *"]
+    #[doc = "* It allocates the memory for the array and calls"]
+    #[doc = "* builtin_interfaces__msg__Time__Sequence__init()."]
+    #[doc = "* \\param[in] size The size / capacity of the array."]
+    #[doc = "* \\return The pointer to the initialized array if successful, otherwise NULL"]
+    #[doc = "* /"]
     pub fn builtin_interfaces__msg__Time__Sequence__create(
         size: usize,
     ) -> *mut builtin_interfaces__msg__Time__Sequence;
 }
 extern "C" {
     #[doc = " Destroy array of msg/Time messages."]
-    #[doc = "a *"]
-    #[doc = "a It calls"]
-    #[doc = "a builtin_interfaces__msg__Time__Sequence__fini()"]
-    #[doc = "a on the array,"]
-    #[doc = "a and frees the memory of the array."]
-    #[doc = "a \\param[in,out] array The initialized array pointer."]
-    #[doc = "a /"]
+    #[doc = "* *"]
+    #[doc = "* It calls"]
+    #[doc = "* builtin_interfaces__msg__Time__Sequence__fini()"]
+    #[doc = "* on the array,"]
+    #[doc = "* and frees the memory of the array."]
+    #[doc = "* \\param[in,out] array The initialized array pointer."]
+    #[doc = "* /"]
     pub fn builtin_interfaces__msg__Time__Sequence__destroy(
         array: *mut builtin_interfaces__msg__Time__Sequence,
     );
 }
 extern "C" {
     #[doc = " Check for msg/Time message array equality."]
-    #[doc = "a *"]
-    #[doc = "a \\param[in] lhs The message array on the left hand size of the equality operator."]
-    #[doc = "a \\param[in] rhs The message array on the right hand size of the equality operator."]
-    #[doc = "a \\return true if message arrays are equal in size and content, otherwise false."]
-    #[doc = "a /"]
+    #[doc = "* *"]
+    #[doc = "* \\param[in] lhs The message array on the left hand size of the equality operator."]
+    #[doc = "* \\param[in] rhs The message array on the right hand size of the equality operator."]
+    #[doc = "* \\return true if message arrays are equal in size and content, otherwise false."]
+    #[doc = "* /"]
     pub fn builtin_interfaces__msg__Time__Sequence__are_equal(
         lhs: *const builtin_interfaces__msg__Time__Sequence,
         rhs: *const builtin_interfaces__msg__Time__Sequence,
@@ -2521,16 +2521,16 @@ extern "C" {
 }
 extern "C" {
     #[doc = " Copy an array of msg/Time messages."]
-    #[doc = "a *"]
-    #[doc = "a This functions performs a deep copy, as opposed to the shallow copy that"]
-    #[doc = "a plain assignment yields."]
-    #[doc = "a "]
-    #[doc = "a \\param[in] input The source array pointer."]
-    #[doc = "a \\param[out] output The target array pointer, which must"]
-    #[doc = "a have been initialized before calling this function."]
-    #[doc = "a \\return true if successful, or false if either pointer"]
-    #[doc = "a is null or memory allocation fails."]
-    #[doc = "a /"]
+    #[doc = "* *"]
+    #[doc = "* This functions performs a deep copy, as opposed to the shallow copy that"]
+    #[doc = "* plain assignment yields."]
+    #[doc = "* "]
+    #[doc = "* \\param[in] input The source array pointer."]
+    #[doc = "* \\param[out] output The target array pointer, which must"]
+    #[doc = "* have been initialized before calling this function."]
+    #[doc = "* \\return true if successful, or false if either pointer"]
+    #[doc = "* is null or memory allocation fails."]
+    #[doc = "* /"]
     pub fn builtin_interfaces__msg__Time__Sequence__copy(
         input: *const builtin_interfaces__msg__Time__Sequence,
         output: *mut builtin_interfaces__msg__Time__Sequence,
@@ -2601,14 +2601,14 @@ fn bindgen_test_layout_rosidl_message_type_support_t() {
 }
 extern "C" {
     #[doc = " Get the message type support handle specific to this identifier."]
-    #[doc = "a *"]
-    #[doc = "a The handle's message typesupport identifier function is returned or if the parameters are NULL"]
-    #[doc = "a then an assert will happen."]
-    #[doc = "a "]
-    #[doc = "a \\param handle Handle to message type support"]
-    #[doc = "a \\param identifier The typesupport identifier to get the handle function for"]
-    #[doc = "a \\return The associated message typesupport handle function."]
-    #[doc = "a /"]
+    #[doc = "* *"]
+    #[doc = "* The handle's message typesupport identifier function is returned or if the parameters are NULL"]
+    #[doc = "* then an assert will happen."]
+    #[doc = "* "]
+    #[doc = "* \\param handle Handle to message type support"]
+    #[doc = "* \\param identifier The typesupport identifier to get the handle function for"]
+    #[doc = "* \\return The associated message typesupport handle function."]
+    #[doc = "* /"]
     pub fn get_message_typesupport_handle(
         handle: *const rosidl_message_type_support_t,
         identifier: *const ::std::os::raw::c_char,
@@ -2632,11 +2632,11 @@ extern "C" {
     ) -> *const rosidl_message_type_support_t;
 }
 #[doc = " Struct defined in msg/Duration in the package builtin_interfaces."]
-#[doc = "a *"]
-#[doc = "a Duration defines a period between two time points."]
-#[doc = "a Messages of this datatype are of ROS Time following this design:"]
-#[doc = "a https://design.ros2.org/articles/clock_and_time.html"]
-#[doc = "a /"]
+#[doc = "* *"]
+#[doc = "* Duration defines a period between two time points."]
+#[doc = "* Messages of this datatype are of ROS Time following this design:"]
+#[doc = "* https://design.ros2.org/articles/clock_and_time.html"]
+#[doc = "* /"]
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
 pub struct builtin_interfaces__msg__Duration {
@@ -2747,57 +2747,57 @@ fn bindgen_test_layout_builtin_interfaces__msg__Duration__Sequence() {
 }
 extern "C" {
     #[doc = " Initialize msg/Duration message."]
-    #[doc = "a *"]
-    #[doc = "a If the init function is called twice for the same message without"]
-    #[doc = "a calling fini inbetween previously allocated memory will be leaked."]
-    #[doc = "a \\param[in,out] msg The previously allocated message pointer."]
-    #[doc = "a Fields without a default value will not be initialized by this function."]
-    #[doc = "a You might want to call memset(msg, 0, sizeof("]
-    #[doc = "a builtin_interfaces__msg__Duration"]
-    #[doc = "a )) before or use"]
-    #[doc = "a builtin_interfaces__msg__Duration__create()"]
-    #[doc = "a to allocate and initialize the message."]
-    #[doc = "a \\return true if initialization was successful, otherwise false"]
-    #[doc = "a /"]
+    #[doc = "* *"]
+    #[doc = "* If the init function is called twice for the same message without"]
+    #[doc = "* calling fini inbetween previously allocated memory will be leaked."]
+    #[doc = "* \\param[in,out] msg The previously allocated message pointer."]
+    #[doc = "* Fields without a default value will not be initialized by this function."]
+    #[doc = "* You might want to call memset(msg, 0, sizeof("]
+    #[doc = "* builtin_interfaces__msg__Duration"]
+    #[doc = "* )) before or use"]
+    #[doc = "* builtin_interfaces__msg__Duration__create()"]
+    #[doc = "* to allocate and initialize the message."]
+    #[doc = "* \\return true if initialization was successful, otherwise false"]
+    #[doc = "* /"]
     pub fn builtin_interfaces__msg__Duration__init(
         msg: *mut builtin_interfaces__msg__Duration,
     ) -> bool;
 }
 extern "C" {
     #[doc = " Finalize msg/Duration message."]
-    #[doc = "a *"]
-    #[doc = "a \\param[in,out] msg The allocated message pointer."]
-    #[doc = "a /"]
+    #[doc = "* *"]
+    #[doc = "* \\param[in,out] msg The allocated message pointer."]
+    #[doc = "* /"]
     pub fn builtin_interfaces__msg__Duration__fini(msg: *mut builtin_interfaces__msg__Duration);
 }
 extern "C" {
     #[doc = " Create msg/Duration message."]
-    #[doc = "a *"]
-    #[doc = "a It allocates the memory for the message, sets the memory to zero, and"]
-    #[doc = "a calls"]
-    #[doc = "a builtin_interfaces__msg__Duration__init()."]
-    #[doc = "a \\return The pointer to the initialized message if successful,"]
-    #[doc = "a otherwise NULL"]
-    #[doc = "a /"]
+    #[doc = "* *"]
+    #[doc = "* It allocates the memory for the message, sets the memory to zero, and"]
+    #[doc = "* calls"]
+    #[doc = "* builtin_interfaces__msg__Duration__init()."]
+    #[doc = "* \\return The pointer to the initialized message if successful,"]
+    #[doc = "* otherwise NULL"]
+    #[doc = "* /"]
     pub fn builtin_interfaces__msg__Duration__create() -> *mut builtin_interfaces__msg__Duration;
 }
 extern "C" {
     #[doc = " Destroy msg/Duration message."]
-    #[doc = "a *"]
-    #[doc = "a It calls"]
-    #[doc = "a builtin_interfaces__msg__Duration__fini()"]
-    #[doc = "a and frees the memory of the message."]
-    #[doc = "a \\param[in,out] msg The allocated message pointer."]
-    #[doc = "a /"]
+    #[doc = "* *"]
+    #[doc = "* It calls"]
+    #[doc = "* builtin_interfaces__msg__Duration__fini()"]
+    #[doc = "* and frees the memory of the message."]
+    #[doc = "* \\param[in,out] msg The allocated message pointer."]
+    #[doc = "* /"]
     pub fn builtin_interfaces__msg__Duration__destroy(msg: *mut builtin_interfaces__msg__Duration);
 }
 extern "C" {
     #[doc = " Check for msg/Duration message equality."]
-    #[doc = "a *"]
-    #[doc = "a \\param[in] lhs The message on the left hand size of the equality operator."]
-    #[doc = "a \\param[in] rhs The message on the right hand size of the equality operator."]
-    #[doc = "a \\return true if messages are equal, otherwise false."]
-    #[doc = "a /"]
+    #[doc = "* *"]
+    #[doc = "* \\param[in] lhs The message on the left hand size of the equality operator."]
+    #[doc = "* \\param[in] rhs The message on the right hand size of the equality operator."]
+    #[doc = "* \\return true if messages are equal, otherwise false."]
+    #[doc = "* /"]
     pub fn builtin_interfaces__msg__Duration__are_equal(
         lhs: *const builtin_interfaces__msg__Duration,
         rhs: *const builtin_interfaces__msg__Duration,
@@ -2805,16 +2805,16 @@ extern "C" {
 }
 extern "C" {
     #[doc = " Copy a msg/Duration message."]
-    #[doc = "a *"]
-    #[doc = "a This functions performs a deep copy, as opposed to the shallow copy that"]
-    #[doc = "a plain assignment yields."]
-    #[doc = "a "]
-    #[doc = "a \\param[in] input The source message pointer."]
-    #[doc = "a \\param[out] output The target message pointer, which must"]
-    #[doc = "a have been initialized before calling this function."]
-    #[doc = "a \\return true if successful, or false if either pointer is null"]
-    #[doc = "a or memory allocation fails."]
-    #[doc = "a /"]
+    #[doc = "* *"]
+    #[doc = "* This functions performs a deep copy, as opposed to the shallow copy that"]
+    #[doc = "* plain assignment yields."]
+    #[doc = "* "]
+    #[doc = "* \\param[in] input The source message pointer."]
+    #[doc = "* \\param[out] output The target message pointer, which must"]
+    #[doc = "* have been initialized before calling this function."]
+    #[doc = "* \\return true if successful, or false if either pointer is null"]
+    #[doc = "* or memory allocation fails."]
+    #[doc = "* /"]
     pub fn builtin_interfaces__msg__Duration__copy(
         input: *const builtin_interfaces__msg__Duration,
         output: *mut builtin_interfaces__msg__Duration,
@@ -2822,16 +2822,16 @@ extern "C" {
 }
 extern "C" {
     #[doc = " Initialize array of msg/Duration messages."]
-    #[doc = "a *"]
-    #[doc = "a It allocates the memory for the number of elements and calls"]
-    #[doc = "a builtin_interfaces__msg__Duration__init()"]
-    #[doc = "a for each element of the array."]
-    #[doc = "a \\param[in,out] array The allocated array pointer."]
-    #[doc = "a \\param[in] size The size / capacity of the array."]
-    #[doc = "a \\return true if initialization was successful, otherwise false"]
-    #[doc = "a If the array pointer is valid and the size is zero it is guaranteed"]
+    #[doc = "* *"]
+    #[doc = "* It allocates the memory for the number of elements and calls"]
+    #[doc = "* builtin_interfaces__msg__Duration__init()"]
+    #[doc = "* for each element of the array."]
+    #[doc = "* \\param[in,out] array The allocated array pointer."]
+    #[doc = "* \\param[in] size The size / capacity of the array."]
+    #[doc = "* \\return true if initialization was successful, otherwise false"]
+    #[doc = "* If the array pointer is valid and the size is zero it is guaranteed"]
     #[doc = "# to return true."]
-    #[doc = "a /"]
+    #[doc = "* /"]
     pub fn builtin_interfaces__msg__Duration__Sequence__init(
         array: *mut builtin_interfaces__msg__Duration__Sequence,
         size: usize,
@@ -2839,49 +2839,49 @@ extern "C" {
 }
 extern "C" {
     #[doc = " Finalize array of msg/Duration messages."]
-    #[doc = "a *"]
-    #[doc = "a It calls"]
-    #[doc = "a builtin_interfaces__msg__Duration__fini()"]
-    #[doc = "a for each element of the array and frees the memory for the number of"]
-    #[doc = "a elements."]
-    #[doc = "a \\param[in,out] array The initialized array pointer."]
-    #[doc = "a /"]
+    #[doc = "* *"]
+    #[doc = "* It calls"]
+    #[doc = "* builtin_interfaces__msg__Duration__fini()"]
+    #[doc = "* for each element of the array and frees the memory for the number of"]
+    #[doc = "* elements."]
+    #[doc = "* \\param[in,out] array The initialized array pointer."]
+    #[doc = "* /"]
     pub fn builtin_interfaces__msg__Duration__Sequence__fini(
         array: *mut builtin_interfaces__msg__Duration__Sequence,
     );
 }
 extern "C" {
     #[doc = " Create array of msg/Duration messages."]
-    #[doc = "a *"]
-    #[doc = "a It allocates the memory for the array and calls"]
-    #[doc = "a builtin_interfaces__msg__Duration__Sequence__init()."]
-    #[doc = "a \\param[in] size The size / capacity of the array."]
-    #[doc = "a \\return The pointer to the initialized array if successful, otherwise NULL"]
-    #[doc = "a /"]
+    #[doc = "* *"]
+    #[doc = "* It allocates the memory for the array and calls"]
+    #[doc = "* builtin_interfaces__msg__Duration__Sequence__init()."]
+    #[doc = "* \\param[in] size The size / capacity of the array."]
+    #[doc = "* \\return The pointer to the initialized array if successful, otherwise NULL"]
+    #[doc = "* /"]
     pub fn builtin_interfaces__msg__Duration__Sequence__create(
         size: usize,
     ) -> *mut builtin_interfaces__msg__Duration__Sequence;
 }
 extern "C" {
     #[doc = " Destroy array of msg/Duration messages."]
-    #[doc = "a *"]
-    #[doc = "a It calls"]
-    #[doc = "a builtin_interfaces__msg__Duration__Sequence__fini()"]
-    #[doc = "a on the array,"]
-    #[doc = "a and frees the memory of the array."]
-    #[doc = "a \\param[in,out] array The initialized array pointer."]
-    #[doc = "a /"]
+    #[doc = "* *"]
+    #[doc = "* It calls"]
+    #[doc = "* builtin_interfaces__msg__Duration__Sequence__fini()"]
+    #[doc = "* on the array,"]
+    #[doc = "* and frees the memory of the array."]
+    #[doc = "* \\param[in,out] array The initialized array pointer."]
+    #[doc = "* /"]
     pub fn builtin_interfaces__msg__Duration__Sequence__destroy(
         array: *mut builtin_interfaces__msg__Duration__Sequence,
     );
 }
 extern "C" {
     #[doc = " Check for msg/Duration message array equality."]
-    #[doc = "a *"]
-    #[doc = "a \\param[in] lhs The message array on the left hand size of the equality operator."]
-    #[doc = "a \\param[in] rhs The message array on the right hand size of the equality operator."]
-    #[doc = "a \\return true if message arrays are equal in size and content, otherwise false."]
-    #[doc = "a /"]
+    #[doc = "* *"]
+    #[doc = "* \\param[in] lhs The message array on the left hand size of the equality operator."]
+    #[doc = "* \\param[in] rhs The message array on the right hand size of the equality operator."]
+    #[doc = "* \\return true if message arrays are equal in size and content, otherwise false."]
+    #[doc = "* /"]
     pub fn builtin_interfaces__msg__Duration__Sequence__are_equal(
         lhs: *const builtin_interfaces__msg__Duration__Sequence,
         rhs: *const builtin_interfaces__msg__Duration__Sequence,
@@ -2889,16 +2889,16 @@ extern "C" {
 }
 extern "C" {
     #[doc = " Copy an array of msg/Duration messages."]
-    #[doc = "a *"]
-    #[doc = "a This functions performs a deep copy, as opposed to the shallow copy that"]
-    #[doc = "a plain assignment yields."]
-    #[doc = "a "]
-    #[doc = "a \\param[in] input The source array pointer."]
-    #[doc = "a \\param[out] output The target array pointer, which must"]
-    #[doc = "a have been initialized before calling this function."]
-    #[doc = "a \\return true if successful, or false if either pointer"]
-    #[doc = "a is null or memory allocation fails."]
-    #[doc = "a /"]
+    #[doc = "* *"]
+    #[doc = "* This functions performs a deep copy, as opposed to the shallow copy that"]
+    #[doc = "* plain assignment yields."]
+    #[doc = "* "]
+    #[doc = "* \\param[in] input The source array pointer."]
+    #[doc = "* \\param[out] output The target array pointer, which must"]
+    #[doc = "* have been initialized before calling this function."]
+    #[doc = "* \\return true if successful, or false if either pointer"]
+    #[doc = "* is null or memory allocation fails."]
+    #[doc = "* /"]
     pub fn builtin_interfaces__msg__Duration__Sequence__copy(
         input: *const builtin_interfaces__msg__Duration__Sequence,
         output: *mut builtin_interfaces__msg__Duration__Sequence,
@@ -4358,17 +4358,17 @@ extern "C" {
 }
 extern "C" {
     #[doc = " Copy rosidl_runtime_c__String structure content."]
-    #[doc = "a *"]
-    #[doc = "a This functions performs a deep copy, as opposed to the shallow copy that"]
-    #[doc = "a plain assignment yields."]
-    #[doc = "a "]
-    #[doc = "a \\param[in] input a pointer to a rosidl_runtime_c__String structure"]
-    #[doc = "a to copy from."]
-    #[doc = "a \\param[out] output a pointer to an initialized rosidl_runtime_c__String"]
-    #[doc = "a structure to copy into."]
-    #[doc = "a \\return true if successful, false if either pointer is null or memory"]
-    #[doc = "a allocation fails."]
-    #[doc = "a /"]
+    #[doc = "* *"]
+    #[doc = "* This functions performs a deep copy, as opposed to the shallow copy that"]
+    #[doc = "* plain assignment yields."]
+    #[doc = "* "]
+    #[doc = "* \\param[in] input a pointer to a rosidl_runtime_c__String structure"]
+    #[doc = "* to copy from."]
+    #[doc = "* \\param[out] output a pointer to an initialized rosidl_runtime_c__String"]
+    #[doc = "* structure to copy into."]
+    #[doc = "* \\return true if successful, false if either pointer is null or memory"]
+    #[doc = "* allocation fails."]
+    #[doc = "* /"]
     pub fn rosidl_runtime_c__String__copy(
         input: *const rosidl_runtime_c__String,
         output: *mut rosidl_runtime_c__String,
@@ -4376,12 +4376,12 @@ extern "C" {
 }
 extern "C" {
     #[doc = " Check for rosidl_runtime_c__String structure equality."]
-    #[doc = "a *"]
-    #[doc = "a \\param[in] lhs a pointer to the left hand side of the equality operator."]
-    #[doc = "a \\param[in] lhs a pointer to the right hand side of the equality operator."]
-    #[doc = "a \\return true if rosidl_runtime_c__String structures are equal in size and content,"]
-    #[doc = "a otherwise false."]
-    #[doc = "a /"]
+    #[doc = "* *"]
+    #[doc = "* \\param[in] lhs a pointer to the left hand side of the equality operator."]
+    #[doc = "* \\param[in] lhs a pointer to the right hand side of the equality operator."]
+    #[doc = "* \\return true if rosidl_runtime_c__String structures are equal in size and content,"]
+    #[doc = "* otherwise false."]
+    #[doc = "* /"]
     pub fn rosidl_runtime_c__String__are_equal(
         lhs: *const rosidl_runtime_c__String,
         rhs: *const rosidl_runtime_c__String,
@@ -4417,12 +4417,12 @@ extern "C" {
 }
 extern "C" {
     #[doc = " Check for rosidl_runtime_c__String__Sequence structure equality."]
-    #[doc = "a *"]
-    #[doc = "a \\param[in] lhs a pointer to the left hand side of the equality operator."]
-    #[doc = "a \\param[in] lhs a pointer to the right hand side of the equality operator."]
-    #[doc = "a \\return true if rosidl_runtime_c__String__Sequence structures are equal"]
-    #[doc = "a in size and content, otherwise false."]
-    #[doc = "a /"]
+    #[doc = "* *"]
+    #[doc = "* \\param[in] lhs a pointer to the left hand side of the equality operator."]
+    #[doc = "* \\param[in] lhs a pointer to the right hand side of the equality operator."]
+    #[doc = "* \\return true if rosidl_runtime_c__String__Sequence structures are equal"]
+    #[doc = "* in size and content, otherwise false."]
+    #[doc = "* /"]
     pub fn rosidl_runtime_c__String__Sequence__are_equal(
         lhs: *const rosidl_runtime_c__String__Sequence,
         rhs: *const rosidl_runtime_c__String__Sequence,
@@ -4430,17 +4430,17 @@ extern "C" {
 }
 extern "C" {
     #[doc = " Copy rosidl_runtime_c__String__Sequence structure content."]
-    #[doc = "a *"]
-    #[doc = "a This functions performs a deep copy, as opposed to the shallow copy"]
-    #[doc = "a that plain assignment yields."]
-    #[doc = "a "]
-    #[doc = "a \\param[in] input a pointer to a rosidl_runtime_c__String__Sequence"]
-    #[doc = "a structure to copy from."]
-    #[doc = "a \\param[out] output a pointer to an initialized rosidl_runtime_c__String__Sequence"]
-    #[doc = "a structure to copy into."]
-    #[doc = "a \\return true if successful, false if either pointer is null or memory"]
-    #[doc = "a allocation fails."]
-    #[doc = "a /"]
+    #[doc = "* *"]
+    #[doc = "* This functions performs a deep copy, as opposed to the shallow copy"]
+    #[doc = "* that plain assignment yields."]
+    #[doc = "* "]
+    #[doc = "* \\param[in] input a pointer to a rosidl_runtime_c__String__Sequence"]
+    #[doc = "* structure to copy from."]
+    #[doc = "* \\param[out] output a pointer to an initialized rosidl_runtime_c__String__Sequence"]
+    #[doc = "* structure to copy into."]
+    #[doc = "* \\return true if successful, false if either pointer is null or memory"]
+    #[doc = "* allocation fails."]
+    #[doc = "* /"]
     pub fn rosidl_runtime_c__String__Sequence__copy(
         input: *const rosidl_runtime_c__String__Sequence,
         output: *mut rosidl_runtime_c__String__Sequence,

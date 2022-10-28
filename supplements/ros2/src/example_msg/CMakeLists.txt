@@ -31,6 +31,7 @@ rosidl_generate_interfaces(${PROJECT_NAME}
   "msg/dir_test/Foo.msg"
   "bar/Buz.msg"
   "srv/AddThreeInts.srv"
+  "action/MyAction.action"
   DEPENDENCIES std_msgs
 )
 
