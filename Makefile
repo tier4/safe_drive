@@ -1,4 +1,4 @@
-SUBDIRS = tests/common supplements/bindgen
+SUBDIRS = tests/common
 
 LIBDIR=supplements/ros2/install/example_msg/lib
 
