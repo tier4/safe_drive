@@ -221,6 +221,7 @@ use std::{
 #[cfg(feature = "custom_alloc")]
 pub mod allocator;
 
+pub mod action;
 pub mod context;
 pub mod error;
 pub mod helper;
