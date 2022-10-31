@@ -151,7 +151,7 @@ impl<const N: usize> Drop for ParameterEventSeq<N> {
 unsafe impl<const N: usize> Send for ParameterEventSeq<N> {}
 unsafe impl<const N: usize> Sync for ParameterEventSeq<N> {}
 
-impl TopicMsg for ParameterEvent {
+impl TypeSupport for ParameterEvent {
     fn type_support() -> *const rcl::rosidl_message_type_support_t {
         unsafe {
             rosidl_typesupport_c__get_message_type_support_handle__rcl_interfaces__msg__ParameterEvent()

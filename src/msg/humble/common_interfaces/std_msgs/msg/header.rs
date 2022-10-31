@@ -141,7 +141,7 @@ impl<const N: usize> Drop for HeaderSeq<N> {
 unsafe impl<const N: usize> Send for HeaderSeq<N> {}
 unsafe impl<const N: usize> Sync for HeaderSeq<N> {}
 
-impl TopicMsg for Header {
+impl TypeSupport for Header {
     fn type_support() -> *const rcl::rosidl_message_type_support_t {
         unsafe { rosidl_typesupport_c__get_message_type_support_handle__std_msgs__msg__Header() }
     }

@@ -157,7 +157,7 @@ impl<const N: usize> Drop for MultiEchoLaserScanSeq<N> {
 unsafe impl<const N: usize> Send for MultiEchoLaserScanSeq<N> {}
 unsafe impl<const N: usize> Sync for MultiEchoLaserScanSeq<N> {}
 
-impl TopicMsg for MultiEchoLaserScan {
+impl TypeSupport for MultiEchoLaserScan {
     fn type_support() -> *const rcl::rosidl_message_type_support_t {
         unsafe {
             rosidl_typesupport_c__get_message_type_support_handle__sensor_msgs__msg__MultiEchoLaserScan()

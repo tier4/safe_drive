@@ -19,7 +19,7 @@ use crate::{
     context::Context,
     error::{DynError, RCLResult},
     helper::InitOnce,
-    msg::{ServiceMsg, TopicMsg},
+    msg::{ServiceMsg, TypeSupport},
     parameter::ParameterServer,
     qos, rcl,
     service::{client::Client, server::Server},
@@ -108,7 +108,7 @@ impl Node {
     ///     node.create_publisher("topic_name", None).unwrap()
     /// }
     /// ```
-    pub fn create_publisher<T: TopicMsg>(
+    pub fn create_publisher<T: TypeSupport>(
         self: &Arc<Self>,
         topic_name: &str,
         qos: Option<qos::Profile>,
@@ -132,7 +132,7 @@ impl Node {
     ///     node.create_subscriber("topic_name", None).unwrap()
     /// }
     /// ```
-    pub fn create_subscriber<T: TopicMsg>(
+    pub fn create_subscriber<T: TypeSupport>(
         self: &Arc<Self>,
         topic_name: &str,
         qos: Option<qos::Profile>,

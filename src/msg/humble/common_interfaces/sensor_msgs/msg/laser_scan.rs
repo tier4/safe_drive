@@ -150,7 +150,7 @@ impl<const N: usize> Drop for LaserScanSeq<N> {
 unsafe impl<const N: usize> Send for LaserScanSeq<N> {}
 unsafe impl<const N: usize> Sync for LaserScanSeq<N> {}
 
-impl TopicMsg for LaserScan {
+impl TypeSupport for LaserScan {
     fn type_support() -> *const rcl::rosidl_message_type_support_t {
         unsafe {
             rosidl_typesupport_c__get_message_type_support_handle__sensor_msgs__msg__LaserScan()

@@ -141,7 +141,7 @@ impl<const N: usize> Drop for UUIDSeq<N> {
 unsafe impl<const N: usize> Send for UUIDSeq<N> {}
 unsafe impl<const N: usize> Sync for UUIDSeq<N> {}
 
-impl TopicMsg for UUID {
+impl TypeSupport for UUID {
     fn type_support() -> *const rcl::rosidl_message_type_support_t {
         unsafe {
             rosidl_typesupport_c__get_message_type_support_handle__unique_identifier_msgs__msg__UUID(

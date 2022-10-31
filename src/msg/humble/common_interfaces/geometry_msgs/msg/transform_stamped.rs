@@ -149,7 +149,7 @@ impl<const N: usize> Drop for TransformStampedSeq<N> {
 unsafe impl<const N: usize> Send for TransformStampedSeq<N> {}
 unsafe impl<const N: usize> Sync for TransformStampedSeq<N> {}
 
-impl TopicMsg for TransformStamped {
+impl TypeSupport for TransformStamped {
     fn type_support() -> *const rcl::rosidl_message_type_support_t {
         unsafe {
             rosidl_typesupport_c__get_message_type_support_handle__geometry_msgs__msg__TransformStamped()

@@ -217,13 +217,11 @@ impl<T: ServiceMsg> Client<T> {
         data: &<T as ServiceMsg>::Request,
     ) -> RCLResult<(ClientRecv<T>, i64)> {
         let mut seq: i64 = 0;
-        if let Err(e) = rcl::MTSafeFn::rcl_send_request(
+        rcl::MTSafeFn::rcl_send_request(
             &self.data.client,
             data as *const _ as *const c_void,
             &mut seq,
-        ) {
-            return Err(e);
-        }
+        )?;
 
         Ok((
             ClientRecv {

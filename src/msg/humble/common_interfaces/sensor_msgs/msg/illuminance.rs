@@ -148,7 +148,7 @@ impl<const N: usize> Drop for IlluminanceSeq<N> {
 unsafe impl<const N: usize> Send for IlluminanceSeq<N> {}
 unsafe impl<const N: usize> Sync for IlluminanceSeq<N> {}
 
-impl TopicMsg for Illuminance {
+impl TypeSupport for Illuminance {
     fn type_support() -> *const rcl::rosidl_message_type_support_t {
         unsafe {
             rosidl_typesupport_c__get_message_type_support_handle__sensor_msgs__msg__Illuminance()

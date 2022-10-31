@@ -148,7 +148,7 @@ impl<const N: usize> Drop for Vector3StampedSeq<N> {
 unsafe impl<const N: usize> Send for Vector3StampedSeq<N> {}
 unsafe impl<const N: usize> Sync for Vector3StampedSeq<N> {}
 
-impl TopicMsg for Vector3Stamped {
+impl TypeSupport for Vector3Stamped {
     fn type_support() -> *const rcl::rosidl_message_type_support_t {
         unsafe {
             rosidl_typesupport_c__get_message_type_support_handle__geometry_msgs__msg__Vector3Stamped()

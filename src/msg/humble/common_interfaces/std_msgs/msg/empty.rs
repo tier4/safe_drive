@@ -140,7 +140,7 @@ impl<const N: usize> Drop for EmptySeq<N> {
 unsafe impl<const N: usize> Send for EmptySeq<N> {}
 unsafe impl<const N: usize> Sync for EmptySeq<N> {}
 
-impl TopicMsg for Empty {
+impl TypeSupport for Empty {
     fn type_support() -> *const rcl::rosidl_message_type_support_t {
         unsafe { rosidl_typesupport_c__get_message_type_support_handle__std_msgs__msg__Empty() }
     }

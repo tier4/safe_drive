@@ -140,7 +140,7 @@ impl<const N: usize> Drop for ClockSeq<N> {
 unsafe impl<const N: usize> Send for ClockSeq<N> {}
 unsafe impl<const N: usize> Sync for ClockSeq<N> {}
 
-impl TopicMsg for Clock {
+impl TypeSupport for Clock {
     fn type_support() -> *const rcl::rosidl_message_type_support_t {
         unsafe {
             rosidl_typesupport_c__get_message_type_support_handle__rosgraph_msgs__msg__Clock()

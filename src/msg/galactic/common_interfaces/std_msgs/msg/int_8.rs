@@ -140,7 +140,7 @@ impl<const N: usize> Drop for Int8Seq<N> {
 unsafe impl<const N: usize> Send for Int8Seq<N> {}
 unsafe impl<const N: usize> Sync for Int8Seq<N> {}
 
-impl TopicMsg for Int8 {
+impl TypeSupport for Int8 {
     fn type_support() -> *const rcl::rosidl_message_type_support_t {
         unsafe { rosidl_typesupport_c__get_message_type_support_handle__std_msgs__msg__Int8() }
     }

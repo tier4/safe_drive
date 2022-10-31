@@ -156,7 +156,7 @@ impl<const N: usize> Drop for ParameterValueSeq<N> {
 unsafe impl<const N: usize> Send for ParameterValueSeq<N> {}
 unsafe impl<const N: usize> Sync for ParameterValueSeq<N> {}
 
-impl TopicMsg for ParameterValue {
+impl TypeSupport for ParameterValue {
     fn type_support() -> *const rcl::rosidl_message_type_support_t {
         unsafe {
             rosidl_typesupport_c__get_message_type_support_handle__rcl_interfaces__msg__ParameterValue()

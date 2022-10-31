@@ -148,7 +148,7 @@ impl<const N: usize> Drop for MapMetaDataSeq<N> {
 unsafe impl<const N: usize> Send for MapMetaDataSeq<N> {}
 unsafe impl<const N: usize> Sync for MapMetaDataSeq<N> {}
 
-impl TopicMsg for MapMetaData {
+impl TypeSupport for MapMetaData {
     fn type_support() -> *const rcl::rosidl_message_type_support_t {
         unsafe {
             rosidl_typesupport_c__get_message_type_support_handle__nav_msgs__msg__MapMetaData()

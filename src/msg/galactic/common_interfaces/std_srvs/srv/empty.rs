@@ -22,6 +22,10 @@ extern "C" {
     fn std_srvs__srv__Empty_Response__Sequence__fini(msg: *mut EmptyResponseSeqRaw);
     fn rosidl_typesupport_c__get_service_type_support_handle__std_srvs__srv__Empty(
     ) -> *const rcl::rosidl_service_type_support_t;
+    fn rosidl_typesupport_c__get_message_type_support_handle__std_srvs__srv__Empty_Request(
+    ) -> *const rcl::rosidl_message_type_support_t;
+    fn rosidl_typesupport_c__get_message_type_support_handle__std_srvs__srv__Empty_Response(
+    ) -> *const rcl::rosidl_message_type_support_t;
 }
 
 #[repr(C)]
@@ -275,5 +279,21 @@ impl ServiceMsg for Empty {
     type Response = EmptyResponse;
     fn type_support() -> *const rcl::rosidl_service_type_support_t {
         unsafe { rosidl_typesupport_c__get_service_type_support_handle__std_srvs__srv__Empty() }
+    }
+}
+
+impl TypeSupport for EmptyRequest {
+    fn type_support() -> *const rcl::rosidl_message_type_support_t {
+        unsafe {
+            rosidl_typesupport_c__get_message_type_support_handle__std_srvs__srv__Empty_Request()
+        }
+    }
+}
+
+impl TypeSupport for EmptyResponse {
+    fn type_support() -> *const rcl::rosidl_message_type_support_t {
+        unsafe {
+            rosidl_typesupport_c__get_message_type_support_handle__std_srvs__srv__Empty_Response()
+        }
     }
 }

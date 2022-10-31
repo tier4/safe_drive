@@ -140,7 +140,7 @@ impl<const N: usize> Drop for CharSeq<N> {
 unsafe impl<const N: usize> Send for CharSeq<N> {}
 unsafe impl<const N: usize> Sync for CharSeq<N> {}
 
-impl TopicMsg for Char {
+impl TypeSupport for Char {
     fn type_support() -> *const rcl::rosidl_message_type_support_t {
         unsafe { rosidl_typesupport_c__get_message_type_support_handle__std_msgs__msg__Char() }
     }

@@ -148,7 +148,7 @@ impl<const N: usize> Drop for TimeReferenceSeq<N> {
 unsafe impl<const N: usize> Send for TimeReferenceSeq<N> {}
 unsafe impl<const N: usize> Sync for TimeReferenceSeq<N> {}
 
-impl TopicMsg for TimeReference {
+impl TypeSupport for TimeReference {
     fn type_support() -> *const rcl::rosidl_message_type_support_t {
         unsafe {
             rosidl_typesupport_c__get_message_type_support_handle__sensor_msgs__msg__TimeReference()

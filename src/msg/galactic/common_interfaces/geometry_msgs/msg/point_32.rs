@@ -142,7 +142,7 @@ impl<const N: usize> Drop for Point32Seq<N> {
 unsafe impl<const N: usize> Send for Point32Seq<N> {}
 unsafe impl<const N: usize> Sync for Point32Seq<N> {}
 
-impl TopicMsg for Point32 {
+impl TypeSupport for Point32 {
     fn type_support() -> *const rcl::rosidl_message_type_support_t {
         unsafe {
             rosidl_typesupport_c__get_message_type_support_handle__geometry_msgs__msg__Point32()

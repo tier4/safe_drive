@@ -25,14 +25,17 @@ pub trait TypeSupport {
     fn type_support() -> *const rcl::rosidl_message_type_support_t;
 }
 
-pub trait TopicMsg {
-    fn type_support() -> *const rcl::rosidl_message_type_support_t;
+pub trait ServiceMsg {
+    type Request: TypeSupport;
+    type Response: TypeSupport;
+    fn type_support() -> *const rcl::rosidl_service_type_support_t;
 }
 
-pub trait ServiceMsg {
-    type Request;
-    type Response;
-    fn type_support() -> *const rcl::rosidl_service_type_support_t;
+pub trait ActionMsg {
+    type Goal: ServiceMsg;
+    type Result: ServiceMsg;
+    type Feedback: TypeSupport;
+    fn type_support() -> *const rcl::rosidl_action_type_support_t;
 }
 
 // Definition of Sequence -------------------------------------------------------------------------
@@ -410,7 +413,7 @@ pub mod builtin_interfaces {
     /// but **DO NOT USE THIS** because of the **year-2038 problem**.
     pub type UnsafeDuration = builtin_interfaces__msg__Duration;
 
-    impl TopicMsg for UnsafeDuration {
+    impl TypeSupport for UnsafeDuration {
         fn type_support() -> *const rcl::rosidl_message_type_support_t {
             unsafe {
                 rosidl_typesupport_c__get_message_type_support_handle__builtin_interfaces__msg__Duration()
@@ -431,7 +434,7 @@ pub mod builtin_interfaces {
     /// but **DO NOT USE THIS** because of the **year-2038 problem**.
     pub type UnsafeTime = builtin_interfaces__msg__Time;
 
-    impl TopicMsg for UnsafeTime {
+    impl TypeSupport for UnsafeTime {
         fn type_support() -> *const rcl::rosidl_message_type_support_t {
             unsafe {
                 rosidl_typesupport_c__get_message_type_support_handle__builtin_interfaces__msg__Time(

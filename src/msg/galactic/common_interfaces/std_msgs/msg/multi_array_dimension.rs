@@ -150,7 +150,7 @@ impl<const N: usize> Drop for MultiArrayDimensionSeq<N> {
 unsafe impl<const N: usize> Send for MultiArrayDimensionSeq<N> {}
 unsafe impl<const N: usize> Sync for MultiArrayDimensionSeq<N> {}
 
-impl TopicMsg for MultiArrayDimension {
+impl TypeSupport for MultiArrayDimension {
     fn type_support() -> *const rcl::rosidl_message_type_support_t {
         unsafe {
             rosidl_typesupport_c__get_message_type_support_handle__std_msgs__msg__MultiArrayDimension()

@@ -26,6 +26,10 @@ extern "C" {
     fn action_msgs__srv__CancelGoal_Response__Sequence__fini(msg: *mut CancelGoalResponseSeqRaw);
     fn rosidl_typesupport_c__get_service_type_support_handle__action_msgs__srv__CancelGoal(
     ) -> *const rcl::rosidl_service_type_support_t;
+    fn rosidl_typesupport_c__get_message_type_support_handle__action_msgs__srv__CancelGoal_Request(
+    ) -> *const rcl::rosidl_message_type_support_t;
+    fn rosidl_typesupport_c__get_message_type_support_handle__action_msgs__srv__CancelGoal_Response(
+    ) -> *const rcl::rosidl_message_type_support_t;
 }
 
 #[repr(C)]
@@ -284,6 +288,22 @@ impl ServiceMsg for CancelGoal {
     fn type_support() -> *const rcl::rosidl_service_type_support_t {
         unsafe {
             rosidl_typesupport_c__get_service_type_support_handle__action_msgs__srv__CancelGoal()
+        }
+    }
+}
+
+impl TypeSupport for CancelGoalRequest {
+    fn type_support() -> *const rcl::rosidl_message_type_support_t {
+        unsafe {
+            rosidl_typesupport_c__get_message_type_support_handle__action_msgs__srv__CancelGoal_Request()
+        }
+    }
+}
+
+impl TypeSupport for CancelGoalResponse {
+    fn type_support() -> *const rcl::rosidl_message_type_support_t {
+        unsafe {
+            rosidl_typesupport_c__get_message_type_support_handle__action_msgs__srv__CancelGoal_Response()
         }
     }
 }

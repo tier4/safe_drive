@@ -159,7 +159,7 @@ impl<const N: usize> Drop for MultiDOFJointTrajectoryPointSeq<N> {
 unsafe impl<const N: usize> Send for MultiDOFJointTrajectoryPointSeq<N> {}
 unsafe impl<const N: usize> Sync for MultiDOFJointTrajectoryPointSeq<N> {}
 
-impl TopicMsg for MultiDOFJointTrajectoryPoint {
+impl TypeSupport for MultiDOFJointTrajectoryPoint {
     fn type_support() -> *const rcl::rosidl_message_type_support_t {
         unsafe {
             rosidl_typesupport_c__get_message_type_support_handle__trajectory_msgs__msg__MultiDOFJointTrajectoryPoint()

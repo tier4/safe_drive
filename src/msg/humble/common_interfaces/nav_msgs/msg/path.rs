@@ -141,7 +141,7 @@ impl<const N: usize> Drop for PathSeq<N> {
 unsafe impl<const N: usize> Send for PathSeq<N> {}
 unsafe impl<const N: usize> Sync for PathSeq<N> {}
 
-impl TopicMsg for Path {
+impl TypeSupport for Path {
     fn type_support() -> *const rcl::rosidl_message_type_support_t {
         unsafe { rosidl_typesupport_c__get_message_type_support_handle__nav_msgs__msg__Path() }
     }

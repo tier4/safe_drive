@@ -154,7 +154,7 @@ impl<const N: usize> Drop for TwistWithCovarianceStampedSeq<N> {
 unsafe impl<const N: usize> Send for TwistWithCovarianceStampedSeq<N> {}
 unsafe impl<const N: usize> Sync for TwistWithCovarianceStampedSeq<N> {}
 
-impl TopicMsg for TwistWithCovarianceStamped {
+impl TypeSupport for TwistWithCovarianceStamped {
     fn type_support() -> *const rcl::rosidl_message_type_support_t {
         unsafe {
             rosidl_typesupport_c__get_message_type_support_handle__geometry_msgs__msg__TwistWithCovarianceStamped()

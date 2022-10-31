@@ -147,7 +147,7 @@ impl<const N: usize> Drop for JoyFeedbackArraySeq<N> {
 unsafe impl<const N: usize> Send for JoyFeedbackArraySeq<N> {}
 unsafe impl<const N: usize> Sync for JoyFeedbackArraySeq<N> {}
 
-impl TopicMsg for JoyFeedbackArray {
+impl TypeSupport for JoyFeedbackArray {
     fn type_support() -> *const rcl::rosidl_message_type_support_t {
         unsafe {
             rosidl_typesupport_c__get_message_type_support_handle__sensor_msgs__msg__JoyFeedbackArray()

@@ -30,6 +30,10 @@ extern "C" {
     );
     fn rosidl_typesupport_c__get_service_type_support_handle__lifecycle_msgs__srv__GetAvailableStates(
     ) -> *const rcl::rosidl_service_type_support_t;
+    fn rosidl_typesupport_c__get_message_type_support_handle__lifecycle_msgs__srv__GetAvailableStates_Request(
+    ) -> *const rcl::rosidl_message_type_support_t;
+    fn rosidl_typesupport_c__get_message_type_support_handle__lifecycle_msgs__srv__GetAvailableStates_Response(
+    ) -> *const rcl::rosidl_message_type_support_t;
 }
 
 #[repr(C)]
@@ -292,6 +296,22 @@ impl ServiceMsg for GetAvailableStates {
     fn type_support() -> *const rcl::rosidl_service_type_support_t {
         unsafe {
             rosidl_typesupport_c__get_service_type_support_handle__lifecycle_msgs__srv__GetAvailableStates()
+        }
+    }
+}
+
+impl TypeSupport for GetAvailableStatesRequest {
+    fn type_support() -> *const rcl::rosidl_message_type_support_t {
+        unsafe {
+            rosidl_typesupport_c__get_message_type_support_handle__lifecycle_msgs__srv__GetAvailableStates_Request()
+        }
+    }
+}
+
+impl TypeSupport for GetAvailableStatesResponse {
+    fn type_support() -> *const rcl::rosidl_message_type_support_t {
+        unsafe {
+            rosidl_typesupport_c__get_message_type_support_handle__lifecycle_msgs__srv__GetAvailableStates_Response()
         }
     }
 }

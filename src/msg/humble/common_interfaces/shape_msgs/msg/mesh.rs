@@ -141,7 +141,7 @@ impl<const N: usize> Drop for MeshSeq<N> {
 unsafe impl<const N: usize> Send for MeshSeq<N> {}
 unsafe impl<const N: usize> Sync for MeshSeq<N> {}
 
-impl TopicMsg for Mesh {
+impl TypeSupport for Mesh {
     fn type_support() -> *const rcl::rosidl_message_type_support_t {
         unsafe { rosidl_typesupport_c__get_message_type_support_handle__shape_msgs__msg__Mesh() }
     }

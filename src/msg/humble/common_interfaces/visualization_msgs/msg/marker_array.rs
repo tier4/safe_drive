@@ -146,7 +146,7 @@ impl<const N: usize> Drop for MarkerArraySeq<N> {
 unsafe impl<const N: usize> Send for MarkerArraySeq<N> {}
 unsafe impl<const N: usize> Sync for MarkerArraySeq<N> {}
 
-impl TopicMsg for MarkerArray {
+impl TypeSupport for MarkerArray {
     fn type_support() -> *const rcl::rosidl_message_type_support_t {
         unsafe {
             rosidl_typesupport_c__get_message_type_support_handle__visualization_msgs__msg__MarkerArray()

@@ -22,6 +22,10 @@ extern "C" {
     fn std_srvs__srv__Trigger_Response__Sequence__fini(msg: *mut TriggerResponseSeqRaw);
     fn rosidl_typesupport_c__get_service_type_support_handle__std_srvs__srv__Trigger(
     ) -> *const rcl::rosidl_service_type_support_t;
+    fn rosidl_typesupport_c__get_message_type_support_handle__std_srvs__srv__Trigger_Request(
+    ) -> *const rcl::rosidl_message_type_support_t;
+    fn rosidl_typesupport_c__get_message_type_support_handle__std_srvs__srv__Trigger_Response(
+    ) -> *const rcl::rosidl_message_type_support_t;
 }
 
 #[repr(C)]
@@ -278,5 +282,21 @@ impl ServiceMsg for Trigger {
     type Response = TriggerResponse;
     fn type_support() -> *const rcl::rosidl_service_type_support_t {
         unsafe { rosidl_typesupport_c__get_service_type_support_handle__std_srvs__srv__Trigger() }
+    }
+}
+
+impl TypeSupport for TriggerRequest {
+    fn type_support() -> *const rcl::rosidl_message_type_support_t {
+        unsafe {
+            rosidl_typesupport_c__get_message_type_support_handle__std_srvs__srv__Trigger_Request()
+        }
+    }
+}
+
+impl TypeSupport for TriggerResponse {
+    fn type_support() -> *const rcl::rosidl_message_type_support_t {
+        unsafe {
+            rosidl_typesupport_c__get_message_type_support_handle__std_srvs__srv__Trigger_Response()
+        }
     }
 }

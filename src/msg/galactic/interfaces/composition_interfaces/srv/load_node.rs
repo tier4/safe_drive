@@ -26,6 +26,10 @@ extern "C" {
     );
     fn rosidl_typesupport_c__get_service_type_support_handle__composition_interfaces__srv__LoadNode(
     ) -> *const rcl::rosidl_service_type_support_t;
+    fn rosidl_typesupport_c__get_message_type_support_handle__composition_interfaces__srv__LoadNode_Request(
+    ) -> *const rcl::rosidl_message_type_support_t;
+    fn rosidl_typesupport_c__get_message_type_support_handle__composition_interfaces__srv__LoadNode_Response(
+    ) -> *const rcl::rosidl_message_type_support_t;
 }
 
 #[repr(C)]
@@ -294,6 +298,22 @@ impl ServiceMsg for LoadNode {
     fn type_support() -> *const rcl::rosidl_service_type_support_t {
         unsafe {
             rosidl_typesupport_c__get_service_type_support_handle__composition_interfaces__srv__LoadNode()
+        }
+    }
+}
+
+impl TypeSupport for LoadNodeRequest {
+    fn type_support() -> *const rcl::rosidl_message_type_support_t {
+        unsafe {
+            rosidl_typesupport_c__get_message_type_support_handle__composition_interfaces__srv__LoadNode_Request()
+        }
+    }
+}
+
+impl TypeSupport for LoadNodeResponse {
+    fn type_support() -> *const rcl::rosidl_message_type_support_t {
+        unsafe {
+            rosidl_typesupport_c__get_message_type_support_handle__composition_interfaces__srv__LoadNode_Response()
         }
     }
 }

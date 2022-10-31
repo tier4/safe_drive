@@ -147,7 +147,7 @@ impl<const N: usize> Drop for PointStampedSeq<N> {
 unsafe impl<const N: usize> Send for PointStampedSeq<N> {}
 unsafe impl<const N: usize> Sync for PointStampedSeq<N> {}
 
-impl TopicMsg for PointStamped {
+impl TypeSupport for PointStamped {
     fn type_support() -> *const rcl::rosidl_message_type_support_t {
         unsafe {
             rosidl_typesupport_c__get_message_type_support_handle__geometry_msgs__msg__PointStamped(

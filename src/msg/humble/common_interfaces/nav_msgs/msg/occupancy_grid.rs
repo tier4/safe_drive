@@ -148,7 +148,7 @@ impl<const N: usize> Drop for OccupancyGridSeq<N> {
 unsafe impl<const N: usize> Send for OccupancyGridSeq<N> {}
 unsafe impl<const N: usize> Sync for OccupancyGridSeq<N> {}
 
-impl TopicMsg for OccupancyGrid {
+impl TypeSupport for OccupancyGrid {
     fn type_support() -> *const rcl::rosidl_message_type_support_t {
         unsafe {
             rosidl_typesupport_c__get_message_type_support_handle__nav_msgs__msg__OccupancyGrid()

@@ -141,7 +141,7 @@ impl<const N: usize> Drop for WrenchSeq<N> {
 unsafe impl<const N: usize> Send for WrenchSeq<N> {}
 unsafe impl<const N: usize> Sync for WrenchSeq<N> {}
 
-impl TopicMsg for Wrench {
+impl TypeSupport for Wrench {
     fn type_support() -> *const rcl::rosidl_message_type_support_t {
         unsafe {
             rosidl_typesupport_c__get_message_type_support_handle__geometry_msgs__msg__Wrench()

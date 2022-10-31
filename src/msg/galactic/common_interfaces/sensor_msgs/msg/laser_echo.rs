@@ -141,7 +141,7 @@ impl<const N: usize> Drop for LaserEchoSeq<N> {
 unsafe impl<const N: usize> Send for LaserEchoSeq<N> {}
 unsafe impl<const N: usize> Sync for LaserEchoSeq<N> {}
 
-impl TopicMsg for LaserEcho {
+impl TypeSupport for LaserEcho {
     fn type_support() -> *const rcl::rosidl_message_type_support_t {
         unsafe {
             rosidl_typesupport_c__get_message_type_support_handle__sensor_msgs__msg__LaserEcho()

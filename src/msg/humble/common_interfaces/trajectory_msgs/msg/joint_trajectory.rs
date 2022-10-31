@@ -149,7 +149,7 @@ impl<const N: usize> Drop for JointTrajectorySeq<N> {
 unsafe impl<const N: usize> Send for JointTrajectorySeq<N> {}
 unsafe impl<const N: usize> Sync for JointTrajectorySeq<N> {}
 
-impl TopicMsg for JointTrajectory {
+impl TypeSupport for JointTrajectory {
     fn type_support() -> *const rcl::rosidl_message_type_support_t {
         unsafe {
             rosidl_typesupport_c__get_message_type_support_handle__trajectory_msgs__msg__JointTrajectory()

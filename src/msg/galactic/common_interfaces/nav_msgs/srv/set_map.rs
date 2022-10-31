@@ -22,6 +22,10 @@ extern "C" {
     fn nav_msgs__srv__SetMap_Response__Sequence__fini(msg: *mut SetMapResponseSeqRaw);
     fn rosidl_typesupport_c__get_service_type_support_handle__nav_msgs__srv__SetMap(
     ) -> *const rcl::rosidl_service_type_support_t;
+    fn rosidl_typesupport_c__get_message_type_support_handle__nav_msgs__srv__SetMap_Request(
+    ) -> *const rcl::rosidl_message_type_support_t;
+    fn rosidl_typesupport_c__get_message_type_support_handle__nav_msgs__srv__SetMap_Response(
+    ) -> *const rcl::rosidl_message_type_support_t;
 }
 
 #[repr(C)]
@@ -277,5 +281,21 @@ impl ServiceMsg for SetMap {
     type Response = SetMapResponse;
     fn type_support() -> *const rcl::rosidl_service_type_support_t {
         unsafe { rosidl_typesupport_c__get_service_type_support_handle__nav_msgs__srv__SetMap() }
+    }
+}
+
+impl TypeSupport for SetMapRequest {
+    fn type_support() -> *const rcl::rosidl_message_type_support_t {
+        unsafe {
+            rosidl_typesupport_c__get_message_type_support_handle__nav_msgs__srv__SetMap_Request()
+        }
+    }
+}
+
+impl TypeSupport for SetMapResponse {
+    fn type_support() -> *const rcl::rosidl_message_type_support_t {
+        unsafe {
+            rosidl_typesupport_c__get_message_type_support_handle__nav_msgs__srv__SetMap_Response()
+        }
     }
 }

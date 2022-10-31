@@ -152,7 +152,7 @@ impl<const N: usize> Drop for StateSeq<N> {
 unsafe impl<const N: usize> Send for StateSeq<N> {}
 unsafe impl<const N: usize> Sync for StateSeq<N> {}
 
-impl TopicMsg for State {
+impl TypeSupport for State {
     fn type_support() -> *const rcl::rosidl_message_type_support_t {
         unsafe {
             rosidl_typesupport_c__get_message_type_support_handle__lifecycle_msgs__msg__State()

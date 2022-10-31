@@ -152,7 +152,7 @@
 use crate::{
     error::{DynError, RCLError, RCLResult},
     get_allocator, is_halt,
-    msg::TopicMsg,
+    msg::TypeSupport,
     node::Node,
     qos, rcl,
     selector::{
@@ -218,7 +218,7 @@ pub struct Subscriber<T> {
     _unsync: PhantomUnsync,
 }
 
-impl<T: TopicMsg> Subscriber<T> {
+impl<T: TypeSupport> Subscriber<T> {
     pub(crate) fn new(
         node: Arc<Node>,
         topic_name: &str,

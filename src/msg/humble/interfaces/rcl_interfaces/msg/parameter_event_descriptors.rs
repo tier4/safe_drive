@@ -155,7 +155,7 @@ impl<const N: usize> Drop for ParameterEventDescriptorsSeq<N> {
 unsafe impl<const N: usize> Send for ParameterEventDescriptorsSeq<N> {}
 unsafe impl<const N: usize> Sync for ParameterEventDescriptorsSeq<N> {}
 
-impl TopicMsg for ParameterEventDescriptors {
+impl TypeSupport for ParameterEventDescriptors {
     fn type_support() -> *const rcl::rosidl_message_type_support_t {
         unsafe {
             rosidl_typesupport_c__get_message_type_support_handle__rcl_interfaces__msg__ParameterEventDescriptors()

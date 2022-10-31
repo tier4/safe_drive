@@ -148,7 +148,7 @@ impl<const N: usize> Drop for MultiArrayLayoutSeq<N> {
 unsafe impl<const N: usize> Send for MultiArrayLayoutSeq<N> {}
 unsafe impl<const N: usize> Sync for MultiArrayLayoutSeq<N> {}
 
-impl TopicMsg for MultiArrayLayout {
+impl TypeSupport for MultiArrayLayout {
     fn type_support() -> *const rcl::rosidl_message_type_support_t {
         unsafe {
             rosidl_typesupport_c__get_message_type_support_handle__std_msgs__msg__MultiArrayLayout()

@@ -60,7 +60,7 @@ use crate::{
     error::{DynError, RCLError, RCLResult},
     get_allocator,
     logger::{pr_error_in, pr_fatal_in, Logger},
-    msg::{ServiceMsg, TopicMsg},
+    msg::{ServiceMsg, TypeSupport},
     parameter::{ParameterServer, Parameters},
     rcl,
     service::{
@@ -286,7 +286,7 @@ impl Selector {
     ///     );
     /// }
     /// ```
-    pub fn add_subscriber<T: TopicMsg + 'static>(
+    pub fn add_subscriber<T: TypeSupport + 'static>(
         &mut self,
         subscriber: Subscriber<T>,
         mut handler: Box<dyn FnMut(T)>,

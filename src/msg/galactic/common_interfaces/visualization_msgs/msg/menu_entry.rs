@@ -153,7 +153,7 @@ impl<const N: usize> Drop for MenuEntrySeq<N> {
 unsafe impl<const N: usize> Send for MenuEntrySeq<N> {}
 unsafe impl<const N: usize> Sync for MenuEntrySeq<N> {}
 
-impl TopicMsg for MenuEntry {
+impl TypeSupport for MenuEntry {
     fn type_support() -> *const rcl::rosidl_message_type_support_t {
         unsafe {
             rosidl_typesupport_c__get_message_type_support_handle__visualization_msgs__msg__MenuEntry()

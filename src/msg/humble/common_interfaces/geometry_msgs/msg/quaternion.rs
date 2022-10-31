@@ -149,7 +149,7 @@ impl<const N: usize> Drop for QuaternionSeq<N> {
 unsafe impl<const N: usize> Send for QuaternionSeq<N> {}
 unsafe impl<const N: usize> Sync for QuaternionSeq<N> {}
 
-impl TopicMsg for Quaternion {
+impl TypeSupport for Quaternion {
     fn type_support() -> *const rcl::rosidl_message_type_support_t {
         unsafe {
             rosidl_typesupport_c__get_message_type_support_handle__geometry_msgs__msg__Quaternion()

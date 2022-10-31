@@ -147,7 +147,7 @@ impl<const N: usize> Drop for KeyValueSeq<N> {
 unsafe impl<const N: usize> Send for KeyValueSeq<N> {}
 unsafe impl<const N: usize> Sync for KeyValueSeq<N> {}
 
-impl TopicMsg for KeyValue {
+impl TypeSupport for KeyValue {
     fn type_support() -> *const rcl::rosidl_message_type_support_t {
         unsafe {
             rosidl_typesupport_c__get_message_type_support_handle__diagnostic_msgs__msg__KeyValue()

@@ -142,7 +142,7 @@ impl<const N: usize> Drop for Pose2DSeq<N> {
 unsafe impl<const N: usize> Send for Pose2DSeq<N> {}
 unsafe impl<const N: usize> Sync for Pose2DSeq<N> {}
 
-impl TopicMsg for Pose2D {
+impl TypeSupport for Pose2D {
     fn type_support() -> *const rcl::rosidl_message_type_support_t {
         unsafe {
             rosidl_typesupport_c__get_message_type_support_handle__geometry_msgs__msg__Pose2D()

@@ -148,7 +148,7 @@ impl<const N: usize> Drop for InertiaStampedSeq<N> {
 unsafe impl<const N: usize> Send for InertiaStampedSeq<N> {}
 unsafe impl<const N: usize> Sync for InertiaStampedSeq<N> {}
 
-impl TopicMsg for InertiaStamped {
+impl TypeSupport for InertiaStamped {
     fn type_support() -> *const rcl::rosidl_message_type_support_t {
         unsafe {
             rosidl_typesupport_c__get_message_type_support_handle__geometry_msgs__msg__InertiaStamped()

@@ -155,7 +155,7 @@ impl<const N: usize> Drop for DiagnosticStatusSeq<N> {
 unsafe impl<const N: usize> Send for DiagnosticStatusSeq<N> {}
 unsafe impl<const N: usize> Sync for DiagnosticStatusSeq<N> {}
 
-impl TopicMsg for DiagnosticStatus {
+impl TypeSupport for DiagnosticStatus {
     fn type_support() -> *const rcl::rosidl_message_type_support_t {
         unsafe {
             rosidl_typesupport_c__get_message_type_support_handle__diagnostic_msgs__msg__DiagnosticStatus()

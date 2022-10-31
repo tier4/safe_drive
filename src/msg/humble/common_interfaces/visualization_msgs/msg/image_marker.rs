@@ -165,7 +165,7 @@ impl<const N: usize> Drop for ImageMarkerSeq<N> {
 unsafe impl<const N: usize> Send for ImageMarkerSeq<N> {}
 unsafe impl<const N: usize> Sync for ImageMarkerSeq<N> {}
 
-impl TopicMsg for ImageMarker {
+impl TypeSupport for ImageMarker {
     fn type_support() -> *const rcl::rosidl_message_type_support_t {
         unsafe {
             rosidl_typesupport_c__get_message_type_support_handle__visualization_msgs__msg__ImageMarker()

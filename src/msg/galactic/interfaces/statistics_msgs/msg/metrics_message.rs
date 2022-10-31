@@ -152,7 +152,7 @@ impl<const N: usize> Drop for MetricsMessageSeq<N> {
 unsafe impl<const N: usize> Send for MetricsMessageSeq<N> {}
 unsafe impl<const N: usize> Sync for MetricsMessageSeq<N> {}
 
-impl TopicMsg for MetricsMessage {
+impl TypeSupport for MetricsMessage {
     fn type_support() -> *const rcl::rosidl_message_type_support_t {
         unsafe {
             rosidl_typesupport_c__get_message_type_support_handle__statistics_msgs__msg__MetricsMessage()

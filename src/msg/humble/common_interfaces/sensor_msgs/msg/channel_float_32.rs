@@ -148,7 +148,7 @@ impl<const N: usize> Drop for ChannelFloat32Seq<N> {
 unsafe impl<const N: usize> Send for ChannelFloat32Seq<N> {}
 unsafe impl<const N: usize> Sync for ChannelFloat32Seq<N> {}
 
-impl TopicMsg for ChannelFloat32 {
+impl TypeSupport for ChannelFloat32 {
     fn type_support() -> *const rcl::rosidl_message_type_support_t {
         unsafe {
             rosidl_typesupport_c__get_message_type_support_handle__sensor_msgs__msg__ChannelFloat32(

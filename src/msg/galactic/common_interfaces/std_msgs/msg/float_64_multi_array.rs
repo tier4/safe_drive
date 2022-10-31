@@ -148,7 +148,7 @@ impl<const N: usize> Drop for Float64MultiArraySeq<N> {
 unsafe impl<const N: usize> Send for Float64MultiArraySeq<N> {}
 unsafe impl<const N: usize> Sync for Float64MultiArraySeq<N> {}
 
-impl TopicMsg for Float64MultiArray {
+impl TypeSupport for Float64MultiArray {
     fn type_support() -> *const rcl::rosidl_message_type_support_t {
         unsafe {
             rosidl_typesupport_c__get_message_type_support_handle__std_msgs__msg__Float64MultiArray(

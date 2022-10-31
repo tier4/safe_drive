@@ -140,7 +140,7 @@ impl<const N: usize> Drop for PlaneSeq<N> {
 unsafe impl<const N: usize> Send for PlaneSeq<N> {}
 unsafe impl<const N: usize> Sync for PlaneSeq<N> {}
 
-impl TopicMsg for Plane {
+impl TypeSupport for Plane {
     fn type_support() -> *const rcl::rosidl_message_type_support_t {
         unsafe { rosidl_typesupport_c__get_message_type_support_handle__shape_msgs__msg__Plane() }
     }

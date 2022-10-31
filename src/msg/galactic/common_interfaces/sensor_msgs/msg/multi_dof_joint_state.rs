@@ -152,7 +152,7 @@ impl<const N: usize> Drop for MultiDOFJointStateSeq<N> {
 unsafe impl<const N: usize> Send for MultiDOFJointStateSeq<N> {}
 unsafe impl<const N: usize> Sync for MultiDOFJointStateSeq<N> {}
 
-impl TopicMsg for MultiDOFJointState {
+impl TypeSupport for MultiDOFJointState {
     fn type_support() -> *const rcl::rosidl_message_type_support_t {
         unsafe {
             rosidl_typesupport_c__get_message_type_support_handle__sensor_msgs__msg__MultiDOFJointState()

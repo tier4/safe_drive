@@ -154,7 +154,7 @@ impl<const N: usize> Drop for DisparityImageSeq<N> {
 unsafe impl<const N: usize> Send for DisparityImageSeq<N> {}
 unsafe impl<const N: usize> Sync for DisparityImageSeq<N> {}
 
-impl TopicMsg for DisparityImage {
+impl TypeSupport for DisparityImage {
     fn type_support() -> *const rcl::rosidl_message_type_support_t {
         unsafe {
             rosidl_typesupport_c__get_message_type_support_handle__stereo_msgs__msg__DisparityImage(

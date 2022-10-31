@@ -14,7 +14,7 @@ use msgs::example_msg::{msg::Num, srv::AddThreeInts};
 use safe_drive::{
     self,
     error::{DynError, RCLResult},
-    msg::{ServiceMsg, TopicMsg},
+    msg::{ServiceMsg, TypeSupport},
     node::Node,
     rcl,
     service::{client::Client, server::Server},

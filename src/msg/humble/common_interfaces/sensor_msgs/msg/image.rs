@@ -146,7 +146,7 @@ impl<const N: usize> Drop for ImageSeq<N> {
 unsafe impl<const N: usize> Send for ImageSeq<N> {}
 unsafe impl<const N: usize> Sync for ImageSeq<N> {}
 
-impl TopicMsg for Image {
+impl TypeSupport for Image {
     fn type_support() -> *const rcl::rosidl_message_type_support_t {
         unsafe { rosidl_typesupport_c__get_message_type_support_handle__sensor_msgs__msg__Image() }
     }

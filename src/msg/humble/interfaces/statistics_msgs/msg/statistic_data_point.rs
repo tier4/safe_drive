@@ -149,7 +149,7 @@ impl<const N: usize> Drop for StatisticDataPointSeq<N> {
 unsafe impl<const N: usize> Send for StatisticDataPointSeq<N> {}
 unsafe impl<const N: usize> Sync for StatisticDataPointSeq<N> {}
 
-impl TopicMsg for StatisticDataPoint {
+impl TypeSupport for StatisticDataPoint {
     fn type_support() -> *const rcl::rosidl_message_type_support_t {
         unsafe {
             rosidl_typesupport_c__get_message_type_support_handle__statistics_msgs__msg__StatisticDataPoint()

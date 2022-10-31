@@ -22,6 +22,10 @@ extern "C" {
     fn std_srvs__srv__SetBool_Response__Sequence__fini(msg: *mut SetBoolResponseSeqRaw);
     fn rosidl_typesupport_c__get_service_type_support_handle__std_srvs__srv__SetBool(
     ) -> *const rcl::rosidl_service_type_support_t;
+    fn rosidl_typesupport_c__get_message_type_support_handle__std_srvs__srv__SetBool_Request(
+    ) -> *const rcl::rosidl_message_type_support_t;
+    fn rosidl_typesupport_c__get_message_type_support_handle__std_srvs__srv__SetBool_Response(
+    ) -> *const rcl::rosidl_message_type_support_t;
 }
 
 #[repr(C)]
@@ -278,5 +282,21 @@ impl ServiceMsg for SetBool {
     type Response = SetBoolResponse;
     fn type_support() -> *const rcl::rosidl_service_type_support_t {
         unsafe { rosidl_typesupport_c__get_service_type_support_handle__std_srvs__srv__SetBool() }
+    }
+}
+
+impl TypeSupport for SetBoolRequest {
+    fn type_support() -> *const rcl::rosidl_message_type_support_t {
+        unsafe {
+            rosidl_typesupport_c__get_message_type_support_handle__std_srvs__srv__SetBool_Request()
+        }
+    }
+}
+
+impl TypeSupport for SetBoolResponse {
+    fn type_support() -> *const rcl::rosidl_message_type_support_t {
+        unsafe {
+            rosidl_typesupport_c__get_message_type_support_handle__std_srvs__srv__SetBool_Response()
+        }
     }
 }

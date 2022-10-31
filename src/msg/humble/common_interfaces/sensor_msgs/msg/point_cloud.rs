@@ -148,7 +148,7 @@ impl<const N: usize> Drop for PointCloudSeq<N> {
 unsafe impl<const N: usize> Send for PointCloudSeq<N> {}
 unsafe impl<const N: usize> Sync for PointCloudSeq<N> {}
 
-impl TopicMsg for PointCloud {
+impl TypeSupport for PointCloud {
     fn type_support() -> *const rcl::rosidl_message_type_support_t {
         unsafe {
             rosidl_typesupport_c__get_message_type_support_handle__sensor_msgs__msg__PointCloud()

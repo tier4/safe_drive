@@ -149,7 +149,7 @@ impl<const N: usize> Drop for PoseWithCovarianceSeq<N> {
 unsafe impl<const N: usize> Send for PoseWithCovarianceSeq<N> {}
 unsafe impl<const N: usize> Sync for PoseWithCovarianceSeq<N> {}
 
-impl TopicMsg for PoseWithCovariance {
+impl TypeSupport for PoseWithCovariance {
     fn type_support() -> *const rcl::rosidl_message_type_support_t {
         unsafe {
             rosidl_typesupport_c__get_message_type_support_handle__geometry_msgs__msg__PoseWithCovariance()

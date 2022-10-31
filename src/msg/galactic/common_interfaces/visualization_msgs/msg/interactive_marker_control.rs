@@ -174,7 +174,7 @@ impl<const N: usize> Drop for InteractiveMarkerControlSeq<N> {
 unsafe impl<const N: usize> Send for InteractiveMarkerControlSeq<N> {}
 unsafe impl<const N: usize> Sync for InteractiveMarkerControlSeq<N> {}
 
-impl TopicMsg for InteractiveMarkerControl {
+impl TypeSupport for InteractiveMarkerControl {
     fn type_support() -> *const rcl::rosidl_message_type_support_t {
         unsafe {
             rosidl_typesupport_c__get_message_type_support_handle__visualization_msgs__msg__InteractiveMarkerControl()

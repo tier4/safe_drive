@@ -148,7 +148,7 @@ impl<const N: usize> Drop for TemperatureSeq<N> {
 unsafe impl<const N: usize> Send for TemperatureSeq<N> {}
 unsafe impl<const N: usize> Sync for TemperatureSeq<N> {}
 
-impl TopicMsg for Temperature {
+impl TypeSupport for Temperature {
     fn type_support() -> *const rcl::rosidl_message_type_support_t {
         unsafe {
             rosidl_typesupport_c__get_message_type_support_handle__sensor_msgs__msg__Temperature()

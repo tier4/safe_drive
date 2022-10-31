@@ -148,7 +148,7 @@ impl<const N: usize> Drop for Int32MultiArraySeq<N> {
 unsafe impl<const N: usize> Send for Int32MultiArraySeq<N> {}
 unsafe impl<const N: usize> Sync for Int32MultiArraySeq<N> {}
 
-impl TopicMsg for Int32MultiArray {
+impl TypeSupport for Int32MultiArray {
     fn type_support() -> *const rcl::rosidl_message_type_support_t {
         unsafe {
             rosidl_typesupport_c__get_message_type_support_handle__std_msgs__msg__Int32MultiArray()

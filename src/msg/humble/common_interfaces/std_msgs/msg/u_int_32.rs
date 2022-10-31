@@ -140,7 +140,7 @@ impl<const N: usize> Drop for UInt32Seq<N> {
 unsafe impl<const N: usize> Send for UInt32Seq<N> {}
 unsafe impl<const N: usize> Sync for UInt32Seq<N> {}
 
-impl TopicMsg for UInt32 {
+impl TypeSupport for UInt32 {
     fn type_support() -> *const rcl::rosidl_message_type_support_t {
         unsafe { rosidl_typesupport_c__get_message_type_support_handle__std_msgs__msg__UInt32() }
     }

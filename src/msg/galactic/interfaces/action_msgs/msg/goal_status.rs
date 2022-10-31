@@ -154,7 +154,7 @@ impl<const N: usize> Drop for GoalStatusSeq<N> {
 unsafe impl<const N: usize> Send for GoalStatusSeq<N> {}
 unsafe impl<const N: usize> Sync for GoalStatusSeq<N> {}
 
-impl TopicMsg for GoalStatus {
+impl TypeSupport for GoalStatus {
     fn type_support() -> *const rcl::rosidl_message_type_support_t {
         unsafe {
             rosidl_typesupport_c__get_message_type_support_handle__action_msgs__msg__GoalStatus()

@@ -50,7 +50,7 @@
 use crate::{
     error::{DynError, RCLResult},
     get_allocator,
-    msg::TopicMsg,
+    msg::TypeSupport,
     node::Node,
     qos, rcl,
     signal_handler::Signaled,
@@ -96,7 +96,7 @@ pub struct Publisher<T> {
     node: Arc<Node>,
 }
 
-impl<T: TopicMsg> Publisher<T> {
+impl<T: TypeSupport> Publisher<T> {
     pub(crate) fn new(
         node: Arc<Node>,
         topic_name: &str,

@@ -148,7 +148,7 @@ impl<const N: usize> Drop for DiagnosticArraySeq<N> {
 unsafe impl<const N: usize> Send for DiagnosticArraySeq<N> {}
 unsafe impl<const N: usize> Sync for DiagnosticArraySeq<N> {}
 
-impl TopicMsg for DiagnosticArray {
+impl TypeSupport for DiagnosticArray {
     fn type_support() -> *const rcl::rosidl_message_type_support_t {
         unsafe {
             rosidl_typesupport_c__get_message_type_support_handle__diagnostic_msgs__msg__DiagnosticArray()
