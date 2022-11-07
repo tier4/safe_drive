@@ -36,6 +36,9 @@ pub use humble::{
     rosidl_action_type_support_t, rosidl_message_type_support_t, rosidl_service_type_support_t,
 };
 
+#[cfg(feature = "humble")]
+pub type size_t = usize;
+
 use crate::error::{ret_val_to_err, RCLResult};
 use once_cell::sync::Lazy;
 use parking_lot::Mutex;

@@ -203,7 +203,7 @@ impl From<&Profile> for rcl::rmw_qos_profile_t {
         rcl::rmw_qos_profile_t {
             history: ToPrimitive::to_u32(&qos.history)
                 .unwrap_or(rcl::rmw_qos_history_policy_e_RMW_QOS_POLICY_HISTORY_UNKNOWN),
-            depth: qos.depth as u64,
+            depth: qos.depth as _,
             reliability: ToPrimitive::to_u32(&qos.reliability)
                 .unwrap_or(rcl::rmw_qos_reliability_policy_e_RMW_QOS_POLICY_RELIABILITY_UNKNOWN),
             durability: ToPrimitive::to_u32(&qos.durability)

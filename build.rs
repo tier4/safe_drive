@@ -22,6 +22,8 @@ fn main() {
     println!("cargo:rustc-link-lib=std_msgs__rosidl_generator_c");
     println!("cargo:rustc-link-lib=std_srvs__rosidl_typesupport_c");
     println!("cargo:rustc-link-lib=std_srvs__rosidl_generator_c");
+    println!("cargo:rustc-link-lib=action_msgs__rosidl_typesupport_c");
+    println!("cargo:rustc-link-lib=action_msgs__rosidl_generator_c");
     println!("cargo:rustc-link-lib=stereo_msgs__rosidl_typesupport_c");
     println!("cargo:rustc-link-lib=stereo_msgs__rosidl_generator_c");
     println!("cargo:rustc-link-lib=trajectory_msgs__rosidl_typesupport_c");

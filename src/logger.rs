@@ -212,7 +212,7 @@ impl Logger {
         let logging_location = rcl::rcutils_log_location_t {
             function_name: function_name.as_ptr(),
             file_name: file_name.as_ptr(),
-            line_number,
+            line_number: line_number as _,
         };
 
         let guard = rcl::MT_UNSAFE_LOG_FN.lock();

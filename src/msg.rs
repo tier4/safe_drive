@@ -57,7 +57,7 @@ macro_rules! def_sequence {
                 }
 
                 let mut msg: $ty_seq = unsafe { std::mem::MaybeUninit::zeroed().assume_init() };
-                if unsafe { $init(&mut msg, size as u64) } {
+                if unsafe { $init(&mut msg, size as _) } {
                     Some($ty(msg))
                 } else {
                     None
@@ -262,7 +262,7 @@ impl<const N: usize> RosString<N> {
         if N == 0 {
             unsafe { rosidl_runtime_c__String__assign(msg, cs.as_ptr()) }
         } else {
-            unsafe { rosidl_runtime_c__String__assignn(msg, cs.as_ptr(), N as u64) }
+            unsafe { rosidl_runtime_c__String__assignn(msg, cs.as_ptr(), N as _) }
         }
     }
 
@@ -339,7 +339,7 @@ impl<const STRLEN: usize, const SEQLEN: usize> RosStringSeq<STRLEN, SEQLEN> {
 
         let mut msg: rosidl_runtime_c__String__Sequence =
             unsafe { std::mem::MaybeUninit::zeroed().assume_init() };
-        if unsafe { rosidl_runtime_c__String__Sequence__init(&mut msg, size as u64) } {
+        if unsafe { rosidl_runtime_c__String__Sequence__init(&mut msg, size as _) } {
             Some(Self(msg))
         } else {
             None
