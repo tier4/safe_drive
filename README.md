@@ -7,7 +7,7 @@ Therefore, you can clearly understand how the scheduler work and the safeness of
 ## Specifications
 
 Some algorithms we adopted are formally specified and tested the safeness by using TLA+.
-Original ROS2's executor (rclcpp) is suffering from starvation.
+Original ROS2's executor (rclcpp) suffers from starvation.
 In contrast, the starvation freedom of our executor has been validated by not only dynamic analysis but also
 formal verification.
 
