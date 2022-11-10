@@ -25,8 +25,9 @@ version = "1"
 optional = true
 
 [dependencies.memac]
-version = "0.3"
+version = "0.4"
 optional = true
+default-features=false
 
 [dev-dependencies]
 futures = "0.3"
@@ -42,3 +43,22 @@ rcl_stat = ["statistics"]
 humble = []
 galactic = []
 custom_alloc = ["memac"]
+memsize_32m = ["memac/buddy_32m"]
+memsize_64m = ["memac/buddy_64m"]
+memsize_128m = ["memac/buddy_128m"]
+memsize_256m = ["memac/buddy_256m"]
+memsize_512m = ["memac/buddy_512m"]
+memsize_1g = ["memac/buddy_1g"]
+memsize_2g = ["memac/buddy_2g"]
+memsize_4g = ["memac/buddy_4g"]
+memsize_8g = ["memac/buddy_8g"]
+memsize_16g = ["memac/buddy_16g"]
+memsize_32g = ["memac/buddy_32g"]
+memsize_64g = ["memac/buddy_64g"]
+memsize_128g = ["memac/buddy_128g"]
+memsize_256g = ["memac/buddy_256g"]
+memsize_512g = ["memac/buddy_512g"]
+memsize_1t = ["memac/buddy_1t"]
+memsize_2t = ["memac/buddy_2t"]
+memsize_4t = ["memac/buddy_4t"]
+memsize_8t = ["memac/buddy_8t"]

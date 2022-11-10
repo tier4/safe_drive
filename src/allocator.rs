@@ -7,7 +7,7 @@
 //! ```
 //! use safe_drive::allocator::ALLOCATOR;
 //! fn main() {
-//!     unsafe { ALLOCATOR.init(128) }; // 128 * 64KiB = 8MiB
+//!     unsafe { ALLOCATOR.init() };
 //! }
 //! ```
 
@@ -21,6 +21,63 @@ use std::{
 };
 
 pub use memac::ALIGNMENT;
+
+#[cfg(feature = "memsize_32m")]
+const MEMSIZE: usize = 32 * 1024 * 1024;
+
+#[cfg(feature = "memsize_64m")]
+const MEMSIZE: usize = 64 * 1024 * 1024;
+
+#[cfg(feature = "memsize_128m")]
+const MEMSIZE: usize = 128 * 1024 * 1024;
+
+#[cfg(feature = "memsize_256m")]
+const MEMSIZE: usize = 256 * 1024 * 1024;
+
+#[cfg(feature = "memsize_512m")]
+const MEMSIZE: usize = 512 * 1024 * 1024;
+
+#[cfg(feature = "memsize_1g")]
+const MEMSIZE: usize = 1024 * 1024 * 1024;
+
+#[cfg(feature = "memsize_2g")]
+const MEMSIZE: usize = 2 * 1024 * 1024 * 1024;
+
+#[cfg(feature = "memsize_4g")]
+const MEMSIZE: usize = 4 * 1024 * 1024 * 1024;
+
+#[cfg(feature = "memsize_8g")]
+const MEMSIZE: usize = 8 * 1024 * 1024 * 1024;
+
+#[cfg(feature = "memsize_16g")]
+const MEMSIZE: usize = 16 * 1024 * 1024 * 1024;
+
+#[cfg(feature = "memsize_32g")]
+const MEMSIZE: usize = 32 * 1024 * 1024 * 1024;
+
+#[cfg(feature = "memsize_64g")]
+const MEMSIZE: usize = 64 * 1024 * 1024 * 1024;
+
+#[cfg(feature = "memsize_128g")]
+const MEMSIZE: usize = 128 * 1024 * 1024 * 1024;
+
+#[cfg(feature = "memsize_256g")]
+const MEMSIZE: usize = 256 * 1024 * 1024 * 1024;
+
+#[cfg(feature = "memsize_512g")]
+const MEMSIZE: usize = 512 * 1024 * 1024 * 1024;
+
+#[cfg(feature = "memsize_1t")]
+const MEMSIZE: usize = 1024 * 1024 * 1024 * 1024;
+
+#[cfg(feature = "memsize_2t")]
+const MEMSIZE: usize = 2 * 1024 * 1024 * 1024 * 1024;
+
+#[cfg(feature = "memsize_4t")]
+const MEMSIZE: usize = 4 * 1024 * 1024 * 1024 * 1024;
+
+#[cfg(feature = "memsize_8t")]
+const MEMSIZE: usize = 8 * 1024 * 1024 * 1024 * 1024;
 
 pub struct CustomAllocator {
     allocator: memac::Allocator,
@@ -52,9 +109,8 @@ impl CustomAllocator {
     ///
     /// The allocated memory region will be automatically touched to avoid
     /// dynamic page allocation of demand paging.
-    pub unsafe fn init(&mut self, pages: usize) -> bool {
-        let size = pages * ALIGNMENT;
-        if let Ok(layout) = Layout::from_size_align(size, memac::ALIGNMENT) {
+    pub unsafe fn init(&mut self) -> bool {
+        if let Ok(layout) = Layout::from_size_align(MEMSIZE, memac::ALIGNMENT) {
             let result = System.alloc(layout);
             if result.is_null() {
                 false
@@ -62,13 +118,13 @@ impl CustomAllocator {
                 let start = result as usize;
 
                 // Touch memory.
-                let mem = from_raw_parts_mut(result, size);
-                for i in (0..size).step_by(4096) {
+                let mem = from_raw_parts_mut(result, MEMSIZE);
+                for i in (0..MEMSIZE).step_by(4096) {
                     write_volatile(&mut mem[i], 0);
                 }
 
-                self.allocator.init_slab(start, size);
-                self.heap = (start, start + size);
+                self.allocator.init(start);
+                self.heap = (start, start + MEMSIZE);
 
                 true
             }
