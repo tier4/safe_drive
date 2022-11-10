@@ -13,4 +13,4 @@ See [tlaplus_community_jar](https://github.com/ytakano/tlaplus_community_jar) fo
 
 - [Asyn/await Scheduler](./scheduler/)
 - [Single Threaded Callback Execution](./callback/)
-- [Initialize Once](./init_once/)
+- [crate::helper::InitOnce](./src/helper.rs/init_once/)
