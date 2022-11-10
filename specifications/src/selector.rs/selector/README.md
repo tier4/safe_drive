@@ -1,7 +1,7 @@
 # Single Threaded Callback Execution
 
 `safe_drive` makes use of the delta list, which was originally introduced by [Operating System Design, The Xinu Approach, Second Edition](https://xinu.cs.purdue.edu/)'s Chapter 13, for timer.
-[callback.tla](./callback.tla) is a specification of the callback execution using the delta list.
+[selector.tla](./selector.tla) is a specification of the callback execution using the delta list.
 
 ## Prerequisites
 
@@ -43,7 +43,7 @@ then
 Additionally, there are 3 sets to represents states of callback functions as follows.
 
 - `running`: a set of processes running now
-- `wait_set`: a set of processes which can execute
+- `wait_set`: a set of processes which can be executed
 - `waiting`: a set of processes waiting a event
 
 

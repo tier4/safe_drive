@@ -1,11 +1,11 @@
----- MODULE callback ----
+---- MODULE selector ----
 EXTENDS TLC, Sequences, SequencesExt, FiniteSets, Integers
 
 CONSTANTS Timers, DeltaRange, Servers, Clients, Subscribers
 
 Tasks == Subscribers \union Servers \union Clients
 
-(* --algorithm callback
+(* --algorithm selector
 variables
     \* list for timer
     \* example: <<[delta |-> 3, name |-> "timer1"], [delta |-> 2, name |-> "timer2"]>>
@@ -96,6 +96,8 @@ begin
 end procedure;
 
 \* execute a task
+\*
+\* safe_drive::selector::notify
 procedure notify(runnable)
 variables
     task;
@@ -111,6 +113,9 @@ begin
         return;
 end procedure;
 
+\* wait with timeout.
+\*
+\* safe_drive::selector::notify_timer
 procedure notify_timer()
 variables
     head;
@@ -143,6 +148,7 @@ begin
         return;
 end procedure;
 
+\* Emulate ROS2's rcl_wait()
 procedure rcl_wait()
 begin
     BeginRclWait:
@@ -154,6 +160,7 @@ begin
         return;
 end procedure;
 
+\* safe_drive::selector::wait_timer
 procedure wait_timer()
 begin
     BeginWaitTimer:
@@ -163,6 +170,7 @@ begin
         return;
 end procedure;
 
+\* safe_drive::selector::wait
 procedure wait()
 begin
     BeginWait:
@@ -201,9 +209,9 @@ begin
         end while;
 end process;
 end algorithm; *)
-\* BEGIN TRANSLATION (chksum(pcal) = "32b8d209" /\ chksum(tla) = "6c655232")
-\* Process variable head of process executor at line 195 col 5 changed to head_
-\* Process variable to_be_reloaded of process executor at line 196 col 5 changed to to_be_reloaded_
+\* BEGIN TRANSLATION (chksum(pcal) = "615b0ea5" /\ chksum(tla) = "7cf79cd9")
+\* Process variable head of process executor at line 203 col 5 changed to head_
+\* Process variable to_be_reloaded of process executor at line 204 col 5 changed to to_be_reloaded_
 \* Parameter name of procedure callback at line 49 col 20 changed to name_
 CONSTANT defaultInitValue
 VARIABLES delta_list, wait_set, running, waiting, pc, stack

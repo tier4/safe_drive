@@ -17,19 +17,19 @@ end define
 \* initializer
 fair+ process pid \in Processes
 begin
-    start_init_once:
+    BeginInitOnce:
         while ~is_init do
-            load_lock_relaxed:
+            LoadLockRelaxed:
                 if ~lock then
-                    compare_exchange:
+                    CompareExchange:
                         if ~lock then
                             lock := TRUE;
                             pids := pids \union {self};
 
-                            initialize:
+                            Initialize:
                                 skip;
 
-                            store_is_init:
+                            StoreIsInit:
                                 is_init := TRUE;
                         end if;
                 end if;
@@ -37,7 +37,7 @@ begin
 end process;
 
 end algorithm; *)
-\* BEGIN TRANSLATION (chksum(pcal) = "4542d7b0" /\ chksum(tla) = "4af7d3b")
+\* BEGIN TRANSLATION (chksum(pcal) = "171ee2b4" /\ chksum(tla) = "1cd14bb5")
 VARIABLES lock, is_init, pids, pc
 
 (* define statement *)
@@ -52,42 +52,42 @@ Init == (* Global variables *)
         /\ lock = FALSE
         /\ is_init = FALSE
         /\ pids = {}
-        /\ pc = [self \in ProcSet |-> "start_init_once"]
+        /\ pc = [self \in ProcSet |-> "BeginInitOnce"]
 
-start_init_once(self) == /\ pc[self] = "start_init_once"
-                         /\ IF ~is_init
-                               THEN /\ pc' = [pc EXCEPT ![self] = "load_lock_relaxed"]
-                               ELSE /\ pc' = [pc EXCEPT ![self] = "Done"]
+BeginInitOnce(self) == /\ pc[self] = "BeginInitOnce"
+                       /\ IF ~is_init
+                             THEN /\ pc' = [pc EXCEPT ![self] = "LoadLockRelaxed"]
+                             ELSE /\ pc' = [pc EXCEPT ![self] = "Done"]
+                       /\ UNCHANGED << lock, is_init, pids >>
+
+LoadLockRelaxed(self) == /\ pc[self] = "LoadLockRelaxed"
+                         /\ IF ~lock
+                               THEN /\ pc' = [pc EXCEPT ![self] = "CompareExchange"]
+                               ELSE /\ pc' = [pc EXCEPT ![self] = "BeginInitOnce"]
                          /\ UNCHANGED << lock, is_init, pids >>
 
-load_lock_relaxed(self) == /\ pc[self] = "load_lock_relaxed"
-                           /\ IF ~lock
-                                 THEN /\ pc' = [pc EXCEPT ![self] = "compare_exchange"]
-                                 ELSE /\ pc' = [pc EXCEPT ![self] = "start_init_once"]
-                           /\ UNCHANGED << lock, is_init, pids >>
+CompareExchange(self) == /\ pc[self] = "CompareExchange"
+                         /\ IF ~lock
+                               THEN /\ lock' = TRUE
+                                    /\ pids' = (pids \union {self})
+                                    /\ pc' = [pc EXCEPT ![self] = "Initialize"]
+                               ELSE /\ pc' = [pc EXCEPT ![self] = "BeginInitOnce"]
+                                    /\ UNCHANGED << lock, pids >>
+                         /\ UNCHANGED is_init
 
-compare_exchange(self) == /\ pc[self] = "compare_exchange"
-                          /\ IF ~lock
-                                THEN /\ lock' = TRUE
-                                     /\ pids' = (pids \union {self})
-                                     /\ pc' = [pc EXCEPT ![self] = "initialize"]
-                                ELSE /\ pc' = [pc EXCEPT ![self] = "start_init_once"]
-                                     /\ UNCHANGED << lock, pids >>
-                          /\ UNCHANGED is_init
-
-initialize(self) == /\ pc[self] = "initialize"
+Initialize(self) == /\ pc[self] = "Initialize"
                     /\ TRUE
-                    /\ pc' = [pc EXCEPT ![self] = "store_is_init"]
+                    /\ pc' = [pc EXCEPT ![self] = "StoreIsInit"]
                     /\ UNCHANGED << lock, is_init, pids >>
 
-store_is_init(self) == /\ pc[self] = "store_is_init"
-                       /\ is_init' = TRUE
-                       /\ pc' = [pc EXCEPT ![self] = "start_init_once"]
-                       /\ UNCHANGED << lock, pids >>
+StoreIsInit(self) == /\ pc[self] = "StoreIsInit"
+                     /\ is_init' = TRUE
+                     /\ pc' = [pc EXCEPT ![self] = "BeginInitOnce"]
+                     /\ UNCHANGED << lock, pids >>
 
-pid(self) == start_init_once(self) \/ load_lock_relaxed(self)
-                \/ compare_exchange(self) \/ initialize(self)
-                \/ store_is_init(self)
+pid(self) == BeginInitOnce(self) \/ LoadLockRelaxed(self)
+                \/ CompareExchange(self) \/ Initialize(self)
+                \/ StoreIsInit(self)
 
 (* Allow infinite stuttering to prevent deadlock on termination. *)
 Terminating == /\ \A self \in ProcSet: pc[self] = "Done"
