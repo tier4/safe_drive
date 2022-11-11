@@ -70,7 +70,7 @@ impl<T> DeltaList<T> {
     }
 }
 
-fn insert_delta<T>(mut list: &mut DeltaList<T>, delta: Duration, data: T) {
+fn insert_delta<T>(mut list: &mut DeltaList<T>, mut delta: Duration, data: T) {
     loop {
         match list {
             DeltaList::Nil => {
@@ -86,6 +86,7 @@ fn insert_delta<T>(mut list: &mut DeltaList<T>, delta: Duration, data: T) {
                     *list = DeltaList::Cons(Box::new(UnsafeCell::new((delta, data, next))));
                     return;
                 } else {
+                    delta -= *d_mut;
                     list = unsafe { &mut (*front).2 };
                 }
             }
