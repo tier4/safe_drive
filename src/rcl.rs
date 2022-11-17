@@ -341,6 +341,49 @@ impl MTUnsafeFn {
         ret_val_to_err(unsafe { self::rcl_wait_set_add_service(wait_set, service, index) })
     }
 
+    pub fn rcl_borrow_loaned_message(
+        &self,
+        publisher: *const rcl_publisher_t,
+        type_support: *const rosidl_message_type_support_t,
+        ros_message: *mut *mut ::std::os::raw::c_void,
+    ) -> RCLResult<()> {
+        ret_val_to_err(unsafe {
+            self::rcl_borrow_loaned_message(publisher, type_support, ros_message)
+        })
+    }
+
+    pub fn rcl_return_loaned_message_from_publisher(
+        &self,
+        publisher: *const rcl_publisher_t,
+        loaned_message: *mut ::std::os::raw::c_void,
+    ) -> RCLResult<()> {
+        ret_val_to_err(unsafe {
+            self::rcl_return_loaned_message_from_publisher(publisher, loaned_message)
+        })
+    }
+
+    pub fn rcl_take_loaned_message(
+        &self,
+        subscription: *const rcl_subscription_t,
+        loaned_message: *mut *mut ::std::os::raw::c_void,
+        message_info: *mut rmw_message_info_t,
+        allocation: *mut rmw_subscription_allocation_t,
+    ) -> RCLResult<()> {
+        ret_val_to_err(unsafe {
+            self::rcl_take_loaned_message(subscription, loaned_message, message_info, allocation)
+        })
+    }
+
+    pub fn rcl_return_loaned_message_from_subscription(
+        &self,
+        subscription: *const rcl_subscription_t,
+        loaned_message: *mut ::std::os::raw::c_void,
+    ) -> RCLResult<()> {
+        ret_val_to_err(unsafe {
+            self::rcl_return_loaned_message_from_subscription(subscription, loaned_message)
+        })
+    }
+
     pub fn rcutils_reset_error(&self) {
         unsafe { self::rcutils_reset_error() };
     }
@@ -401,12 +444,30 @@ impl MTSafeFn {
         unsafe { self::rcl_get_zero_initialized_publisher() }
     }
 
+    pub fn rcl_publisher_can_loan_messages(publisher: *const rcl_publisher_t) -> bool {
+        unsafe { self::rcl_publisher_can_loan_messages(publisher) }
+    }
+
+    pub fn rcl_subscription_can_loan_messages(subscription: *const rcl_subscription_t) -> bool {
+        unsafe { self::rcl_subscription_can_loan_messages(subscription) }
+    }
+
     pub fn rcl_publish(
         publisher: *const rcl_publisher_t,
         ros_message: *const ::std::os::raw::c_void,
         allocation: *mut rmw_publisher_allocation_t,
     ) -> RCLResult<()> {
         ret_val_to_err(unsafe { self::rcl_publish(publisher, ros_message, allocation) })
+    }
+
+    pub fn rcl_publish_loaned_message(
+        publisher: *const rcl_publisher_t,
+        ros_message: *mut ::std::os::raw::c_void,
+        allocation: *mut rmw_publisher_allocation_t,
+    ) -> RCLResult<()> {
+        ret_val_to_err(unsafe {
+            self::rcl_publish_loaned_message(publisher, ros_message, allocation)
+        })
     }
 
     pub fn rmw_get_default_publisher_options() -> rmw_publisher_options_t {

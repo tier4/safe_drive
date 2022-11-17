@@ -52,6 +52,7 @@ use crate::{
     get_allocator,
     msg::TypeSupport,
     node::Node,
+    publisher_loaned_message::PublisherLoanedMessage,
     qos, rcl,
     signal_handler::Signaled,
 };
@@ -86,7 +87,7 @@ use parking_lot::Mutex;
 /// publisher.send(&msg).unwrap();
 /// ```
 pub struct Publisher<T> {
-    publisher: rcl::rcl_publisher_t,
+    publisher: Arc<rcl::rcl_publisher_t>,
     topic_name: String,
 
     #[cfg(feature = "rcl_stat")]
@@ -119,7 +120,7 @@ impl<T: TypeSupport> Publisher<T> {
         }
 
         Ok(Publisher {
-            publisher,
+            publisher: Arc::new(publisher),
             node,
             topic_name: topic_name.to_string(),
 
@@ -132,6 +133,14 @@ impl<T: TypeSupport> Publisher<T> {
 
     pub fn get_topic_name(&self) -> &str {
         &self.topic_name
+    }
+
+    pub fn can_loan_messages(&self) -> bool {
+        rcl::MTSafeFn::rcl_publisher_can_loan_messages(self.publisher.as_ref())
+    }
+
+    pub fn borrow_loaned_message(&self) -> RCLResult<PublisherLoanedMessage<T>> {
+        PublisherLoanedMessage::new(self.publisher.clone())
     }
 
     /// Send a message.
@@ -168,10 +177,34 @@ impl<T: TypeSupport> Publisher<T> {
         let start = std::time::SystemTime::now();
 
         if let Err(e) =
-            rcl::MTSafeFn::rcl_publish(&self.publisher, msg as *const T as _, null_mut())
+            rcl::MTSafeFn::rcl_publish(self.publisher.as_ref(), msg as *const T as _, null_mut())
         {
             return Err(e.into());
         }
+
+        #[cfg(feature = "rcl_stat")]
+        {
+            if let Ok(dur) = start.elapsed() {
+                let mut guard = self.latency_publish.lock();
+                guard.add(dur);
+            }
+        }
+
+        Ok(())
+    }
+
+    /// Send a loaned message.
+    ///
+    /// This functions takes the ownership of the loaned message since its chunk should be transferred back to the middleware.
+    pub fn send_loaned(&self, msg: PublisherLoanedMessage<T>) -> Result<(), DynError> {
+        if crate::is_halt() {
+            return Err(Signaled.into());
+        }
+
+        #[cfg(feature = "rcl_stat")]
+        let start = std::time::SystemTime::now();
+
+        msg.send()?;
 
         #[cfg(feature = "rcl_stat")]
         {
@@ -196,7 +229,9 @@ impl<T> Drop for Publisher<T> {
     fn drop(&mut self) {
         let (node, publisher) = (&mut self.node, &mut self.publisher);
         let guard = rcl::MT_UNSAFE_FN.lock();
-        let _ = guard.rcl_publisher_fini(publisher, unsafe { node.as_ptr_mut() });
+        let _ = guard.rcl_publisher_fini(publisher.as_ref() as *const _ as *mut _, unsafe {
+            node.as_ptr_mut()
+        });
     }
 }
 

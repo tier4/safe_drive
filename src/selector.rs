@@ -69,7 +69,7 @@ use crate::{
         Header,
     },
     signal_handler::{self, Signaled},
-    topic::subscriber::{RCLSubscription, Subscriber},
+    topic::subscriber::{RCLSubscription, Subscriber, TakenMsg},
     PhantomUnsend, PhantomUnsync, RecvResult, ST,
 };
 use std::{
@@ -289,7 +289,7 @@ impl Selector {
     pub fn add_subscriber<T: TypeSupport + 'static>(
         &mut self,
         subscriber: Subscriber<T>,
-        mut handler: Box<dyn FnMut(T)>,
+        mut handler: Box<dyn FnMut(TakenMsg<T>)>,
     ) -> bool {
         let sub = subscriber.subscription.clone();
         let context_ptr = subscriber.subscription.node.context.as_ptr();

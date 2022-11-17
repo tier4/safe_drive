@@ -160,6 +160,7 @@ use crate::{
         CallbackResult,
     },
     signal_handler::Signaled,
+    subscriber_loaned_message::SubscriberLoanedMessage,
     PhantomUnsync, RecvResult,
 };
 use std::{
@@ -169,7 +170,7 @@ use std::{
     mem::MaybeUninit,
     os::raw::c_void,
     pin::Pin,
-    ptr::null_mut,
+    ptr::{null, null_mut},
     sync::Arc,
     task::{self, Poll},
 };
@@ -180,7 +181,7 @@ use crate::helper::statistics::{SerializableTimeStat, TimeStatistics};
 #[cfg(feature = "rcl_stat")]
 use parking_lot::Mutex;
 
-pub(crate) struct RCLSubscription {
+pub struct RCLSubscription {
     pub subscription: Box<rcl::rcl_subscription_t>,
 
     topic_name: String,
@@ -290,11 +291,12 @@ impl<T: TypeSupport> Subscriber<T> {
     /// - `RCLError::BadAlloc if allocating` memory failed, or
     /// - `RCLError::Error` if an unspecified error occurs.
     #[must_use]
-    pub fn try_recv(&self) -> RecvResult<T, ()> {
+    pub fn try_recv(&self) -> RecvResult<TakenMsg<T>, ()> {
         #[cfg(feature = "rcl_stat")]
         let start = std::time::SystemTime::now();
 
-        match rcl_take::<T>(self.subscription.subscription.as_ref()) {
+        let s = self.subscription.clone();
+        match take::<T>(s) {
             Ok(n) => {
                 #[cfg(feature = "rcl_stat")]
                 self.subscription.measure_latency(start);
@@ -356,7 +358,7 @@ impl<T: TypeSupport> Subscriber<T> {
     /// - `RCLError::SubscriptionInvalid` if the subscription is invalid, or
     /// - `RCLError::BadAlloc` if allocating memory failed, or
     /// - `RCLError::Error` if an unspecified error occurs.
-    pub async fn recv(&mut self) -> Result<T, DynError> {
+    pub async fn recv(&mut self) -> Result<TakenMsg<T>, DynError> {
         AsyncReceiver {
             subscription: &mut self.subscription,
             is_waiting: false,
@@ -382,12 +384,14 @@ pub struct AsyncReceiver<'a, T> {
 }
 
 impl<'a, T> Future for AsyncReceiver<'a, T> {
-    type Output = Result<T, DynError>;
+    type Output = Result<TakenMsg<T>, DynError>;
 
     fn poll(self: Pin<&mut Self>, cx: &mut task::Context<'_>) -> Poll<Self::Output> {
         if is_halt() {
             return Poll::Ready(Err(Signaled.into()));
         }
+
+        let s = self.subscription.clone();
 
         let (is_waiting, subscription) = unsafe {
             let this = self.get_unchecked_mut();
@@ -395,13 +399,11 @@ impl<'a, T> Future for AsyncReceiver<'a, T> {
         };
         *is_waiting = false;
 
-        let s = subscription.subscription.as_ref();
-
         #[cfg(feature = "rcl_stat")]
         let start = std::time::SystemTime::now();
 
         // try to take 1 message
-        match rcl_take::<T>(s) {
+        match take::<T>(s) {
             Ok(value) => {
                 #[cfg(feature = "rcl_stat")]
                 subscription.measure_latency(start);
@@ -467,10 +469,67 @@ impl Options {
     }
 }
 
-fn rcl_take<T>(subscription: &rcl::rcl_subscription_t) -> RCLResult<T> {
-    let mut ros_message: T = unsafe { MaybeUninit::zeroed().assume_init() };
+pub enum TakenMsg<T> {
+    Copied(T),
+    Loaned(SubscriberLoanedMessage<T>),
+}
 
+impl<T> TakenMsg<T> {
+    // Returns the owned message without cloning if the subscriber owns the memory region and its data. None is returned when it does not own the memory region (i.e. the message is loaned).
+    pub fn get_owned(self) -> Option<T> {
+        match self {
+            TakenMsg::Copied(inner) => Some(inner),
+            TakenMsg::Loaned(_) => None,
+        }
+    }
+}
+
+impl<T> std::ops::Deref for TakenMsg<T> {
+    type Target = T;
+
+    fn deref(&self) -> &Self::Target {
+        match self {
+            TakenMsg::Copied(copied) => copied,
+            TakenMsg::Loaned(loaned) => loaned.get(),
+        }
+    }
+}
+
+impl<T> std::ops::DerefMut for TakenMsg<T> {
+    fn deref_mut(&mut self) -> &mut Self::Target {
+        match self {
+            TakenMsg::Copied(copied) => copied,
+            TakenMsg::Loaned(loaned) => loaned.get(),
+        }
+    }
+}
+
+fn take<T>(subscription: Arc<RCLSubscription>) -> RCLResult<TakenMsg<T>> {
+    if rcl::MTSafeFn::rcl_subscription_can_loan_messages(subscription.subscription.as_ref()) {
+        take_loaned_message(subscription).map(TakenMsg::Loaned)
+    } else {
+        rcl_take(subscription.subscription.as_ref()).map(TakenMsg::Copied)
+    }
+}
+
+fn take_loaned_message<T>(
+    subscription: Arc<RCLSubscription>,
+) -> RCLResult<SubscriberLoanedMessage<T>> {
     let guard = rcl::MT_UNSAFE_FN.lock();
+    let message: *mut T = null_mut();
+    guard
+        .rcl_take_loaned_message(
+            subscription.subscription.as_ref(),
+            &message as *const _ as *mut _,
+            null_mut(),
+            null_mut(),
+        )
+        .map(|_| SubscriberLoanedMessage::new(subscription, message))
+}
+
+fn rcl_take<T>(subscription: &rcl::rcl_subscription_t) -> RCLResult<T> {
+    let guard = rcl::MT_UNSAFE_FN.lock();
+    let mut ros_message: T = unsafe { MaybeUninit::zeroed().assume_init() };
     match guard.rcl_take(
         subscription,
         &mut ros_message as *mut _ as *mut c_void,
