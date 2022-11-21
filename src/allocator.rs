@@ -1,13 +1,26 @@
 //! # A Custom Memory Allocator
 //!
-//! `CustomAllocator` is a custom memory allocator using the slab allocator.
+//! `CustomAllocator` is a custom memory allocator
 //!
 //! # Example
 //!
 //! ```
 //! use safe_drive::allocator::ALLOCATOR;
+//! use std::alloc::{GlobalAlloc, Layout, System};
+//!
+//! static mut MY_ALLOCATOR: memac::Allocator<memac::buddy::Buddy32M> = memac::Allocator::new();
+//! const MEMSIZE_32M: usize = 32 * 1024 * 1024; // 32MiB
+//!
 //! fn main() {
-//!     unsafe { ALLOCATOR.init() };
+//!     unsafe {
+//!         let layout = Layout::from_size_align(MEMSIZE_32M, memac::ALIGNMENT).unwrap();
+//!         let heap_start = System.alloc(layout);
+//!
+//!         assert!(!heap_start.is_null());
+//!
+//!         MY_ALLOCATOR.init(heap_start as usize, MEMSIZE_32M);
+//!         ALLOCATOR.init(&MY_ALLOCATOR, heap_start as usize, MEMSIZE_32M);
+//!     }
 //! }
 //! ```
 
@@ -20,67 +33,8 @@ use std::{
     slice::{from_raw_parts, from_raw_parts_mut},
 };
 
-pub use memac::ALIGNMENT;
-
-#[cfg(feature = "memsize_32m")]
-const MEMSIZE: usize = 32 * 1024 * 1024;
-
-#[cfg(feature = "memsize_64m")]
-const MEMSIZE: usize = 64 * 1024 * 1024;
-
-#[cfg(feature = "memsize_128m")]
-const MEMSIZE: usize = 128 * 1024 * 1024;
-
-#[cfg(feature = "memsize_256m")]
-const MEMSIZE: usize = 256 * 1024 * 1024;
-
-#[cfg(feature = "memsize_512m")]
-const MEMSIZE: usize = 512 * 1024 * 1024;
-
-#[cfg(feature = "memsize_1g")]
-const MEMSIZE: usize = 1024 * 1024 * 1024;
-
-#[cfg(feature = "memsize_2g")]
-const MEMSIZE: usize = 2 * 1024 * 1024 * 1024;
-
-#[cfg(feature = "memsize_4g")]
-const MEMSIZE: usize = 4 * 1024 * 1024 * 1024;
-
-#[cfg(feature = "memsize_8g")]
-const MEMSIZE: usize = 8 * 1024 * 1024 * 1024;
-
-#[cfg(feature = "memsize_16g")]
-const MEMSIZE: usize = 16 * 1024 * 1024 * 1024;
-
-#[cfg(feature = "memsize_32g")]
-const MEMSIZE: usize = 32 * 1024 * 1024 * 1024;
-
-#[cfg(feature = "memsize_64g")]
-const MEMSIZE: usize = 64 * 1024 * 1024 * 1024;
-
-#[cfg(feature = "memsize_128g")]
-const MEMSIZE: usize = 128 * 1024 * 1024 * 1024;
-
-#[cfg(feature = "memsize_256g")]
-const MEMSIZE: usize = 256 * 1024 * 1024 * 1024;
-
-#[cfg(feature = "memsize_512g")]
-const MEMSIZE: usize = 512 * 1024 * 1024 * 1024;
-
-#[cfg(feature = "memsize_1t")]
-const MEMSIZE: usize = 1024 * 1024 * 1024 * 1024;
-
-#[cfg(feature = "memsize_2t")]
-const MEMSIZE: usize = 2 * 1024 * 1024 * 1024 * 1024;
-
-#[cfg(feature = "memsize_4t")]
-const MEMSIZE: usize = 4 * 1024 * 1024 * 1024 * 1024;
-
-#[cfg(feature = "memsize_8t")]
-const MEMSIZE: usize = 8 * 1024 * 1024 * 1024 * 1024;
-
 pub struct CustomAllocator {
-    allocator: memac::Allocator,
+    allocator: Option<&'static dyn GlobalAlloc>,
     heap: (usize, usize),
 }
 
@@ -97,58 +51,55 @@ impl Contains for (usize, usize) {
 impl CustomAllocator {
     const fn new() -> Self {
         Self {
-            allocator: memac::Allocator::new(),
+            allocator: None,
             heap: (0, 0),
         }
     }
 
     /// Set a heap memory region to the custom memory allocator.
-    /// `pages` is a page size to be used by the allocator.
-    /// So, `pages * ALIGNMENT` bytes will be allocated, and
-    /// `ALIGNMENT` is 64KiB.
-    ///
     /// The allocated memory region will be automatically touched to avoid
     /// dynamic page allocation of demand paging.
-    pub unsafe fn init(&mut self) -> bool {
-        if let Ok(layout) = Layout::from_size_align(MEMSIZE, memac::ALIGNMENT) {
-            let result = System.alloc(layout);
-            if result.is_null() {
-                false
-            } else {
-                let start = result as usize;
-
-                // Touch memory.
-                let mem = from_raw_parts_mut(result, MEMSIZE);
-                for i in (0..MEMSIZE).step_by(4096) {
-                    write_volatile(&mut mem[i], 0);
-                }
-
-                self.allocator.init(start);
-                self.heap = (start, start + MEMSIZE);
-
-                true
-            }
-        } else {
-            false
+    pub unsafe fn init(
+        &mut self,
+        allocator: &'static dyn GlobalAlloc,
+        heap_start: usize,
+        size: usize,
+    ) {
+        // Touch memory.
+        let mem = from_raw_parts_mut(heap_start as *mut u8, size);
+        for i in (0..size).step_by(4096) {
+            write_volatile(&mut mem[i], 0);
         }
+
+        self.allocator = Some(allocator);
+        self.heap = (heap_start, size);
     }
 }
 
 unsafe impl GlobalAlloc for CustomAllocator {
     unsafe fn alloc(&self, layout: std::alloc::Layout) -> *mut u8 {
-        let result = self.allocator.alloc(layout);
+        if let Some(allocator) = self.allocator {
+            let result = allocator.alloc(layout);
 
-        if result.is_null() {
-            System.alloc(layout)
+            if result.is_null() {
+                System.alloc(layout)
+            } else {
+                result
+            }
         } else {
-            result
+            System.alloc(layout)
         }
     }
 
     unsafe fn dealloc(&self, ptr: *mut u8, layout: std::alloc::Layout) {
         let addr = ptr as usize;
-        if self.heap.contains(addr) {
-            self.allocator.dealloc(ptr, layout)
+
+        if let Some(allocator) = self.allocator {
+            if self.heap.contains(addr) {
+                allocator.dealloc(ptr, layout)
+            } else {
+                System.dealloc(ptr, layout)
+            }
         } else {
             System.dealloc(ptr, layout)
         }

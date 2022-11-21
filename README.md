@@ -35,6 +35,13 @@ TODO.
 - [x] Humble
 - [x] Glactic
 
+## Supporting DDS
+
+- [x] CycloneDDS
+- [ ] FastDDS
+  - Single threaded applications will work well, but async/await is buggy because of FastDDS or safe_drive.
+  - It may crash when destroying with async/await.
+
 ## Progress
 
 - [ ] Zero copy
