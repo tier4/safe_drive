@@ -193,3 +193,8 @@ pub unsafe extern "C" fn zero_allocate(
     let addr = result as usize + size_of::<usize>();
     addr as _
 }
+
+#[no_mangle]
+pub unsafe extern "C" fn rcutils_get_default_allocator() -> crate::RcutilsAllocator {
+    crate::get_allocator()
+}
