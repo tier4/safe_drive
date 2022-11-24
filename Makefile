@@ -16,7 +16,7 @@ FORCE:
 
 test:
 	# cargo test test_async_service -- --nocapture --exact
-	cargo test -- --nocapture
+	cargo test --features custom_alloc -- --nocapture
 
 check:
 	cargo check
