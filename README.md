@@ -38,9 +38,7 @@ TODO.
 ## Supporting DDS
 
 - [x] CycloneDDS
-- [ ] FastDDS
-  - Single threaded applications will work well, but async/await applications will be buggy because of FastDDS or safe_drive.
-  - It may crash when destroying with async/await.
+- [x] FastDDS
 
 ## Progress
 
