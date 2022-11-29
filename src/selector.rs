@@ -272,7 +272,7 @@ impl Selector {
     /// # Example
     ///
     /// ```
-    /// use safe_drive::{msg::common_interfaces::std_msgs, node::Node, selector::Selector};
+    /// use safe_drive::{msg::common_interfaces::std_msgs, node::Node, selector::Selector, topic::subscriber::TakenMsg};
     /// use std::sync::Arc;
     ///
     /// fn add_new_subscriber(selector: &mut Selector, node: Arc<Node>) {
@@ -282,7 +282,7 @@ impl Selector {
     ///     // Add the subscriber with a callback function.
     ///     selector.add_subscriber(
     ///         subscriber,
-    ///         Box::new(|msg: std_msgs::msg::Bool| /* some tasks */ ()), // Callback function.
+    ///         Box::new(|msg: TakenMsg<std_msgs::msg::Bool>| /* some tasks */ ()), // Callback function.
     ///     );
     /// }
     /// ```

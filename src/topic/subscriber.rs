@@ -170,7 +170,7 @@ use std::{
     mem::MaybeUninit,
     os::raw::c_void,
     pin::Pin,
-    ptr::{null, null_mut},
+    ptr::null_mut,
     sync::Arc,
     task::{self, Poll},
 };
@@ -181,7 +181,7 @@ use crate::helper::statistics::{SerializableTimeStat, TimeStatistics};
 #[cfg(feature = "rcl_stat")]
 use parking_lot::Mutex;
 
-pub struct RCLSubscription {
+pub(crate) struct RCLSubscription {
     pub subscription: Box<rcl::rcl_subscription_t>,
 
     topic_name: String,
@@ -296,7 +296,7 @@ impl<T: TypeSupport> Subscriber<T> {
         let start = std::time::SystemTime::now();
 
         let s = self.subscription.clone();
-        match take::<T>(s) {
+        match take::<T>(&s) {
             Ok(n) => {
                 #[cfg(feature = "rcl_stat")]
                 self.subscription.measure_latency(start);
@@ -403,7 +403,7 @@ impl<'a, T> Future for AsyncReceiver<'a, T> {
         let start = std::time::SystemTime::now();
 
         // try to take 1 message
-        match take::<T>(s) {
+        match take::<T>(&s) {
             Ok(value) => {
                 #[cfg(feature = "rcl_stat")]
                 subscription.measure_latency(start);
@@ -504,9 +504,9 @@ impl<T> std::ops::DerefMut for TakenMsg<T> {
     }
 }
 
-fn take<T>(subscription: Arc<RCLSubscription>) -> RCLResult<TakenMsg<T>> {
+fn take<T>(subscription: &Arc<RCLSubscription>) -> RCLResult<TakenMsg<T>> {
     if rcl::MTSafeFn::rcl_subscription_can_loan_messages(subscription.subscription.as_ref()) {
-        take_loaned_message(subscription).map(TakenMsg::Loaned)
+        take_loaned_message(subscription.clone()).map(TakenMsg::Loaned)
     } else {
         rcl_take(subscription.subscription.as_ref()).map(TakenMsg::Copied)
     }

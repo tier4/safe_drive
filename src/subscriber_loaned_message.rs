@@ -8,18 +8,18 @@ pub struct SubscriberLoanedMessage<T> {
 }
 
 impl<T> SubscriberLoanedMessage<T> {
-    pub fn new(subscription: Arc<RCLSubscription>, chunk: *mut T) -> Self {
+    pub(crate) fn new(subscription: Arc<RCLSubscription>, chunk: *mut T) -> Self {
         Self {
             subscription,
             chunk,
         }
     }
 
-    pub fn get(&self) -> &mut T {
+    pub(crate) fn get(&self) -> &mut T {
         unsafe { &mut *self.chunk }
     }
 
-    pub fn into_raw(&self) -> *mut T {
+    pub(crate) fn as_mut_ptr(&self) -> *mut T {
         self.chunk
     }
 }

@@ -35,7 +35,7 @@ impl<T: TypeSupport> PublisherLoanedMessage<T> {
             PublisherLoanedMessage::Loaned(mut msg) => {
                 if let Err(e) = rcl::MTSafeFn::rcl_publish_loaned_message(
                     msg.publisher.as_ref(),
-                    msg.into_raw() as *const _ as *mut _,
+                    msg.as_mut_ptr() as *const _ as *mut _,
                     null_mut(),
                 ) {
                     return Err(e.into());
@@ -89,7 +89,7 @@ pub struct Loaned<T: TypeSupport> {
 }
 
 impl<T: TypeSupport> Loaned<T> {
-    pub fn new(publisher: Arc<rcl::rcl_publisher_t>) -> RCLResult<Self> {
+    pub(crate) fn new(publisher: Arc<rcl::rcl_publisher_t>) -> RCLResult<Self> {
         let mut chunk = null_mut();
         let guard = rcl::MT_UNSAFE_FN.lock();
         guard.rcl_borrow_loaned_message(publisher.as_ref(), T::type_support(), &mut chunk)?;
@@ -100,18 +100,18 @@ impl<T: TypeSupport> Loaned<T> {
         })
     }
 
-    pub fn get(&self) -> &mut T {
+    pub(crate) fn get(&self) -> &mut T {
         unsafe { &mut *self.chunk }
     }
 
-    pub fn into_raw(&self) -> *mut T {
+    pub(crate) fn as_mut_ptr(&self) -> *mut T {
         self.chunk
     }
 
-    pub fn send(mut self) -> Result<(), DynError> {
+    pub(crate) fn send(mut self) -> Result<(), DynError> {
         if let Err(e) = rcl::MTSafeFn::rcl_publish_loaned_message(
             self.publisher.as_ref(),
-            self.into_raw() as *const _ as *mut _,
+            self.as_mut_ptr() as *const _ as *mut _,
             null_mut(),
         ) {
             return Err(e.into());
