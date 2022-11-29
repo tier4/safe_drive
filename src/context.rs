@@ -26,7 +26,6 @@ use crate::{
     selector::{async_selector::SELECTOR, Selector},
     signal_handler,
 };
-use ctor::dtor;
 use once_cell::sync::Lazy;
 use parking_lot::Mutex;
 use std::{env, ffi::CString, sync::Arc};
@@ -208,8 +207,8 @@ impl Drop for InitOptions {
 unsafe impl Sync for Context {}
 unsafe impl Send for Context {}
 
-#[dtor]
-unsafe fn remove_context() {
+#[no_mangle]
+pub(crate) extern "C" fn remove_context() {
     {
         SELECTOR.lock().halt().unwrap();
     }

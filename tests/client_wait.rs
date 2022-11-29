@@ -4,22 +4,22 @@ use common::msgs::example_msg::srv::{AddThreeIntsRequest, AddThreeIntsResponse};
 use safe_drive::{self, context::Context, error::DynError, RecvResult};
 use std::time::Duration;
 
-const SERVICE_NAME1: &str = "test_service1";
+const SERVICE_NAME2: &str = "test_service2";
 
 #[test]
-fn test_service() -> Result<(), DynError> {
+fn test_client_wait() -> Result<(), DynError> {
     // create a context
     let ctx = Context::new()?;
 
     // create a server node
-    let node_server = ctx.create_node("test_service_server_node", None, Default::default())?;
+    let node_server = ctx.create_node("test_client_wait_server_node", None, Default::default())?;
 
     // create a client node
-    let node_client = ctx.create_node("test_service_client_node", None, Default::default())?;
+    let node_client = ctx.create_node("test_client_wait_client_node", None, Default::default())?;
 
     // create a server and a client
-    let server = common::create_server(node_server, SERVICE_NAME1)?;
-    let client = common::create_client(node_client, SERVICE_NAME1)?;
+    let server = common::create_server(node_server, SERVICE_NAME2)?;
+    let client = common::create_client(node_client, SERVICE_NAME2)?;
 
     // create a selector
     let mut selector = ctx.create_selector()?;
@@ -49,19 +49,17 @@ fn test_service() -> Result<(), DynError> {
             }
         }),
     );
-    selector.wait()?;
+    selector.wait()?; // Wait the request.
 
     std::thread::sleep(Duration::from_millis(1));
 
-    // Client: receive the response
-    match rcv_client.try_recv() {
-        RecvResult::Ok((_, data, header)) => {
-            println!("Client: sum = {}, header = {:?}", data.sum, header);
-            assert_eq!(data.sum, 8);
+    match rcv_client.recv_timeout(Duration::from_millis(20), &mut selector) {
+        RecvResult::Ok((_client, response, _)) => {
+            println!("received: {}", response.sum);
             Ok(())
         }
-        RecvResult::RetryLater(_) => {
-            println!("should retry");
+        RecvResult::RetryLater(_rcv) => {
+            println!("retry later");
             Ok(())
         }
         RecvResult::Err(e) => Err(e.into()),
