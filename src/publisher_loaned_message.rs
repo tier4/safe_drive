@@ -6,6 +6,9 @@ use crate::{
     rcl,
 };
 
+/// A message loaned by a publisher.
+/// 
+/// If loaning the shared memory is not available due to the configuration or the message type `T`, it allocates the memory area for `T` and the message will be copied for subscribers.
 pub enum PublisherLoanedMessage<T: TypeSupport> {
     Copied(Copied<T>),
     Loaned(Loaned<T>),

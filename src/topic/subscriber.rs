@@ -469,6 +469,7 @@ impl Options {
     }
 }
 
+/// A smart pointer for the message taken from the topic with `rcl_take` or `rcl_take_loaned_message`. 
 pub enum TakenMsg<T> {
     Copied(T),
     Loaned(SubscriberLoanedMessage<T>),

@@ -2,6 +2,7 @@ use std::sync::Arc;
 
 use crate::{rcl, topic::subscriber::RCLSubscription};
 
+/// A message loaned by a subscriber.
 pub struct SubscriberLoanedMessage<T> {
     subscription: Arc<RCLSubscription>,
     chunk: *mut T,
@@ -17,10 +18,6 @@ impl<T> SubscriberLoanedMessage<T> {
 
     pub(crate) fn get(&self) -> &mut T {
         unsafe { &mut *self.chunk }
-    }
-
-    pub(crate) fn as_mut_ptr(&self) -> *mut T {
-        self.chunk
     }
 }
 

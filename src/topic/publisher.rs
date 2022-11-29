@@ -139,6 +139,7 @@ impl<T: TypeSupport> Publisher<T> {
         rcl::MTSafeFn::rcl_publisher_can_loan_messages(self.publisher.as_ref())
     }
 
+    /// Borrows a memory chunk from the shared memory.
     pub fn borrow_loaned_message(&self) -> RCLResult<PublisherLoanedMessage<T>> {
         PublisherLoanedMessage::new(self.publisher.clone())
     }
