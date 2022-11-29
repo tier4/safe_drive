@@ -15,7 +15,7 @@ pub enum PublisherLoanedMessage<T: TypeSupport> {
 }
 
 impl<T: TypeSupport> PublisherLoanedMessage<T> {
-    pub fn new(publisher: Arc<rcl::rcl_publisher_t>) -> RCLResult<Self> {
+    pub(crate) fn new(publisher: Arc<rcl::rcl_publisher_t>) -> RCLResult<Self> {
         if rcl::MTSafeFn::rcl_publisher_can_loan_messages(publisher.as_ref() as *const _) {
             Ok(Self::Loaned(Loaned::new(publisher)?))
         } else {
@@ -24,7 +24,7 @@ impl<T: TypeSupport> PublisherLoanedMessage<T> {
         }
     }
 
-    pub fn send(self) -> Result<(), DynError> {
+    pub(crate) fn send(self) -> Result<(), DynError> {
         match self {
             PublisherLoanedMessage::Copied(msg) => {
                 if let Err(e) = rcl::MTSafeFn::rcl_publish(
