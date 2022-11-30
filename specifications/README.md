@@ -12,4 +12,5 @@ See [tlaplus_community_jar](https://github.com/ytakano/tlaplus_community_jar) fo
 ## Specifications
 
 - [Single Threaded Callback Execution](./src/selector.rs/selector/)
+- [crate::dela_list](./src/delta_list.rs/)
 - [crate::helper::InitOnce](./src/helper.rs/init_once/)
