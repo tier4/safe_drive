@@ -7,7 +7,7 @@ use crate::{
 };
 
 /// A message loaned by a publisher.
-/// 
+///
 /// If loaning the shared memory is not available due to the configuration or the message type `T`, it allocates the memory area for `T` and the message will be copied for subscribers.
 pub enum PublisherLoanedMessage<T: TypeSupport> {
     Copied(Copied<T>),
@@ -109,21 +109,6 @@ impl<T: TypeSupport> Loaned<T> {
 
     pub(crate) fn as_mut_ptr(&self) -> *mut T {
         self.chunk
-    }
-
-    pub(crate) fn send(mut self) -> Result<(), DynError> {
-        if let Err(e) = rcl::MTSafeFn::rcl_publish_loaned_message(
-            self.publisher.as_ref(),
-            self.as_mut_ptr() as *const _ as *mut _,
-            null_mut(),
-        ) {
-            return Err(e.into());
-        }
-
-        // rcl_publish_loaned_message returns the loaned chunk to the middleware.
-        self.returned = true;
-
-        Ok(())
     }
 }
 
