@@ -25,11 +25,11 @@ $ sudo curl -sSL https://raw.githubusercontent.com/ros/rosdistro/master/ros.key 
 
 ```text
 $ sudo apt update
-$ sudo apt install ros-galactic-desktop python3-colcon-common-extensions
+$ sudo apt install ros-humble-desktop python3-colcon-common-extensions
 ```
 
 ```text
-$ . /opt/ros/galactic/setup.bash
+$ . /opt/ros/humble/setup.bash
 ```
 
 ## Install Colcon-cargo
@@ -42,16 +42,7 @@ $ pip install git+https://github.com/colcon/colcon-ros-cargo.git
 ## Install Cargo-ament
 
 ```text
-$ git clone git@github.com:tier4/safe_drive_msg.git
 $ git clone https://github.com/tier4/cargo-ament-build.git
 $ cd cargo-ament-build
 $ cargo install --path .
-```
-
-## Get safe_drive
-
-This is required because safe_drive and safe_drive_msg are private currently.
-
-```text
-$ git clone git@github.com:tier4/safe_drive.git
 ```

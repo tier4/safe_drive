@@ -148,17 +148,7 @@ This communication is so-called topic by ROS2.
 There are <code>N</code> senders and <code>M</code> receivers in a topic.
 This tutorial implements 1 sender (in Rust) and 2 receivers (in Rust and C++).</p>
 <p>The following figure is a example topology.</p>
-<pre class="mermaid">graph TD;
-    Publisher1--&gt;TopicA;
-    Publisher2--&gt;TopicA;
-    TopicA--&gt;Subscriber1;
-    TopicA--&gt;Subscriber2;
-    TopicA--&gt;Subscriber3;
-    Publisher3--&gt;TopicB;
-    Publisher4--&gt;TopicB;
-    Publisher5--&gt;TopicB;
-    TopicB--&gt;Subscriber4;
-    TopicB--&gt;Subscriber5;
+<pre class="mermaid">   TopicB--&gt;Subscriber5;
 </pre>
 <p>There are 2 topics, <code>TopicA</code> and <code>TopicB</code> in this figure.
 If <code>Publisher2</code> of <code>TopicA</code> send a message,
@@ -208,7 +198,7 @@ Currently, safe_drive's repository is private,
 and we need to specify the path as follows.</p>
 <pre><code class="language-toml"># pubsub/src/my_talker/Cargo.toml
 [dependencies]
-safe_drive = { path = &quot;/tmp/safe_drive&quot;, default-features = false, features = [&quot;galactic&quot;] }
+safe_drive = { path = &quot;/tmp/safe_drive&quot; }
 std_msgs = { path = &quot;/tmp/safe_drive_tutorial/pubsub/std_msgs&quot; }
 
 [package.metadata.ros]
@@ -405,7 +395,7 @@ We created and will edit files of the listener as follows.</p>
 Add safe_drive to the dependencies as follows.</p>
 <pre><code class="language-toml"># pubsub/src/my_listener/Cargo.toml
 [dependencies]
-safe_drive = { path = &quot;/tmp/safe_drive&quot;, default-features = false, features = [&quot;galactic&quot;] }
+safe_drive = { path = &quot;/tmp/safe_drive&quot; }
 std_msgs = { path = &quot;/tmp/safe_drive_tutorial/pubsub/std_msgs&quot; }
 
 [package.metadata.ros]

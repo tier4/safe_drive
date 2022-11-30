@@ -157,23 +157,18 @@ $ sudo sh -c 'echo &quot;deb [arch=$(dpkg --print-architecture)] http://packages
 $ sudo curl -sSL https://raw.githubusercontent.com/ros/rosdistro/master/ros.key -o /usr/share/keyrings/ros-archive-keyring.gpg
 </code></pre>
 <pre><code class="language-text">$ sudo apt update
-$ sudo apt install ros-galactic-desktop python3-colcon-common-extensions
+$ sudo apt install ros-humble-desktop python3-colcon-common-extensions
 </code></pre>
-<pre><code class="language-text">$ . /opt/ros/galactic/setup.bash
+<pre><code class="language-text">$ . /opt/ros/humble/setup.bash
 </code></pre>
 <h2 id="install-colcon-cargo"><a class="header" href="#install-colcon-cargo">Install Colcon-cargo</a></h2>
 <pre><code class="language-text">$ pip install git+https://github.com/tier4/colcon-cargo.git
 $ pip install git+https://github.com/colcon/colcon-ros-cargo.git
 </code></pre>
 <h2 id="install-cargo-ament"><a class="header" href="#install-cargo-ament">Install Cargo-ament</a></h2>
-<pre><code class="language-text">$ git clone git@github.com:tier4/safe_drive_msg.git
-$ git clone https://github.com/tier4/cargo-ament-build.git
+<pre><code class="language-text">$ git clone https://github.com/tier4/cargo-ament-build.git
 $ cd cargo-ament-build
 $ cargo install --path .
-</code></pre>
-<h2 id="get-safe_drive"><a class="header" href="#get-safe_drive">Get safe_drive</a></h2>
-<p>This is required because safe_drive and safe_drive_msg are private currently.</p>
-<pre><code class="language-text">$ git clone git@github.com:tier4/safe_drive.git
 </code></pre>
 
                     </main>

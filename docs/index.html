@@ -154,16 +154,16 @@ formal verification.</p>
 <p>See <a href="https://github.com/tier4/safe_drive/tree/main/specifications">specifications</a>.</p>
 <p>We specified and tested as follows.</p>
 <ul>
-<li>Async/await Scheduler
+<li>Single Threaded Callback Execution
 <ul>
 <li>Deadlock freedom</li>
 <li>Starvation freedom</li>
 </ul>
 </li>
-<li>Single Threaded Callback Execution
+<li>Scheduling Core Algorithm
 <ul>
-<li>Deadlock freedom</li>
-<li>Starvation freedom</li>
+<li>Validate the insertion algorithm</li>
+<li>Termination</li>
 </ul>
 </li>
 <li>Initialize Once

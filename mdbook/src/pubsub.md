@@ -89,7 +89,7 @@ and we need to specify the path as follows.
 ```toml
 # pubsub/src/my_talker/Cargo.toml
 [dependencies]
-safe_drive = { path = "/tmp/safe_drive", default-features = false, features = ["galactic"] }
+safe_drive = { path = "/tmp/safe_drive" }
 std_msgs = { path = "/tmp/safe_drive_tutorial/pubsub/std_msgs" }
 
 [package.metadata.ros]
@@ -316,7 +316,7 @@ Add safe_drive to the dependencies as follows.
 ```toml
 # pubsub/src/my_listener/Cargo.toml
 [dependencies]
-safe_drive = { path = "/tmp/safe_drive", default-features = false, features = ["galactic"] }
+safe_drive = { path = "/tmp/safe_drive" }
 std_msgs = { path = "/tmp/safe_drive_tutorial/pubsub/std_msgs" }
 
 [package.metadata.ros]

@@ -15,12 +15,12 @@ See [specifications](https://github.com/tier4/safe_drive/tree/main/specification
 
 We specified and tested as follows.
 
-- Async/await Scheduler
-  - Deadlock freedom
-  - Starvation freedom
 - Single Threaded Callback Execution
   - Deadlock freedom
   - Starvation freedom
+- Scheduling Core Algorithm
+  - Validate the insertion algorithm
+  - Termination
 - Initialize Once
   - Deadlock freedom
   - Termination
