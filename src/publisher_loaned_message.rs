@@ -14,6 +14,8 @@ pub enum PublisherLoanedMessage<T: TypeSupport> {
     Loaned(Loaned<T>),
 }
 
+unsafe impl<T: Send + TypeSupport> Send for PublisherLoanedMessage<T> {}
+
 impl<T: TypeSupport> PublisherLoanedMessage<T> {
     pub(crate) fn new(publisher: Arc<rcl::rcl_publisher_t>) -> RCLResult<Self> {
         if rcl::MTSafeFn::rcl_publisher_can_loan_messages(publisher.as_ref() as *const _) {
