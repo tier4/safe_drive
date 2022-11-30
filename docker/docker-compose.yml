@@ -14,3 +14,4 @@ services:
     security_opt:
       - seccomp:unconfined
     privileged: true
+    shm_size: '1gb'

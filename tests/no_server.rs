@@ -25,6 +25,8 @@ fn test_no_server() -> Result<(), DynError> {
     let (client, seq) = client.send_ret_seq(&req).unwrap();
     println!("clinet:send: seq = {seq}");
 
+    std::thread::sleep(Duration::from_millis(500));
+
     let srv;
     let request;
     match server.try_recv() {
