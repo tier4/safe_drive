@@ -42,7 +42,7 @@ TODO.
 
 ## Progress
 
-- [ ] Zero copy
+- [x] Zero copy
 - [x] Custom memory allocator
 - [x] Topic (Pub/Sub)
 - [x] Service (Client/Server)
