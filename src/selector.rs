@@ -69,7 +69,7 @@ use crate::{
         Header,
     },
     signal_handler::{self, Signaled},
-    topic::subscriber::{RCLSubscription, Subscriber},
+    topic::subscriber::{RCLSubscription, Subscriber, TakenMsg},
     PhantomUnsend, PhantomUnsync, RecvResult, ST,
 };
 use std::{
@@ -272,7 +272,7 @@ impl Selector {
     /// # Example
     ///
     /// ```
-    /// use safe_drive::{msg::common_interfaces::std_msgs, node::Node, selector::Selector};
+    /// use safe_drive::{msg::common_interfaces::std_msgs, node::Node, selector::Selector, topic::subscriber::TakenMsg};
     /// use std::sync::Arc;
     ///
     /// fn add_new_subscriber(selector: &mut Selector, node: Arc<Node>) {
@@ -282,14 +282,14 @@ impl Selector {
     ///     // Add the subscriber with a callback function.
     ///     selector.add_subscriber(
     ///         subscriber,
-    ///         Box::new(|msg: std_msgs::msg::Bool| /* some tasks */ ()), // Callback function.
+    ///         Box::new(|msg: TakenMsg<std_msgs::msg::Bool>| /* some tasks */ ()), // Callback function.
     ///     );
     /// }
     /// ```
     pub fn add_subscriber<T: TypeSupport + 'static>(
         &mut self,
         subscriber: Subscriber<T>,
-        mut handler: Box<dyn FnMut(T)>,
+        mut handler: Box<dyn FnMut(TakenMsg<T>)>,
     ) -> bool {
         let sub = subscriber.subscription.clone();
         let context_ptr = subscriber.subscription.node.context.as_ptr();
