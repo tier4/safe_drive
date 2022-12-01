@@ -1,6 +1,6 @@
 //! # A Custom Memory Allocator
 //!
-//! `CustomAllocator` is a custom memory allocator
+//! `CustomAllocator` is a custom memory allocator.
 //!
 //! # Example
 //!
