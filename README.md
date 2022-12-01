@@ -29,7 +29,7 @@ We specified and tested as follows.
 ## Documents
 
 - [https://tier4.github.io/safe_drive/](https://tier4.github.io/safe_drive/)
-- [https://docs.rs/crate/safe_drive/latest](https://docs.rs/crate/safe_drive/latest)
+- [https://docs.rs/safe_drive/latest/safe_drive/](https://docs.rs/safe_drive/latest/safe_drive/)
 
 ## Supporting ROS2
 

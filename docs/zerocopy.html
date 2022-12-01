@@ -81,7 +81,7 @@
 
         <nav id="sidebar" class="sidebar" aria-label="Table of contents">
             <div class="sidebar-scrollbox">
-                <ol class="chapter"><li class="chapter-item expanded "><a href="index.html"><strong aria-hidden="true">1.</strong> Top</a></li><li class="chapter-item expanded "><a href="tutorial.html"><strong aria-hidden="true">2.</strong> Tutorial</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="setup.html"><strong aria-hidden="true">2.1.</strong> Setting-up</a></li><li class="chapter-item expanded "><a href="pubsub.html"><strong aria-hidden="true">2.2.</strong> Publish and Subscribe</a></li><li class="chapter-item expanded "><a href="timer.html"><strong aria-hidden="true">2.3.</strong> Timer</a></li><li class="chapter-item expanded "><a href="multi_pubsub.html"><strong aria-hidden="true">2.4.</strong> Multi-threaded Publish and Subscribe</a></li><li class="chapter-item expanded "><a href="message.html"><strong aria-hidden="true">2.5.</strong> User Defined Data Structure</a></li><li class="chapter-item expanded "><a href="service.html"><strong aria-hidden="true">2.6.</strong> Service</a></li><li class="chapter-item expanded "><a href="parameter.html"><strong aria-hidden="true">2.7.</strong> Parameter</a></li><li class="chapter-item expanded "><a href="zerocopy.html" class="active"><strong aria-hidden="true">2.8.</strong> Zero Copy Publish and Subscribe</a></li><li class="chapter-item expanded "><a href="pusbsub_and_service.html"><strong aria-hidden="true">2.9.</strong> Request to Server in Callback</a></li></ol></li><li class="chapter-item expanded "><a href="contribution.html"><strong aria-hidden="true">3.</strong> Contribution Guide</a></li></ol>
+                <ol class="chapter"><li class="chapter-item expanded "><a href="index.html"><strong aria-hidden="true">1.</strong> Top</a></li><li class="chapter-item expanded "><a href="tutorial.html"><strong aria-hidden="true">2.</strong> Tutorial</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="setup.html"><strong aria-hidden="true">2.1.</strong> Setting-up</a></li><li class="chapter-item expanded "><a href="pubsub.html"><strong aria-hidden="true">2.2.</strong> Publish and Subscribe</a></li><li class="chapter-item expanded "><a href="timer.html"><strong aria-hidden="true">2.3.</strong> Timer</a></li><li class="chapter-item expanded "><a href="multi_pubsub.html"><strong aria-hidden="true">2.4.</strong> Multi-threaded Publish and Subscribe</a></li><li class="chapter-item expanded "><a href="message.html"><strong aria-hidden="true">2.5.</strong> User Defined Data Structure</a></li><li class="chapter-item expanded "><a href="service.html"><strong aria-hidden="true">2.6.</strong> Service</a></li><li class="chapter-item expanded "><a href="parameter.html"><strong aria-hidden="true">2.7.</strong> Parameter</a></li><li class="chapter-item expanded "><a href="zerocopy.html" class="active"><strong aria-hidden="true">2.8.</strong> Zero Copy Publish and Subscribe</a></li><li class="chapter-item expanded "><a href="pusbsub_and_service.html"><strong aria-hidden="true">2.9.</strong> Request to Server in Callback</a></li><li class="chapter-item expanded "><a href="allocator.html"><strong aria-hidden="true">2.10.</strong> Custom Memory Allocator</a></li></ol></li><li class="chapter-item expanded "><a href="contribution.html"><strong aria-hidden="true">3.</strong> Contribution Guide</a></li></ol>
             </div>
             <div id="sidebar-resize-handle" class="sidebar-resize-handle"></div>
         </nav>
@@ -144,6 +144,59 @@
                     <main>
                         <h1 id="zero-copy-publish-and-subscribe"><a class="header" href="#zero-copy-publish-and-subscribe">Zero Copy Publish and Subscribe</a></h1>
 <p>Under construction.</p>
+<pre><pre class="playground"><code class="language-rust">use safe_drive::{context::Context, msg::common_interfaces::std_msgs};
+use std::{error::Error, time::Duration};
+
+const TOPIC_NAME: &amp;str = &quot;pubsub_loaned&quot;;
+
+fn main() -&gt; Result&lt;(), Box&lt;dyn Error + Sync + Send + 'static&gt;&gt; {
+    // create a context
+    let ctx = Context::new()?;
+
+    // create a subscribe node
+    let node_sub = ctx.create_node(&quot;loaned_sub_node&quot;, None, Default::default())?;
+
+    // create a publish node
+    let node_pub = ctx.create_node(&quot;loaned_pub_node&quot;, None, Default::default())?;
+
+    std::thread::sleep(Duration::from_millis(500));
+
+    // create a publisher and a subscriber
+    let subscriber = node_sub.create_subscriber::&lt;std_msgs::msg::Bool&gt;(TOPIC_NAME, None)?;
+    let publisher = node_pub.create_publisher::&lt;std_msgs::msg::Bool&gt;(TOPIC_NAME, None)?;
+
+    let mut loaned = publisher.borrow_loaned_message()?;
+    *loaned = std_msgs::msg::Bool::new().ok_or(&quot;failed to new Bool&quot;)?;
+    loaned.data = false;
+    publisher.send_loaned(loaned)?; // send message
+
+    std::thread::sleep(Duration::from_millis(500));
+
+    // wait messages
+    let mut selector = ctx.create_selector()?;
+    selector.add_subscriber(
+        subscriber,
+        Box::new(move |msg| {
+            assert!(!msg.data);
+        }),
+    );
+    selector.wait()?;
+
+    Ok(())
+}
+</code></pre></pre>
+<pre><code class="language-xml">&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot; ?&gt;
+&lt;CycloneDDS xmlns=&quot;https://cdds.io/config&quot; xmlns:xsi=&quot;http://www.w3.org/2001/XMLSchema-instance&quot; xsi:schemaLocation=&quot;https://cdds.io/config https://raw.githubusercontent.com/eclipse-cyclonedds/cyclonedds/iceoryx/etc/cyclonedds.xsd&quot;&gt;
+    &lt;Domain id=&quot;any&quot;&gt;
+        &lt;SharedMemory&gt;
+            &lt;Enable&gt;true&lt;/Enable&gt;
+            &lt;LogLevel&gt;info&lt;/LogLevel&gt;
+        &lt;/SharedMemory&gt;
+    &lt;/Domain&gt;
+&lt;/CycloneDDS&gt;
+</code></pre>
+<pre><code class="language-text">$ iox-roudi
+</code></pre>
 
                     </main>
 

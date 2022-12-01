@@ -1,6 +1,6 @@
 # Timer
 
-[Source Code](https://github.com/tier4/safe_drive_tutorial/tree/main/timers).
+[Source code](https://github.com/tier4/safe_drive_tutorial/tree/main/timers).
 
 This tutorial does not use `colcon` to build.
 We use only `cargo`, which is a Rust's standard build system.
