@@ -81,7 +81,7 @@
 
         <nav id="sidebar" class="sidebar" aria-label="Table of contents">
             <div class="sidebar-scrollbox">
-                <ol class="chapter"><li class="chapter-item expanded "><a href="index.html"><strong aria-hidden="true">1.</strong> Top</a></li><li class="chapter-item expanded "><a href="tutorial.html"><strong aria-hidden="true">2.</strong> Tutorial</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="setup.html"><strong aria-hidden="true">2.1.</strong> Setting-up</a></li><li class="chapter-item expanded "><a href="pubsub.html" class="active"><strong aria-hidden="true">2.2.</strong> Publish and Subscribe</a></li><li class="chapter-item expanded "><a href="timer.html"><strong aria-hidden="true">2.3.</strong> Timer</a></li><li class="chapter-item expanded "><a href="multi_pubsub.html"><strong aria-hidden="true">2.4.</strong> Multi-threaded Publish and Subscribe</a></li><li class="chapter-item expanded "><a href="message.html"><strong aria-hidden="true">2.5.</strong> User Defined Data Structure</a></li><li class="chapter-item expanded "><a href="service.html"><strong aria-hidden="true">2.6.</strong> Service</a></li><li class="chapter-item expanded "><a href="parameter.html"><strong aria-hidden="true">2.7.</strong> Parameter</a></li></ol></li></ol>
+                <ol class="chapter"><li class="chapter-item expanded "><a href="index.html"><strong aria-hidden="true">1.</strong> Top</a></li><li class="chapter-item expanded "><a href="tutorial.html"><strong aria-hidden="true">2.</strong> Tutorial</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="setup.html"><strong aria-hidden="true">2.1.</strong> Setting-up</a></li><li class="chapter-item expanded "><a href="pubsub.html" class="active"><strong aria-hidden="true">2.2.</strong> Publish and Subscribe</a></li><li class="chapter-item expanded "><a href="timer.html"><strong aria-hidden="true">2.3.</strong> Timer</a></li><li class="chapter-item expanded "><a href="multi_pubsub.html"><strong aria-hidden="true">2.4.</strong> Multi-threaded Publish and Subscribe</a></li><li class="chapter-item expanded "><a href="message.html"><strong aria-hidden="true">2.5.</strong> User Defined Data Structure</a></li><li class="chapter-item expanded "><a href="service.html"><strong aria-hidden="true">2.6.</strong> Service</a></li><li class="chapter-item expanded "><a href="parameter.html"><strong aria-hidden="true">2.7.</strong> Parameter</a></li><li class="chapter-item expanded "><a href="zerocopy.html"><strong aria-hidden="true">2.8.</strong> Zero Copy Publish and Subscribe</a></li><li class="chapter-item expanded "><a href="pusbsub_and_service.html"><strong aria-hidden="true">2.9.</strong> Request to Server in Callback</a></li></ol></li><li class="chapter-item expanded "><a href="contribution.html"><strong aria-hidden="true">3.</strong> Contribution Guide</a></li></ol>
             </div>
             <div id="sidebar-resize-handle" class="sidebar-resize-handle"></div>
         </nav>
@@ -143,12 +143,23 @@
                 <div id="content" class="content">
                     <main>
                         <h1 id="publish-and-subscribe"><a class="header" href="#publish-and-subscribe">Publish and Subscribe</a></h1>
+<p><a href="https://github.com/tier4/safe_drive_tutorial/tree/main/pubsub">Source code</a>.</p>
 <p>This chapter introduces a simple example of publish and subscribe communication.
 This communication is so-called topic by ROS2.
 There are <code>N</code> senders and <code>M</code> receivers in a topic.
 This tutorial implements 1 sender (in Rust) and 2 receivers (in Rust and C++).</p>
 <p>The following figure is a example topology.</p>
-<pre class="mermaid">   TopicB--&gt;Subscriber5;
+<pre class="mermaid">graph TD;
+    Publisher1--&gt;TopicA;
+    Publisher2--&gt;TopicA;
+    TopicA--&gt;Subscriber1;
+    TopicA--&gt;Subscriber2;
+    TopicA--&gt;Subscriber3;
+    Publisher3--&gt;TopicB;
+    Publisher4--&gt;TopicB;
+    Publisher5--&gt;TopicB;
+    TopicB--&gt;Subscriber4;
+    TopicB--&gt;Subscriber5;
 </pre>
 <p>There are 2 topics, <code>TopicA</code> and <code>TopicB</code> in this figure.
 If <code>Publisher2</code> of <code>TopicA</code> send a message,
@@ -198,13 +209,13 @@ Currently, safe_drive's repository is private,
 and we need to specify the path as follows.</p>
 <pre><code class="language-toml"># pubsub/src/my_talker/Cargo.toml
 [dependencies]
-safe_drive = { path = &quot;/tmp/safe_drive&quot; }
+safe_drive = &quot;0.1&quot;
 std_msgs = { path = &quot;/tmp/safe_drive_tutorial/pubsub/std_msgs&quot; }
 
 [package.metadata.ros]
 msg = [&quot;std_msgs&quot;]
 msg_dir = &quot;/tmp/safe_drive_tutorial/pubsub&quot;
-safe_drive_path = &quot;path_to/safe_drive&quot;
+safe_drive_version = &quot;0.1&quot;
 </code></pre>
 <h3 id="edit-my_talkersrcmainrs"><a class="header" href="#edit-my_talkersrcmainrs">Edit <code>my_talker/src/main.rs</code></a></h3>
 <p>my_talker is very simple.
@@ -349,7 +360,7 @@ It contains the package name, maintainer, description, etc, as follows.</p>
   &lt;maintainer email=&quot;yuuki.takano@tier4.jp&quot;&gt;Yuuki Takano&lt;/maintainer&gt;
   &lt;license&gt;Apache License 2.0&lt;/license&gt;
 
-  &lt;build_depend&gt;std_msgs&lt;/build_depend&gt;
+  &lt;depend&gt;std_msgs&lt;/depend&gt;
 
   &lt;test_depend&gt;ament_lint_auto&lt;/test_depend&gt;
   &lt;test_depend&gt;ament_lint_common&lt;/test_depend&gt;
@@ -361,8 +372,9 @@ It contains the package name, maintainer, description, etc, as follows.</p>
 </code></pre>
 <p>Copy and paste this, then edit it if you want.</p>
 <h3 id="execute-the-talker"><a class="header" href="#execute-the-talker">Execute the Talker</a></h3>
-<p>Before compiling, ensure that you load setting of ROS2 as follows.</p>
-<pre><code class="language-text">$ . /opt/ros/galactic/setup.bash
+<p>Before compiling, ensure that you load setting of ROS2 as follows.
+If you have already done so, you do not need this.</p>
+<pre><code class="language-text">$ . /opt/ros/humble/setup.bash
 </code></pre>
 <p>Then compile by using colcon as follows.
 Before compiling, change the current directory to <code>pubsub</code>,
@@ -395,13 +407,13 @@ We created and will edit files of the listener as follows.</p>
 Add safe_drive to the dependencies as follows.</p>
 <pre><code class="language-toml"># pubsub/src/my_listener/Cargo.toml
 [dependencies]
-safe_drive = { path = &quot;/tmp/safe_drive&quot; }
+safe_drive = &quot;0.1&quot;
 std_msgs = { path = &quot;/tmp/safe_drive_tutorial/pubsub/std_msgs&quot; }
 
 [package.metadata.ros]
 msg = [&quot;std_msgs&quot;]
 msg_dir = &quot;/tmp/safe_drive_tutorial/pubsub&quot;
-safe_drive_path = &quot;path_to/safe_drive&quot;
+safe_drive_version = &quot;0.1&quot;
 </code></pre>
 <h3 id="edit-my_listenersrcmainrs"><a class="header" href="#edit-my_listenersrcmainrs">Edit <code>my_listener/src/main.rs</code></a></h3>
 <p>To implement subscriber,
@@ -502,7 +514,7 @@ which is <code>my_listener</code>.</p>
   &lt;maintainer email=&quot;yuuki.takano@tier4.jp&quot;&gt;Yuuki Takano&lt;/maintainer&gt;
   &lt;license&gt;Apache License 2.0&lt;/license&gt;
 
-  &lt;build_depend&gt;std_msgs&lt;/build_depend&gt;
+  &lt;depend&gt;std_msgs&lt;/depend&gt;
 
   &lt;test_depend&gt;ament_lint_auto&lt;/test_depend&gt;
   &lt;test_depend&gt;ament_lint_common&lt;/test_depend&gt;

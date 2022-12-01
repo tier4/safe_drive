@@ -1,5 +1,7 @@
 # Publish and Subscribe
 
+[Source code](https://github.com/tier4/safe_drive_tutorial/tree/main/pubsub).
+
 This chapter introduces a simple example of publish and subscribe communication.
 This communication is so-called topic by ROS2.
 There are `N` senders and `M` receivers in a topic.
@@ -89,13 +91,13 @@ and we need to specify the path as follows.
 ```toml
 # pubsub/src/my_talker/Cargo.toml
 [dependencies]
-safe_drive = { path = "/tmp/safe_drive" }
+safe_drive = "0.1"
 std_msgs = { path = "/tmp/safe_drive_tutorial/pubsub/std_msgs" }
 
 [package.metadata.ros]
 msg = ["std_msgs"]
 msg_dir = "/tmp/safe_drive_tutorial/pubsub"
-safe_drive_path = "path_to/safe_drive"
+safe_drive_version = "0.1"
 ```
 
 ### Edit `my_talker/src/main.rs`
@@ -251,7 +253,7 @@ It contains the package name, maintainer, description, etc, as follows.
   <maintainer email="yuuki.takano@tier4.jp">Yuuki Takano</maintainer>
   <license>Apache License 2.0</license>
 
-  <build_depend>std_msgs</build_depend>
+  <depend>std_msgs</depend>
 
   <test_depend>ament_lint_auto</test_depend>
   <test_depend>ament_lint_common</test_depend>
@@ -267,9 +269,10 @@ Copy and paste this, then edit it if you want.
 ### Execute the Talker
 
 Before compiling, ensure that you load setting of ROS2 as follows.
+If you have already done so, you do not need this.
 
 ```text
-$ . /opt/ros/galactic/setup.bash
+$ . /opt/ros/humble/setup.bash
 ```
 
 Then compile by using colcon as follows.
@@ -316,13 +319,13 @@ Add safe_drive to the dependencies as follows.
 ```toml
 # pubsub/src/my_listener/Cargo.toml
 [dependencies]
-safe_drive = { path = "/tmp/safe_drive" }
+safe_drive = "0.1"
 std_msgs = { path = "/tmp/safe_drive_tutorial/pubsub/std_msgs" }
 
 [package.metadata.ros]
 msg = ["std_msgs"]
 msg_dir = "/tmp/safe_drive_tutorial/pubsub"
-safe_drive_path = "path_to/safe_drive"
+safe_drive_version = "0.1"
 ```
 
 ### Edit `my_listener/src/main.rs`
@@ -433,7 +436,7 @@ which is `my_listener`.
   <maintainer email="yuuki.takano@tier4.jp">Yuuki Takano</maintainer>
   <license>Apache License 2.0</license>
 
-  <build_depend>std_msgs</build_depend>
+  <depend>std_msgs</depend>
 
   <test_depend>ament_lint_auto</test_depend>
   <test_depend>ament_lint_common</test_depend>

@@ -1,12 +1,15 @@
 # Timer
 
+[Source Code](https://github.com/tier4/safe_drive_tutorial/tree/main/timers).
+
 This tutorial does not use `colcon` to build.
 We use only `cargo`, which is a Rust's standard build system.
 
 Don't forget loading ROS2's environment as follows.
+If you already done so, you do not need this.
 
 ```text
-$ . /opt/ros/galactic/setup.bash
+$ . /opt/ros/humble/setup.bash
 ```
 
 ## Wall-timer
@@ -25,7 +28,7 @@ Then, add `safe_drive` to the dependencies of `Cargo.toml`.
 
 ```toml
 [dependencies]
-safe_drive = { path = "path_to/safe_drive" }
+safe_drive = "0.1"
 ```
 
 The following code is an example using a wall-timer.

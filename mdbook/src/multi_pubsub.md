@@ -1,5 +1,7 @@
 # Multi-threaded Publish and Subscribe
 
+[Source code](https://github.com/tier4/safe_drive_tutorial/tree/main/mt_pubsub).
+
 Previous chapters use a selector to wait messages.
 A selector can be used by only a single thread.
 This means previous implementation is single-threaded.
@@ -68,7 +70,7 @@ please go back to the previous chapter.
   <maintainer email="yuuki.takano@tier4.jp">Yuuki Takano</maintainer>
   <license>Apache License 2.0</license>
 
-  <build_depend>std_msgs</build_depend>
+  <depend>std_msgs</depend>
 
   <test_depend>ament_lint_auto</test_depend>
   <test_depend>ament_lint_common</test_depend>
@@ -92,13 +94,13 @@ To use `async_std`, we have to update `Cargo.toml` as follows.
 # Cargo.toml
 [dependencies]
 async-std = { version = "1", features = ["attributes"] }
-safe_drive = { path = "path_to/safe_drive", default-features = false, features = ["galactic"] }
+safe_drive = "0.1"
 std_msgs = { path = "/tmp/safe_drive_tutorial/mt_pubsub/std_msgs" }
 
 [package.metadata.ros]
 msg = ["std_msgs"]
 msg_dir = "/tmp/safe_drive_tutorial/mt_pubsub"
-safe_drive_path = "path_to/safe_drive"
+safe_drive_version = "0.1"
 ```
 
 ## Publishers

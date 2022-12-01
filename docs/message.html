@@ -81,7 +81,7 @@
 
         <nav id="sidebar" class="sidebar" aria-label="Table of contents">
             <div class="sidebar-scrollbox">
-                <ol class="chapter"><li class="chapter-item expanded "><a href="index.html"><strong aria-hidden="true">1.</strong> Top</a></li><li class="chapter-item expanded "><a href="tutorial.html"><strong aria-hidden="true">2.</strong> Tutorial</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="setup.html"><strong aria-hidden="true">2.1.</strong> Setting-up</a></li><li class="chapter-item expanded "><a href="pubsub.html"><strong aria-hidden="true">2.2.</strong> Publish and Subscribe</a></li><li class="chapter-item expanded "><a href="timer.html"><strong aria-hidden="true">2.3.</strong> Timer</a></li><li class="chapter-item expanded "><a href="multi_pubsub.html"><strong aria-hidden="true">2.4.</strong> Multi-threaded Publish and Subscribe</a></li><li class="chapter-item expanded "><a href="message.html" class="active"><strong aria-hidden="true">2.5.</strong> User Defined Data Structure</a></li><li class="chapter-item expanded "><a href="service.html"><strong aria-hidden="true">2.6.</strong> Service</a></li><li class="chapter-item expanded "><a href="parameter.html"><strong aria-hidden="true">2.7.</strong> Parameter</a></li></ol></li></ol>
+                <ol class="chapter"><li class="chapter-item expanded "><a href="index.html"><strong aria-hidden="true">1.</strong> Top</a></li><li class="chapter-item expanded "><a href="tutorial.html"><strong aria-hidden="true">2.</strong> Tutorial</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="setup.html"><strong aria-hidden="true">2.1.</strong> Setting-up</a></li><li class="chapter-item expanded "><a href="pubsub.html"><strong aria-hidden="true">2.2.</strong> Publish and Subscribe</a></li><li class="chapter-item expanded "><a href="timer.html"><strong aria-hidden="true">2.3.</strong> Timer</a></li><li class="chapter-item expanded "><a href="multi_pubsub.html"><strong aria-hidden="true">2.4.</strong> Multi-threaded Publish and Subscribe</a></li><li class="chapter-item expanded "><a href="message.html" class="active"><strong aria-hidden="true">2.5.</strong> User Defined Data Structure</a></li><li class="chapter-item expanded "><a href="service.html"><strong aria-hidden="true">2.6.</strong> Service</a></li><li class="chapter-item expanded "><a href="parameter.html"><strong aria-hidden="true">2.7.</strong> Parameter</a></li><li class="chapter-item expanded "><a href="zerocopy.html"><strong aria-hidden="true">2.8.</strong> Zero Copy Publish and Subscribe</a></li><li class="chapter-item expanded "><a href="pusbsub_and_service.html"><strong aria-hidden="true">2.9.</strong> Request to Server in Callback</a></li></ol></li><li class="chapter-item expanded "><a href="contribution.html"><strong aria-hidden="true">3.</strong> Contribution Guide</a></li></ol>
             </div>
             <div id="sidebar-resize-handle" class="sidebar-resize-handle"></div>
         </nav>
@@ -143,6 +143,7 @@
                 <div id="content" class="content">
                     <main>
                         <h1 id="user-defined-data-structure"><a class="header" href="#user-defined-data-structure">User Defined Data Structure</a></h1>
+<p><a href="https://github.com/tier4/safe_drive_tutorial/tree/main/msgtest">Source code</a>.</p>
 <p>Until previous tutorial, we used pre-defined message types.
 In this tutorial, we will describe how to define user defined types.</p>
 <h2 id="create-project-directory"><a class="header" href="#create-project-directory">Create Project Directory</a></h2>
@@ -270,13 +271,13 @@ So, <code>MyMsg</code> and <code>MyMsgs</code> are generated as follows.</p>
 The most important thing is to add <code>my_interfaces</code>, which defines message types we use.</p>
 <pre><code class="language-toml"># msgtest/src/talker/Cargo.toml
 [dependencies]
-safe_drive = { path = &quot;/tmp/safe_drive&quot;, default-features = false, features = [&quot;galactic&quot;] }
+safe_drive = &quot;0.1&quot;
 my_interfaces = { path = &quot;/tmp/safe_drive_tutorial/msgtest/my_interfaces&quot; }
 
 [package.metadata.ros]
 msg = [&quot;my_interfaces&quot;]
 msg_dir = &quot;/tmp/safe_drive_tutorial/msgtest&quot;
-safe_drive_path = &quot;/tmp/safe_drive&quot;
+safe_drive_version = &quot;0.1&quot;
 </code></pre>
 <h3 id="create-talkerpackagexml"><a class="header" href="#create-talkerpackagexml">Create <code>talker/package.xml</code></a></h3>
 <p>Then create <code>package.xml</code> as follows.</p>
@@ -434,13 +435,13 @@ you can thus update the elements of the array via the slice.</p>
 <p>The listener also requires <code>my_interfaces</code>, and edit <code>Cargo.toml</code> as follows.</p>
 <pre><code class="language-toml"># msgtest/src/listener/Cargo.toml
 [dependencies]
-safe_drive = { path = &quot;/tmp/safe_drive&quot;, default-features = false, features = [&quot;galactic&quot;] }
+safe_drive = &quot;0.1&quot;
 my_interfaces = { path = &quot;/tmp/safe_drive_tutorial/msgtest/my_interfaces&quot; }
 
 [package.metadata.ros]
 msg = [&quot;my_interfaces&quot;]
 msg_dir = &quot;/tmp/safe_drive_tutorial/msgtest&quot;
-safe_drive_path = &quot;/tmp/safe_drive&quot;
+safe_drive_version = &quot;0.1&quot;
 </code></pre>
 <h3 id="create-listenerpackagexml"><a class="header" href="#create-listenerpackagexml">Create <code>listener/package.xml</code></a></h3>
 <p>Then create <code>package.xml</code> as follows.</p>

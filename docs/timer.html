@@ -81,7 +81,7 @@
 
         <nav id="sidebar" class="sidebar" aria-label="Table of contents">
             <div class="sidebar-scrollbox">
-                <ol class="chapter"><li class="chapter-item expanded "><a href="index.html"><strong aria-hidden="true">1.</strong> Top</a></li><li class="chapter-item expanded "><a href="tutorial.html"><strong aria-hidden="true">2.</strong> Tutorial</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="setup.html"><strong aria-hidden="true">2.1.</strong> Setting-up</a></li><li class="chapter-item expanded "><a href="pubsub.html"><strong aria-hidden="true">2.2.</strong> Publish and Subscribe</a></li><li class="chapter-item expanded "><a href="timer.html" class="active"><strong aria-hidden="true">2.3.</strong> Timer</a></li><li class="chapter-item expanded "><a href="multi_pubsub.html"><strong aria-hidden="true">2.4.</strong> Multi-threaded Publish and Subscribe</a></li><li class="chapter-item expanded "><a href="message.html"><strong aria-hidden="true">2.5.</strong> User Defined Data Structure</a></li><li class="chapter-item expanded "><a href="service.html"><strong aria-hidden="true">2.6.</strong> Service</a></li><li class="chapter-item expanded "><a href="parameter.html"><strong aria-hidden="true">2.7.</strong> Parameter</a></li></ol></li></ol>
+                <ol class="chapter"><li class="chapter-item expanded "><a href="index.html"><strong aria-hidden="true">1.</strong> Top</a></li><li class="chapter-item expanded "><a href="tutorial.html"><strong aria-hidden="true">2.</strong> Tutorial</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="setup.html"><strong aria-hidden="true">2.1.</strong> Setting-up</a></li><li class="chapter-item expanded "><a href="pubsub.html"><strong aria-hidden="true">2.2.</strong> Publish and Subscribe</a></li><li class="chapter-item expanded "><a href="timer.html" class="active"><strong aria-hidden="true">2.3.</strong> Timer</a></li><li class="chapter-item expanded "><a href="multi_pubsub.html"><strong aria-hidden="true">2.4.</strong> Multi-threaded Publish and Subscribe</a></li><li class="chapter-item expanded "><a href="message.html"><strong aria-hidden="true">2.5.</strong> User Defined Data Structure</a></li><li class="chapter-item expanded "><a href="service.html"><strong aria-hidden="true">2.6.</strong> Service</a></li><li class="chapter-item expanded "><a href="parameter.html"><strong aria-hidden="true">2.7.</strong> Parameter</a></li><li class="chapter-item expanded "><a href="zerocopy.html"><strong aria-hidden="true">2.8.</strong> Zero Copy Publish and Subscribe</a></li><li class="chapter-item expanded "><a href="pusbsub_and_service.html"><strong aria-hidden="true">2.9.</strong> Request to Server in Callback</a></li></ol></li><li class="chapter-item expanded "><a href="contribution.html"><strong aria-hidden="true">3.</strong> Contribution Guide</a></li></ol>
             </div>
             <div id="sidebar-resize-handle" class="sidebar-resize-handle"></div>
         </nav>
@@ -143,10 +143,12 @@
                 <div id="content" class="content">
                     <main>
                         <h1 id="timer"><a class="header" href="#timer">Timer</a></h1>
+<p><a href="https://github.com/tier4/safe_drive_tutorial/tree/main/timers">Source Code</a>.</p>
 <p>This tutorial does not use <code>colcon</code> to build.
 We use only <code>cargo</code>, which is a Rust's standard build system.</p>
-<p>Don't forget loading ROS2's environment as follows.</p>
-<pre><code class="language-text">$ . /opt/ros/galactic/setup.bash
+<p>Don't forget loading ROS2's environment as follows.
+If you already done so, you do not need this.</p>
+<pre><code class="language-text">$ . /opt/ros/humble/setup.bash
 </code></pre>
 <h2 id="wall-timer"><a class="header" href="#wall-timer">Wall-timer</a></h2>
 <p>A wall-timer is a timer which periodically invoked.
@@ -157,7 +159,7 @@ $ cd wall_timer
 </code></pre>
 <p>Then, add <code>safe_drive</code> to the dependencies of <code>Cargo.toml</code>.</p>
 <pre><code class="language-toml">[dependencies]
-safe_drive = { path = &quot;path_to/safe_drive&quot; }
+safe_drive = &quot;0.1&quot;
 </code></pre>
 <p>The following code is an example using a wall-timer.
 The important method is <code>Selector::add_wall_timer()</code> which takes

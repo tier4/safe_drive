@@ -81,7 +81,7 @@
 
         <nav id="sidebar" class="sidebar" aria-label="Table of contents">
             <div class="sidebar-scrollbox">
-                <ol class="chapter"><li class="chapter-item expanded "><a href="index.html"><strong aria-hidden="true">1.</strong> Top</a></li><li class="chapter-item expanded "><a href="tutorial.html"><strong aria-hidden="true">2.</strong> Tutorial</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="setup.html"><strong aria-hidden="true">2.1.</strong> Setting-up</a></li><li class="chapter-item expanded "><a href="pubsub.html"><strong aria-hidden="true">2.2.</strong> Publish and Subscribe</a></li><li class="chapter-item expanded "><a href="timer.html"><strong aria-hidden="true">2.3.</strong> Timer</a></li><li class="chapter-item expanded "><a href="multi_pubsub.html"><strong aria-hidden="true">2.4.</strong> Multi-threaded Publish and Subscribe</a></li><li class="chapter-item expanded "><a href="message.html"><strong aria-hidden="true">2.5.</strong> User Defined Data Structure</a></li><li class="chapter-item expanded "><a href="service.html"><strong aria-hidden="true">2.6.</strong> Service</a></li><li class="chapter-item expanded "><a href="parameter.html" class="active"><strong aria-hidden="true">2.7.</strong> Parameter</a></li></ol></li></ol>
+                <ol class="chapter"><li class="chapter-item expanded "><a href="index.html"><strong aria-hidden="true">1.</strong> Top</a></li><li class="chapter-item expanded "><a href="tutorial.html"><strong aria-hidden="true">2.</strong> Tutorial</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="setup.html"><strong aria-hidden="true">2.1.</strong> Setting-up</a></li><li class="chapter-item expanded "><a href="pubsub.html"><strong aria-hidden="true">2.2.</strong> Publish and Subscribe</a></li><li class="chapter-item expanded "><a href="timer.html"><strong aria-hidden="true">2.3.</strong> Timer</a></li><li class="chapter-item expanded "><a href="multi_pubsub.html"><strong aria-hidden="true">2.4.</strong> Multi-threaded Publish and Subscribe</a></li><li class="chapter-item expanded "><a href="message.html"><strong aria-hidden="true">2.5.</strong> User Defined Data Structure</a></li><li class="chapter-item expanded "><a href="service.html"><strong aria-hidden="true">2.6.</strong> Service</a></li><li class="chapter-item expanded "><a href="parameter.html" class="active"><strong aria-hidden="true">2.7.</strong> Parameter</a></li><li class="chapter-item expanded "><a href="zerocopy.html"><strong aria-hidden="true">2.8.</strong> Zero Copy Publish and Subscribe</a></li><li class="chapter-item expanded "><a href="pusbsub_and_service.html"><strong aria-hidden="true">2.9.</strong> Request to Server in Callback</a></li></ol></li><li class="chapter-item expanded "><a href="contribution.html"><strong aria-hidden="true">3.</strong> Contribution Guide</a></li></ol>
             </div>
             <div id="sidebar-resize-handle" class="sidebar-resize-handle"></div>
         </nav>
@@ -143,17 +143,47 @@
                 <div id="content" class="content">
                     <main>
                         <h1 id="parameter"><a class="header" href="#parameter">Parameter</a></h1>
+<p><a href="https://github.com/tier4/safe_drive_tutorial/tree/main/params">Source code</a>.</p>
+<p>This chapter introduces how to use parameters.
+A node can have parameters as follows.</p>
+<pre class="mermaid">graph TD;
+    NodeA --&gt; ParamA1:i64;
+    NodeA --&gt; ParamA2:bool;
+    NodeA --&gt; ParamA3:String;
+    NodeB --&gt; ParamB1:f64;
+    NodeB --&gt; ParamB2:f64;
+</pre>
+<p>In this figure, NodeA has 3 parameters whose types are
+<code>i64</code>, <code>bool</code>, and <code>String</code>, respectively,
+and NodeB has 2 parameters whose types are <code>f64</code>.
+Parameters can be read/write from external nodes.</p>
+<p>To receive a notification of updating a parameter,
+we can use a callback function or async/await.
+In this chapter, we will explain how to handle it.</p>
+<h2 id="packages"><a class="header" href="#packages">Packages</a></h2>
+<p>We will prepare 2 packages as follows.</p>
 <pre><code class="language-text">$ mkdir params
 $ cd params
 $ cargo new param_server
 $ cargo new async_param_server
 </code></pre>
+<p><code>param_server</code> explains a callback based parameter handling, and <code>async_param_server</code> explains an async/await based.</p>
+<p>To manage 2 packages, let's prepare <code>Cargo.toml</code> file for a workspace as follows.</p>
 <pre><code class="language-toml"># params/Cargo.toml
 [workspace]
 members = [&quot;param_server&quot;, &quot;async_param_server&quot;]
 </code></pre>
+<p>The following table shows files we use in this chapter.</p>
+<div class="table-wrapper"><table><thead><tr><th>File</th><th>What?</th></tr></thead><tbody>
+<tr><td>params/param_server/</td><td>callback based parameter server</td></tr>
+<tr><td>params/async_param_server/</td><td>async/await based parameter server</td></tr>
+<tr><td>params/Cargo.toml</td><td>workspace configuration</td></tr>
+</tbody></table>
+</div>
 <h2 id="type-of-parameter"><a class="header" href="#type-of-parameter">Type of Parameter</a></h2>
-<p><code>safe_drive::parameter::Value</code></p>
+<p>Before explaining handlers,
+let's see types of parameters.</p>
+<p>The type of parameter value is defined by <code>safe_drive::parameter::Value</code> as follows.</p>
 <pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
 </span><span class="boring">fn main() {
 </span>pub enum Value {
@@ -170,7 +200,9 @@ members = [&quot;param_server&quot;, &quot;async_param_server&quot;]
 }
 <span class="boring">}
 </span></code></pre></pre>
-<p><code>safe_drive::parameter::Descriptor</code></p>
+<p>This means that <code>i64</code> is valid,
+but <code>i8</code>, <code>i32</code>, and other user defined types are invalid.</p>
+<p>A parameter is associated with a descriptor of <code>safe_drive::parameter::Descriptor</code> as follows.</p>
 <pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
 </span><span class="boring">fn main() {
 </span>pub struct Descriptor {
@@ -183,7 +215,7 @@ members = [&quot;param_server&quot;, &quot;async_param_server&quot;]
 }
 <span class="boring">}
 </span></code></pre></pre>
-<p><code>safe_drive::parameter::{Parameter, Parameters, ParameterServer}</code></p>
+<p>So, a parameter and parameters can be represented by <code>safe_drive::parameter::{Parameter, Parameters}</code> as follows.</p>
 <pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
 </span><span class="boring">fn main() {
 </span>pub struct Parameter {
@@ -192,19 +224,36 @@ members = [&quot;param_server&quot;, &quot;async_param_server&quot;]
 }
 
 pub struct Parameters { /* omitted private fields */ }
-
-pub struct ParameterServer {
+<span class="boring">}
+</span></code></pre></pre>
+<p>and a parameter server can be represented by
+<code>safe_drive::parameter::ParameterServer</code> as follows.</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>pub struct ParameterServer {
     pub params: Arc&lt;RwLock&lt;Parameters&gt;&gt;
     // omitted private fields
 }
 <span class="boring">}
 </span></code></pre></pre>
+<p>In summary, a parameter server can be represented as follows.</p>
+<pre class="mermaid">graph TD;
+    ParameterServer --&gt; Parameters;
+    Parameters --&gt; Parameter;
+    Parameter --&gt; Descriptor;
+    Parameter --&gt; Value;
+</pre>
 <h2 id="parameter-setting-and-waiting-update-by-callback"><a class="header" href="#parameter-setting-and-waiting-update-by-callback">Parameter Setting and Waiting Update by Callback</a></h2>
+<p>We will explain how to set parameters,
+and how to wait updating by using a callback function.</p>
 <h3 id="edit-param_servercargotoml"><a class="header" href="#edit-param_servercargotoml">Edit <code>param_server/Cargo.toml</code></a></h3>
+<p>Add <code>safe_drive</code> to the dependencies section of <code>Cargo.toml</code> as follows.</p>
 <pre><code class="language-toml">[dependencies]
-safe_drive = { path = &quot;path_to/safe_drive&quot;, default-features = false, features = [&quot;galactic&quot;] }
+safe_drive = &quot;0.1&quot;
 </code></pre>
 <h3 id="edit-param_serversrcmainrs"><a class="header" href="#edit-param_serversrcmainrs">Edit <code>param_server/src/main.rs</code></a></h3>
+<p><code>param_server</code> can be implemented as follows.
+This sets 2 parameters up and waits updating.</p>
 <pre><pre class="playground"><code class="language-rust">use safe_drive::{context::Context, error::DynError, logger::Logger, parameter::Value, pr_info};
 
 fn main() -&gt; Result&lt;(), DynError&gt; {
@@ -259,13 +308,105 @@ fn main() -&gt; Result&lt;(), DynError&gt; {
     }
 }
 </code></pre></pre>
+<h3 id="param_server-in-detail"><a class="header" href="#param_server-in-detail"><code>param_server</code> in Detail</a></h3>
+<p>First of all, we have to create a parameter server by <code>create_parameter_server()</code> method as follows.</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>// Create a parameter server.
+let param_server = node.create_parameter_server()?;
+<span class="boring">}
+</span></code></pre></pre>
+<p>Then set parameters as follows.
+To update parameters, we have to acquire a write lock
+for mutual exclusion by <code>write()</code> method.</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>{
+    // Set parameters.
+    let mut params = param_server.params.write(); // Write lock
+
+    // Statically typed parameter.
+    params.set_parameter(
+        &quot;my_flag&quot;.to_string(),                     // parameter name
+        Value::Bool(false),                        // value
+        false,                                     // read only?
+        Some(&quot;my flag's description&quot;.to_string()), // description
+    )?;
+
+    // Dynamically typed parameter.
+    params.set_dynamically_typed_parameter(
+        &quot;my_dynamic_type_flag&quot;.to_string(), // parameter name
+        Value::Bool(false),                 // value
+        false,                              // read only?
+        Some(&quot;my dynamic type flag's description&quot;.to_string()), // description
+    )?;
+}
+<span class="boring">}
+</span></code></pre></pre>
+<p>To set a statically typed parameters, use <code>set_parameter()</code>.
+A statically typed parameter cannot be updated
+by a value whose type is different from original type.</p>
+<p>To set a dynamically typed parameters, use <code>set_dynamically_typed_parameter()</code>.
+A dynamically typed parameter can be updated by an arbitrary type.</p>
+<p>Finally, register a callback function to wait updating
+parameters as follows.</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>// Add a callback function to the parameter server.
+selector.add_parameter_server(
+    param_server,
+    Box::new(move |params, updated| {
+        // Print updated parameters.
+        let mut keys = String::new();
+        for key in updated.iter() {
+            let value = &amp;params.get_parameter(key).unwrap().value;
+            keys = format!(&quot;{keys}{key} = {}, &quot;, value);
+        }
+        pr_info!(logger, &quot;updated parameters: {keys}&quot;);
+    }),
+);
+
+// Spin.
+loop {
+    selector.wait()?;
+}
+<span class="boring">}
+</span></code></pre></pre>
+<p>1st argument of the closure, <code>params</code>, is a value of parameters,
+and 2nd argument, <code>updated</code> is a value containing updated parameters.</p>
+<h3 id="execute-param_server"><a class="header" href="#execute-param_server">Execute <code>param_server</code></a></h3>
+<p>Then, let's execute <code>param_server</code> and get/set a parameter.
+First, execute <code>param_server</code> in a terminal application window as follows.</p>
+<pre><code class="language-text">$ cargo run --bin param_server
+    Finished dev [unoptimized + debuginfo] target(s) in 0.01s
+     Running `target/debug/param_server`
+[INFO] [1669873997.622330908] [param_server]: updated parameters: my_flag = true,
+</code></pre>
+<p>Then, get and set the parameter by using <code>ros2</code> command in another terminal application window as follows.</p>
+<pre><code class="language-text">$ ros2 param get param_server my_flag
+Boolean value is: False
+$ ros2 param set param_server my_flag True
+Set parameter successful
+$ ros2 param get param_server my_flag
+Boolean value is: True
+$ ros2 param set param_server my_flag 10
+Setting parameter failed: failed type checking: dst = Bool, src = I64
+</code></pre>
+<p>We can get and set boolean values,
+but integer value cannot be set because <code>my_flag</code> is boolean type
+and statically typed.</p>
+<hr />
 <h2 id="asynchronous-wait"><a class="header" href="#asynchronous-wait">Asynchronous Wait</a></h2>
+<p>Then, we explain async/await based parameter server.</p>
 <h3 id="edit-async_param_servercargotoml"><a class="header" href="#edit-async_param_servercargotoml">Edit <code>async_param_server/Cargo.toml</code></a></h3>
+<p>Add <code>safe_drive</code> and <code>tokio</code> to the dependencies section of <code>Cargo.toml</code> as follows.</p>
 <pre><code class="language-toml">[dependencies]
-safe_drive = { path = &quot;path_to/safe_drive&quot;, default-features = false, features = [&quot;galactic&quot;] }
+safe_drive = &quot;0.1&quot;
 tokio = { version = &quot;1&quot;, features = [&quot;full&quot;] }
 </code></pre>
 <h3 id="edit-async_param_serversrcmainrs"><a class="header" href="#edit-async_param_serversrcmainrs">Edit <code>async_param_server/src/main.rs</code></a></h3>
+<p><code>async_param_server</code> can be implemented as follows.
+This sets 2 parameters up and waits updating.</p>
 <pre><pre class="playground"><code class="language-rust">use safe_drive::{context::Context, error::DynError, logger::Logger, parameter::Value, pr_info};
 
 #[tokio::main]
@@ -316,6 +457,19 @@ async fn main() -&gt; Result&lt;(), DynError&gt; {
     }
 }
 </code></pre></pre>
+<p>Important things are only following 2 lines.</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>// Wait update asynchronously.
+let updated = param_server.wait().await?;
+
+let params = param_server.params.read(); // Read lock
+<span class="boring">}
+</span></code></pre></pre>
+<p>To wait updating, use <code>wait().await</code>
+and acquire a read lock by <code>read()</code> method
+to read parameters.
+<code>wait().await</code> returns updated parameters.</p>
 
                     </main>
 
@@ -325,6 +479,9 @@ async fn main() -&gt; Result&lt;(), DynError&gt; {
                                 <i class="fa fa-angle-left"></i>
                             </a>
 
+                            <a rel="next" href="zerocopy.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <i class="fa fa-angle-right"></i>
+                            </a>
 
                         <div style="clear: both"></div>
                     </nav>
@@ -336,6 +493,9 @@ async fn main() -&gt; Result&lt;(), DynError&gt; {
                         <i class="fa fa-angle-left"></i>
                     </a>
 
+                    <a rel="next" href="zerocopy.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <i class="fa fa-angle-right"></i>
+                    </a>
             </nav>
 
         </div>

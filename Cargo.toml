@@ -7,7 +7,7 @@ description = "safe_drive: Formally Specified Rust Bindings for ROS2"
 license-file = "LICENSE"
 readme = "README.md"
 keywords = ["Robotics", "ROS2"]
-categories = [ "Science::Robotics" ]
+categories = [ "science::robotics" ]
 repository = "https://github.com/tier4/safe_drive"
 homepage = "https://tier4.github.io/safe_drive"
 

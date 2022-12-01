@@ -1,5 +1,7 @@
 # Service
 
+[Source code](https://github.com/tier4/safe_drive_tutorial/tree/main/srvtest).
+
 A service is a communication consisting requests and responses.
 There are a server and clients for a service as follows.
 
@@ -112,14 +114,14 @@ we have to edit `Cargo.toml` as follows.
 
 ```toml
 [dependencies]
-safe_drive = { path = "/tmp/safe_drive", default-features = false, features = ["galactic"] }
+safe_drive = "0.1"
 srvmsg = { path = "/tmp/safe_drive_tutorial/srvtest/srvmsg" }
 tokio = { version = "1", features = ["full"] }
 
 [package.metadata.ros]
 msg = ["srvmsg"]
 msg_dir = "/tmp/safe_drive_tutorial/srvtest"
-safe_drive_path = "/tmp/safe_drive"
+safe_drive_version = "0.1"
 ```
 
 ### Create `server/package.xml`
@@ -155,11 +157,12 @@ Don't forget `<depend>srvmsg</depend>`.
 `AddTwoInts.srv` will be translated to `struct AddTwoInts` as follows.
 
 ```rust
+#[derive(Debug)]
 pub struct AddTwoInts;
 
 impl ServiceMsg for AddTwoInts {
-    type Request = AddTwoIntsRequest;
-    type Response = AddTwoIntsResponse;
+    type Request = AddTwoInts_Request;
+    type Response = AddTwoInts_Response;
     fn type_support() -> *const rcl::rosidl_service_type_support_t {
         unsafe {
             rosidl_typesupport_c__get_service_type_support_handle__srvmsg__srv__AddTwoInts()
@@ -170,19 +173,19 @@ impl ServiceMsg for AddTwoInts {
 
 `struct AddTwoInts` implements `ServiceMsg trait`.
 `ServiceMsg::Request` and `ServiceMsg::Response` are types of request and response, respectively.
-`AddTwoIntsRequest` and `AddTowIntsResponse` are as follows.
+`AddTwoInts_Request` and `AddTowInts_Response` are as follows.
 
 ```rust
 #[repr(C)]
 #[derive(Debug)]
-pub struct AddTwoIntsRequest {
+pub struct AddTwoInts_Request {
     pub x: u32,
     pub y: u32,
 }
 
 #[repr(C)]
 #[derive(Debug)]
-pub struct AddTwoIntsResponse {
+pub struct AddTwoInts_Response {
     pub result: u32,
 }
 ```
@@ -193,7 +196,7 @@ You have to create a server by `create_server()` method and register a callback 
 
 ```rust
 use safe_drive::{context::Context, error::DynError, logger::Logger, pr_error, qos::Profile};
-use srvmsg_rs::srvmsg::srv::{AddTwoInts, AddTwoIntsResponse};
+use srvmsg_rs::srvmsg::srv::{AddTwoInts, AddTwoInts_Response};
 
 fn main() -> Result<(), DynError> {
     // Create a context.
@@ -214,7 +217,7 @@ fn main() -> Result<(), DynError> {
     selector.add_server(
         server,
         Box::new(move |msg, _header| {
-            let mut response = AddTwoIntsResponse::new().unwrap();
+            let mut response = AddTwoInts_Response::new().unwrap();
             pr_error!(logger, "recv: {:?}", msg);
             response.result = msg.x + msg.y;
             response
@@ -244,7 +247,7 @@ The callback was passed as follows.
 selector.add_server(
     server,
     Box::new(move |msg, _header| {
-        let mut response = AddTwoIntsResponse::new().unwrap();
+        let mut response = AddTwoInts_Response::new().unwrap();
         pr_error!(logger, "recv: {:?}", msg);
         response.result = msg.x + msg.y;
         response
@@ -253,7 +256,7 @@ selector.add_server(
 ```
 
 The callback function must take a message sent by a client and a header including sequence number, time, etc.
-`msg`'s types is `AddTwoIntsRequest` and a value of `AddTwoIntsResponse`, which is a response, must be returned.
+`msg`'s types is `AddTwoInts_Request` and a value of `AddTwoInts_Response`, which is a response, must be returned.
 
 ## Client
 
@@ -265,14 +268,14 @@ The callback function must take a message sent by a client and a header includin
 ```toml
 # srvtest/src/client/Cargo.toml
 [dependencies]
-safe_drive = { path = "/tmp/safe_drive", default-features = false, features = ["galactic"] }
+safe_drive = "0.1"
 srvmsg = { path = "/tmp/safe_drive_tutorial/srvtest/srvmsg" }
 tokio = { version = "1", features = ["full"] }
 
 [package.metadata.ros]
 msg = ["srvmsg"]
 msg_dir = "/tmp/safe_drive_tutorial/srvtest"
-safe_drive_path = "/tmp/safe_drive"
+safe_drive_version = "0.1"
 ```
 
 ### Create `client/package.xml`
@@ -313,7 +316,7 @@ In this tutorial, we use [Tokio](https://tokio.rs/), which is the most popular a
 use safe_drive::{
     context::Context, error::DynError, logger::Logger, pr_error, pr_info, pr_warn, qos::Profile,
 };
-use srvmsg_rs::srvmsg::srv::{AddTwoInts, AddTwoIntsRequest};
+use srvmsg_rs::srvmsg::srv::{AddTwoInts, AddTwoInts_Request};
 use std::time::Duration;
 use tokio::time::timeout;
 
@@ -330,7 +333,7 @@ async fn main() -> Result<(), DynError> {
 
     let mut n = 0;
     loop {
-        let mut request = AddTwoIntsRequest::new().unwrap();
+        let mut request = AddTwoInts_Request::new().unwrap();
         request.x = n;
         request.y = n + 1;
         n += 1;
@@ -400,9 +403,9 @@ $ cd srvtest
 $ . ./install/setup.bash
 $ ros2 run client client
 [WARN] [1659604527.720730018] [client]: timeout: deadline has elapsed
-[INFO] [1659604528.722220697] [client]: received AddTwoIntsResponse { result: 3 }
-[INFO] [1659604529.723525686] [client]: received AddTwoIntsResponse { result: 5 }
-[INFO] [1659604530.724820326] [client]: received AddTwoIntsResponse { result: 7 }
+[INFO] [1659604528.722220697] [client]: received AddTwoInts_Response { result: 3 }
+[INFO] [1659604529.723525686] [client]: received AddTwoInts_Response { result: 5 }
+[INFO] [1659604530.724820326] [client]: received AddTwoInts_Response { result: 7 }
 ```
 
 Nicely done!
