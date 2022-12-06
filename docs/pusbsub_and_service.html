@@ -81,7 +81,7 @@
 
         <nav id="sidebar" class="sidebar" aria-label="Table of contents">
             <div class="sidebar-scrollbox">
-                <ol class="chapter"><li class="chapter-item expanded "><a href="index.html"><strong aria-hidden="true">1.</strong> Top</a></li><li class="chapter-item expanded "><a href="tutorial.html"><strong aria-hidden="true">2.</strong> Tutorial</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="setup.html"><strong aria-hidden="true">2.1.</strong> Setting-up</a></li><li class="chapter-item expanded "><a href="pubsub.html"><strong aria-hidden="true">2.2.</strong> Publish and Subscribe</a></li><li class="chapter-item expanded "><a href="timer.html"><strong aria-hidden="true">2.3.</strong> Timer</a></li><li class="chapter-item expanded "><a href="multi_pubsub.html"><strong aria-hidden="true">2.4.</strong> Multi-threaded Publish and Subscribe</a></li><li class="chapter-item expanded "><a href="message.html"><strong aria-hidden="true">2.5.</strong> User Defined Data Structure</a></li><li class="chapter-item expanded "><a href="service.html"><strong aria-hidden="true">2.6.</strong> Service</a></li><li class="chapter-item expanded "><a href="parameter.html"><strong aria-hidden="true">2.7.</strong> Parameter</a></li><li class="chapter-item expanded "><a href="zerocopy.html"><strong aria-hidden="true">2.8.</strong> Zero Copy Publish and Subscribe</a></li><li class="chapter-item expanded "><a href="pusbsub_and_service.html" class="active"><strong aria-hidden="true">2.9.</strong> Request to Server in Callback</a></li><li class="chapter-item expanded "><a href="allocator.html"><strong aria-hidden="true">2.10.</strong> Custom Memory Allocator</a></li></ol></li><li class="chapter-item expanded "><a href="contribution.html"><strong aria-hidden="true">3.</strong> Contribution Guide</a></li></ol>
+                <ol class="chapter"><li class="chapter-item expanded "><a href="index.html"><strong aria-hidden="true">1.</strong> Top</a></li><li class="chapter-item expanded "><a href="tutorial.html"><strong aria-hidden="true">2.</strong> Tutorial</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="setup.html"><strong aria-hidden="true">2.1.</strong> Setting-up</a></li><li class="chapter-item expanded "><a href="pubsub.html"><strong aria-hidden="true">2.2.</strong> Publish and Subscribe</a></li><li class="chapter-item expanded "><a href="timer.html"><strong aria-hidden="true">2.3.</strong> Timer</a></li><li class="chapter-item expanded "><a href="multi_pubsub.html"><strong aria-hidden="true">2.4.</strong> Multi-threaded Publish and Subscribe</a></li><li class="chapter-item expanded "><a href="message.html"><strong aria-hidden="true">2.5.</strong> User Defined Data Structure</a></li><li class="chapter-item expanded "><a href="service.html"><strong aria-hidden="true">2.6.</strong> Service</a></li><li class="chapter-item expanded "><a href="parameter.html"><strong aria-hidden="true">2.7.</strong> Parameter</a></li><li class="chapter-item expanded "><a href="zerocopy.html"><strong aria-hidden="true">2.8.</strong> Zero Copy Publish and Subscribe</a></li><li class="chapter-item expanded "><a href="allocator.html"><strong aria-hidden="true">2.9.</strong> Custom Memory Allocator</a></li><li class="chapter-item expanded "><a href="pusbsub_and_service.html" class="active"><strong aria-hidden="true">2.10.</strong> Request to Server in Callback</a></li></ol></li><li class="chapter-item expanded "><a href="contribution.html"><strong aria-hidden="true">3.</strong> Contribution Guide</a></li></ol>
             </div>
             <div id="sidebar-resize-handle" class="sidebar-resize-handle"></div>
         </nav>
@@ -142,9 +142,16 @@
 
                 <div id="content" class="content">
                     <main>
-                        <h1 id="using-both-topic-and-service-with-callback-based-execution"><a class="header" href="#using-both-topic-and-service-with-callback-based-execution">Using Both Topic and Service with Callback Based Execution</a></h1>
-<p>Under construction.</p>
+                        <h1 id="request-to-server-in-callback"><a class="header" href="#request-to-server-in-callback">Request to Server in Callback</a></h1>
+<p><a href="https://github.com/tier4/safe_drive_tutorial/tree/main/pubsubsrv">Source code</a>.</p>
+<p>In this chapter, we will introduce how to access a server in a callback function.
+The code introduced here can be implemented by using async/await more beautifully.</p>
 <h2 id="subscriber-and-client"><a class="header" href="#subscriber-and-client">Subscriber and Client</a></h2>
+<p>The concept here is very simple.
+We use 2 selectors for a callback function and accessing a server,
+and <code>recv_timeout()</code> to receive a response from the server.</p>
+<p>We only show Rust code of a publisher as follows.
+Other files can be found in <a href="https://github.com/tier4/safe_drive_tutorial/tree/main/pubsubsrv">Source code</a>.</p>
 <pre><pre class="playground"><code class="language-rust">use safe_drive::{
     context::Context,
     error::DynError,
@@ -213,16 +220,92 @@ fn worker(
     }
 }
 </code></pre></pre>
+<h2 id="in-detail"><a class="header" href="#in-detail">in Detail</a></h2>
+<p>The important pieces are as follows.
+This code create 2 selectors first.
+<code>selector_client</code> is used for a service.</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>// Create 2 selectors.
+let selector = ctx.create_selector()?;
+let selector_client = ctx.create_selector()?;
+<span class="boring">}
+</span></code></pre></pre>
+<p>In the callback function, <code>recv_timeout()</code> method, which takes
+<code>selector_client</code>, is used as follows.</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>// Send a request.
+let receiver = c.send(&amp;request).unwrap();
+
+// Receive a response.
+match receiver.recv_timeout(Duration::from_millis(20), &amp;mut selector_client) {
+    RecvResult::Ok((c, _response, _header)) =&gt; client = Some(c),
+    RecvResult::RetryLater(r) =&gt; client = Some(r.give_up()),
+    RecvResult::Err(e) =&gt; {
+        pr_fatal!(logger, &quot;{e}&quot;);
+        panic!()
+    }
+}
+<span class="boring">}
+</span></code></pre></pre>
+<p>In this callback function,
+it sends a request to the server and receives a response
+by <code>recv_timeout()</code> method.</p>
+<h2 id="state-change"><a class="header" href="#state-change">State Change</a></h2>
+<p>A service's state can be represented as follows.</p>
+<pre class="mermaid">graph LR;
+    Start--&gt;Send
+    Send--&gt;Receive
+    Receive--&gt;Send
+</pre>
+<p>To represent the state, <code>safe_drive</code> uses the type system of Rust.</p>
+<p>First, a client is created as follows.
+At that time, it must be <code>Send</code> state.</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>let mut client = Some(client); // Send state.
+<span class="boring">}
+</span></code></pre></pre>
+<p><code>send()</code> method consumes the client and returns
+<code>receiver</code>.
+It means the state is changed from Send to Receive.</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>let c = client.take().unwrap();
+let receiver = c.send(&amp;request).unwrap(); // Change state from Send to Receive.
+<span class="boring">}
+</span></code></pre></pre>
+<p><code>recv_timeout()</code> also consumes <code>receiver</code> and returns a new client
+to send a new request if it successfully receives a response.</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>match receiver.recv_timeout(Duration::from_millis(20), &amp;mut selector_client) {
+    RecvResult::Ok((c, _response, _header)) =&gt; client = Some(c),
+    RecvResult::RetryLater(r) =&gt; client = Some(r.give_up()),
+    RecvResult::Err(e) =&gt; {
+        pr_fatal!(logger, &quot;{e}&quot;);
+        panic!()
+    }
+}
+<span class="boring">}
+</span></code></pre></pre>
+<p>When it has timed out, you can choose retrying or giving up.
+This code chooses giving up by <code>give_up()</code> method.
+<code>give_up()</code> methods consumes a receiver and return a new
+client to send a new request.</p>
+<p>This code will work, but we think using async/await is better than this because it is designed for asynchronous programming.
+I recommend to rewrite this code by using async/await.</p>
 
                     </main>
 
                     <nav class="nav-wrapper" aria-label="Page navigation">
                         <!-- Mobile navigation buttons -->
-                            <a rel="prev" href="zerocopy.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                            <a rel="prev" href="allocator.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                                 <i class="fa fa-angle-left"></i>
                             </a>
 
-                            <a rel="next" href="allocator.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                            <a rel="next" href="contribution.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                                 <i class="fa fa-angle-right"></i>
                             </a>
 
@@ -232,11 +315,11 @@ fn worker(
             </div>
 
             <nav class="nav-wide-wrapper" aria-label="Page navigation">
-                    <a rel="prev" href="zerocopy.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                    <a rel="prev" href="allocator.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                         <i class="fa fa-angle-left"></i>
                     </a>
 
-                    <a rel="next" href="allocator.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                    <a rel="next" href="contribution.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                         <i class="fa fa-angle-right"></i>
                     </a>
             </nav>
