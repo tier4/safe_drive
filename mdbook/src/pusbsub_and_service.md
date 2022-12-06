@@ -20,7 +20,7 @@ use safe_drive::{
     error::DynError,
     logger::Logger,
     msg::common_interfaces::{std_msgs, std_srvs},
-    pr_fatal,
+    pr_fatal, pr_info,
     selector::Selector,
     service::client::Client,
     topic::subscriber::Subscriber,
@@ -58,6 +58,8 @@ fn worker(
     selector.add_subscriber(
         subscriber,
         Box::new(move |_msg| {
+            pr_info!(logger, "receive a message");
+
             // Take the client.
             let c = client.take().unwrap();
 
@@ -68,7 +70,10 @@ fn worker(
 
             // Receive a response.
             match receiver.recv_timeout(Duration::from_millis(20), &mut selector_client) {
-                RecvResult::Ok((c, _response, _header)) => client = Some(c),
+                RecvResult::Ok((c, _response, _header)) => {
+                    pr_info!(logger, "receive a response");
+                    client = Some(c)
+                }
                 RecvResult::RetryLater(r) => client = Some(r.give_up()),
                 RecvResult::Err(e) => {
                     pr_fatal!(logger, "{e}");
@@ -105,7 +110,10 @@ let receiver = c.send(&request).unwrap();
 
 // Receive a response.
 match receiver.recv_timeout(Duration::from_millis(20), &mut selector_client) {
-    RecvResult::Ok((c, _response, _header)) => client = Some(c),
+    RecvResult::Ok((c, _response, _header)) => {
+        pr_info!(logger, "receive a response");
+        client = Some(c)
+    }
     RecvResult::RetryLater(r) => client = Some(r.give_up()),
     RecvResult::Err(e) => {
         pr_fatal!(logger, "{e}");
@@ -151,8 +159,12 @@ let receiver = c.send(&request).unwrap(); // Change state from Send to Receive.
 to send a new request if it successfully receives a response.
 
 ```rust
+// Receive a response.
 match receiver.recv_timeout(Duration::from_millis(20), &mut selector_client) {
-    RecvResult::Ok((c, _response, _header)) => client = Some(c),
+    RecvResult::Ok((c, _response, _header)) => {
+        pr_info!(logger, "receive a response");
+        client = Some(c)
+    }
     RecvResult::RetryLater(r) => client = Some(r.give_up()),
     RecvResult::Err(e) => {
         pr_fatal!(logger, "{e}");
