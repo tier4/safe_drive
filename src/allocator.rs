@@ -35,7 +35,8 @@ use std::{
 
 pub struct CustomAllocator {
     allocator: Option<&'static dyn GlobalAlloc>,
-    heap: (usize, usize),
+    heap_start: usize,
+    heap_end: usize,
 }
 
 #[global_allocator]
@@ -52,7 +53,8 @@ impl CustomAllocator {
     const fn new() -> Self {
         Self {
             allocator: None,
-            heap: (0, 0),
+            heap_start: 0,
+            heap_end: 0,
         }
     }
 
@@ -63,16 +65,17 @@ impl CustomAllocator {
         &mut self,
         allocator: &'static dyn GlobalAlloc,
         heap_start: usize,
-        size: usize,
+        heap_size: usize,
     ) {
         // Touch memory.
-        let mem = from_raw_parts_mut(heap_start as *mut u8, size);
-        for i in (0..size).step_by(4096) {
+        let mem = from_raw_parts_mut(heap_start as *mut u8, heap_size);
+        for i in (0..heap_size).step_by(4096) {
             write_volatile(&mut mem[i], 0);
         }
 
         self.allocator = Some(allocator);
-        self.heap = (heap_start, size);
+        self.heap_start = heap_start;
+        self.heap_end = heap_start + heap_size;
     }
 }
 
@@ -95,7 +98,7 @@ unsafe impl GlobalAlloc for CustomAllocator {
         let addr = ptr as usize;
 
         if let Some(allocator) = self.allocator {
-            if self.heap.contains(addr) {
+            if (self.heap_start..self.heap_end).contains(&addr) {
                 allocator.dealloc(ptr, layout)
             } else {
                 System.dealloc(ptr, layout)

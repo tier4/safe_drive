@@ -1,6 +1,6 @@
 [package]
 name = "safe_drive"
-version = "0.1.2"
+version = "0.1.3"
 edition = "2021"
 authors = [ "Yuuki Takano <yuuki.takano@tier4.jp>, TIER IV, Inc." ]
 description = "safe_drive: Formally Specified Rust Bindings for ROS2"

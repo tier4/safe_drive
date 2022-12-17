@@ -9,7 +9,7 @@ This tutorial implements 1 sender (in Rust) and 2 receivers (in Rust and C++).
 
 The following figure is a example topology.
 
- ```mermaid
+```mermaid
 graph TD;
     Publisher1-->TopicA;
     Publisher2-->TopicA;
