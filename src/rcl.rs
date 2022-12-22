@@ -384,6 +384,100 @@ impl MTUnsafeFn {
         })
     }
 
+    pub fn rcl_action_client_init(
+        &self,
+        action_client: *mut rcl_action_client_t,
+        node: *mut rcl_node_t,
+        type_support: *const rosidl_action_type_support_t,
+        action_name: *const ::std::os::raw::c_char,
+        options: *const rcl_action_client_options_t,
+    ) -> RCLResult<()> {
+        ret_val_to_err(unsafe {
+            self::rcl_action_client_init(action_client, node, type_support, action_name, options)
+        })
+    }
+
+    pub fn rcl_action_client_fini(
+        &self,
+        action_client: *mut rcl_action_client_t,
+        node: *mut rcl_node_t,
+    ) -> RCLResult<()> {
+        ret_val_to_err(unsafe { self::rcl_action_client_fini(action_client, node) })
+    }
+
+    pub fn rcl_action_server_is_available(
+        &self,
+        node: *const rcl_node_t,
+        client: *const rcl_action_client_t,
+        is_available: *mut bool,
+    ) -> RCLResult<()> {
+        ret_val_to_err(unsafe { self::rcl_action_server_is_available(node, client, is_available) })
+    }
+
+    pub fn rcl_action_take_goal_response(
+        &self,
+        action_client: *const rcl_action_client_t,
+        response_header: *mut rmw_request_id_t,
+        ros_goal_response: *mut ::std::os::raw::c_void,
+    ) -> RCLResult<()> {
+        ret_val_to_err(unsafe {
+            self::rcl_action_take_goal_response(action_client, response_header, ros_goal_response)
+        })
+    }
+
+    pub fn rcl_action_take_feedback(
+        &self,
+        action_client: *const rcl_action_client_t,
+        ros_feedback: *mut ::std::os::raw::c_void,
+    ) -> RCLResult<()> {
+        ret_val_to_err(unsafe { self::rcl_action_take_feedback(action_client, ros_feedback) })
+    }
+
+    pub fn rcl_action_take_status(
+        &self,
+        action_client: *const rcl_action_client_t,
+        ros_status_array: *mut ::std::os::raw::c_void,
+    ) -> RCLResult<()> {
+        ret_val_to_err(unsafe { self::rcl_action_take_status(action_client, ros_status_array) })
+    }
+
+    pub fn rcl_action_take_result_response(
+        &self,
+        action_client: *const rcl_action_client_t,
+        response_header: *mut rmw_request_id_t,
+        ros_result: *mut ::std::os::raw::c_void,
+    ) -> RCLResult<()> {
+        ret_val_to_err(unsafe {
+            self::rcl_action_take_result_response(action_client, response_header, ros_result)
+        })
+    }
+
+    pub fn rcl_action_send_cancel_request(
+        &self,
+        action_client: *const rcl_action_client_t,
+        ros_cancel_request: *const ::std::os::raw::c_void,
+        sequence_number: *mut i64,
+    ) -> RCLResult<()> {
+        ret_val_to_err(unsafe {
+            self::rcl_action_send_cancel_request(action_client, ros_cancel_request, sequence_number)
+        })
+    }
+
+    pub fn rcl_action_take_cancel_response(
+        &self,
+        action_client: *const rcl_action_client_t,
+        response_header: *mut rmw_request_id_t,
+        ros_cancel_response: *mut ::std::os::raw::c_void,
+    ) -> RCLResult<()> {
+        ret_val_to_err(unsafe {
+            self::rcl_action_take_cancel_response(
+                action_client,
+                response_header,
+                ros_cancel_response,
+            )
+        })
+    }
+
     pub fn rcutils_reset_error(&self) {
         unsafe { self::rcutils_reset_error() };
     }
@@ -516,5 +610,34 @@ impl MTSafeFn {
         sequence_number: *mut i64,
     ) -> RCLResult<()> {
         ret_val_to_err(unsafe { self::rcl_send_request(client, ros_request, sequence_number) })
+    }
+
+    pub fn rcl_action_get_zero_initialized_client() -> rcl_action_client_t {
+        unsafe { self::rcl_action_get_zero_initialized_client() }
+    }
+
+    pub fn rcl_action_client_get_default_options() -> rcl_action_client_options_t {
+        unsafe { self::rcl_action_client_get_default_options() }
+    }
+
+    pub fn rcl_action_send_goal_request(
+        action_client: *const rcl_action_client_t,
+        ros_goal_request: *const ::std::os::raw::c_void,
+        sequence_number: *mut i64,
+    ) -> RCLResult<()> {
+        ret_val_to_err(unsafe {
+            self::rcl_action_send_goal_request(action_client, ros_goal_request, sequence_number)
+        })
+    }
+
+    pub fn rcl_action_send_result_request(
+        &self,
+        action_client: *const rcl_action_client_t,
+        ros_result_request: *mut ::std::os::raw::c_void,
+        sequence_number: *mut i64,
+    ) -> RCLResult<()> {
+        ret_val_to_err(unsafe {
+            self::rcl_action_send_result_request(action_client, ros_result_request, sequence_number)
+        })
     }
 }
