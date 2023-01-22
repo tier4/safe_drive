@@ -1,4 +1,4 @@
-# Editor setting-up
+# Editor Setting-up
 
 `safe_drive` has features like `humble` or `galactic`, which indicates ROS2 version.
 We recommend pass one of a feature to enable editor's support.

@@ -1,4 +1,4 @@
-# Generating messages included by safe_drive
+# Generating Messages Included by safe_drive
 
 For client applications, `safe_drive` provides a way to transpile from ROS2's .idl files to Rust crates by using [safe_drive_msg](https://github.com/tier4/safe_drive_msg).
 `safe_drive` itself includes ROS2's some basic messages to handle parameter
