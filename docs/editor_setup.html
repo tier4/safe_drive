@@ -3,7 +3,7 @@
     <head>
         <!-- Book generated using mdBook -->
         <meta charset="UTF-8">
-        <title>Contribution Guide - safe_drive: Formally Specified Rust Bindings for ROS2</title>
+        <title>Editor setting-up - safe_drive: Formally Specified Rust Bindings for ROS2</title>
 
 
         <!-- Custom HTML head -->
@@ -80,7 +80,7 @@
 
         <nav id="sidebar" class="sidebar" aria-label="Table of contents">
             <div class="sidebar-scrollbox">
-                <ol class="chapter"><li class="chapter-item expanded "><a href="index.html"><strong aria-hidden="true">1.</strong> Top</a></li><li class="chapter-item expanded "><a href="tutorial.html"><strong aria-hidden="true">2.</strong> Tutorial</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="setup.html"><strong aria-hidden="true">2.1.</strong> Setting-up</a></li><li class="chapter-item expanded "><a href="pubsub.html"><strong aria-hidden="true">2.2.</strong> Publish and Subscribe</a></li><li class="chapter-item expanded "><a href="timer.html"><strong aria-hidden="true">2.3.</strong> Timer</a></li><li class="chapter-item expanded "><a href="multi_pubsub.html"><strong aria-hidden="true">2.4.</strong> Multi-threaded Publish and Subscribe</a></li><li class="chapter-item expanded "><a href="message.html"><strong aria-hidden="true">2.5.</strong> User Defined Data Structure</a></li><li class="chapter-item expanded "><a href="service.html"><strong aria-hidden="true">2.6.</strong> Service</a></li><li class="chapter-item expanded "><a href="parameter.html"><strong aria-hidden="true">2.7.</strong> Parameter</a></li><li class="chapter-item expanded "><a href="zerocopy.html"><strong aria-hidden="true">2.8.</strong> Zero Copy Publish and Subscribe</a></li><li class="chapter-item expanded "><a href="allocator.html"><strong aria-hidden="true">2.9.</strong> Custom Memory Allocator</a></li><li class="chapter-item expanded "><a href="pusbsub_and_service.html"><strong aria-hidden="true">2.10.</strong> Request to Server in Callback</a></li></ol></li><li class="chapter-item expanded "><a href="contribution.html" class="active"><strong aria-hidden="true">3.</strong> Contribution Guide</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="setup_contribution.html"><strong aria-hidden="true">3.1.</strong> Setting-up for contribution</a></li><li class="chapter-item expanded "><a href="build_and_test.html"><strong aria-hidden="true">3.2.</strong> Build and test</a></li><li class="chapter-item expanded "><a href="editor_setup.html"><strong aria-hidden="true">3.3.</strong> Editor setting-up</a></li><li class="chapter-item expanded "><a href="internal_msgs.html"><strong aria-hidden="true">3.4.</strong> Generating messages included by safe_drive</a></li><li class="chapter-item expanded "><a href="c_apis.html"><strong aria-hidden="true">3.5.</strong> C APIs</a></li><li class="chapter-item expanded "><a href="document.html"><strong aria-hidden="true">3.6.</strong> Documentation</a></li></ol></li></ol>
+                <ol class="chapter"><li class="chapter-item expanded "><a href="index.html"><strong aria-hidden="true">1.</strong> Top</a></li><li class="chapter-item expanded "><a href="tutorial.html"><strong aria-hidden="true">2.</strong> Tutorial</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="setup.html"><strong aria-hidden="true">2.1.</strong> Setting-up</a></li><li class="chapter-item expanded "><a href="pubsub.html"><strong aria-hidden="true">2.2.</strong> Publish and Subscribe</a></li><li class="chapter-item expanded "><a href="timer.html"><strong aria-hidden="true">2.3.</strong> Timer</a></li><li class="chapter-item expanded "><a href="multi_pubsub.html"><strong aria-hidden="true">2.4.</strong> Multi-threaded Publish and Subscribe</a></li><li class="chapter-item expanded "><a href="message.html"><strong aria-hidden="true">2.5.</strong> User Defined Data Structure</a></li><li class="chapter-item expanded "><a href="service.html"><strong aria-hidden="true">2.6.</strong> Service</a></li><li class="chapter-item expanded "><a href="parameter.html"><strong aria-hidden="true">2.7.</strong> Parameter</a></li><li class="chapter-item expanded "><a href="zerocopy.html"><strong aria-hidden="true">2.8.</strong> Zero Copy Publish and Subscribe</a></li><li class="chapter-item expanded "><a href="allocator.html"><strong aria-hidden="true">2.9.</strong> Custom Memory Allocator</a></li><li class="chapter-item expanded "><a href="pusbsub_and_service.html"><strong aria-hidden="true">2.10.</strong> Request to Server in Callback</a></li></ol></li><li class="chapter-item expanded "><a href="contribution.html"><strong aria-hidden="true">3.</strong> Contribution Guide</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="setup_contribution.html"><strong aria-hidden="true">3.1.</strong> Setting-up for contribution</a></li><li class="chapter-item expanded "><a href="build_and_test.html"><strong aria-hidden="true">3.2.</strong> Build and test</a></li><li class="chapter-item expanded "><a href="editor_setup.html" class="active"><strong aria-hidden="true">3.3.</strong> Editor setting-up</a></li><li class="chapter-item expanded "><a href="internal_msgs.html"><strong aria-hidden="true">3.4.</strong> Generating messages included by safe_drive</a></li><li class="chapter-item expanded "><a href="c_apis.html"><strong aria-hidden="true">3.5.</strong> C APIs</a></li><li class="chapter-item expanded "><a href="document.html"><strong aria-hidden="true">3.6.</strong> Documentation</a></li></ol></li></ol>
             </div>
             <div id="sidebar-resize-handle" class="sidebar-resize-handle"></div>
         </nav>
@@ -141,18 +141,30 @@
 
                 <div id="content" class="content">
                     <main>
-                        <h1 id="contribution-guide"><a class="header" href="#contribution-guide">Contribution Guide</a></h1>
-<p>This chapter explains <code>safe_drive</code>'s internal briefly to contribute to it.</p>
+                        <h1 id="editor-setting-up"><a class="header" href="#editor-setting-up">Editor setting-up</a></h1>
+<p><code>safe_drive</code> has features like <code>humble</code> or <code>galactic</code>, which indicates ROS2 version.
+We recommend pass one of a feature to enable editor's support.</p>
+<p>If you use ROS2 humble and Visual Studio Code,
+please add <code>humble</code> in <code>rust-analyzer -&gt; cargo -&gt; features</code> as follows.</p>
+<pre><code class="language-json">{
+    &quot;rust-analyzer.cargo.features&quot;: [
+        &quot;humble&quot;
+    ]
+}
+</code></pre>
+<p>Client applications not necessary to specify a feature of ROS2 version,
+because <a href="https://github.com/tier4/safe_drive/blob/main/build.rs">build.rs</a> detects
+ROS2 version from <code>ROS_DISTRO</code> environment variable.</p>
 
                     </main>
 
                     <nav class="nav-wrapper" aria-label="Page navigation">
                         <!-- Mobile navigation buttons -->
-                            <a rel="prev" href="pusbsub_and_service.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                            <a rel="prev" href="build_and_test.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                                 <i class="fa fa-angle-left"></i>
                             </a>
 
-                            <a rel="next" href="setup_contribution.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                            <a rel="next" href="internal_msgs.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                                 <i class="fa fa-angle-right"></i>
                             </a>
 
@@ -162,11 +174,11 @@
             </div>
 
             <nav class="nav-wide-wrapper" aria-label="Page navigation">
-                    <a rel="prev" href="pusbsub_and_service.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                    <a rel="prev" href="build_and_test.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                         <i class="fa fa-angle-left"></i>
                     </a>
 
-                    <a rel="next" href="setup_contribution.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                    <a rel="next" href="internal_msgs.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                         <i class="fa fa-angle-right"></i>
                     </a>
             </nav>

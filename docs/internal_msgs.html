@@ -3,7 +3,7 @@
     <head>
         <!-- Book generated using mdBook -->
         <meta charset="UTF-8">
-        <title>Contribution Guide - safe_drive: Formally Specified Rust Bindings for ROS2</title>
+        <title>Generating messages included by safe_drive - safe_drive: Formally Specified Rust Bindings for ROS2</title>
 
 
         <!-- Custom HTML head -->
@@ -80,7 +80,7 @@
 
         <nav id="sidebar" class="sidebar" aria-label="Table of contents">
             <div class="sidebar-scrollbox">
-                <ol class="chapter"><li class="chapter-item expanded "><a href="index.html"><strong aria-hidden="true">1.</strong> Top</a></li><li class="chapter-item expanded "><a href="tutorial.html"><strong aria-hidden="true">2.</strong> Tutorial</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="setup.html"><strong aria-hidden="true">2.1.</strong> Setting-up</a></li><li class="chapter-item expanded "><a href="pubsub.html"><strong aria-hidden="true">2.2.</strong> Publish and Subscribe</a></li><li class="chapter-item expanded "><a href="timer.html"><strong aria-hidden="true">2.3.</strong> Timer</a></li><li class="chapter-item expanded "><a href="multi_pubsub.html"><strong aria-hidden="true">2.4.</strong> Multi-threaded Publish and Subscribe</a></li><li class="chapter-item expanded "><a href="message.html"><strong aria-hidden="true">2.5.</strong> User Defined Data Structure</a></li><li class="chapter-item expanded "><a href="service.html"><strong aria-hidden="true">2.6.</strong> Service</a></li><li class="chapter-item expanded "><a href="parameter.html"><strong aria-hidden="true">2.7.</strong> Parameter</a></li><li class="chapter-item expanded "><a href="zerocopy.html"><strong aria-hidden="true">2.8.</strong> Zero Copy Publish and Subscribe</a></li><li class="chapter-item expanded "><a href="allocator.html"><strong aria-hidden="true">2.9.</strong> Custom Memory Allocator</a></li><li class="chapter-item expanded "><a href="pusbsub_and_service.html"><strong aria-hidden="true">2.10.</strong> Request to Server in Callback</a></li></ol></li><li class="chapter-item expanded "><a href="contribution.html" class="active"><strong aria-hidden="true">3.</strong> Contribution Guide</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="setup_contribution.html"><strong aria-hidden="true">3.1.</strong> Setting-up for contribution</a></li><li class="chapter-item expanded "><a href="build_and_test.html"><strong aria-hidden="true">3.2.</strong> Build and test</a></li><li class="chapter-item expanded "><a href="editor_setup.html"><strong aria-hidden="true">3.3.</strong> Editor setting-up</a></li><li class="chapter-item expanded "><a href="internal_msgs.html"><strong aria-hidden="true">3.4.</strong> Generating messages included by safe_drive</a></li><li class="chapter-item expanded "><a href="c_apis.html"><strong aria-hidden="true">3.5.</strong> C APIs</a></li><li class="chapter-item expanded "><a href="document.html"><strong aria-hidden="true">3.6.</strong> Documentation</a></li></ol></li></ol>
+                <ol class="chapter"><li class="chapter-item expanded "><a href="index.html"><strong aria-hidden="true">1.</strong> Top</a></li><li class="chapter-item expanded "><a href="tutorial.html"><strong aria-hidden="true">2.</strong> Tutorial</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="setup.html"><strong aria-hidden="true">2.1.</strong> Setting-up</a></li><li class="chapter-item expanded "><a href="pubsub.html"><strong aria-hidden="true">2.2.</strong> Publish and Subscribe</a></li><li class="chapter-item expanded "><a href="timer.html"><strong aria-hidden="true">2.3.</strong> Timer</a></li><li class="chapter-item expanded "><a href="multi_pubsub.html"><strong aria-hidden="true">2.4.</strong> Multi-threaded Publish and Subscribe</a></li><li class="chapter-item expanded "><a href="message.html"><strong aria-hidden="true">2.5.</strong> User Defined Data Structure</a></li><li class="chapter-item expanded "><a href="service.html"><strong aria-hidden="true">2.6.</strong> Service</a></li><li class="chapter-item expanded "><a href="parameter.html"><strong aria-hidden="true">2.7.</strong> Parameter</a></li><li class="chapter-item expanded "><a href="zerocopy.html"><strong aria-hidden="true">2.8.</strong> Zero Copy Publish and Subscribe</a></li><li class="chapter-item expanded "><a href="allocator.html"><strong aria-hidden="true">2.9.</strong> Custom Memory Allocator</a></li><li class="chapter-item expanded "><a href="pusbsub_and_service.html"><strong aria-hidden="true">2.10.</strong> Request to Server in Callback</a></li></ol></li><li class="chapter-item expanded "><a href="contribution.html"><strong aria-hidden="true">3.</strong> Contribution Guide</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="setup_contribution.html"><strong aria-hidden="true">3.1.</strong> Setting-up for contribution</a></li><li class="chapter-item expanded "><a href="build_and_test.html"><strong aria-hidden="true">3.2.</strong> Build and test</a></li><li class="chapter-item expanded "><a href="editor_setup.html"><strong aria-hidden="true">3.3.</strong> Editor setting-up</a></li><li class="chapter-item expanded "><a href="internal_msgs.html" class="active"><strong aria-hidden="true">3.4.</strong> Generating messages included by safe_drive</a></li><li class="chapter-item expanded "><a href="c_apis.html"><strong aria-hidden="true">3.5.</strong> C APIs</a></li><li class="chapter-item expanded "><a href="document.html"><strong aria-hidden="true">3.6.</strong> Documentation</a></li></ol></li></ol>
             </div>
             <div id="sidebar-resize-handle" class="sidebar-resize-handle"></div>
         </nav>
@@ -141,18 +141,42 @@
 
                 <div id="content" class="content">
                     <main>
-                        <h1 id="contribution-guide"><a class="header" href="#contribution-guide">Contribution Guide</a></h1>
-<p>This chapter explains <code>safe_drive</code>'s internal briefly to contribute to it.</p>
+                        <h1 id="generating-messages-included-by-safe_drive"><a class="header" href="#generating-messages-included-by-safe_drive">Generating messages included by safe_drive</a></h1>
+<p>For client applications, <code>safe_drive</code> provides a way to transpile from ROS2's .idl files to Rust crates by using <a href="https://github.com/tier4/safe_drive_msg">safe_drive_msg</a>.
+<code>safe_drive</code> itself includes ROS2's some basic messages to handle parameter
+servers.</p>
+<p>The basic messages can be generated by <a href="https://github.com/tier4/ros2msg_to_rs">ros2msg_to_rs</a>,
+and located in <a href="https://github.com/tier4/safe_drive/tree/main/src/msg">src/msg</a>.</p>
+<p><code>safe_drive</code> contains <a href="https://github.com/ros2/common_interfaces.git">common_interfaces</a>,
+<a href="https://github.com/ros2/unique_identifier_msgs.git">unique_identifier_msgs</a>,
+and <a href="https://github.com/ros2/rcl_interfaces.git">rcl_interfaces</a>.
+These messages can be transpiled as follows.
+<code>{safe_drive}</code> of the following means a directory path to <code>safe_drive</code>.</p>
+<pre><code class="language-text">$ git clone https://github.com/ros2/common_interfaces.git -b humble
+$ ros2msg_to_rs --disable-common-interfaces -s crate -i common_interfaces -o {safe_drive}/src/msg/humble/common_interfaces
+</code></pre>
+<pre><code class="language-text">$ mkdir ros2msg &amp;&amp; cd ros2msg
+$ git clone https://github.com/ros2/unique_identifier_msgs.git -b humble
+$ ros2msg_to_rs --disable-common-interfaces -s crate -i . -o {safe_drive}/src/msg/humble/ros2msg
+</code></pre>
+<pre><code class="language-text">$ git clone https://github.com/ros2/rcl_interfaces.git -b humble
+$ rm -rf rcl_interfaces/test_msgs rcl_interfaces/builtin_interfaces
+$ ros2msg_to_rs --disable-common-interfaces -s crate -i rcl_interfaces -o {safe_drive}/src/msg/humble/interfaces
+</code></pre>
+<p><code>-s crate</code> means <code>crate</code> is the name of top module.
+<code>-i</code> and <code>-o</code> means input and output directories.
+Because <code>safe_drive</code> defines <code>builtin_interfaces</code> internally, it must be removed before transpilation.</p>
+<p>To support newer version of ROS2, these files should be updated.</p>
 
                     </main>
 
                     <nav class="nav-wrapper" aria-label="Page navigation">
                         <!-- Mobile navigation buttons -->
-                            <a rel="prev" href="pusbsub_and_service.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                            <a rel="prev" href="editor_setup.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                                 <i class="fa fa-angle-left"></i>
                             </a>
 
-                            <a rel="next" href="setup_contribution.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                            <a rel="next" href="c_apis.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                                 <i class="fa fa-angle-right"></i>
                             </a>
 
@@ -162,11 +186,11 @@
             </div>
 
             <nav class="nav-wide-wrapper" aria-label="Page navigation">
-                    <a rel="prev" href="pusbsub_and_service.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                    <a rel="prev" href="editor_setup.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                         <i class="fa fa-angle-left"></i>
                     </a>
 
-                    <a rel="next" href="setup_contribution.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                    <a rel="next" href="c_apis.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                         <i class="fa fa-angle-right"></i>
                     </a>
             </nav>

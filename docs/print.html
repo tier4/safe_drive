@@ -81,7 +81,7 @@
 
         <nav id="sidebar" class="sidebar" aria-label="Table of contents">
             <div class="sidebar-scrollbox">
-                <ol class="chapter"><li class="chapter-item expanded "><a href="index.html"><strong aria-hidden="true">1.</strong> Top</a></li><li class="chapter-item expanded "><a href="tutorial.html"><strong aria-hidden="true">2.</strong> Tutorial</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="setup.html"><strong aria-hidden="true">2.1.</strong> Setting-up</a></li><li class="chapter-item expanded "><a href="pubsub.html"><strong aria-hidden="true">2.2.</strong> Publish and Subscribe</a></li><li class="chapter-item expanded "><a href="timer.html"><strong aria-hidden="true">2.3.</strong> Timer</a></li><li class="chapter-item expanded "><a href="multi_pubsub.html"><strong aria-hidden="true">2.4.</strong> Multi-threaded Publish and Subscribe</a></li><li class="chapter-item expanded "><a href="message.html"><strong aria-hidden="true">2.5.</strong> User Defined Data Structure</a></li><li class="chapter-item expanded "><a href="service.html"><strong aria-hidden="true">2.6.</strong> Service</a></li><li class="chapter-item expanded "><a href="parameter.html"><strong aria-hidden="true">2.7.</strong> Parameter</a></li><li class="chapter-item expanded "><a href="zerocopy.html"><strong aria-hidden="true">2.8.</strong> Zero Copy Publish and Subscribe</a></li><li class="chapter-item expanded "><a href="allocator.html"><strong aria-hidden="true">2.9.</strong> Custom Memory Allocator</a></li><li class="chapter-item expanded "><a href="pusbsub_and_service.html"><strong aria-hidden="true">2.10.</strong> Request to Server in Callback</a></li></ol></li><li class="chapter-item expanded "><a href="contribution.html"><strong aria-hidden="true">3.</strong> Contribution Guide</a></li></ol>
+                <ol class="chapter"><li class="chapter-item expanded "><a href="index.html"><strong aria-hidden="true">1.</strong> Top</a></li><li class="chapter-item expanded "><a href="tutorial.html"><strong aria-hidden="true">2.</strong> Tutorial</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="setup.html"><strong aria-hidden="true">2.1.</strong> Setting-up</a></li><li class="chapter-item expanded "><a href="pubsub.html"><strong aria-hidden="true">2.2.</strong> Publish and Subscribe</a></li><li class="chapter-item expanded "><a href="timer.html"><strong aria-hidden="true">2.3.</strong> Timer</a></li><li class="chapter-item expanded "><a href="multi_pubsub.html"><strong aria-hidden="true">2.4.</strong> Multi-threaded Publish and Subscribe</a></li><li class="chapter-item expanded "><a href="message.html"><strong aria-hidden="true">2.5.</strong> User Defined Data Structure</a></li><li class="chapter-item expanded "><a href="service.html"><strong aria-hidden="true">2.6.</strong> Service</a></li><li class="chapter-item expanded "><a href="parameter.html"><strong aria-hidden="true">2.7.</strong> Parameter</a></li><li class="chapter-item expanded "><a href="zerocopy.html"><strong aria-hidden="true">2.8.</strong> Zero Copy Publish and Subscribe</a></li><li class="chapter-item expanded "><a href="allocator.html"><strong aria-hidden="true">2.9.</strong> Custom Memory Allocator</a></li><li class="chapter-item expanded "><a href="pusbsub_and_service.html"><strong aria-hidden="true">2.10.</strong> Request to Server in Callback</a></li></ol></li><li class="chapter-item expanded "><a href="contribution.html"><strong aria-hidden="true">3.</strong> Contribution Guide</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="setup_contribution.html"><strong aria-hidden="true">3.1.</strong> Setting-up for contribution</a></li><li class="chapter-item expanded "><a href="build_and_test.html"><strong aria-hidden="true">3.2.</strong> Build and test</a></li><li class="chapter-item expanded "><a href="editor_setup.html"><strong aria-hidden="true">3.3.</strong> Editor setting-up</a></li><li class="chapter-item expanded "><a href="internal_msgs.html"><strong aria-hidden="true">3.4.</strong> Generating messages included by safe_drive</a></li><li class="chapter-item expanded "><a href="c_apis.html"><strong aria-hidden="true">3.5.</strong> C APIs</a></li><li class="chapter-item expanded "><a href="document.html"><strong aria-hidden="true">3.6.</strong> Documentation</a></li></ol></li></ol>
             </div>
             <div id="sidebar-resize-handle" class="sidebar-resize-handle"></div>
         </nav>
@@ -2450,14 +2450,149 @@ client to send a new request.</p>
 <p>This code will work, but we think using async/await is better than this because it is designed for asynchronous programming.
 I recommend to rewrite this code by using async/await.</p>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="contribution-guide"><a class="header" href="#contribution-guide">Contribution Guide</a></h1>
-<ul>
-<li><a href="./setup_contribution.html">Setting-up for contribution</a></li>
-<li><a href="./build_and_test.html">Build and test</a></li>
-<li><a href="./editor_setup.html">Editor setting-up</a></li>
-<li><a href="./internal_msgs.html">Generating messages included by safe_drive</a></li>
-<li><a href="./c_apis.html">C APIs</a></li>
-<li><a href="./document.html">Documentation</a></li>
-</ul>
+<p>This chapter explains <code>safe_drive</code>'s internal briefly to contribute to it.</p>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="setting-up-for-contribution"><a class="header" href="#setting-up-for-contribution">Setting-up for contribution</a></h1>
+<h2 id="basic-setting-up"><a class="header" href="#basic-setting-up">Basic setting-up</a></h2>
+<p>See <a href="./setup.html">Setting-up</a> for basic setting-up.</p>
+<h2 id="setting-up-development-tools"><a class="header" href="#setting-up-development-tools">Setting-up development tools</a></h2>
+<p>To build <code>safe_drive</code>,
+you need install <code>bindgen-cli</code> and <code>ros2msg_to_rs</code> as follows.</p>
+<pre><code class="language-text">$ cargo install bindgen-cli
+$ cargo install --git https://github.com/tier4/ros2msg_to_rs.git
+</code></pre>
+<p><code>bindgen_cli</code> is a transpiler from C to Rust,
+and <code>ros2msg_to_rs</code> is also a transpiler from .msg and .srv to Rust.</p>
+<p>If you want to contribute to documents you are reading now,
+please install <code>mdbook</code> and <code>mdbook-mermaind</code> as follows.</p>
+<pre><code class="language-text">$ cargo install mdbook
+$ cargo install mdbook-mermaid
+</code></pre>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="build-and-test"><a class="header" href="#build-and-test">Build and Test</a></h1>
+<p>Build and test can be done by using <code>make</code> as follows.</p>
+<p>Build:</p>
+<pre><code class="language-text">$ make
+</code></pre>
+<p>Test:</p>
+<pre><code class="language-text">$ make test
+</code></pre>
+<p><code>make test</code> executes test codes in <a href="https://github.com/tier4/safe_drive/tree/main/tests">tests</a>,
+and codes in documentation comment.</p>
+<p><code>cargo test</code> may not work because it requires some environment variables
+and some code generation.
+Please see <a href="https://github.com/tier4/safe_drive/blob/main/Makefile">Makefile</a>.</p>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="editor-setting-up"><a class="header" href="#editor-setting-up">Editor setting-up</a></h1>
+<p><code>safe_drive</code> has features like <code>humble</code> or <code>galactic</code>, which indicates ROS2 version.
+We recommend pass one of a feature to enable editor's support.</p>
+<p>If you use ROS2 humble and Visual Studio Code,
+please add <code>humble</code> in <code>rust-analyzer -&gt; cargo -&gt; features</code> as follows.</p>
+<pre><code class="language-json">{
+    &quot;rust-analyzer.cargo.features&quot;: [
+        &quot;humble&quot;
+    ]
+}
+</code></pre>
+<p>Client applications not necessary to specify a feature of ROS2 version,
+because <a href="https://github.com/tier4/safe_drive/blob/main/build.rs">build.rs</a> detects
+ROS2 version from <code>ROS_DISTRO</code> environment variable.</p>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="generating-messages-included-by-safe_drive"><a class="header" href="#generating-messages-included-by-safe_drive">Generating messages included by safe_drive</a></h1>
+<p>For client applications, <code>safe_drive</code> provides a way to transpile from ROS2's .idl files to Rust crates by using <a href="https://github.com/tier4/safe_drive_msg">safe_drive_msg</a>.
+<code>safe_drive</code> itself includes ROS2's some basic messages to handle parameter
+servers.</p>
+<p>The basic messages can be generated by <a href="https://github.com/tier4/ros2msg_to_rs">ros2msg_to_rs</a>,
+and located in <a href="https://github.com/tier4/safe_drive/tree/main/src/msg">src/msg</a>.</p>
+<p><code>safe_drive</code> contains <a href="https://github.com/ros2/common_interfaces.git">common_interfaces</a>,
+<a href="https://github.com/ros2/unique_identifier_msgs.git">unique_identifier_msgs</a>,
+and <a href="https://github.com/ros2/rcl_interfaces.git">rcl_interfaces</a>.
+These messages can be transpiled as follows.
+<code>{safe_drive}</code> of the following means a directory path to <code>safe_drive</code>.</p>
+<pre><code class="language-text">$ git clone https://github.com/ros2/common_interfaces.git -b humble
+$ ros2msg_to_rs --disable-common-interfaces -s crate -i common_interfaces -o {safe_drive}/src/msg/humble/common_interfaces
+</code></pre>
+<pre><code class="language-text">$ mkdir ros2msg &amp;&amp; cd ros2msg
+$ git clone https://github.com/ros2/unique_identifier_msgs.git -b humble
+$ ros2msg_to_rs --disable-common-interfaces -s crate -i . -o {safe_drive}/src/msg/humble/ros2msg
+</code></pre>
+<pre><code class="language-text">$ git clone https://github.com/ros2/rcl_interfaces.git -b humble
+$ rm -rf rcl_interfaces/test_msgs rcl_interfaces/builtin_interfaces
+$ ros2msg_to_rs --disable-common-interfaces -s crate -i rcl_interfaces -o {safe_drive}/src/msg/humble/interfaces
+</code></pre>
+<p><code>-s crate</code> means <code>crate</code> is the name of top module.
+<code>-i</code> and <code>-o</code> means input and output directories.
+Because <code>safe_drive</code> defines <code>builtin_interfaces</code> internally, it must be removed before transpilation.</p>
+<p>To support newer version of ROS2, these files should be updated.</p>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="c-apis"><a class="header" href="#c-apis">C APIs</a></h1>
+<p>C APIs of ROS2 are defined in
+<a href="https://github.com/tier4/safe_drive/blob/main/src/msg/humble/runtime_c.rs">src/msg/humble/runtime_c.rs</a>
+and <a href="https://github.com/tier4/safe_drive/tree/main/src/rcl">src/rcl</a>.
+These files are generated by Make file in <a href="https://github.com/tier4/safe_drive/tree/main/supplements/bindgen">supplements/bindgen</a>.</p>
+<h2 id="mt-unsafe-apis"><a class="header" href="#mt-unsafe-apis">MT Unsafe APIs</a></h2>
+<p>MT unsafe APIs requires mutex to prevent data races.
+So, these MT unsafe APIs must be redefined in <code>MTUnsafeFn</code> in <a href="https://github.com/tier4/safe_drive/blob/main/src/rcl.rs">src/rcl.rs</a>.
+The redefined functions can be called via <code>rcl::MT_UNSAFE_FN</code>, which is a global variable, after locking.
+For example, <code>rcl::rcl_guard_condition_init()</code> are defined as follows.</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>pub(crate) static MT_UNSAFE_FN: Lazy&lt;Mutex&lt;MTUnsafeFn&gt;&gt; =
+    Lazy::new(|| Mutex::new(MTUnsafeFn::new()));
+
+pub(crate) struct MTUnsafeFn;
+
+impl MTUnsafeFn {
+    pub fn rcl_guard_condition_init(
+        &amp;self,
+        guard_condition: *mut rcl_guard_condition_t,
+        context: *mut rcl_context_t,
+        options: rcl_guard_condition_options_t,
+    ) -&gt; RCLResult&lt;()&gt; {
+        ret_val_to_err(unsafe { self::rcl_guard_condition_init(guard_condition, context, options) })
+    }
+}
+<span class="boring">}</span></code></pre></pre>
+<p>It can be called as follows.</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>let guard = rcl::MT_UNSAFE_FN.lock();
+guard.rcl_guard_condition_init(
+    &amp;mut guard_condition,
+    unsafe { context.as_ptr_mut() },
+    rcl::rcl_guard_condition_options_t { allocator },
+)?;
+<span class="boring">}</span></code></pre></pre>
+<h2 id="mt-safe-apis"><a class="header" href="#mt-safe-apis">MT Safe APIs</a></h2>
+<p>MT safe APIs are redefined in <code>MTSafeFn</code> in <a href="https://github.com/tier4/safe_drive/blob/main/src/rcl.rs">src/rcl.rs</a>.
+For example, <code>rcl::rcl_shutdown()</code> is defined as follows.</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>pub(crate) struct MTSafeFn;
+
+impl MTSafeFn {
+    pub fn rcl_shutdown(context: *mut rcl_context_t) -&gt; RCLResult&lt;()&gt; {
+        ret_val_to_err(unsafe { self::rcl_shutdown(context) })
+    }
+}
+<span class="boring">}</span></code></pre></pre>
+<p>It can be called without lock as follows.</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>rcl::MTSafeFn::rcl_shutdown(&amp;mut self.context).unwrap();
+<span class="boring">}</span></code></pre></pre>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="documentation"><a class="header" href="#documentation">Documentation</a></h1>
+<p>You can contribute to documents you are reading now.
+Documents are written in Markdown and located in <a href="https://github.com/tier4/safe_drive/tree/main/mdbook">mdbook</a>.
+These Markdown files are compiled to HTML files and located in <a href="https://github.com/tier4/safe_drive/tree/main/docs">docs</a>,
+and published at <a href="https://tier4.github.io/safe_drive/">https://tier4.github.io/safe_drive/</a>.</p>
+<p>You can use (Mermaid)[https://mermaid.js.org/#/] notation in Markdown as follows.</p>
+<pre class="mermaid">graph TD;
+    A--&gt;B;
+    A--&gt;C;
+    B--&gt;D;
+    C--&gt;D;
+</pre>
+<p>The compilation can be done by <code>make</code> as follows.</p>
+<pre><code class="language-text">$ make doc
+</code></pre>
+<p>We are not native English speaker.
+So, we need your help to improve documents!</p>
 
                     </main>
 

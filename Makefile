@@ -24,7 +24,7 @@ check:
 clippy:
 	cargo clippy
 
-doc:
+doc: FORCE
 	$(MAKE) -C mdbook
 	cargo doc
 
