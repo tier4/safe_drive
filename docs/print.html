@@ -9,7 +9,6 @@
 
         <!-- Custom HTML head -->
         
-        <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
         <meta name="description" content="">
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <meta name="theme-color" content="#ffffff" />
@@ -35,13 +34,13 @@
     </head>
     <body>
         <!-- Provide site root to javascript -->
-        <script type="text/javascript">
+        <script>
             var path_to_root = "";
             var default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "navy" : "light";
         </script>
 
         <!-- Work around some values being stored in localStorage wrapped in quotes -->
-        <script type="text/javascript">
+        <script>
             try {
                 var theme = localStorage.getItem('mdbook-theme');
                 var sidebar = localStorage.getItem('mdbook-sidebar');
@@ -57,7 +56,7 @@
         </script>
 
         <!-- Set the theme before any content is loaded, prevents flash -->
-        <script type="text/javascript">
+        <script>
             var theme;
             try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
             if (theme === null || theme === undefined) { theme = default_theme; }
@@ -69,7 +68,7 @@
         </script>
 
         <!-- Hide / unhide sidebar before it is displayed -->
-        <script type="text/javascript">
+        <script>
             var html = document.querySelector('html');
             var sidebar = 'hidden';
             if (document.body.clientWidth >= 1080) {
@@ -100,7 +99,7 @@
                             <i class="fa fa-paint-brush"></i>
                         </button>
                         <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
-                            <li role="none"><button role="menuitem" class="theme" id="light">Light (default)</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light</button></li>
                             <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
                             <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
                             <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
@@ -133,7 +132,7 @@
                 </div>
 
                 <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
-                <script type="text/javascript">
+                <script>
                     document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
                     document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
                     Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
@@ -345,16 +344,14 @@ fn main() -&gt; Result&lt;(), DynError&gt; {
         cnt += 1;
         std::thread::sleep(Duration::from_secs(1));
     }
-}
-</code></pre></pre>
+}</code></pre></pre>
 <h4 id="my_talker-in-detail"><a class="header" href="#my_talker-in-detail">my_talker in Detail</a></h4>
 <p><code>create_node</code> creates a node.</p>
 <pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
 </span><span class="boring">fn main() {
 </span>// Create a node.
 let node = ctx.create_node(&quot;my_talker&quot;, None, Default::default())?;
-<span class="boring">}
-</span></code></pre></pre>
+<span class="boring">}</span></code></pre></pre>
 <p>The arguments indicate as follows.</p>
 <ul>
 <li><code>&quot;my_talker&quot;</code> : the name of the node.</li>
@@ -371,8 +368,7 @@ let node = ctx.create_node(&quot;my_talker&quot;, None, Default::default())?;
 </span><span class="boring">fn main() {
 </span>// Create a publisher.
 let publisher = node.create_publisher::&lt;std_msgs::msg::String&gt;(&quot;my_topic&quot;, None)?;
-<span class="boring">}
-</span></code></pre></pre>
+<span class="boring">}</span></code></pre></pre>
 <ul>
 <li><code>&lt;std_msgs::msg::String&gt;</code> : the publisher can send values of <code>std_msgs::msg::String</code>.</li>
 <li><code>&quot;my_topic&quot;</code> : the topic name to which the publisher send messages.</li>
@@ -387,23 +383,20 @@ msg.data.assign(&amp;data);
 
 // Send a message.
 publisher.send(&amp;msg)?;
-<span class="boring">}
-</span></code></pre></pre>
+<span class="boring">}</span></code></pre></pre>
 <p><code>Logger</code> is used to print some messages.
 It can be created as follows.</p>
 <pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
 </span><span class="boring">fn main() {
 </span>// Create a logger.
 let logger = Logger::new(&quot;my_talker&quot;);
-<span class="boring">}
-</span></code></pre></pre>
+<span class="boring">}</span></code></pre></pre>
 <p>The argument of <code>&quot;my_talker&quot;</code> is the name of the logger.
 To print a message, use <code>pr_*</code> macros as follows.</p>
 <pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
 </span><span class="boring">fn main() {
 </span>pr_info!(logger, &quot;send: {}&quot;, msg.data); // Print log.
-<span class="boring">}
-</span></code></pre></pre>
+<span class="boring">}</span></code></pre></pre>
 <p>There are macros for logging as follows.</p>
 <ul>
 <li><code>pr_debug!</code> : debug</li>
@@ -517,8 +510,7 @@ fn main() -&gt; Result&lt;(), DynError&gt; {
     loop {
         selector.wait()?;
     }
-}
-</code></pre></pre>
+}</code></pre></pre>
 <h4 id="my_listener-in-detail"><a class="header" href="#my_listener-in-detail"><code>my_listener</code> in Detail</a></h4>
 <p>Similar to the publisher,
 <code>create_subscriber</code> creates a subscriber.</p>
@@ -526,8 +518,7 @@ fn main() -&gt; Result&lt;(), DynError&gt; {
 </span><span class="boring">fn main() {
 </span>// Create a subscriber.
 let subscriber = node.create_subscriber::&lt;std_msgs::msg::String&gt;(&quot;my_topic&quot;, None)?;
-<span class="boring">}
-</span></code></pre></pre>
+<span class="boring">}</span></code></pre></pre>
 <p>The arguments are as follows.</p>
 <ul>
 <li><code>&quot;my_topic&quot;</code> : the name of the topic to which the subscriber is subscribing.</li>
@@ -555,8 +546,7 @@ selector.add_subscriber(
 loop {
     selector.wait()?;
 }
-<span class="boring">}
-</span></code></pre></pre>
+<span class="boring">}</span></code></pre></pre>
 <p>The arguments of <code>add_subscriber</code> method are as follows.</p>
 <ul>
 <li><code>subscriber</code> : the subscriber.</li>
@@ -673,8 +663,7 @@ fn main() -&gt; Result&lt;(), DynError&gt; {
     loop {
         selector.wait()?;
     }
-}
-</code></pre></pre>
+}</code></pre></pre>
 <p>Timers can be set by a method of selector as follows,
 and the timers will be invoked when calling the <code>Selector::wait()</code> methods.</p>
 <pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
@@ -689,8 +678,7 @@ and the timers will be invoked when calling the <code>Selector::wait()</code> me
         pr_info!(logger1, &quot;send: msg.data = {}&quot;, msg.data);
     }),
 );
-<span class="boring">}
-</span></code></pre></pre>
+<span class="boring">}</span></code></pre></pre>
 <ul>
 <li><code>&quot;publisher&quot;</code> is the name of this timer. The name is used for statistics. You can use any name.</li>
 <li><code>Duration::from_secs(1)</code> is the duration for periodic invoking. This argument means the callback function is invoked every 1 second.</li>
@@ -752,8 +740,7 @@ pub fn main() -&gt; Result&lt;(), DynError&gt; {
 
         selector.wait()?;
     }
-}
-</code></pre></pre>
+}</code></pre></pre>
 <p><code>Selector::add_timer()</code> does not take the name,
 but other arguments are same as <code>Selector::add_wall_timer()</code>.</p>
 <pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
@@ -762,8 +749,7 @@ but other arguments are same as <code>Selector::add_wall_timer()</code>.</p>
     Duration::from_secs(2),
     Box::new(move || ...),
 );
-<span class="boring">}
-</span></code></pre></pre>
+<span class="boring">}</span></code></pre></pre>
 <ul>
 <li><code>Duration::from_secs(2)</code> is a duration indicating when the timer will be invoked.</li>
 <li><code>Box::new(move || ...)</code> is the callback function.</li>
@@ -785,8 +771,7 @@ loop {
 
     selector.wait()?;
 }
-<span class="boring">}
-</span></code></pre></pre>
+<span class="boring">}</span></code></pre></pre>
 <p>The important thing is that the borrowed resources must be released.
 To release definitely, the code fraction borrowing the <code>queue</code> is surrounded by braces.</p>
 <p>The following is a execution result of this code.</p>
@@ -921,8 +906,7 @@ async fn main() -&gt; Result&lt;(), DynError&gt; {
     task2.await;
 
     Ok(())
-}
-</code></pre></pre>
+}</code></pre></pre>
 <p>The <code>async_std::task::spawn</code> creates a asynchronous task,
 which is similar to a thread.
 The following is a excerpt creating a task which sends &quot;Hello, World!&quot;
@@ -938,8 +922,7 @@ let task1 = async_std::task::spawn(async move {
         async_std::task::sleep(Duration::from_millis(500)).await; // Sleep 500ms.
     }
 });
-<span class="boring">}
-</span></code></pre></pre>
+<span class="boring">}</span></code></pre></pre>
 <p>This excerpt sends a message by <code>Publisher::send</code> and sleep by <code>async_std::task::sleep</code>.
 Note that this uses <code>async_std::task::sleep</code> instead of <code>std::thread::sleep</code>,
 because the former is non-blocking but the the latter is blocking.
@@ -980,8 +963,7 @@ async fn receiver(mut subscriber: Subscriber&lt;std_msgs::msg::String&gt;) -&gt;
         let msg = subscriber.recv().await?;
         pr_info!(logger, &quot;{}&quot;, msg.data);
     }
-}
-</code></pre></pre>
+}</code></pre></pre>
 <p><code>Subscriber::recv</code> is an asynchronous function to receive a message.
 To receive asynchronously, use the <code>.await</code> keyword.
 If there is a message to be received, <code>recv().await</code> returns the message immediately.
@@ -1012,8 +994,7 @@ async fn receiver(mut subscriber: Subscriber&lt;std_msgs::msg::String&gt;) -&gt;
 
     Ok(())
 }
-<span class="boring">}
-</span></code></pre></pre>
+<span class="boring">}</span></code></pre></pre>
 <p><code>async_std::timeout</code> is a function to represent timeout.
 <code>timeout(Duration::from_secs(3), subscriber.recv()).await</code> calls <code>subscriber.recv()</code> asynchronously,
 but it will be timed out after 3s later.</p>
@@ -1217,8 +1198,7 @@ pub struct MyMsg {
     pub five_integers_array: [i32; 5],
     pub up_to_five_integers_array: safe_drive::msg::I32Seq&lt;5&gt;,
 }
-<span class="boring">}
-</span></code></pre></pre>
+<span class="boring">}</span></code></pre></pre>
 <pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
 </span><span class="boring">fn main() {
 </span>// /tmp/safe_drive_tutorial/msgtest/my_interfaces/src/msg/my_msgs.rs
@@ -1228,8 +1208,7 @@ pub struct MyMsgs {
     pub msg1: crate::msg::my_msg::MyMsg,
     pub msg2: crate::msg::my_msg::MyMsg,
 }
-<span class="boring">}
-</span></code></pre></pre>
+<span class="boring">}</span></code></pre></pre>
 <h3 id="edit-talkersrcmainrs"><a class="header" href="#edit-talkersrcmainrs">Edit <code>talker/src/main.rs</code></a></h3>
 <p>If you want to know how to implement a subscriber or a publisher, please see <a href="./pubsub.html">a tutorial of Pub/Sub</a>. This section describes how to handle a messages generated by <code>ros2msg_to_rs</code>.</p>
 <pre><pre class="playground"><code class="language-rust">// msgtest/src/talker/src/main.rs
@@ -1301,8 +1280,7 @@ fn create_message() -&gt; Result&lt;my_interfaces::msg::MyMsg, DynError&gt; {
     my_msg.up_to_five_integers_array = msgs;
 
     Ok(my_msg)
-}
-</code></pre></pre>
+}</code></pre></pre>
 <p>Primitive types and arrays can be handles in the ordinary way of Rust as follows.</p>
 <pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
 </span><span class="boring">fn main() {
@@ -1314,8 +1292,7 @@ my_msg.five_integers_array[1] = 13;
 my_msg.five_integers_array[2] = 49;
 my_msg.five_integers_array[3] = 55;
 my_msg.five_integers_array[4] = 19;
-<span class="boring">}
-</span></code></pre></pre>
+<span class="boring">}</span></code></pre></pre>
 <p>To access elements of unbounded or bounded arrays,
 we can use <code>as_slice_mut()</code> or <code>as_slice()</code> methods as follows.</p>
 <pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
@@ -1323,8 +1300,7 @@ we can use <code>as_slice_mut()</code> or <code>as_slice()</code> methods as fol
 </span>// unbounded or unbounded array
 let mut msgs = I32Seq::new(3).unwrap();
 let ref_msgs = msgs.as_slice_mut();
-<span class="boring">}
-</span></code></pre></pre>
+<span class="boring">}</span></code></pre></pre>
 <p><code>as_slice_mut()</code> returns a mutable slice,
 you can thus update the elements of the array via the slice.</p>
 <h2 id="listener"><a class="header" href="#listener">Listener</a></h2>
@@ -1415,8 +1391,7 @@ fn main() -&gt; Result&lt;(), DynError&gt; {
     loop {
         selector.wait()?;
     }
-}
-</code></pre></pre>
+}</code></pre></pre>
 <h2 id="compilation-and-execution"><a class="header" href="#compilation-and-execution">Compilation and Execution</a></h2>
 <p>Now, we can compile and execute the talker and listener. Let's do it!</p>
 <h3 id="compile"><a class="header" href="#compile">Compile</a></h3>
@@ -1493,8 +1468,7 @@ pub struct MyMsgStr {
     pub dynamic_array_bounded_str: safe_drive::msg::RosStringSeq&lt;10, 0&gt;,
     pub bounded_array_bounded_str: safe_drive::msg::RosStringSeq&lt;10, 3&gt;,
 }
-<span class="boring">}
-</span></code></pre></pre>
+<span class="boring">}</span></code></pre></pre>
 <p>To access to elements of string arrays,
 we can use <code>as_slice_mut()</code> or <code>as_slice_mut()</code> as follows.</p>
 <pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
@@ -1548,8 +1522,7 @@ we can use <code>as_slice_mut()</code> or <code>as_slice_mut()</code> as follows
 
     Ok(my_msg)
 }
-<span class="boring">}
-</span></code></pre></pre>
+<span class="boring">}</span></code></pre></pre>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="service"><a class="header" href="#service">Service</a></h1>
 <p><a href="https://github.com/tier4/safe_drive_tutorial/tree/main/srvtest">Source code</a>.</p>
 <p>A service is a communication consisting requests and responses.
@@ -1677,8 +1650,7 @@ impl ServiceMsg for AddTwoInts {
         }
     }
 }
-<span class="boring">}
-</span></code></pre></pre>
+<span class="boring">}</span></code></pre></pre>
 <p><code>struct AddTwoInts</code> implements <code>ServiceMsg trait</code>.
 <code>ServiceMsg::Request</code> and <code>ServiceMsg::Response</code> are types of request and response, respectively.
 <code>AddTwoInts_Request</code> and <code>AddTowInts_Response</code> are as follows.</p>
@@ -1696,8 +1668,7 @@ pub struct AddTwoInts_Request {
 pub struct AddTwoInts_Response {
     pub result: u32,
 }
-<span class="boring">}
-</span></code></pre></pre>
+<span class="boring">}</span></code></pre></pre>
 <h3 id="edit-serversrcmainrs"><a class="header" href="#edit-serversrcmainrs">Edit <code>server/src/main.rs</code></a></h3>
 <p>You have to create a server by <code>create_server()</code> method and register a callback function to a selector as follows.</p>
 <pre><pre class="playground"><code class="language-rust">use safe_drive::{context::Context, error::DynError, logger::Logger, pr_error, qos::Profile};
@@ -1732,15 +1703,13 @@ fn main() -&gt; Result&lt;(), DynError&gt; {
     loop {
         selector.wait()?; // Spin.
     }
-}
-</code></pre></pre>
+}</code></pre></pre>
 <p>Let's dig into detail.</p>
 <pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
 </span><span class="boring">fn main() {
 </span>// Create a server.
 let server = node.create_server::&lt;AddTwoInts&gt;(&quot;my_service&quot;, Some(Profile::default()))?;
-<span class="boring">}
-</span></code></pre></pre>
+<span class="boring">}</span></code></pre></pre>
 <p><code>AddTwoInts</code> of <code>create_server::&lt;AddTwoInts&gt;</code> indicates the protocol of the server.
 The arguments of <code>&quot;my_service&quot;</code> and <code>Some(Profile::default())</code> are the service name and QoS.
 If you pass <code>None</code> instead of <code>Some(Profile::default())</code>, <code>Profile::default()</code> is used.</p>
@@ -1756,8 +1725,7 @@ If you pass <code>None</code> instead of <code>Some(Profile::default())</code>, 
         response
     }),
 );
-<span class="boring">}
-</span></code></pre></pre>
+<span class="boring">}</span></code></pre></pre>
 <p>The callback function must take a message sent by a client and a header including sequence number, time, etc.
 <code>msg</code>'s types is <code>AddTwoInts_Request</code> and a value of <code>AddTwoInts_Response</code>, which is a response, must be returned.</p>
 <h2 id="client"><a class="header" href="#client">Client</a></h2>
@@ -1849,8 +1817,7 @@ async fn main() -&gt; Result&lt;(), DynError&gt; {
 
         tokio::time::sleep(Duration::from_secs(1)).await;
     }
-}
-</code></pre></pre>
+}</code></pre></pre>
 <p>Because a response will be never returned,
 we use <code>tokio::time::timeout</code> to receive a response.
 <code>timeout(Duration::from_secs(1), &amp;mut receiver).await</code>
@@ -1890,8 +1857,7 @@ and it can be used for the server as follows.</p>
 <pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
 </span><span class="boring">fn main() {
 </span>async { server.recv().await };
-<span class="boring">}
-</span></code></pre></pre>
+<span class="boring">}</span></code></pre></pre>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="parameter"><a class="header" href="#parameter">Parameter</a></h1>
 <p><a href="https://github.com/tier4/safe_drive_tutorial/tree/main/params">Source code</a>.</p>
 <p>This chapter introduces how to use parameters.
@@ -1948,8 +1914,7 @@ let's see types of parameters.</p>
     VecF64(Vec&lt;f64&gt;),
     VecString(Vec&lt;String&gt;),
 }
-<span class="boring">}
-</span></code></pre></pre>
+<span class="boring">}</span></code></pre></pre>
 <p>This means that <code>i64</code> is valid,
 but <code>i8</code>, <code>i32</code>, and other user defined types are invalid.</p>
 <p>A parameter is associated with a descriptor of <code>safe_drive::parameter::Descriptor</code> as follows.</p>
@@ -1963,8 +1928,7 @@ but <code>i8</code>, <code>i32</code>, and other user defined types are invalid.
     pub floating_point_range: Option&lt;FloatingPointRange&gt;,
     pub integer_range: Option&lt;IntegerRange&gt;,
 }
-<span class="boring">}
-</span></code></pre></pre>
+<span class="boring">}</span></code></pre></pre>
 <p>So, a parameter and parameters can be represented by <code>safe_drive::parameter::{Parameter, Parameters}</code> as follows.</p>
 <pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
 </span><span class="boring">fn main() {
@@ -1974,8 +1938,7 @@ but <code>i8</code>, <code>i32</code>, and other user defined types are invalid.
 }
 
 pub struct Parameters { /* omitted private fields */ }
-<span class="boring">}
-</span></code></pre></pre>
+<span class="boring">}</span></code></pre></pre>
 <p>and a parameter server can be represented by
 <code>safe_drive::parameter::ParameterServer</code> as follows.</p>
 <pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
@@ -1984,8 +1947,7 @@ pub struct Parameters { /* omitted private fields */ }
     pub params: Arc&lt;RwLock&lt;Parameters&gt;&gt;
     // omitted private fields
 }
-<span class="boring">}
-</span></code></pre></pre>
+<span class="boring">}</span></code></pre></pre>
 <p>In summary, a parameter server can be represented as follows.</p>
 <pre class="mermaid">graph TD;
     ParameterServer --&gt; Parameters;
@@ -2056,16 +2018,14 @@ fn main() -&gt; Result&lt;(), DynError&gt; {
     loop {
         selector.wait()?;
     }
-}
-</code></pre></pre>
+}</code></pre></pre>
 <h3 id="param_server-in-detail"><a class="header" href="#param_server-in-detail"><code>param_server</code> in Detail</a></h3>
 <p>First of all, we have to create a parameter server by <code>create_parameter_server()</code> method as follows.</p>
 <pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
 </span><span class="boring">fn main() {
 </span>// Create a parameter server.
 let param_server = node.create_parameter_server()?;
-<span class="boring">}
-</span></code></pre></pre>
+<span class="boring">}</span></code></pre></pre>
 <p>Then set parameters as follows.
 To update parameters, we have to acquire a write lock
 for mutual exclusion by <code>write()</code> method.</p>
@@ -2091,8 +2051,7 @@ for mutual exclusion by <code>write()</code> method.</p>
         Some(&quot;my dynamic type flag's description&quot;.to_string()), // description
     )?;
 }
-<span class="boring">}
-</span></code></pre></pre>
+<span class="boring">}</span></code></pre></pre>
 <p>To set a statically typed parameters, use <code>set_parameter()</code>.
 A statically typed parameter cannot be updated
 by a value whose type is different from original type.</p>
@@ -2120,8 +2079,7 @@ selector.add_parameter_server(
 loop {
     selector.wait()?;
 }
-<span class="boring">}
-</span></code></pre></pre>
+<span class="boring">}</span></code></pre></pre>
 <p>1st argument of the closure, <code>params</code>, is a value of parameters,
 and 2nd argument, <code>updated</code> is a value containing updated parameters.</p>
 <h3 id="execute-param_server"><a class="header" href="#execute-param_server">Execute <code>param_server</code></a></h3>
@@ -2205,8 +2163,7 @@ async fn main() -&gt; Result&lt;(), DynError&gt; {
         }
         pr_info!(logger, &quot;updated parameters: {keys}&quot;);
     }
-}
-</code></pre></pre>
+}</code></pre></pre>
 <p>Important things are only following 2 lines.</p>
 <pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
 </span><span class="boring">fn main() {
@@ -2214,8 +2171,7 @@ async fn main() -&gt; Result&lt;(), DynError&gt; {
 let updated = param_server.wait().await?;
 
 let params = param_server.params.read(); // Read lock
-<span class="boring">}
-</span></code></pre></pre>
+<span class="boring">}</span></code></pre></pre>
 <p>To wait updating, use <code>wait().await</code>
 and acquire a read lock by <code>read()</code> method
 to read parameters.
@@ -2283,8 +2239,7 @@ fn main() -&gt; Result&lt;(), Box&lt;dyn Error + Sync + Send + 'static&gt;&gt; {
     selector.wait()?;
 
     Ok(())
-}
-</code></pre></pre>
+}</code></pre></pre>
 <p>The important thing is using <code>borrow_loaned_message()</code> and <code>send_loaned()</code> methods as follows.</p>
 <pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
 </span><span class="boring">fn main() {
@@ -2292,8 +2247,7 @@ fn main() -&gt; Result&lt;(), Box&lt;dyn Error + Sync + Send + 'static&gt;&gt; {
 *loaned = std_msgs::msg::Bool::new().ok_or(&quot;failed to new Bool&quot;)?;
 loaned.data = false;
 publisher.send_loaned(loaned)?; // send message
-<span class="boring">}
-</span></code></pre></pre>
+<span class="boring">}</span></code></pre></pre>
 <p><code>borrow_loaned_message()</code> borrows a memory region from CycloneDDS and
 <code>send_loaned()</code> sends a message in the borrowed region.
 <code>safe_drive</code> automatically check whether zero copy is available or not,
@@ -2327,6 +2281,14 @@ It can be launched as follows.</p>
 </code></pre>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="custom-memory-allocator"><a class="header" href="#custom-memory-allocator">Custom Memory Allocator</a></h1>
 <p>Under construction.</p>
+<pre><code class="language-text">$ mkdir custom_alloc
+$ cargo new forwarder
+$ cargo new requester
+</code></pre>
+<pre><code class="language-text">$ cat Cargo.toml
+[workspace]
+members = [&quot;requester&quot;, &quot;forwarder&quot;]
+</code></pre>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="request-to-server-in-callback"><a class="header" href="#request-to-server-in-callback">Request to Server in Callback</a></h1>
 <p><a href="https://github.com/tier4/safe_drive_tutorial/tree/main/pubsubsrv">Source code</a>.</p>
 <p>In this chapter, we will introduce how to access a server in a callback function.
@@ -2408,8 +2370,7 @@ fn worker(
     loop {
         selector.wait()?;
     }
-}
-</code></pre></pre>
+}</code></pre></pre>
 <h2 id="in-detail"><a class="header" href="#in-detail">in Detail</a></h2>
 <p>The important pieces are as follows.
 This code create 2 selectors first.
@@ -2419,8 +2380,7 @@ This code create 2 selectors first.
 </span>// Create 2 selectors.
 let selector = ctx.create_selector()?;
 let selector_client = ctx.create_selector()?;
-<span class="boring">}
-</span></code></pre></pre>
+<span class="boring">}</span></code></pre></pre>
 <p>In the callback function, <code>recv_timeout()</code> method, which takes
 <code>selector_client</code>, is used as follows.</p>
 <pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
@@ -2440,8 +2400,7 @@ match receiver.recv_timeout(Duration::from_millis(20), &amp;mut selector_client)
         panic!()
     }
 }
-<span class="boring">}
-</span></code></pre></pre>
+<span class="boring">}</span></code></pre></pre>
 <p>In this callback function,
 it sends a request to the server and receives a response
 by <code>recv_timeout()</code> method.</p>
@@ -2458,8 +2417,7 @@ At that time, it must be <code>Send</code> state.</p>
 <pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
 </span><span class="boring">fn main() {
 </span>let mut client = Some(client); // Send state.
-<span class="boring">}
-</span></code></pre></pre>
+<span class="boring">}</span></code></pre></pre>
 <p><code>send()</code> method consumes the client and returns
 <code>receiver</code>.
 It means the state is changed from Send to Receive.</p>
@@ -2467,8 +2425,7 @@ It means the state is changed from Send to Receive.</p>
 </span><span class="boring">fn main() {
 </span>let c = client.take().unwrap();
 let receiver = c.send(&amp;request).unwrap(); // Change state from Send to Receive.
-<span class="boring">}
-</span></code></pre></pre>
+<span class="boring">}</span></code></pre></pre>
 <p><code>recv_timeout()</code> also consumes <code>receiver</code> and returns a new client
 to send a new request if it successfully receives a response.</p>
 <pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
@@ -2485,8 +2442,7 @@ match receiver.recv_timeout(Duration::from_millis(20), &amp;mut selector_client)
         panic!()
     }
 }
-<span class="boring">}
-</span></code></pre></pre>
+<span class="boring">}</span></code></pre></pre>
 <p>When it has timed out, you can choose retrying or giving up.
 This code chooses giving up by <code>give_up()</code> method.
 <code>give_up()</code> methods consumes a receiver and return a new
@@ -2494,7 +2450,14 @@ client to send a new request.</p>
 <p>This code will work, but we think using async/await is better than this because it is designed for asynchronous programming.
 I recommend to rewrite this code by using async/await.</p>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="contribution-guide"><a class="header" href="#contribution-guide">Contribution Guide</a></h1>
-<p>Under construction.</p>
+<ul>
+<li><a href="./setup_contribution.html">Setting-up for contribution</a></li>
+<li><a href="./build_and_test.html">Build and test</a></li>
+<li><a href="./editor_setup.html">Editor setting-up</a></li>
+<li><a href="./internal_msgs.html">Generating messages included by safe_drive</a></li>
+<li><a href="./c_apis.html">C APIs</a></li>
+<li><a href="./document.html">Documentation</a></li>
+</ul>
 
                     </main>
 
@@ -2516,24 +2479,24 @@ I recommend to rewrite this code by using async/await.</p>
 
 
 
-        <script type="text/javascript">
+        <script>
             window.playground_copyable = true;
         </script>
 
 
-        <script src="elasticlunr.min.js" type="text/javascript" charset="utf-8"></script>
-        <script src="mark.min.js" type="text/javascript" charset="utf-8"></script>
-        <script src="searcher.js" type="text/javascript" charset="utf-8"></script>
+        <script src="elasticlunr.min.js"></script>
+        <script src="mark.min.js"></script>
+        <script src="searcher.js"></script>
 
-        <script src="clipboard.min.js" type="text/javascript" charset="utf-8"></script>
-        <script src="highlight.js" type="text/javascript" charset="utf-8"></script>
-        <script src="book.js" type="text/javascript" charset="utf-8"></script>
+        <script src="clipboard.min.js"></script>
+        <script src="highlight.js"></script>
+        <script src="book.js"></script>
 
         <!-- Custom JS scripts -->
-        <script type="text/javascript" src="mermaid.min.js"></script>
-        <script type="text/javascript" src="mermaid-init.js"></script>
+        <script src="mermaid.min.js"></script>
+        <script src="mermaid-init.js"></script>
 
-        <script type="text/javascript">
+        <script>
         window.addEventListener('load', function() {
             window.setTimeout(window.print, 100);
         });

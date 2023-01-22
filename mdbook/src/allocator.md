@@ -13,7 +13,3 @@ $ cat Cargo.toml
 [workspace]
 members = ["requester", "forwarder"]
 ```
-
-```text
-
-```

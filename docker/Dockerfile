@@ -25,7 +25,8 @@ RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
 RUN . /root/.cargo/env && \
     cargo install bindgen-cli && \
     cargo install mdbook && \
-    cargo install mdbook-mermaid
+    cargo install mdbook-mermaid && \
+    cargo install --git https://github.com/tier4/ros2msg_to_rs.git
 
 RUN pip install git+https://github.com/tier4/colcon-cargo.git && \
     pip install git+https://github.com/colcon/colcon-ros-cargo.git

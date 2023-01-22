@@ -19,7 +19,7 @@
 //!
 //! ## runtime_c.rs
 //!
-//! See [Makefile](https://github.com/tier4/safe_drive/blob/main/supplements/bindgen/Makefile) in supplements.
+//! See [Makefile](https://github.com/tier4/safe_drive/blob/main/supplements/bindgen/Makefile.galactic) in supplements.
 
 pub mod common_interfaces;
 pub mod interfaces;
