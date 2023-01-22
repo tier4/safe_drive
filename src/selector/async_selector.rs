@@ -67,8 +67,6 @@ impl AsyncSelector {
 
             yield_now();
             let _ = th.join();
-
-            // std::thread::sleep(Duration::from_millis(10));
         }
 
         Ok(())

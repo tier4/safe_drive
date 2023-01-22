@@ -163,6 +163,7 @@ use crate::{
     subscriber_loaned_message::SubscriberLoanedMessage,
     PhantomUnsync, RecvResult,
 };
+use pin_project::{pin_project, pinned_drop};
 use std::{
     ffi::CString,
     future::Future,
@@ -377,6 +378,7 @@ impl<T: TypeSupport> Subscriber<T> {
 }
 
 /// Asynchronous receiver of subscribers.
+#[pin_project(PinnedDrop)]
 pub struct AsyncReceiver<'a, T> {
     subscription: &'a mut Arc<RCLSubscription>,
     is_waiting: bool,
@@ -391,13 +393,13 @@ impl<'a, T> Future for AsyncReceiver<'a, T> {
             return Poll::Ready(Err(Signaled.into()));
         }
 
-        let s = self.subscription.clone();
+        let this = self.project();
 
-        let (is_waiting, subscription) = unsafe {
-            let this = self.get_unchecked_mut();
-            (&mut this.is_waiting, &this.subscription)
-        };
-        *is_waiting = false;
+        let s = this.subscription.clone();
+
+        // let is_waiting = this.is_waiting;
+        // let subscription = this.subscription;
+        *this.is_waiting = false;
 
         #[cfg(feature = "rcl_stat")]
         let start = std::time::SystemTime::now();
@@ -418,9 +420,9 @@ impl<'a, T> Future for AsyncReceiver<'a, T> {
                 let mut waker = Some(cx.waker().clone());
 
                 guard.send_command(
-                    &subscription.node.context,
+                    &this.subscription.node.context,
                     async_selector::Command::Subscription(
-                        (*subscription).clone(),
+                        this.subscription.clone(),
                         Box::new(move || {
                             let w = waker.take();
                             w.unwrap().wake();
@@ -429,7 +431,7 @@ impl<'a, T> Future for AsyncReceiver<'a, T> {
                     ),
                 )?;
 
-                *is_waiting = true;
+                *this.is_waiting = true;
                 Poll::Pending
             }
             Err(e) => Poll::Ready(Err(e.into())), // error
@@ -437,8 +439,9 @@ impl<'a, T> Future for AsyncReceiver<'a, T> {
     }
 }
 
-impl<'a, T> Drop for AsyncReceiver<'a, T> {
-    fn drop(&mut self) {
+#[pinned_drop]
+impl<'a, T> PinnedDrop for AsyncReceiver<'a, T> {
+    fn drop(self: Pin<&mut Self>) {
         if self.is_waiting {
             let mut guard = SELECTOR.lock();
             let _ = guard.send_command(
@@ -469,7 +472,7 @@ impl Options {
     }
 }
 
-/// A smart pointer for the message taken from the topic with `rcl_take` or `rcl_take_loaned_message`. 
+/// A smart pointer for the message taken from the topic with `rcl_take` or `rcl_take_loaned_message`.
 pub enum TakenMsg<T> {
     Copied(T),
     Loaned(SubscriberLoanedMessage<T>),

@@ -103,8 +103,9 @@ use crate::{
     signal_handler::Signaled,
     PhantomUnsync, RecvResult,
 };
+use pin_project::{pin_project, pinned_drop};
 use std::{
-    ffi::CString, future::Future, marker::PhantomData, mem::MaybeUninit, os::raw::c_void,
+    ffi::CString, future::Future, marker::PhantomData, mem::MaybeUninit, os::raw::c_void, pin::Pin,
     sync::Arc, task::Poll,
 };
 
@@ -385,6 +386,7 @@ fn rcl_take_request_with_info<T>(
 }
 
 /// Receiver to receive a request asynchronously.
+#[pin_project(PinnedDrop)]
 #[must_use]
 pub struct AsyncReceiver<T> {
     server: Server<T>,
@@ -402,16 +404,18 @@ impl<T: ServiceMsg> Future for AsyncReceiver<T> {
             return Poll::Ready(Err(Signaled.into()));
         }
 
-        let (server, is_waiting) = unsafe {
-            let this = self.get_unchecked_mut();
-            (&this.server, &mut this.is_waiting)
-        };
-        *is_waiting = false;
+        let this = self.project();
 
-        match rcl_take_request_with_info::<<T as ServiceMsg>::Request>(&server.data.service) {
+        // let (server, is_waiting) = unsafe {
+        //     let this = self.get_unchecked_mut();
+        //     (&this.server, &mut this.is_waiting)
+        // };
+        *this.is_waiting = false;
+
+        match rcl_take_request_with_info::<<T as ServiceMsg>::Request>(&this.server.data.service) {
             Ok((request, header)) => Poll::Ready(Ok((
                 ServerSend {
-                    data: server.data.clone(),
+                    data: this.server.data.clone(),
                     request_id: header.request_id,
                     _phantom: Default::default(),
                     _unsync: Default::default(),
@@ -423,9 +427,9 @@ impl<T: ServiceMsg> Future for AsyncReceiver<T> {
                 let mut waker = Some(cx.waker().clone());
                 let mut guard = SELECTOR.lock();
                 if let Err(e) = guard.send_command(
-                    &server.data.node.context,
+                    &this.server.data.node.context,
                     async_selector::Command::Server(
-                        server.data.clone(),
+                        this.server.data.clone(),
                         Box::new(move || {
                             let w = waker.take().unwrap();
                             w.wake();
@@ -436,7 +440,7 @@ impl<T: ServiceMsg> Future for AsyncReceiver<T> {
                     return Poll::Ready(Err(e));
                 }
 
-                *is_waiting = true;
+                *this.is_waiting = true;
                 Poll::Pending
             }
             Err(e) => Poll::Ready(Err(e.into())),
@@ -444,8 +448,9 @@ impl<T: ServiceMsg> Future for AsyncReceiver<T> {
     }
 }
 
-impl<T> Drop for AsyncReceiver<T> {
-    fn drop(&mut self) {
+#[pinned_drop]
+impl<T> PinnedDrop for AsyncReceiver<T> {
+    fn drop(self: Pin<&mut Self>) {
         if self.is_waiting {
             let mut guard = SELECTOR.lock();
             let _ = guard.send_command(
