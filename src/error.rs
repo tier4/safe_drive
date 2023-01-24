@@ -76,3 +76,70 @@ pub(crate) fn ret_val_to_err(n: rcl::rcl_ret_t) -> RCLResult<()> {
         Err(FromPrimitive::from_u32(n).unwrap_or(RCLError::InvalidRetVal))
     }
 }
+
+//
+// Some errors in rcl and rcl_action have the same error code (e.g. RCL_RET_ACTION_NAME_INVALID ==
+// RCL_RET_EVENT_INVALID == 2000) so errors in actions are referenced through RCLActionError.
+#[repr(u32)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum RCLActionError {
+    NameInvalid,
+    // RCL_RET_ACTION_GOAL_ACCEPTED and RCL_RET_ACTION_GOAL_REJECTED are not used in RCL
+    // and do not represent errors, but are kept here for consistency.
+    GoalAccepted,
+    GoalRejected,
+    ClientInvalid,
+    ClientTakeFailed,
+    ServerInvalid,
+    ServerTakeFailed,
+    GoalHandleInvalid,
+    GoalEventInvalid,
+    RCLError(RCLError),
+    InvalidRetVal,
+}
+
+impl fmt::Display for RCLActionError {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "{:?} ({})", self, Into::<u32>::into(*self))
+    }
+}
+
+impl Error for RCLActionError {}
+
+/// Result type to RCLActionError when encountering error.
+pub type RCLActionResult<T> = Result<T, RCLActionError>;
+
+pub(crate) fn action_ret_val_to_err(n: rcl::rcl_ret_t) -> RCLActionResult<()> {
+    match n as u32 {
+        rcl::RCL_RET_OK => Ok(()),
+        rcl::RCL_RET_ACTION_NAME_INVALID => Err(RCLActionError::NameInvalid),
+        rcl::RCL_RET_ACTION_GOAL_ACCEPTED => Err(RCLActionError::GoalAccepted),
+        rcl::RCL_RET_ACTION_GOAL_REJECTED => Err(RCLActionError::GoalRejected),
+        rcl::RCL_RET_ACTION_CLIENT_INVALID => Err(RCLActionError::ClientInvalid),
+        rcl::RCL_RET_ACTION_CLIENT_TAKE_FAILED => Err(RCLActionError::ClientTakeFailed),
+        rcl::RCL_RET_ACTION_SERVER_INVALID => Err(RCLActionError::ServerInvalid),
+        rcl::RCL_RET_ACTION_SERVER_TAKE_FAILED => Err(RCLActionError::ServerTakeFailed),
+        rcl::RCL_RET_ACTION_GOAL_HANDLE_INVALID => Err(RCLActionError::GoalHandleInvalid),
+        rcl::RCL_RET_ACTION_GOAL_EVENT_INVALID => Err(RCLActionError::GoalEventInvalid),
+
+        other => ret_val_to_err(n).map_err(RCLActionError::RCLError),
+    }
+}
+
+impl From<RCLActionError> for u32 {
+    fn from(val: RCLActionError) -> Self {
+        match val {
+            RCLActionError::NameInvalid => rcl::RCL_RET_ACTION_NAME_INVALID,
+            RCLActionError::GoalAccepted => rcl::RCL_RET_ACTION_GOAL_ACCEPTED,
+            RCLActionError::GoalRejected => rcl::RCL_RET_ACTION_GOAL_REJECTED,
+            RCLActionError::ClientInvalid => rcl::RCL_RET_ACTION_CLIENT_INVALID,
+            RCLActionError::ClientTakeFailed => rcl::RCL_RET_ACTION_CLIENT_TAKE_FAILED,
+            RCLActionError::ServerInvalid => rcl::RCL_RET_ACTION_SERVER_INVALID,
+            RCLActionError::ServerTakeFailed => rcl::RCL_RET_ACTION_SERVER_TAKE_FAILED,
+            RCLActionError::GoalHandleInvalid => rcl::RCL_RET_ACTION_GOAL_HANDLE_INVALID,
+            RCLActionError::GoalEventInvalid => rcl::RCL_RET_ACTION_GOAL_EVENT_INVALID,
+            RCLActionError::RCLError(err) => err as u32,
+            RCLActionError::InvalidRetVal => !0,
+        }
+    }
+}
