@@ -4,7 +4,7 @@
 //! We specified the delta list by using TLA+.
 //! See [the specification](https://github.com/tier4/safe_drive/tree/main/specifications/callback).
 
-use std::{cell::UnsafeCell, time::Duration};
+use core::{cell::UnsafeCell, time::Duration};
 
 /// Timers are represented by a linked list.
 /// Each element represents the difference of time from parent node.

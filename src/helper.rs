@@ -1,4 +1,4 @@
-use std::sync::atomic::{AtomicBool, Ordering};
+use core::sync::atomic::{AtomicBool, Ordering};
 
 pub trait Contains {
     type T;

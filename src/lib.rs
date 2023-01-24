@@ -211,11 +211,14 @@
 //! }
 //! ```
 
-use std::{
+#![cfg_attr(not(feature = "std"), no_std)]
+
+extern crate alloc;
+
+use core::{
     cell::Cell,
     marker::PhantomData,
     ops::{Deref, DerefMut},
-    sync::MutexGuard,
 };
 
 #[cfg(feature = "custom_alloc")]
@@ -242,7 +245,7 @@ mod signal_handler;
 mod time;
 
 type PhantomUnsync = PhantomData<Cell<()>>;
-type PhantomUnsend = PhantomData<MutexGuard<'static, ()>>;
+type PhantomUnsend = PhantomData<*mut ()>;
 
 use error::DynError;
 use msg::ServiceMsg;

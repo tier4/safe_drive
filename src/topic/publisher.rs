@@ -56,7 +56,8 @@ use crate::{
     qos, rcl,
     signal_handler::Signaled,
 };
-use std::{ffi::CString, marker::PhantomData, ptr::null_mut, sync::Arc};
+use alloc::{ffi::CString, sync::Arc};
+use core::{marker::PhantomData, ptr::null_mut};
 
 #[cfg(feature = "rcl_stat")]
 use crate::helper::statistics::{SerializableTimeStat, TimeStatistics};

@@ -1,3 +1,5 @@
+//! Translator between ROS2's time types and Rust's `SystemTime`.
+
 use crate::{
     logger::{pr_fatal_in, Logger},
     msg::builtin_interfaces,
