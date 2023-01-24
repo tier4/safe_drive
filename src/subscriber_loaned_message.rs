@@ -1,5 +1,6 @@
+use std::sync::Arc;
+
 use crate::{rcl, topic::subscriber::RCLSubscription};
-use alloc::sync::Arc;
 
 /// A message loaned by a subscriber.
 pub struct SubscriberLoanedMessage<T> {

@@ -43,13 +43,12 @@ version = "1.12"
 features = ["attributes"]
 
 [features]
-default = ["std"]
+default = []
 statistics = ["serde", "serde_json"]
 rcl_stat = ["statistics"]
 humble = []
 galactic = []
 custom_alloc = []
-std = []
 
 [package.metadata.docs.rs]
 
