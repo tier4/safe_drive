@@ -49,8 +49,9 @@ Then, we have to create or edit the following files for basic configurations.
 To enable rust-analyzer in the `mt_pubsub` directory and reduce the compilation time,
 prepare workspace's `Cargo.toml` as follows.
 
+`mt_pubsub/src/Cargo.toml`
+
 ```toml
-# mt_pubsub/src/Cargo.toml
 [workspace]
 members = ["publishers", "subscribers"]
 ```
@@ -59,8 +60,9 @@ members = ["publishers", "subscribers"]
 If you cannot understand what these files do,
 please go back to the previous chapter.
 
+`publishers/package.xml`
+
 ```xml
-<!-- publishers/package.xml -->
 <?xml version="1.0"?>
 <?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
 <package format="3">
@@ -81,17 +83,18 @@ please go back to the previous chapter.
 </package>
 ```
 
+`subscribers/package.xml`
+
 ```xml
-<!-- subscribers/package.xml -->
-<!-- other entries are omitted -->
   <name>subscribers</name>
   <description>MT-Subscribers</description>
 ```
 
 To use `async_std`, we have to update `Cargo.toml` as follows.
 
+`Cargo.toml`
+
 ```toml
-# Cargo.toml
 [dependencies]
 async-std = { version = "1", features = ["attributes"] }
 safe_drive = "0.1"
@@ -111,8 +114,9 @@ One is send a message every 500ms,
 and another is send a message every 250ms.
 The code of the `publishers` is as follows.
 
+`mt_pubsub/src/publishers/src/main.rs`
+
 ```rust
-// mt_pubsub/src/publishers/src/main.rs
 use safe_drive::{context::Context, error::DynError};
 use std::time::Duration;
 
@@ -180,8 +184,9 @@ Calling blocking functions should be avoided in asynchronous tasks.
 Then, let's implement the `subscribers`.
 The main function is almost same as previous one.
 
+`mt_pubsub/src/subscribers/src/main`
+
 ```rust
-// mt_pubsub/src/subscribers/src/main
 use safe_drive::{
     context::Context, error::DynError, logger::Logger, pr_info, topic::subscriber::Subscriber,
 };

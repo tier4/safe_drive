@@ -172,8 +172,8 @@ $ cargo new client
 $ ros2 pkg create --build-type ament_cmake srvmsg
 </code></pre>
 <p>In addition to that, create the workspace's <code>Cargo.toml</code> as follows.</p>
-<pre><code class="language-toml"># srvtest/src/Cargo.toml
-[workspace]
+<p><code>srvtest/src/Cargo.toml</code></p>
+<pre><code class="language-toml">[workspace]
 members = [ &quot;client&quot;, &quot;server&quot;]
 </code></pre>
 <h2 id="define-protocol"><a class="header" href="#define-protocol">Define Protocol</a></h2>
@@ -209,8 +209,8 @@ rosidl_generate_interfaces(${PROJECT_NAME}
 </code></pre>
 <h3 id="edit-srvmsgpackagexml"><a class="header" href="#edit-srvmsgpackagexml">Edit <code>srvmsg/package.xml</code></a></h3>
 <p>In addition to that, the following lines must be added to <code>package.xml</code>.</p>
-<pre><code class="language-xml">&lt;!-- srvtest/src/srvmsg/package.xml --&gt;
-&lt;build_depend&gt;rosidl_default_generators&lt;/build_depend&gt;
+<p><code>srvtest/src/srvmsg/package.xml</code></p>
+<pre><code class="language-xml">&lt;build_depend&gt;rosidl_default_generators&lt;/build_depend&gt;
 &lt;exec_depend&gt;rosidl_default_runtime&lt;/exec_depend&gt;
 &lt;member_of_group&gt;rosidl_interface_packages&lt;/member_of_group&gt;
 </code></pre>
@@ -231,8 +231,8 @@ safe_drive_version = &quot;0.1&quot;
 </code></pre>
 <h3 id="create-serverpackagexml"><a class="header" href="#create-serverpackagexml">Create <code>server/package.xml</code></a></h3>
 <p><code>package.xml</code> is also required as follows.</p>
-<pre><code class="language-xml">&lt;!-- srvtest/src/server/package.xml --&gt;
-&lt;?xml version=&quot;1.0&quot;?&gt;
+<p><code>srvtest/src/server/package.xml</code></p>
+<pre><code class="language-xml">&lt;?xml version=&quot;1.0&quot;?&gt;
 &lt;?xml-model href=&quot;http://download.ros.org/schema/package_format3.xsd&quot; schematypens=&quot;http://www.w3.org/2001/XMLSchema&quot;?&gt;
 &lt;package format=&quot;3&quot;&gt;
   &lt;name&gt;server&lt;/name&gt;
@@ -349,8 +349,8 @@ If you pass <code>None</code> instead of <code>Some(Profile::default())</code>, 
 <h2 id="client"><a class="header" href="#client">Client</a></h2>
 <h3 id="edit-clientcargotoml"><a class="header" href="#edit-clientcargotoml">Edit <code>client/Cargo.toml</code></a></h3>
 <p><code>safe_drive</code>, and <code>tokio</code> must be added to <code>Cargo.toml</code> as follows.</p>
-<pre><code class="language-toml"># srvtest/src/client/Cargo.toml
-[dependencies]
+<p><code>srvtest/src/client/Cargo.toml</code></p>
+<pre><code class="language-toml">[dependencies]
 safe_drive = &quot;0.1&quot;
 srvmsg = { path = &quot;/tmp/safe_drive_tutorial/srvtest/srvmsg&quot; }
 tokio = { version = &quot;1&quot;, features = [&quot;full&quot;] }
@@ -362,8 +362,8 @@ safe_drive_version = &quot;0.1&quot;
 </code></pre>
 <h3 id="create-clientpackagexml"><a class="header" href="#create-clientpackagexml">Create <code>client/package.xml</code></a></h3>
 <p><code>package.xml</code> is also required as follows.</p>
-<pre><code class="language-xml">&lt;!-- srvtest/src/client/package.xml --&gt;
-&lt;?xml version=&quot;1.0&quot;?&gt;
+<p><code>srvtest/src/client/package.xml</code></p>
+<pre><code class="language-xml">&lt;?xml version=&quot;1.0&quot;?&gt;
 &lt;?xml-model href=&quot;http://download.ros.org/schema/package_format3.xsd&quot; schematypens=&quot;http://www.w3.org/2001/XMLSchema&quot;?&gt;
 &lt;package format=&quot;3&quot;&gt;
   &lt;name&gt;client&lt;/name&gt;

@@ -168,8 +168,8 @@ $ cargo new async_param_server
 </code></pre>
 <p><code>param_server</code> explains a callback based parameter handling, and <code>async_param_server</code> explains an async/await based.</p>
 <p>To manage 2 packages, let's prepare <code>Cargo.toml</code> file for a workspace as follows.</p>
-<pre><code class="language-toml"># params/Cargo.toml
-[workspace]
+<p><code>params/Cargo.toml</code></p>
+<pre><code class="language-toml">[workspace]
 members = [&quot;param_server&quot;, &quot;async_param_server&quot;]
 </code></pre>
 <p>The following table shows files we use in this chapter.</p>

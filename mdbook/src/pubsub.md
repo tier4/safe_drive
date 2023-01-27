@@ -59,8 +59,9 @@ we will use throughout this tutorial.
 
 To handle multiple projects of `cargo`, we recommend to prepare `Cargo.toml` for the workspace as follows.
 
+`pubsub/src/Cargo.toml`
+
 ```toml
-# pubsub/src/Cargo.toml
 [workspace]
 members = ["my_talker", "my_listener"]
 ```
@@ -88,8 +89,9 @@ Add safe_drive to the dependencies of `Cargo.toml` to use it.
 Currently, safe_drive's repository is private,
 and we need to specify the path as follows.
 
+`pubsub/src/my_talker/Cargo.toml`
+
 ```toml
-# pubsub/src/my_talker/Cargo.toml
 [dependencies]
 safe_drive = "0.1"
 std_msgs = { path = "/tmp/safe_drive_tutorial/pubsub/std_msgs" }
@@ -135,8 +137,9 @@ Now, we have understood the basics of ROS2.
 The following is a code of my_talker.
 You should also understand what this code is doing.
 
+`pubsub/src/my_talker/src/main.rs`
+
 ```rust
-// pubsub/src/my_talker/src/main.rs
 use safe_drive::{
     context::Context, error::DynError, logger::Logger, pr_info
 };
@@ -242,8 +245,9 @@ There are macros for logging as follows.
 `package.xml` is used by colcon, which is a build tool used by ROS2.
 It contains the package name, maintainer, description, etc, as follows.
 
+`pubsub/src/my_talker/package.xml`
+
 ```xml
-<!-- pubsub/src/my_talker/package.xml -->
 <?xml version="1.0"?>
 <?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
 <package format="3">
@@ -334,8 +338,9 @@ To implement subscriber,
 we have to prepare a callback function of the subscriber.
 This is the main difference from `my_talker`.
 
+`pubsub/src/my_listener/src/main.rs`
+
 ```rust
-// pubsub/src/my_listener/src/main.rs
 use safe_drive::{
     context::Context, error::DynError, logger::Logger, pr_info,
 };
@@ -425,8 +430,9 @@ To receive events forever, use infinite loop.
 The only difference is the name of the package,
 which is `my_listener`.
 
+`pubsub/src/my_listener/package.xml`
+
 ```xml
-<!-- pubsub/src/my_listener/package.xml -->
 <?xml version="1.0"?>
 <?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
 <package format="3">

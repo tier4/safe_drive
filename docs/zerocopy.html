@@ -157,15 +157,15 @@ To use CycloneDDS, please install it as <a href="http://docs.ros.org.ros.informa
 </tbody></table>
 </div>
 <p>Add <code>safe_drive</code> to dependencies section of <code>Cargo.toml</code> as follows.</p>
-<pre><code class="language-toml"># Cargo.toml
-[dependencies]
+<p><code>Cargo.toml</code></p>
+<pre><code class="language-toml">[dependencies]
 safe_drive = &quot;0.1&quot;
 </code></pre>
 <h2 id="mainrs"><a class="header" href="#mainrs"><code>main.rs</code></a></h2>
 <p><code>main.rs</code> can be implemented as follows,
 but almost every lines are same as shown before.</p>
-<pre><pre class="playground"><code class="language-rust">//! main.rs
-use safe_drive::{context::Context, msg::common_interfaces::std_msgs};
+<p><code>main.rs</code></p>
+<pre><pre class="playground"><code class="language-rust">use safe_drive::{context::Context, msg::common_interfaces::std_msgs};
 use std::{error::Error, time::Duration};
 
 const TOPIC_NAME: &amp;str = &quot;pubsub_loaned&quot;;
@@ -220,8 +220,8 @@ and it uses conventional copied APIs if zero copy is not available.</p>
 <h2 id="setting-up-zero-copy"><a class="header" href="#setting-up-zero-copy">Setting-up Zero Copy</a></h2>
 <p>To enable zero copy, please prepare cyclonedds.xml, which is a configuration file of CycloneDDS, as follows.
 You can use arbitrary name for it.</p>
-<pre><code class="language-xml">&lt;!-- cyclonedds.xml --&gt;
-&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot; ?&gt;
+<p><code>cyclonedds.xml</code></p>
+<pre><code class="language-xml">&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot; ?&gt;
 &lt;CycloneDDS xmlns=&quot;https://cdds.io/config&quot; xmlns:xsi=&quot;http://www.w3.org/2001/XMLSchema-instance&quot; xsi:schemaLocation=&quot;https://cdds.io/config https://raw.githubusercontent.com/eclipse-cyclonedds/cyclonedds/iceoryx/etc/cyclonedds.xsd&quot;&gt;
     &lt;Domain id=&quot;any&quot;&gt;
         &lt;SharedMemory&gt;

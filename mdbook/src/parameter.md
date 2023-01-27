@@ -38,8 +38,9 @@ $ cargo new async_param_server
 
 To manage 2 packages, let's prepare `Cargo.toml` file for a workspace as follows.
 
+`params/Cargo.toml`
+
 ```toml
-# params/Cargo.toml
 [workspace]
 members = ["param_server", "async_param_server"]
 ```

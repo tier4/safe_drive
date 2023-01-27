@@ -185,8 +185,8 @@ we will use throughout this tutorial.</p>
 </div>
 <h2 id="workspace-of-rust"><a class="header" href="#workspace-of-rust">Workspace of Rust</a></h2>
 <p>To handle multiple projects of <code>cargo</code>, we recommend to prepare <code>Cargo.toml</code> for the workspace as follows.</p>
-<pre><code class="language-toml"># pubsub/src/Cargo.toml
-[workspace]
+<p><code>pubsub/src/Cargo.toml</code></p>
+<pre><code class="language-toml">[workspace]
 members = [&quot;my_talker&quot;, &quot;my_listener&quot;]
 </code></pre>
 <p>The workspace enables <code>rust-analyzer</code> and reduces compilation time.</p>
@@ -206,8 +206,8 @@ These files will automatically created when you do <code>cargo new</code> as des
 Add safe_drive to the dependencies of <code>Cargo.toml</code> to use it.
 Currently, safe_drive's repository is private,
 and we need to specify the path as follows.</p>
-<pre><code class="language-toml"># pubsub/src/my_talker/Cargo.toml
-[dependencies]
+<p><code>pubsub/src/my_talker/Cargo.toml</code></p>
+<pre><code class="language-toml">[dependencies]
 safe_drive = &quot;0.1&quot;
 std_msgs = { path = &quot;/tmp/safe_drive_tutorial/pubsub/std_msgs&quot; }
 
@@ -244,8 +244,8 @@ and subscribers and publishers are created by the node.</p>
 <p>Now, we have understood the basics of ROS2.
 The following is a code of my_talker.
 You should also understand what this code is doing.</p>
-<pre><pre class="playground"><code class="language-rust">// pubsub/src/my_talker/src/main.rs
-use safe_drive::{
+<p><code>pubsub/src/my_talker/src/main.rs</code></p>
+<pre><pre class="playground"><code class="language-rust">use safe_drive::{
     context::Context, error::DynError, logger::Logger, pr_info
 };
 use std::time::Duration;
@@ -343,8 +343,8 @@ To print a message, use <code>pr_*</code> macros as follows.</p>
 <h3 id="create-my_talkerpackagexml"><a class="header" href="#create-my_talkerpackagexml">Create <code>my_talker/package.xml</code></a></h3>
 <p><code>package.xml</code> is used by colcon, which is a build tool used by ROS2.
 It contains the package name, maintainer, description, etc, as follows.</p>
-<pre><code class="language-xml">&lt;!-- pubsub/src/my_talker/package.xml --&gt;
-&lt;?xml version=&quot;1.0&quot;?&gt;
+<p><code>pubsub/src/my_talker/package.xml</code></p>
+<pre><code class="language-xml">&lt;?xml version=&quot;1.0&quot;?&gt;
 &lt;?xml-model href=&quot;http://download.ros.org/schema/package_format3.xsd&quot; schematypens=&quot;http://www.w3.org/2001/XMLSchema&quot;?&gt;
 &lt;package format=&quot;3&quot;&gt;
   &lt;name&gt;my_talker&lt;/name&gt;
@@ -412,8 +412,8 @@ safe_drive_version = &quot;0.1&quot;
 <p>To implement subscriber,
 we have to prepare a callback function of the subscriber.
 This is the main difference from <code>my_talker</code>.</p>
-<pre><pre class="playground"><code class="language-rust">// pubsub/src/my_listener/src/main.rs
-use safe_drive::{
+<p><code>pubsub/src/my_listener/src/main.rs</code></p>
+<pre><pre class="playground"><code class="language-rust">use safe_drive::{
     context::Context, error::DynError, logger::Logger, pr_info,
 };
 
@@ -494,8 +494,8 @@ To receive events forever, use infinite loop.</p>
 <p><code>package.xml</code> is almost same as above.
 The only difference is the name of the package,
 which is <code>my_listener</code>.</p>
-<pre><code class="language-xml">&lt;!-- pubsub/src/my_listener/package.xml --&gt;
-&lt;?xml version=&quot;1.0&quot;?&gt;
+<p><code>pubsub/src/my_listener/package.xml</code></p>
+<pre><code class="language-xml">&lt;?xml version=&quot;1.0&quot;?&gt;
 &lt;?xml-model href=&quot;http://download.ros.org/schema/package_format3.xsd&quot; schematypens=&quot;http://www.w3.org/2001/XMLSchema&quot;?&gt;
 &lt;package format=&quot;3&quot;&gt;
   &lt;name&gt;my_listener&lt;/name&gt;

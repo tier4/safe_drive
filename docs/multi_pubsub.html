@@ -180,15 +180,15 @@ At the moment, the following directories is present.</p>
 </div>
 <p>To enable rust-analyzer in the <code>mt_pubsub</code> directory and reduce the compilation time,
 prepare workspace's <code>Cargo.toml</code> as follows.</p>
-<pre><code class="language-toml"># mt_pubsub/src/Cargo.toml
-[workspace]
+<p><code>mt_pubsub/src/Cargo.toml</code></p>
+<pre><code class="language-toml">[workspace]
 members = [&quot;publishers&quot;, &quot;subscribers&quot;]
 </code></pre>
 <p><code>package.xml</code>s are almost same as <a href="./pubsub.html">Publish and Subscribe</a>.
 If you cannot understand what these files do,
 please go back to the previous chapter.</p>
-<pre><code class="language-xml">&lt;!-- publishers/package.xml --&gt;
-&lt;?xml version=&quot;1.0&quot;?&gt;
+<p><code>publishers/package.xml</code></p>
+<pre><code class="language-xml">&lt;?xml version=&quot;1.0&quot;?&gt;
 &lt;?xml-model href=&quot;http://download.ros.org/schema/package_format3.xsd&quot; schematypens=&quot;http://www.w3.org/2001/XMLSchema&quot;?&gt;
 &lt;package format=&quot;3&quot;&gt;
   &lt;name&gt;publishers&lt;/name&gt;
@@ -207,14 +207,13 @@ please go back to the previous chapter.</p>
   &lt;/export&gt;
 &lt;/package&gt;
 </code></pre>
-<pre><code class="language-xml">&lt;!-- subscribers/package.xml --&gt;
-&lt;!-- other entries are omitted --&gt;
-  &lt;name&gt;subscribers&lt;/name&gt;
+<p><code>subscribers/package.xml</code></p>
+<pre><code class="language-xml">  &lt;name&gt;subscribers&lt;/name&gt;
   &lt;description&gt;MT-Subscribers&lt;/description&gt;
 </code></pre>
 <p>To use <code>async_std</code>, we have to update <code>Cargo.toml</code> as follows.</p>
-<pre><code class="language-toml"># Cargo.toml
-[dependencies]
+<p><code>Cargo.toml</code></p>
+<pre><code class="language-toml">[dependencies]
 async-std = { version = &quot;1&quot;, features = [&quot;attributes&quot;] }
 safe_drive = &quot;0.1&quot;
 std_msgs = { path = &quot;/tmp/safe_drive_tutorial/mt_pubsub/std_msgs&quot; }
@@ -230,8 +229,8 @@ This create 2 tasks.
 One is send a message every 500ms,
 and another is send a message every 250ms.
 The code of the <code>publishers</code> is as follows.</p>
-<pre><pre class="playground"><code class="language-rust">// mt_pubsub/src/publishers/src/main.rs
-use safe_drive::{context::Context, error::DynError};
+<p><code>mt_pubsub/src/publishers/src/main.rs</code></p>
+<pre><pre class="playground"><code class="language-rust">use safe_drive::{context::Context, error::DynError};
 use std::time::Duration;
 
 #[async_std::main]
@@ -292,8 +291,8 @@ Calling blocking functions should be avoided in asynchronous tasks.</p>
 <h2 id="subscribers"><a class="header" href="#subscribers">Subscribers</a></h2>
 <p>Then, let's implement the <code>subscribers</code>.
 The main function is almost same as previous one.</p>
-<pre><pre class="playground"><code class="language-rust">// mt_pubsub/src/subscribers/src/main
-use safe_drive::{
+<p><code>mt_pubsub/src/subscribers/src/main</code></p>
+<pre><pre class="playground"><code class="language-rust">use safe_drive::{
     context::Context, error::DynError, logger::Logger, pr_info, topic::subscriber::Subscriber,
 };
 

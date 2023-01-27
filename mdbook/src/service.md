@@ -41,8 +41,9 @@ $ ros2 pkg create --build-type ament_cmake srvmsg
 
 In addition to that, create the workspace's `Cargo.toml` as follows.
 
+`srvtest/src/Cargo.toml`
+
 ```toml
-# srvtest/src/Cargo.toml
 [workspace]
 members = [ "client", "server"]
 ```
@@ -96,8 +97,9 @@ rosidl_generate_interfaces(${PROJECT_NAME}
 
 In addition to that, the following lines must be added to `package.xml`.
 
+`srvtest/src/srvmsg/package.xml`
+
 ```xml
-<!-- srvtest/src/srvmsg/package.xml -->
 <build_depend>rosidl_default_generators</build_depend>
 <exec_depend>rosidl_default_runtime</exec_depend>
 <member_of_group>rosidl_interface_packages</member_of_group>
@@ -128,8 +130,9 @@ safe_drive_version = "0.1"
 
 `package.xml` is also required as follows.
 
+`srvtest/src/server/package.xml`
+
 ```xml
-<!-- srvtest/src/server/package.xml -->
 <?xml version="1.0"?>
 <?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
 <package format="3">
@@ -265,8 +268,9 @@ The callback function must take a message sent by a client and a header includin
 
 `safe_drive`, and `tokio` must be added to `Cargo.toml` as follows.
 
+`srvtest/src/client/Cargo.toml`
+
 ```toml
-# srvtest/src/client/Cargo.toml
 [dependencies]
 safe_drive = "0.1"
 srvmsg = { path = "/tmp/safe_drive_tutorial/srvtest/srvmsg" }
@@ -282,8 +286,9 @@ safe_drive_version = "0.1"
 
 `package.xml` is also required as follows.
 
+`srvtest/src/client/package.xml`
+
 ```xml
-<!-- srvtest/src/client/package.xml -->
 <?xml version="1.0"?>
 <?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
 <package format="3">

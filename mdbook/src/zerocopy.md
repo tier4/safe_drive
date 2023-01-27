@@ -23,8 +23,9 @@ The files we use are as follows. `cyclonedds.xml` will be created and used later
 
 Add `safe_drive` to dependencies section of `Cargo.toml` as follows.
 
+`Cargo.toml`
+
 ```toml
-# Cargo.toml
 [dependencies]
 safe_drive = "0.1"
 ```
@@ -34,8 +35,9 @@ safe_drive = "0.1"
 `main.rs` can be implemented as follows,
 but almost every lines are same as shown before.
 
+`main.rs`
+
 ```rust
-//! main.rs
 use safe_drive::{context::Context, msg::common_interfaces::std_msgs};
 use std::{error::Error, time::Duration};
 
@@ -97,8 +99,9 @@ and it uses conventional copied APIs if zero copy is not available.
 To enable zero copy, please prepare cyclonedds.xml, which is a configuration file of CycloneDDS, as follows.
 You can use arbitrary name for it.
 
+`cyclonedds.xml`
+
 ```xml
-<!-- cyclonedds.xml -->
 <?xml version="1.0" encoding="UTF-8" ?>
 <CycloneDDS xmlns="https://cdds.io/config" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="https://cdds.io/config https://raw.githubusercontent.com/eclipse-cyclonedds/cyclonedds/iceoryx/etc/cyclonedds.xsd">
     <Domain id="any">
