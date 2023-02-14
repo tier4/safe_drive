@@ -1,5 +1,6 @@
 fn main() {
     println!("cargo:rustc-link-lib=rcl");
+    println!("cargo:rustc-link-lib=rcl_action");
     println!("cargo:rustc-link-lib=rcutils");
     println!("cargo:rustc-link-lib=rmw");
     println!("cargo:rustc-link-lib=rosidl_runtime_c");
