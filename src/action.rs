@@ -1,3 +1,8 @@
+//! Actions
+
+pub mod client;
+pub mod server;
+
 #[derive(Debug, Copy, Clone, PartialEq, Eq)]
 pub enum GoalStatus {
     Unknown,
