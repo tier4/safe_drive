@@ -374,6 +374,18 @@ impl MTUnsafeFn {
         })
     }
 
+    pub fn rcl_ros_clock_init(
+        &self,
+        clock: *mut rcl_clock_t,
+        allocator: *mut rcl_allocator_t,
+    ) -> RCLResult<()> {
+        ret_val_to_err(unsafe { self::rcl_ros_clock_init(clock, allocator) })
+    }
+
+    pub fn rcl_ros_clock_fini(&self, clock: *mut rcl_clock_t) -> RCLResult<()> {
+        ret_val_to_err(unsafe { self::rcl_ros_clock_fini(clock) })
+    }
+
     pub fn rcl_return_loaned_message_from_subscription(
         &self,
         subscription: *const rcl_subscription_t,
