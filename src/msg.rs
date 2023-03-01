@@ -18,6 +18,7 @@ mod humble;
 #[cfg(feature = "humble")]
 pub use humble::*;
 
+use self::builtin_interfaces::UnsafeTime;
 use crate::rcl;
 use std::{ffi::CString, fmt::Display, intrinsics::transmute};
 
@@ -32,10 +33,35 @@ pub trait ServiceMsg {
 }
 
 pub trait ActionMsg {
-    type Goal: ServiceMsg;
-    type Result: ServiceMsg;
-    type Feedback: TypeSupport;
+    type Goal: ActionGoal;
+    type Result: ActionResult;
+    type Feedback: TypeSupport + GetUUID;
     fn type_support() -> *const rcl::rosidl_action_type_support_t;
+}
+
+pub trait ActionGoal {
+    type Request: TypeSupport + GetUUID;
+    type Response: TypeSupport + GoalResponse;
+    fn type_support() -> *const rcl::rosidl_service_type_support_t;
+}
+
+pub trait GetUUID {
+    fn get_uuid(&self) -> &[u8; 16];
+}
+
+pub trait GoalResponse {
+    fn is_accepted(&self) -> bool;
+    fn get_time_stamp(&self) -> UnsafeTime;
+}
+
+pub trait ActionResult {
+    type Request: TypeSupport + GetUUID;
+    type Response: TypeSupport + ResultResponse;
+    fn type_support() -> *const rcl::rosidl_service_type_support_t;
+}
+
+pub trait ResultResponse {
+    fn get_status(&self) -> u8;
 }
 
 // Definition of Sequence -------------------------------------------------------------------------
