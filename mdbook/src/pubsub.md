@@ -93,13 +93,13 @@ and we need to specify the path as follows.
 
 ```toml
 [dependencies]
-safe_drive = "0.1"
+safe_drive = "0.2"
 std_msgs = { path = "/tmp/safe_drive_tutorial/pubsub/std_msgs" }
 
 [package.metadata.ros]
 msg = ["std_msgs"]
 msg_dir = "/tmp/safe_drive_tutorial/pubsub"
-safe_drive_version = "0.1"
+safe_drive_version = "0.2"
 ```
 
 ### Edit `my_talker/src/main.rs`
@@ -323,13 +323,13 @@ Add safe_drive to the dependencies as follows.
 ```toml
 # pubsub/src/my_listener/Cargo.toml
 [dependencies]
-safe_drive = "0.1"
+safe_drive = "0.2"
 std_msgs = { path = "/tmp/safe_drive_tutorial/pubsub/std_msgs" }
 
 [package.metadata.ros]
 msg = ["std_msgs"]
 msg_dir = "/tmp/safe_drive_tutorial/pubsub"
-safe_drive_version = "0.1"
+safe_drive_version = "0.2"
 ```
 
 ### Edit `my_listener/src/main.rs`

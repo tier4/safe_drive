@@ -116,14 +116,14 @@ we have to edit `Cargo.toml` as follows.
 
 ```toml
 [dependencies]
-safe_drive = "0.1"
+safe_drive = "0.2"
 srvmsg = { path = "/tmp/safe_drive_tutorial/srvtest/srvmsg" }
 tokio = { version = "1", features = ["full"] }
 
 [package.metadata.ros]
 msg = ["srvmsg"]
 msg_dir = "/tmp/safe_drive_tutorial/srvtest"
-safe_drive_version = "0.1"
+safe_drive_version = "0.2"
 ```
 
 ### Create `server/package.xml`
@@ -272,7 +272,7 @@ The callback function must take a message sent by a client and a header includin
 
 ```toml
 [dependencies]
-safe_drive = "0.1"
+safe_drive = "0.2"
 srvmsg = { path = "/tmp/safe_drive_tutorial/srvtest/srvmsg" }
 tokio = { version = "1", features = ["full"] }
 

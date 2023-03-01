@@ -182,13 +182,13 @@ The most important thing is to add `my_interfaces`, which defines message types 
 ```toml
 # msgtest/src/talker/Cargo.toml
 [dependencies]
-safe_drive = "0.1"
+safe_drive = "0.2"
 my_interfaces = { path = "/tmp/safe_drive_tutorial/msgtest/my_interfaces" }
 
 [package.metadata.ros]
 msg = ["my_interfaces"]
 msg_dir = "/tmp/safe_drive_tutorial/msgtest"
-safe_drive_version = "0.1"
+safe_drive_version = "0.2"
 ```
 
 ### Create `talker/package.xml`
@@ -369,13 +369,13 @@ The listener also requires `my_interfaces`, and edit `Cargo.toml` as follows.
 ```toml
 # msgtest/src/listener/Cargo.toml
 [dependencies]
-safe_drive = "0.1"
+safe_drive = "0.2"
 my_interfaces = { path = "/tmp/safe_drive_tutorial/msgtest/my_interfaces" }
 
 [package.metadata.ros]
 msg = ["my_interfaces"]
 msg_dir = "/tmp/safe_drive_tutorial/msgtest"
-safe_drive_version = "0.1"
+safe_drive_version = "0.2"
 ```
 
 ### Create `listener/package.xml`

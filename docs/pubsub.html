@@ -8,6 +8,7 @@
 
         <!-- Custom HTML head -->
         
+        <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
         <meta name="description" content="">
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <meta name="theme-color" content="#ffffff" />
@@ -33,13 +34,13 @@
     </head>
     <body>
         <!-- Provide site root to javascript -->
-        <script>
+        <script type="text/javascript">
             var path_to_root = "";
             var default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "navy" : "light";
         </script>
 
         <!-- Work around some values being stored in localStorage wrapped in quotes -->
-        <script>
+        <script type="text/javascript">
             try {
                 var theme = localStorage.getItem('mdbook-theme');
                 var sidebar = localStorage.getItem('mdbook-sidebar');
@@ -55,7 +56,7 @@
         </script>
 
         <!-- Set the theme before any content is loaded, prevents flash -->
-        <script>
+        <script type="text/javascript">
             var theme;
             try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
             if (theme === null || theme === undefined) { theme = default_theme; }
@@ -67,7 +68,7 @@
         </script>
 
         <!-- Hide / unhide sidebar before it is displayed -->
-        <script>
+        <script type="text/javascript">
             var html = document.querySelector('html');
             var sidebar = 'hidden';
             if (document.body.clientWidth >= 1080) {
@@ -98,7 +99,7 @@
                             <i class="fa fa-paint-brush"></i>
                         </button>
                         <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
-                            <li role="none"><button role="menuitem" class="theme" id="light">Light</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light (default)</button></li>
                             <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
                             <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
                             <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
@@ -131,7 +132,7 @@
                 </div>
 
                 <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
-                <script>
+                <script type="text/javascript">
                     document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
                     document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
                     Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
@@ -148,7 +149,7 @@ This communication is so-called topic by ROS2.
 There are <code>N</code> senders and <code>M</code> receivers in a topic.
 This tutorial implements 1 sender (in Rust) and 2 receivers (in Rust and C++).</p>
 <p>The following figure is a example topology.</p>
-<pre class="mermaid">graph TD;
+<pre><code class="language-mermaid">graph TD;
     Publisher1--&gt;TopicA;
     Publisher2--&gt;TopicA;
     TopicA--&gt;Subscriber1;
@@ -159,7 +160,7 @@ This tutorial implements 1 sender (in Rust) and 2 receivers (in Rust and C++).</
     Publisher5--&gt;TopicB;
     TopicB--&gt;Subscriber4;
     TopicB--&gt;Subscriber5;
-</pre>
+</code></pre>
 <p>There are 2 topics, <code>TopicA</code> and <code>TopicB</code> in this figure.
 If <code>Publisher2</code> of <code>TopicA</code> send a message,
 <code>Subscriber1-3</code> subscribing <code>TopicA</code> receive the message.
@@ -208,13 +209,13 @@ Currently, safe_drive's repository is private,
 and we need to specify the path as follows.</p>
 <p><code>pubsub/src/my_talker/Cargo.toml</code></p>
 <pre><code class="language-toml">[dependencies]
-safe_drive = &quot;0.1&quot;
+safe_drive = &quot;0.2&quot;
 std_msgs = { path = &quot;/tmp/safe_drive_tutorial/pubsub/std_msgs&quot; }
 
 [package.metadata.ros]
 msg = [&quot;std_msgs&quot;]
 msg_dir = &quot;/tmp/safe_drive_tutorial/pubsub&quot;
-safe_drive_version = &quot;0.1&quot;
+safe_drive_version = &quot;0.2&quot;
 </code></pre>
 <h3 id="edit-my_talkersrcmainrs"><a class="header" href="#edit-my_talkersrcmainrs">Edit <code>my_talker/src/main.rs</code></a></h3>
 <p>my_talker is very simple.
@@ -231,14 +232,14 @@ A node contains publishers, subscribers, servers, and clients.
 A node is a functional unit of ROS2.
 Publishers and subscribers can be created by a node.</p>
 <p>The following figure is an example hierarchy.</p>
-<pre class="mermaid">graph TD;
+<pre><code class="language-mermaid">graph TD;
     Context--&gt;NodeA
     NodeA--&gt;SubscriberA
     NodeA--&gt;SubscriberB
     NodeA--&gt;PublisherA
     NodeA--&gt;PublisherB
     NodeA--&gt;PublisherC
-</pre>
+</code></pre>
 <p>In this figure, <code>NodeA</code> is created by a context,
 and subscribers and publishers are created by the node.</p>
 <p>Now, we have understood the basics of ROS2.
@@ -279,14 +280,16 @@ fn main() -&gt; Result&lt;(), DynError&gt; {
         cnt += 1;
         std::thread::sleep(Duration::from_secs(1));
     }
-}</code></pre></pre>
+}
+</code></pre></pre>
 <h4 id="my_talker-in-detail"><a class="header" href="#my_talker-in-detail">my_talker in Detail</a></h4>
 <p><code>create_node</code> creates a node.</p>
 <pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
 </span><span class="boring">fn main() {
 </span>// Create a node.
 let node = ctx.create_node(&quot;my_talker&quot;, None, Default::default())?;
-<span class="boring">}</span></code></pre></pre>
+<span class="boring">}
+</span></code></pre></pre>
 <p>The arguments indicate as follows.</p>
 <ul>
 <li><code>&quot;my_talker&quot;</code> : the name of the node.</li>
@@ -303,7 +306,8 @@ let node = ctx.create_node(&quot;my_talker&quot;, None, Default::default())?;
 </span><span class="boring">fn main() {
 </span>// Create a publisher.
 let publisher = node.create_publisher::&lt;std_msgs::msg::String&gt;(&quot;my_topic&quot;, None)?;
-<span class="boring">}</span></code></pre></pre>
+<span class="boring">}
+</span></code></pre></pre>
 <ul>
 <li><code>&lt;std_msgs::msg::String&gt;</code> : the publisher can send values of <code>std_msgs::msg::String</code>.</li>
 <li><code>&quot;my_topic&quot;</code> : the topic name to which the publisher send messages.</li>
@@ -318,20 +322,23 @@ msg.data.assign(&amp;data);
 
 // Send a message.
 publisher.send(&amp;msg)?;
-<span class="boring">}</span></code></pre></pre>
+<span class="boring">}
+</span></code></pre></pre>
 <p><code>Logger</code> is used to print some messages.
 It can be created as follows.</p>
 <pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
 </span><span class="boring">fn main() {
 </span>// Create a logger.
 let logger = Logger::new(&quot;my_talker&quot;);
-<span class="boring">}</span></code></pre></pre>
+<span class="boring">}
+</span></code></pre></pre>
 <p>The argument of <code>&quot;my_talker&quot;</code> is the name of the logger.
 To print a message, use <code>pr_*</code> macros as follows.</p>
 <pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
 </span><span class="boring">fn main() {
 </span>pr_info!(logger, &quot;send: {}&quot;, msg.data); // Print log.
-<span class="boring">}</span></code></pre></pre>
+<span class="boring">}
+</span></code></pre></pre>
 <p>There are macros for logging as follows.</p>
 <ul>
 <li><code>pr_debug!</code> : debug</li>
@@ -400,13 +407,13 @@ We created and will edit files of the listener as follows.</p>
 Add safe_drive to the dependencies as follows.</p>
 <pre><code class="language-toml"># pubsub/src/my_listener/Cargo.toml
 [dependencies]
-safe_drive = &quot;0.1&quot;
+safe_drive = &quot;0.2&quot;
 std_msgs = { path = &quot;/tmp/safe_drive_tutorial/pubsub/std_msgs&quot; }
 
 [package.metadata.ros]
 msg = [&quot;std_msgs&quot;]
 msg_dir = &quot;/tmp/safe_drive_tutorial/pubsub&quot;
-safe_drive_version = &quot;0.1&quot;
+safe_drive_version = &quot;0.2&quot;
 </code></pre>
 <h3 id="edit-my_listenersrcmainrs"><a class="header" href="#edit-my_listenersrcmainrs">Edit <code>my_listener/src/main.rs</code></a></h3>
 <p>To implement subscriber,
@@ -445,7 +452,8 @@ fn main() -&gt; Result&lt;(), DynError&gt; {
     loop {
         selector.wait()?;
     }
-}</code></pre></pre>
+}
+</code></pre></pre>
 <h4 id="my_listener-in-detail"><a class="header" href="#my_listener-in-detail"><code>my_listener</code> in Detail</a></h4>
 <p>Similar to the publisher,
 <code>create_subscriber</code> creates a subscriber.</p>
@@ -453,7 +461,8 @@ fn main() -&gt; Result&lt;(), DynError&gt; {
 </span><span class="boring">fn main() {
 </span>// Create a subscriber.
 let subscriber = node.create_subscriber::&lt;std_msgs::msg::String&gt;(&quot;my_topic&quot;, None)?;
-<span class="boring">}</span></code></pre></pre>
+<span class="boring">}
+</span></code></pre></pre>
 <p>The arguments are as follows.</p>
 <ul>
 <li><code>&quot;my_topic&quot;</code> : the name of the topic to which the subscriber is subscribing.</li>
@@ -481,7 +490,8 @@ selector.add_subscriber(
 loop {
     selector.wait()?;
 }
-<span class="boring">}</span></code></pre></pre>
+<span class="boring">}
+</span></code></pre></pre>
 <p>The arguments of <code>add_subscriber</code> method are as follows.</p>
 <ul>
 <li><code>subscriber</code> : the subscriber.</li>
@@ -564,22 +574,22 @@ We are receiving messages sent from <code>my_talker</code>.</p>
 
 
 
-        <script>
+        <script type="text/javascript">
             window.playground_copyable = true;
         </script>
 
 
-        <script src="elasticlunr.min.js"></script>
-        <script src="mark.min.js"></script>
-        <script src="searcher.js"></script>
+        <script src="elasticlunr.min.js" type="text/javascript" charset="utf-8"></script>
+        <script src="mark.min.js" type="text/javascript" charset="utf-8"></script>
+        <script src="searcher.js" type="text/javascript" charset="utf-8"></script>
 
-        <script src="clipboard.min.js"></script>
-        <script src="highlight.js"></script>
-        <script src="book.js"></script>
+        <script src="clipboard.min.js" type="text/javascript" charset="utf-8"></script>
+        <script src="highlight.js" type="text/javascript" charset="utf-8"></script>
+        <script src="book.js" type="text/javascript" charset="utf-8"></script>
 
         <!-- Custom JS scripts -->
-        <script src="mermaid.min.js"></script>
-        <script src="mermaid-init.js"></script>
+        <script type="text/javascript" src="mermaid.min.js"></script>
+        <script type="text/javascript" src="mermaid-init.js"></script>
 
 
     </body>

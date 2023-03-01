@@ -28,7 +28,7 @@ Then, add `safe_drive` to the dependencies of `Cargo.toml`.
 
 ```toml
 [dependencies]
-safe_drive = "0.1"
+safe_drive = "0.2"
 ```
 
 The following code is an example using a wall-timer.
