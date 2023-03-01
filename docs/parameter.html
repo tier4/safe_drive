@@ -146,13 +146,13 @@
 <p><a href="https://github.com/tier4/safe_drive_tutorial/tree/main/params">Source code</a>.</p>
 <p>This chapter introduces how to use parameters.
 A node can have parameters as follows.</p>
-<pre><code class="language-mermaid">graph TD;
-   NodeA --&gt; ParamA1:i64;
-   NodeA --&gt; ParamA2:bool;
-   NodeA --&gt; ParamA3:String;
-   NodeB --&gt; ParamB1:f64;
-   NodeB --&gt; ParamB2:f64;
-</code></pre>
+<pre class="mermaid">graph TD;
+    NodeA --&gt; ParamA1:i64;
+    NodeA --&gt; ParamA2:bool;
+    NodeA --&gt; ParamA3:String;
+    NodeB --&gt; ParamB1:f64;
+    NodeB --&gt; ParamB2:f64;
+</pre>
 <p>In this figure, NodeA has 3 parameters whose types are
 <code>i64</code>, <code>bool</code>, and <code>String</code>, respectively,
 and NodeB has 2 parameters whose types are <code>f64</code>.
@@ -237,12 +237,12 @@ pub struct Parameters { /* omitted private fields */ }
 <span class="boring">}
 </span></code></pre></pre>
 <p>In summary, a parameter server can be represented as follows.</p>
-<pre><code class="language-mermaid">graph TD;
-   ParameterServer --&gt; Parameters;
-   Parameters --&gt; Parameter;
-   Parameter --&gt; Descriptor;
-   Parameter --&gt; Value;
-</code></pre>
+<pre class="mermaid">graph TD;
+    ParameterServer --&gt; Parameters;
+    Parameters --&gt; Parameter;
+    Parameter --&gt; Descriptor;
+    Parameter --&gt; Value;
+</pre>
 <h2 id="parameter-setting-and-waiting-update-by-callback"><a class="header" href="#parameter-setting-and-waiting-update-by-callback">Parameter Setting and Waiting Update by Callback</a></h2>
 <p>We will explain how to set parameters,
 and how to wait updating by using a callback function.</p>

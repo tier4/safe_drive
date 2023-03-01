@@ -148,12 +148,12 @@ Documents are written in Markdown and located in <a href="https://github.com/tie
 These Markdown files are compiled to HTML files and located in <a href="https://github.com/tier4/safe_drive/tree/main/docs">docs</a>,
 and published at <a href="https://tier4.github.io/safe_drive/">https://tier4.github.io/safe_drive/</a>.</p>
 <p>You can use (Mermaid)[https://mermaid.js.org/#/] notation in Markdown as follows.</p>
-<pre><code class="language-mermaid">graph TD;
+<pre class="mermaid">graph TD;
     A--&gt;B;
     A--&gt;C;
     B--&gt;D;
     C--&gt;D;
-</code></pre>
+</pre>
 <p>The compilation can be done by <code>make</code> as follows.</p>
 <pre><code class="language-text">$ make doc
 </code></pre>

@@ -146,14 +146,14 @@
 <p><a href="https://github.com/tier4/safe_drive_tutorial/tree/main/srvtest">Source code</a>.</p>
 <p>A service is a communication consisting requests and responses.
 There are a server and clients for a service as follows.</p>
-<pre><code class="language-mermaid">graph TD;
+<pre class="mermaid">graph TD;
     Server--response--&gt;Client1;
     Server--response--&gt;Client2;
     Server--response--&gt;Client3;
     Client1--request--&gt;Server;
     Client2--request--&gt;Server;
     Client3--request--&gt;Server;
-</code></pre>
+</pre>
 <p>A client sends a request and the server replies the request.
 In this tutorial, we will describe how to implement a client and a server in Rust by using <code>safe_drive</code>.</p>
 <h2 id="create-base-files"><a class="header" href="#create-base-files">Create Base Files</a></h2>
