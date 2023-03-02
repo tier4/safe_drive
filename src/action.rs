@@ -1,7 +1,14 @@
 //! Actions
 
+use crate::msg::{ActionGoal, ActionMsg, ActionResult};
+
 pub mod client;
-pub mod server;
+// pub mod server;
+
+type SendGoalServiceRequest<T> = <<T as ActionMsg>::Goal as ActionGoal>::Request;
+type SendGoalServiceResponse<T> = <<T as ActionMsg>::Goal as ActionGoal>::Response;
+type GetResultServiceRequest<T> = <<T as ActionMsg>::Result as ActionResult>::Request;
+type GetResultServiceResponse<T> = <<T as ActionMsg>::Result as ActionResult>::Response;
 
 #[derive(Debug, Copy, Clone, PartialEq, Eq)]
 pub enum GoalStatus {

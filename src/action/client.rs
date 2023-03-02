@@ -1,12 +1,17 @@
-use std::{collections::BTreeMap, ffi::CString, marker::PhantomData, mem::MaybeUninit, sync::Arc};
+use std::{collections::BTreeMap, ffi::CString, mem::MaybeUninit, sync::Arc};
 
 use crate::{
-    error::{DynError, RCLActionError, RCLActionResult, RCLError, RCLResult},
+    error::{DynError, RCLActionError, RCLActionResult, RCLError},
     get_allocator,
-    msg::{interfaces::action_msgs::msg::GoalStatusArray, ActionMsg, ServiceMsg},
+    msg::{interfaces::action_msgs::msg::GoalStatusArray, ActionMsg},
     node::Node,
     qos::Profile,
     rcl, RecvResult,
+};
+
+use super::{
+    GetResultServiceRequest, GetResultServiceResponse, SendGoalServiceRequest,
+    SendGoalServiceResponse,
 };
 
 pub struct ClientQosOption {
@@ -30,18 +35,13 @@ impl From<ClientQosOption> for rcl::rcl_action_client_options_t {
     }
 }
 
-type GoalRequest<T> = <<T as ActionMsg>::Goal as ServiceMsg>::Request;
-type GoalResponse<T> = <<T as ActionMsg>::Goal as ServiceMsg>::Response;
-type ResultRequest<T> = <<T as ActionMsg>::Result as ServiceMsg>::Request;
-type ResultResponse<T> = <<T as ActionMsg>::Result as ServiceMsg>::Response;
-
 /// An action client.
 pub struct Client<T: ActionMsg> {
     client: rcl::rcl_action_client_t,
     node: Arc<Node>,
 
-    goal_response_callbacks: BTreeMap<i64, Box<dyn FnOnce(GoalResponse<T>)>>,
-    result_response_callbacks: BTreeMap<i64, Box<dyn FnOnce(ResultResponse<T>)>>,
+    goal_response_callbacks: BTreeMap<i64, Box<dyn FnOnce(SendGoalServiceResponse<T>)>>,
+    result_response_callbacks: BTreeMap<i64, Box<dyn FnOnce(GetResultServiceResponse<T>)>>,
 }
 
 impl<T> Client<T>
@@ -109,8 +109,8 @@ where
     // TODO: this shouldn't be pub?
     pub fn send_goal_request(
         &mut self,
-        data: &GoalRequest<T>,
-        callback: Box<dyn FnOnce(GoalResponse<T>)>,
+        data: &SendGoalServiceRequest<T>,
+        callback: Box<dyn FnOnce(SendGoalServiceResponse<T>)>,
     ) -> Result<(), DynError> {
         // TODO: use mutex?
         // TODO: callbacks are FnMut? Fn? FnOnce?
@@ -118,7 +118,7 @@ where
         let mut seq: i64 = 0;
         rcl::MTSafeFn::rcl_action_send_goal_request(
             &self.client,
-            data as *const GoalRequest<T> as _,
+            data as *const SendGoalServiceRequest<T> as _,
             &mut seq,
         )?;
 
@@ -140,7 +140,8 @@ where
         let guard = rcl::MT_UNSAFE_FN.lock();
 
         let mut header: rcl::rmw_request_id_t = unsafe { MaybeUninit::zeroed().assume_init() };
-        let mut response: GoalResponse<T> = unsafe { MaybeUninit::zeroed().assume_init() };
+        let mut response: SendGoalServiceResponse<T> =
+            unsafe { MaybeUninit::zeroed().assume_init() };
         match guard.rcl_action_take_goal_response(
             &self.client,
             &mut header,
@@ -180,15 +181,15 @@ where
 
     pub fn send_result_request(
         &mut self,
-        data: &ResultRequest<T>,
-        callback: Box<dyn FnOnce(ResultResponse<T>)>,
+        data: &GetResultServiceRequest<T>,
+        callback: Box<dyn FnOnce(GetResultServiceResponse<T>)>,
     ) -> Result<(), DynError> {
         // TODO: use mutex?
 
         let mut seq: i64 = 0;
         rcl::MTSafeFn::rcl_action_send_result_request(
             &self.client,
-            data as *const ResultRequest<T> as _,
+            data as *const GetResultServiceRequest<T> as _,
             &mut seq,
         )?;
 
@@ -206,11 +207,12 @@ where
 
     // Takes a result for the goal.
     // TODO: or take_result_response
-    pub fn try_recv_result_response(&self) -> RCLActionResult<ResultResponse<T>> {
+    pub fn try_recv_result_response(&self) -> RCLActionResult<GetResultServiceResponse<T>> {
         let guard = rcl::MT_UNSAFE_FN.lock();
 
         let mut header: rcl::rmw_request_id_t = unsafe { MaybeUninit::zeroed().assume_init() };
-        let mut response: ResultResponse<T> = unsafe { MaybeUninit::zeroed().assume_init() };
+        let mut response: GetResultServiceResponse<T> =
+            unsafe { MaybeUninit::zeroed().assume_init() };
         guard.rcl_action_take_result_response(
             &self.client,
             &mut header,
