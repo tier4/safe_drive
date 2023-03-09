@@ -195,7 +195,7 @@ where
 
         if self.result_response_callbacks.contains_key(&seq) {
             Err(format!(
-                "A goal callback with sequence number {} already exists",
+                "A result callback with sequence number {} already exists",
                 seq
             )
             .into())
@@ -206,20 +206,37 @@ where
     }
 
     // Takes a result for the goal.
-    // TODO: or take_result_response
-    pub fn try_recv_result_response(&self) -> RCLActionResult<GetResultServiceResponse<T>> {
+    pub fn try_recv_result_response(&mut self) -> RecvResult<(), ()> {
         let guard = rcl::MT_UNSAFE_FN.lock();
 
         let mut header: rcl::rmw_request_id_t = unsafe { MaybeUninit::zeroed().assume_init() };
         let mut response: GetResultServiceResponse<T> =
             unsafe { MaybeUninit::zeroed().assume_init() };
-        guard.rcl_action_take_result_response(
+        match guard.rcl_action_take_result_response(
             &self.client,
             &mut header,
             &mut response as *const _ as *mut _,
-        )?;
+        ) {
+            Ok(()) => {
+                let seq = header.sequence_number;
+                match self.result_response_callbacks.remove(&seq) {
+                    Some(callback) => callback(response),
+                    None => {
+                        return RecvResult::Err(
+                            format!(
+                                "The goal callback with sequence number {} was not found",
+                                seq
+                            )
+                            .into(),
+                        );
+                    }
+                }
 
-        Ok(response)
+                RecvResult::Ok(())
+            }
+            Err(RCLActionError::ClientTakeFailed) => RecvResult::RetryLater(()),
+            Err(e) => RecvResult::Err(e.into()),
+        }
     }
 
     // Takes a feedback for the goal.

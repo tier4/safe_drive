@@ -50,7 +50,7 @@ fn test_action() -> Result<(), DynError> {
     // }
 
     // send goal request
-    let goal = MyAction_Goal { a: 100 };
+    let goal = MyAction_Goal { a: 10 };
     let mut goal_id = UUID::new().unwrap();
     goal_id.uuid = [1, 2, 3, 4, 5, 6, 7, 8, 1, 2, 3, 4, 5, 6, 7, 8];
 
@@ -62,15 +62,31 @@ fn test_action() -> Result<(), DynError> {
     client.send_goal_request(
         &goal_request,
         Box::new(|resp| {
-            println!("Goal response received: {:?}", resp);
+            println!(
+                "Goal response received: accepted = {}, timestamp = {:?}",
+                resp.accepted, resp.stamp
+            );
+        }),
+    )?;
+
+    // TODO: UUID can't be cloned?
+    let mut goal_id = UUID::new().unwrap();
+    goal_id.uuid = [1, 2, 3, 4, 5, 6, 7, 8, 1, 2, 3, 4, 5, 6, 7, 8];
+    let result_req = MyAction_GetResult_Request { goal_id };
+    client.send_result_request(
+        &result_req,
+        Box::new(|resp| {
+            println!(
+                "Result response received: status = {}, result = {}",
+                resp.status, resp.result.b
+            );
         }),
     )?;
 
     // receive goal response
     loop {
         match client.try_recv_goal_response() {
-            // we wait for a single response here
-            RecvResult::Ok(_) => break,
+            RecvResult::Ok(_) => break, // we wait for a single response here
             RecvResult::RetryLater(_) => {
                 println!("retrying...");
             }
@@ -84,6 +100,18 @@ fn test_action() -> Result<(), DynError> {
     // get feedback
 
     // get result
+    loop {
+        match client.try_recv_result_response() {
+            RecvResult::Ok(_) => break, // we wait for a single result here
+            RecvResult::RetryLater(_) => {
+                println!("retrying...");
+            }
+            RecvResult::Err(e) => {
+                println!("Error: {}", e);
+            }
+        }
+        std::thread::sleep(std::time::Duration::from_secs(1));
+    }
 
     handle.join().unwrap();
 
