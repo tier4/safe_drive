@@ -21,6 +21,12 @@ impl Clock {
     pub(crate) fn as_ptr_mut(&self) -> *mut rcl::rcl_clock_t {
         &self.clock as *const _ as *mut _
     }
+
+    pub fn get_now(&mut self) -> RCLResult<rcl::rcl_time_point_value_t> {
+        let mut now = unsafe { MaybeUninit::zeroed().assume_init() };
+        rcl::MTSafeFn::rcl_clock_get_now(&mut self.clock, &mut now)?;
+        Ok(now)
+    }
 }
 
 impl Drop for Clock {
