@@ -496,6 +496,65 @@ impl MTUnsafeFn {
         })
     }
 
+    pub fn rcl_action_server_init(
+        &self,
+        action_server: *mut rcl_action_server_t,
+        node: *mut rcl_node_t,
+        clock: *mut rcl_clock_t,
+        type_support: *const rosidl_action_type_support_t,
+        action_name: *const ::std::os::raw::c_char,
+        options: *const rcl_action_server_options_t,
+    ) -> RCLActionResult<()> {
+        action_ret_val_to_err(unsafe {
+            self::rcl_action_server_init(
+                action_server,
+                node,
+                clock,
+                type_support,
+                action_name,
+                options,
+            )
+        })
+    }
+
+    pub fn rcl_action_server_fini(
+        &self,
+        action_server: *mut rcl_action_server_t,
+        node: *mut rcl_node_t,
+    ) -> RCLActionResult<()> {
+        action_ret_val_to_err(unsafe { self::rcl_action_server_fini(action_server, node) })
+    }
+
+    pub fn rcl_action_take_goal_request(
+        &self,
+        action_server: *const rcl_action_server_t,
+        request_header: *mut rmw_request_id_t,
+        ros_goal_request: *mut ::std::os::raw::c_void,
+    ) -> RCLActionResult<()> {
+        action_ret_val_to_err(unsafe {
+            self::rcl_action_take_goal_request(action_server, request_header, ros_goal_request)
+        })
+    }
+
+    pub fn rcl_action_send_goal_response(
+        &self,
+        action_server: *const rcl_action_server_t,
+        response_header: *mut rmw_request_id_t,
+        ros_goal_response: *mut ::std::os::raw::c_void,
+    ) -> RCLActionResult<()> {
+        action_ret_val_to_err(unsafe {
+            self::rcl_action_send_goal_response(action_server, response_header, ros_goal_response)
+        })
+    }
+
+    pub fn rcl_action_accept_new_goal(
+        &self,
+        action_server: *mut rcl_action_server_t,
+        goal_info: *const rcl_action_goal_info_t,
+    ) -> *mut rcl_action_goal_handle_t {
+        unsafe { self::rcl_action_accept_new_goal(action_server, goal_info) }
+    }
+
     pub fn rcutils_reset_error(&self) {
         unsafe { self::rcutils_reset_error() };
     }
@@ -634,6 +693,13 @@ impl MTSafeFn {
         ret_val_to_err(unsafe { self::rcl_send_request(client, ros_request, sequence_number) })
     }
 
+    pub fn rcl_clock_get_now(
+        clock: *mut rcl_clock_t,
+        time_point_value: *mut rcl_time_point_value_t,
+    ) -> RCLResult<()> {
+        ret_val_to_err(unsafe { self::rcl_clock_get_now(clock, time_point_value) })
+    }
+
     pub fn rcl_action_get_zero_initialized_client() -> rcl_action_client_t {
         unsafe { self::rcl_action_get_zero_initialized_client() }
     }
@@ -660,5 +726,17 @@ impl MTSafeFn {
         action_ret_val_to_err(unsafe {
             self::rcl_action_send_result_request(action_client, ros_result_request, sequence_number)
         })
+    }
+
+    pub fn rcl_action_get_zero_initialized_server() -> rcl_action_server_t {
+        unsafe { self::rcl_action_get_zero_initialized_server() }
+    }
+
+    pub fn rcl_action_get_zero_initialized_goal_info() -> rcl_action_goal_info_t {
+        unsafe { self::rcl_action_get_zero_initialized_goal_info() }
+    }
+
+    pub fn rcl_action_server_get_default_options() -> rcl_action_server_options_t {
+        unsafe { self::rcl_action_server_get_default_options() }
     }
 }
