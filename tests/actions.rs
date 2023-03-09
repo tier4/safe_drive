@@ -2,7 +2,11 @@ pub mod common;
 
 use common::msgs::example_msg::action::*;
 use safe_drive::{
-    self, action, context::Context, error::DynError, msg::unique_identifier_msgs::msg::UUID,
+    self,
+    action::{client::Client, server::Server},
+    context::Context,
+    error::DynError,
+    msg::unique_identifier_msgs::msg::UUID,
     RecvResult,
 };
 use std::{thread, time::Duration};
@@ -13,8 +17,28 @@ fn test_action() -> Result<(), DynError> {
 
     let node_client = ctx.create_node("test_action_client_node", None, Default::default())?;
 
-    let mut client: action::client::Client<MyAction> =
-        action::client::Client::new(node_client, "test_action", None)?;
+    let mut client: Client<MyAction> = Client::new(node_client, "test_action", None)?;
+
+    // start the action server
+    let handle = thread::spawn(move || {
+        let node_server = ctx
+            .create_node("test_action_server_node", None, Default::default())
+            .unwrap();
+        let mut server: Server<MyAction> = Server::new(node_server, "test_action", None, |req| {
+            println!("Goal request received: {:?}", req);
+            true
+        })
+        .unwrap();
+
+        println!("server: waiting for goal requests...");
+        match server.try_recv_goal_request() {
+            RecvResult::Ok(_) => println!("server: accepted goal"),
+            RecvResult::RetryLater(_) => {
+                // println!("server: waiting for goal requests...");
+            }
+            RecvResult::Err(err) => println!("server: error: {:?}", err),
+        }
+    });
 
     thread::sleep(Duration::from_millis(100));
 
@@ -30,13 +54,11 @@ fn test_action() -> Result<(), DynError> {
     let mut goal_id = UUID::new().unwrap();
     goal_id.uuid = [1, 2, 3, 4, 5, 6, 7, 8, 1, 2, 3, 4, 5, 6, 7, 8];
 
-    let goal_request = MyAction_SendGoal_Request {
-        // TODO: ergonomic apis
-        // TODO: generate UUID w/ uuid crate. rclcpp's ClientBase::generate_goal_id
-        // does not conform to the UUID v4 standard, strictly speaking.
-        goal_id,
-        goal,
-    };
+    let goal_request = MyAction_SendGoal_Request { goal_id, goal };
+
+    // TODO: ergonomic apis
+    // TODO: generate UUID w/ uuid crate. rclcpp's ClientBase::generate_goal_id
+    // does not conform to the UUID v4 standard, strictly speaking.
     client.send_goal_request(
         &goal_request,
         Box::new(|resp| {
@@ -53,7 +75,6 @@ fn test_action() -> Result<(), DynError> {
                 println!("retrying...");
             }
             RecvResult::Err(e) => {
-                // panic!("Error: {}", e);
                 println!("Error: {}", e);
             }
         }
@@ -63,6 +84,8 @@ fn test_action() -> Result<(), DynError> {
     // get feedback
 
     // get result
+
+    handle.join().unwrap();
 
     Ok(())
 }

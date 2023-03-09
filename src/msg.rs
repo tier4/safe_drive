@@ -49,9 +49,26 @@ pub trait GetUUID {
     fn get_uuid(&self) -> &[u8; 16];
 }
 
+/// Response for send goal service.
+pub struct SendGoalServiceResponse {
+    pub accepted: bool,
+    pub stamp: builtin_interfaces::UnsafeTime,
+}
+
+impl SendGoalServiceResponse {
+    fn is_accepted(&self) -> bool {
+        self.accepted
+    }
+
+    fn get_time_stamp(&self) -> UnsafeTime {
+        self.stamp
+    }
+}
+
 pub trait GoalResponse {
     fn is_accepted(&self) -> bool;
     fn get_time_stamp(&self) -> UnsafeTime;
+    fn new(accepted: bool, stamp: UnsafeTime) -> Self;
 }
 
 pub trait ActionResult {
