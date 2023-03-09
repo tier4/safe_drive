@@ -390,7 +390,7 @@ impl<const N: usize> MyAction_SendGoal_RequestSeq<N> {
         self.as_slice().len()
     }
 
-    pub fn is_empty(&self) -> bool {
+    pub fn is_mpty(&self) -> bool {
         self.len() == 0
     }
 }
@@ -618,6 +618,10 @@ impl GoalResponse for MyAction_SendGoal_Response {
             sec: self.stamp.sec,
             nanosec: self.stamp.nanosec,
         }
+    }
+
+    fn new(accepted: bool, stamp: UnsafeTime) -> Self {
+        Self { accepted, stamp }
     }
 }
 
