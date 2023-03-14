@@ -169,16 +169,6 @@ where
         }
     }
 
-    // TODO: ergonomic api, maybe return [GoalStatus], GoalStatusArray is a rosidl message type
-    pub fn take_status(&self) -> RCLActionResult<GoalStatusArray> {
-        let guard = rcl::MT_UNSAFE_FN.lock();
-
-        let mut status_array: GoalStatusArray = unsafe { MaybeUninit::zeroed().assume_init() };
-        guard.rcl_action_take_status(&self.client, &mut status_array as *const _ as *mut _)?;
-
-        Ok(status_array)
-    }
-
     pub fn send_result_request(
         &mut self,
         data: &GetResultServiceRequest<T>,
@@ -247,6 +237,19 @@ where
             unsafe { MaybeUninit::zeroed().assume_init() };
         match guard.rcl_action_take_feedback(&self.client, &mut feedback as *const _ as *mut _) {
             Ok(()) => RecvResult::Ok(feedback),
+            Err(RCLActionError::ClientTakeFailed) => RecvResult::RetryLater(()),
+            Err(e) => RecvResult::Err(e.into()),
+        }
+    }
+
+    // Takes a status message for all the ongoing goals.
+    // TODO: ergonomic api, maybe return [GoalStatus], GoalStatusArray is a rosidl message type
+    pub fn try_recv_status(&self) -> RecvResult<GoalStatusArray, ()> {
+        let guard = rcl::MT_UNSAFE_FN.lock();
+
+        let mut status_array: GoalStatusArray = unsafe { MaybeUninit::zeroed().assume_init() };
+        match guard.rcl_action_take_status(&self.client, &mut status_array as *const _ as *mut _) {
+            Ok(()) => RecvResult::Ok(status_array),
             Err(RCLActionError::ClientTakeFailed) => RecvResult::RetryLater(()),
             Err(e) => RecvResult::Err(e.into()),
         }

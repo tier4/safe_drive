@@ -134,3 +134,63 @@ fn test_action() -> Result<(), DynError> {
 
     Ok(())
 }
+
+#[test]
+fn test_action_status() -> Result<(), DynError> {
+    let ctx = Context::new()?;
+
+    let node_client = ctx.create_node("test_action_client_node", None, Default::default())?;
+
+    let mut client: Client<MyAction> = Client::new(node_client, "test_action", None)?;
+
+    thread::sleep(Duration::from_millis(100));
+
+    // send goal request
+    let goal = MyAction_Goal { a: 10 };
+    let mut goal_id = UUID::new().unwrap();
+    goal_id.uuid = [1, 2, 3, 4, 5, 6, 7, 8, 1, 2, 3, 4, 5, 6, 7, 8];
+
+    let goal_request = MyAction_SendGoal_Request { goal_id, goal };
+
+    client.send_goal_request(
+        &goal_request,
+        Box::new(|resp| {
+            println!(
+                "Goal response received: accepted = {}, timestamp = {:?}",
+                resp.accepted, resp.stamp
+            );
+        }),
+    )?;
+
+    // receive goal response
+    loop {
+        match client.try_recv_goal_response() {
+            RecvResult::Ok(_) => break, // we wait for a single response here
+            RecvResult::RetryLater(_) => {
+                println!("retrying...");
+            }
+            RecvResult::Err(e) => {
+                println!("Error: {}", e);
+            }
+        }
+        std::thread::sleep(std::time::Duration::from_secs(1));
+    }
+
+    // Once the goal is accepted, get status for all the ongoing goals.
+    // There should be at least one ongoing goal which this test has requested.
+    loop {
+        match client.try_recv_status() {
+            RecvResult::Ok(status_array) => {
+                println!("Status received: {:?}", status_array);
+                break;
+            }
+            RecvResult::RetryLater(_) => {
+                println!("retrying...");
+            }
+            RecvResult::Err(e) => println!("Error: {}", e),
+        }
+        std::thread::sleep(std::time::Duration::from_secs(1));
+    }
+
+    Ok(())
+}
