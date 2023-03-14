@@ -90,9 +90,7 @@ fn test_action() -> Result<(), DynError> {
             RecvResult::RetryLater(_) => {
                 println!("retrying...");
             }
-            RecvResult::Err(e) => {
-                println!("Error: {}", e);
-            }
+            RecvResult::Err(e) => return Err(e.into()),
         }
         std::thread::sleep(std::time::Duration::from_secs(1));
     }
@@ -111,7 +109,7 @@ fn test_action() -> Result<(), DynError> {
             RecvResult::RetryLater(_) => {
                 println!("retrying...");
             }
-            RecvResult::Err(e) => println!("Error: {}", e),
+            RecvResult::Err(e) => return Err(e.into()),
         }
         std::thread::sleep(std::time::Duration::from_secs(1));
     }
@@ -123,9 +121,7 @@ fn test_action() -> Result<(), DynError> {
             RecvResult::RetryLater(_) => {
                 println!("retrying...");
             }
-            RecvResult::Err(e) => {
-                println!("Error: {}", e);
-            }
+            RecvResult::Err(e) => println!("Error: {}", e),
         }
         std::thread::sleep(std::time::Duration::from_secs(1));
     }
@@ -169,9 +165,7 @@ fn test_action_status() -> Result<(), DynError> {
             RecvResult::RetryLater(_) => {
                 println!("retrying...");
             }
-            RecvResult::Err(e) => {
-                println!("Error: {}", e);
-            }
+            RecvResult::Err(e) => return Err(e.into()),
         }
         std::thread::sleep(std::time::Duration::from_secs(1));
     }
@@ -187,7 +181,7 @@ fn test_action_status() -> Result<(), DynError> {
             RecvResult::RetryLater(_) => {
                 println!("retrying...");
             }
-            RecvResult::Err(e) => println!("Error: {}", e),
+            RecvResult::Err(e) => return Err(e.into()),
         }
         std::thread::sleep(std::time::Duration::from_secs(1));
     }
