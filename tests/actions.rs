@@ -148,7 +148,7 @@ fn test_action_status() -> Result<(), DynError> {
     // send goal request
     let goal = MyAction_Goal { a: 10 };
     let mut goal_id = UUID::new().unwrap();
-    goal_id.uuid = [1, 2, 3, 4, 5, 6, 7, 8, 1, 2, 3, 4, 5, 6, 7, 8];
+    goal_id.uuid = [1, 2, 3, 4, 5, 6, 7, 8, 1, 2, 3, 4, 5, 6, 7, 9];
 
     let goal_request = MyAction_SendGoal_Request { goal_id, goal };
 
