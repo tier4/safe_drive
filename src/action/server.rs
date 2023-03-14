@@ -106,7 +106,7 @@ where
                 let now_sec = now_nanosec / 10_i64.pow(9);
                 let stamp = builtin_interfaces::UnsafeTime {
                     sec: now_sec as i32,
-                    nanosec: (now_nanosec - now_sec) as u32,
+                    nanosec: (now_nanosec - now_sec * 10_i64.pow(9)) as u32,
                 };
 
                 // accept goal if appropriate
@@ -119,11 +119,9 @@ where
 
                     let uuid = request.get_uuid().clone();
                     goal_info.goal_id = unique_identifier_msgs__msg__UUID { uuid };
-                    // UUID kata ga takusan atte wakaran
-                    // TODO: avoid unwrap
 
                     goal_info.stamp.sec = (now_nanosec / 10_i64.pow(9)) as i32;
-                    goal_info.stamp.nanosec = (now_nanosec - now_sec) as u32;
+                    goal_info.stamp.nanosec = (now_nanosec - now_sec * 10_i64.pow(9)) as u32;
 
                     let goal_handle =
                         guard.rcl_action_accept_new_goal(&mut self.server, &goal_info);
