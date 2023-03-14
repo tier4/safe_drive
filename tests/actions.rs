@@ -97,7 +97,24 @@ fn test_action() -> Result<(), DynError> {
         std::thread::sleep(std::time::Duration::from_secs(1));
     }
 
-    // get feedback
+    // get feedback (wait for five feedback messages)
+    let mut received = 0;
+    loop {
+        match client.try_recv_feedback() {
+            RecvResult::Ok(feedback) => {
+                println!("Feedback received: {:?}", feedback);
+                received += 1;
+                if received > 5 {
+                    break;
+                }
+            }
+            RecvResult::RetryLater(_) => {
+                println!("retrying...");
+            }
+            RecvResult::Err(e) => println!("Error: {}", e),
+        }
+        std::thread::sleep(std::time::Duration::from_secs(1));
+    }
 
     // get result
     loop {

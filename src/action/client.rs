@@ -240,14 +240,16 @@ where
     }
 
     // Takes a feedback for the goal.
-    pub fn try_recv_feedback(&self) -> RCLActionResult<<T as ActionMsg>::Feedback> {
+    pub fn try_recv_feedback(&self) -> RecvResult<<T as ActionMsg>::Feedback, ()> {
         let guard = rcl::MT_UNSAFE_FN.lock();
 
         let mut feedback: <T as ActionMsg>::Feedback =
             unsafe { MaybeUninit::zeroed().assume_init() };
-        guard.rcl_action_take_feedback(&self.client, &mut feedback as *const _ as *mut _)?;
-
-        Ok(feedback)
+        match guard.rcl_action_take_feedback(&self.client, &mut feedback as *const _ as *mut _) {
+            Ok(()) => RecvResult::Ok(feedback),
+            Err(RCLActionError::ClientTakeFailed) => RecvResult::RetryLater(()),
+            Err(e) => RecvResult::Err(e.into()),
+        }
     }
 }
 
