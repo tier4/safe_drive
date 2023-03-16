@@ -143,3 +143,12 @@ impl From<RCLActionError> for u32 {
         }
     }
 }
+
+impl std::fmt::Display for rcl::rcutils_error_string_t {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let s = self.str_;
+        let inner: &[u8] = unsafe { &*(&s as *const [i8] as *const [u8]) };
+        let s = String::from_utf8(inner.to_vec()).unwrap();
+        write!(f, "{}", s)
+    }
+}

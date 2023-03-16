@@ -7,7 +7,7 @@ use crate::{
     msg::{builtin_interfaces, ActionGoal, ActionMsg, GetUUID, GoalResponse},
     node::Node,
     qos::Profile,
-    rcl::{self, unique_identifier_msgs__msg__UUID},
+    rcl::{self, rcutils_get_error_string, unique_identifier_msgs__msg__UUID},
     RecvResult,
 };
 
@@ -126,7 +126,8 @@ where
                     let goal_handle =
                         guard.rcl_action_accept_new_goal(&mut self.server, &goal_info);
                     if goal_handle.is_null() {
-                        return RecvResult::Err("Failed to accept the goal".into());
+                        let msg = unsafe { rcutils_get_error_string() };
+                        return RecvResult::Err(format!("Failed to accept new goal: {msg}").into());
                     }
                 }
 
