@@ -91,6 +91,8 @@ where
     }
 
     pub fn try_recv_goal_request(&mut self) -> RecvResult<(), ()> {
+        assert!(rcl::MTSafeFn::rcl_clock_valid(&mut self.clock.clock));
+
         let guard = rcl::MT_UNSAFE_FN.lock();
 
         let mut header: rcl::rmw_request_id_t = unsafe { MaybeUninit::zeroed().assume_init() };
@@ -122,6 +124,9 @@ where
 
                     goal_info.stamp.sec = (now_nanosec / 10_i64.pow(9)) as i32;
                     goal_info.stamp.nanosec = (now_nanosec - now_sec * 10_i64.pow(9)) as u32;
+
+                    assert!(rcl::MTSafeFn::rcl_clock_valid(&mut self.clock.clock));
+                    println!("{:?}", self.clock.clock.get_now); // this access makes difference
 
                     let goal_handle =
                         guard.rcl_action_accept_new_goal(&mut self.server, &goal_info);

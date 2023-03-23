@@ -4,16 +4,18 @@ use crate::{error::RCLResult, get_allocator, rcl};
 
 /// A clock. For now only SystemTime/ROSTime is implemented.
 pub struct Clock {
-    clock: rcl::rcl_clock_t,
+    pub(crate) clock: rcl::rcl_clock_t,
 }
 
 impl Clock {
     /// Create a clock.
     pub fn new() -> RCLResult<Self> {
-        let mut clock: rcl::rcl_clock_t = unsafe { MaybeUninit::zeroed().assume_init() };
+        let mut clock = unsafe { MaybeUninit::zeroed().assume_init() };
 
         let guard = rcl::MT_UNSAFE_FN.lock();
         guard.rcl_ros_clock_init(&mut clock, &mut get_allocator())?;
+
+        assert!(rcl::MTSafeFn::rcl_clock_valid(&mut clock));
 
         Ok(Self { clock })
     }
@@ -32,6 +34,6 @@ impl Clock {
 impl Drop for Clock {
     fn drop(&mut self) {
         let guard = rcl::MT_UNSAFE_FN.lock();
-        guard.rcl_ros_clock_fini(&mut self.clock);
+        let _ = guard.rcl_ros_clock_fini(&mut self.clock);
     }
 }
