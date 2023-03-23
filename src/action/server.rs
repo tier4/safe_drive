@@ -127,6 +127,7 @@ where
 
                     assert!(rcl::MTSafeFn::rcl_clock_valid(&mut self.clock.clock));
                     println!("{:?}", self.clock.clock.get_now); // this access makes difference
+                    println!("{:?}", self.clock.clock.type_); // this access makes difference
 
                     let goal_handle =
                         guard.rcl_action_accept_new_goal(&mut self.server, &goal_info);
