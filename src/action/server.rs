@@ -52,7 +52,7 @@ impl<T> Server<T>
 where
     T: ActionMsg,
 {
-    /// Create a client.
+    /// Create a server.
     pub fn new<GR>(
         node: Arc<Node>,
         action_name: &str,

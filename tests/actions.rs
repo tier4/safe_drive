@@ -9,22 +9,28 @@ use safe_drive::{
     msg::unique_identifier_msgs::msg::UUID,
     RecvResult,
 };
-use std::{thread, time::Duration};
+use std::{sync::Arc, thread, time::Duration};
+
+fn create_server(
+    ctx: &Arc<Context>,
+    node: &str,
+    action: &str,
+) -> Result<Server<MyAction>, DynError> {
+    let node_server = ctx.create_node(node, None, Default::default()).unwrap();
+
+    Server::new(node_server, action, None, |req| {
+        println!("Goal request received: {:?}", req);
+        true
+    })
+    .map_err(|e| e.into())
+}
 
 #[test]
 fn test_action() -> Result<(), DynError> {
     let ctx = Context::new()?;
 
     // start the action server
-    let node_server = ctx
-        .create_node("test_action_server_node", None, Default::default())
-        .unwrap();
-
-    let mut server: Server<MyAction> = Server::new(node_server, "test_action", None, |req| {
-        println!("Goal request received: {:?}", req);
-        true
-    })
-    .unwrap();
+    let mut server = create_server(&ctx, "test_action_server_node", "test_action")?;
 
     // start the action client
     let node_client = ctx.create_node("test_action_client_node", None, Default::default())?;
@@ -181,7 +187,7 @@ fn test_action_status() -> Result<(), DynError> {
     }
 
     // Once the goal is accepted, get status for all the ongoing goals.
-    // There should be at least one ongoing goal which this test has requested.
+    // There should be at least one ongoing goal which has been requested earlier in this test.
     loop {
         match client.try_recv_status() {
             RecvResult::Ok(status_array) => {
