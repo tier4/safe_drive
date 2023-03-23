@@ -37,6 +37,13 @@ pub trait ActionMsg {
     type Result: ActionResult;
     type Feedback: TypeSupport + GetUUID;
     fn type_support() -> *const rcl::rosidl_action_type_support_t;
+
+    // TODO: could be moved to ActionGoal::Request?
+    type GoalContent: TypeSupport;
+    fn new_goal_request(
+        goal: Self::GoalContent,
+        uuid: [u8; 16],
+    ) -> <Self::Goal as ActionGoal>::Request;
 }
 
 pub trait ActionGoal {

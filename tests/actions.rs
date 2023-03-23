@@ -42,35 +42,20 @@ fn test_action() -> Result<(), DynError> {
     // break;
     // }
     // }
+    thread::sleep(Duration::from_millis(100));
 
     // send goal request
     let goal = MyAction_Goal { a: 10 };
-    let mut goal_id = UUID::new().unwrap();
-    goal_id.uuid = [1, 2, 3, 4, 5, 6, 7, 8, 1, 2, 3, 4, 5, 6, 7, 8];
 
-    let goal_request = MyAction_SendGoal_Request { goal_id, goal };
-
-    // TODO: ergonomic apis
     // TODO: generate UUID w/ uuid crate. rclcpp's ClientBase::generate_goal_id
     // does not conform to the UUID v4 standard, strictly speaking.
-    // client.send_goal_with_uuid(goal, goal_id, |resp| {
-    //         println!(
-    //             "Goal response received: accepted = {}, timestamp = {:?}",
-    //             resp.accepted, resp.stamp
-    //         );
-    //     }
-    // )?;
-    thread::sleep(Duration::from_millis(100));
-
-    client.send_goal_request(
-        &goal_request,
-        Box::new(|resp| {
-            println!(
-                "Goal response received: accepted = {}, timestamp = {:?}",
-                resp.accepted, resp.stamp
-            );
-        }),
-    )?;
+    let uuid = [1, 2, 3, 4, 5, 6, 7, 8, 1, 2, 3, 4, 5, 6, 7, 8];
+    client.send_goal_with_uuid(goal, uuid, |resp| {
+        println!(
+            "Goal response received: accepted = {}, timestamp = {:?}",
+            resp.accepted, resp.stamp
+        );
+    })?;
 
     // wait for goal request, then send response
     loop {

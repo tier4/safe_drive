@@ -103,10 +103,23 @@ where
 
     // )
 
-    // pub fn send_goal_with_uuid()
+    /// Send a goal request to the server with given uuid. the uuid can be any 16-bit slice [u8; 16] i.e. does not have to
+    /// strictly conform to the UUID v4 standard.
+    pub fn send_goal_with_uuid<GR>(
+        &mut self,
+        goal: <T as ActionMsg>::GoalContent,
+        uuid: [u8; 16],
+        callback: GR,
+    ) -> Result<(), DynError>
+    where
+        GR: FnOnce(SendGoalServiceResponse<T>) + 'static,
+    {
+        let request = <T as ActionMsg>::new_goal_request(goal, uuid);
+        let boxed = Box::new(callback);
+        self.send_goal_request(&request, boxed)
+    }
 
-    // Send a goal request.
-    // TODO: this shouldn't be pub?
+    /// Send a goal request.
     pub fn send_goal_request(
         &mut self,
         data: &SendGoalServiceRequest<T>,
@@ -243,7 +256,7 @@ where
     }
 
     // Takes a status message for all the ongoing goals.
-    // TODO: ergonomic api, maybe return [GoalStatus], GoalStatusArray is a rosidl message type
+    // TODO: maybe return status_array.status_list. could it be cloned?
     pub fn try_recv_status(&self) -> RecvResult<GoalStatusArray, ()> {
         let guard = rcl::MT_UNSAFE_FN.lock();
 

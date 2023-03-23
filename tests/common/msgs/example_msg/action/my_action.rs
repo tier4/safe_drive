@@ -26,6 +26,18 @@ impl ActionMsg for MyAction {
             rosidl_typesupport_c__get_action_type_support_handle__example_msg__action__MyAction()
         }
     }
+
+    type GoalContent = MyAction_Goal;
+
+    fn new_goal_request(
+        goal: Self::GoalContent,
+        uuid: [u8; 16],
+    ) -> <Self::Goal as ActionGoal>::Request {
+        MyAction_SendGoal_Request {
+            goal,
+            goal_id: unique_identifier_msgs::msg::UUID { uuid },
+        }
+    }
 }
 
 #[repr(C)]
