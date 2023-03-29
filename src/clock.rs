@@ -15,8 +15,6 @@ impl Clock {
         let guard = rcl::MT_UNSAFE_FN.lock();
         guard.rcl_ros_clock_init(&mut clock, &mut get_allocator())?;
 
-        assert!(rcl::MTSafeFn::rcl_clock_valid(&mut clock));
-
         Ok(Self {
             clock: Box::new(clock),
         })

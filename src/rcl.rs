@@ -693,10 +693,6 @@ impl MTSafeFn {
         ret_val_to_err(unsafe { self::rcl_send_request(client, ros_request, sequence_number) })
     }
 
-    pub fn rcl_clock_valid(clock: *mut rcl_clock_t) -> bool {
-        unsafe { self::rcl_clock_valid(clock) }
-    }
-
     pub fn rcl_clock_get_now(
         clock: *mut rcl_clock_t,
         time_point_value: *mut rcl_time_point_value_t,

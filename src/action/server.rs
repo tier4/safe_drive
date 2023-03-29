@@ -123,9 +123,6 @@ where
                     goal_info.stamp.sec = (now_nanosec / 10_i64.pow(9)) as i32;
                     goal_info.stamp.nanosec = (now_nanosec - now_sec * 10_i64.pow(9)) as u32;
 
-                    println!("{:?}", self.clock.clock.get_now); // this access makes difference
-                    println!("{:?}", self.clock.clock.type_); // this access makes difference
-
                     let goal_handle =
                         guard.rcl_action_accept_new_goal(&mut self.server, &goal_info);
                     if goal_handle.is_null() {
