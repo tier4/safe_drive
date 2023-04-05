@@ -24,7 +24,7 @@ define
 
     starvation_free == \A x \in (Timers \union Tasks):
         LET delta_set == {y.name: y \in ToSet(delta_list)} IN
-        (((x \in delta_set) \/ (x \in wait_set)) ~> <>(x \in running))
+        (((x \in delta_set) \/ (x \in wait_set)) ~> x \in running)
     running_xor_waiting == \A x \in Tasks:
         (x \in running /\ x \notin waiting) \/ (x \notin running /\ x \in waiting)
     running_then_not_delta_list == \A x \in Timers:
@@ -209,7 +209,7 @@ begin
         end while;
 end process;
 end algorithm; *)
-\* BEGIN TRANSLATION (chksum(pcal) = "615b0ea5" /\ chksum(tla) = "7cf79cd9")
+\* BEGIN TRANSLATION (chksum(pcal) = "5e751b92" /\ chksum(tla) = "e157856a")
 \* Process variable head of process executor at line 203 col 5 changed to head_
 \* Process variable to_be_reloaded of process executor at line 204 col 5 changed to to_be_reloaded_
 \* Parameter name of procedure callback at line 49 col 20 changed to name_
@@ -222,7 +222,7 @@ pick_task(set) == CHOOSE x \in set: TRUE
 
 starvation_free == \A x \in (Timers \union Tasks):
     LET delta_set == {y.name: y \in ToSet(delta_list)} IN
-    (((x \in delta_set) \/ (x \in wait_set)) ~> <>(x \in running))
+    (((x \in delta_set) \/ (x \in wait_set)) ~> x \in running)
 running_xor_waiting == \A x \in Tasks:
     (x \in running /\ x \notin waiting) \/ (x \notin running /\ x \in waiting)
 running_then_not_delta_list == \A x \in Timers:
