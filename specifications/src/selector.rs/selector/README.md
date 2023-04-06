@@ -69,5 +69,5 @@ $$
 where
 
 $$
-\mathrm{Tasks} = \mathrm{Subscribers} \cap \mathrm{Servers} \cap \mathrm{Clients}.
+\mathrm{Tasks} = \mathrm{Subscribers} \cup \mathrm{Servers} \cup \mathrm{Clients}.
 $$
