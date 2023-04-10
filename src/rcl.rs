@@ -398,7 +398,7 @@ impl MTUnsafeLogFn {
         ret_val_to_err(unsafe { self::rcutils_logging_initialize() })
     }
 
-    pub fn rcutils_logging_logger_is_enabled_for(&self, name: *const i8, severity: i32) -> bool {
+    pub fn rcutils_logging_logger_is_enabled_for(&self, name: *const ::std::os::raw::c_char, severity: i32) -> bool {
         unsafe { self::rcutils_logging_logger_is_enabled_for(name, severity) }
     }
 
