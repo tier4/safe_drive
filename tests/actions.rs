@@ -18,11 +18,16 @@ fn create_server(
 ) -> Result<Server<MyAction>, DynError> {
     let node_server = ctx.create_node(node, None, Default::default()).unwrap();
 
-    Server::new(node_server, action, None, |req| {
+    let goal_callback = |req| {
         println!("Goal request received: {:?}", req);
         true
-    })
-    .map_err(|e| e.into())
+    };
+    let cancel_callback = |req| {
+        println!("Cancel request received: {:?}", req);
+        true
+    };
+
+    Server::new(node_server, action, None, goal_callback, cancel_callback).map_err(|e| e.into())
 }
 
 #[test]
@@ -136,9 +141,10 @@ fn test_action() -> Result<(), DynError> {
 fn test_action_status() -> Result<(), DynError> {
     let ctx = Context::new()?;
 
-    let node_client = ctx.create_node("test_action_client_node", None, Default::default())?;
+    let mut server = create_server(&ctx, "test_action_server_node", "test_action_status")?;
 
-    let mut client: Client<MyAction> = Client::new(node_client, "test_action", None)?;
+    let node_client = ctx.create_node("test_action_client_node", None, Default::default())?;
+    let mut client: Client<MyAction> = Client::new(node_client, "test_action_status", None)?;
 
     thread::sleep(Duration::from_millis(100));
 

@@ -459,6 +459,32 @@ impl MTUnsafeFn {
         })
     }
 
+    pub fn rcl_action_take_result_request(
+        &self,
+        action_server: *const rcl_action_server_t,
+        request_header: *mut rmw_request_id_t,
+        ros_result_request: *mut ::std::os::raw::c_void,
+    ) -> RCLActionResult<()> {
+        action_ret_val_to_err(unsafe {
+            self::rcl_action_take_result_request(action_server, request_header, ros_result_request)
+        })
+    }
+
+    pub fn rcl_action_send_result_response(
+        &self,
+        action_server: *const rcl_action_server_t,
+        response_header: *mut rmw_request_id_t,
+        ros_result_response: *mut ::std::os::raw::c_void,
+    ) -> RCLActionResult<()> {
+        action_ret_val_to_err(unsafe {
+            self::rcl_action_send_result_response(
+                action_server,
+                response_header,
+                ros_result_response,
+            )
+        })
+    }
+
     pub fn rcl_action_take_result_response(
         &self,
         action_client: *const rcl_action_client_t,
@@ -553,6 +579,43 @@ impl MTUnsafeFn {
         goal_info: *const rcl_action_goal_info_t,
     ) -> *mut rcl_action_goal_handle_t {
         unsafe { self::rcl_action_accept_new_goal(action_server, goal_info) }
+    }
+
+    pub fn rcl_action_take_cancel_request(
+        &self,
+        action_server: *const rcl_action_server_t,
+        request_header: *mut rmw_request_id_t,
+        ros_cancel_request: *mut ::std::os::raw::c_void,
+    ) -> RCLActionResult<()> {
+        action_ret_val_to_err(unsafe {
+            self::rcl_action_take_cancel_request(action_server, request_header, ros_cancel_request)
+        })
+    }
+
+    pub fn rcl_action_process_cancel_request(
+        &self,
+        action_server: *const rcl_action_server_t,
+        cancel_request: *const rcl_action_cancel_request_t,
+        cancel_response: *mut rcl_action_cancel_response_t,
+    ) -> RCLActionResult<()> {
+        action_ret_val_to_err(unsafe {
+            self::rcl_action_process_cancel_request(action_server, cancel_request, cancel_response)
+        })
+    }
+
+    pub fn rcl_action_send_cancel_response(
+        &self,
+        action_server: *const rcl_action_server_t,
+        response_header: *mut rmw_request_id_t,
+        ros_cancel_response: *mut ::std::os::raw::c_void,
+    ) -> RCLActionResult<()> {
+        action_ret_val_to_err(unsafe {
+            self::rcl_action_send_cancel_response(
+                action_server,
+                response_header,
+                ros_cancel_response,
+            )
+        })
     }
 
     pub fn rcutils_reset_error(&self) {
@@ -738,5 +801,13 @@ impl MTSafeFn {
 
     pub fn rcl_action_server_get_default_options() -> rcl_action_server_options_t {
         unsafe { self::rcl_action_server_get_default_options() }
+    }
+
+    pub fn rcl_action_get_zero_initialized_cancel_request() -> rcl_action_cancel_request_t {
+        unsafe { self::rcl_action_get_zero_initialized_cancel_request() }
+    }
+
+    pub fn rcl_action_get_zero_initialized_cancel_response() -> rcl_action_cancel_response_t {
+        unsafe { self::rcl_action_get_zero_initialized_cancel_response() }
     }
 }

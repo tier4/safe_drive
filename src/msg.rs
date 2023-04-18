@@ -44,10 +44,12 @@ pub trait ActionMsg {
         goal: Self::GoalContent,
         uuid: [u8; 16],
     ) -> <Self::Goal as ActionGoal>::Request;
+
+    type ResultContent: TypeSupport;
 }
 
 pub trait ActionGoal {
-    type Request: TypeSupport + GetUUID;
+    type Request: TypeSupport + GetUUID + Clone;
     type Response: TypeSupport + GoalResponse;
     fn type_support() -> *const rcl::rosidl_service_type_support_t;
 }
