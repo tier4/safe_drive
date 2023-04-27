@@ -129,13 +129,16 @@ where
             )?;
         }
 
-        Ok(Self {
+        let mut server = Self {
             server,
             node,
             clock,
             goal_request_callback: Box::new(goal_request_callback),
             cancel_request_callback: Box::new(cancel_request_callback),
-        })
+        };
+        server.publish_status().unwrap();
+
+        Ok(server)
     }
 
     pub fn try_recv_goal_request(&mut self) -> RecvResult<(), ()> {
@@ -177,6 +180,8 @@ where
                         let msg = unsafe { rcutils_get_error_string() };
                         return RecvResult::Err(format!("Failed to accept new goal: {msg}").into());
                     }
+
+                    self.publish_status().unwrap();
                 }
 
                 // TODO: Make SendgoalServiceResponse independent of T (edit safe-drive-msg)
@@ -271,6 +276,17 @@ where
             Err(RCLActionError::ServerTakeFailed) => RecvResult::RetryLater(()),
             Err(e) => RecvResult::Err(e.into()),
         }
+    }
+
+    // TODO: when to publish?
+    fn publish_status(&mut self) -> Result<(), DynError> {
+        let guard = rcl::MT_UNSAFE_FN.lock();
+
+        let mut status = rcl::MTSafeFn::rcl_action_get_zero_initialized_goal_status_array();
+        guard.rcl_action_get_goal_status_array(&self.server, &mut status)?;
+        guard.rcl_action_publish_status(&self.server, &status as *const _ as *const _)?;
+
+        Ok(())
     }
 
     // TODO: try_recv_data? (see rclcpp's take_data)

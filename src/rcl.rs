@@ -551,6 +551,26 @@ impl MTUnsafeFn {
         action_ret_val_to_err(unsafe { self::rcl_action_server_fini(action_server, node) })
     }
 
+    pub fn rcl_action_publish_status(
+        &self,
+        action_server: *const rcl_action_server_t,
+        status_message: *const ::std::os::raw::c_void,
+    ) -> RCLActionResult<()> {
+        action_ret_val_to_err(unsafe {
+            self::rcl_action_publish_status(action_server, status_message)
+        })
+    }
+
+    pub fn rcl_action_get_goal_status_array(
+        &self,
+        action_server: *const rcl_action_server_t,
+        status_message: *mut rcl_action_goal_status_array_t,
+    ) -> RCLActionResult<()> {
+        action_ret_val_to_err(unsafe {
+            self::rcl_action_get_goal_status_array(action_server, status_message)
+        })
+    }
+
     pub fn rcl_action_take_goal_request(
         &self,
         action_server: *const rcl_action_server_t,
@@ -793,6 +813,10 @@ impl MTSafeFn {
 
     pub fn rcl_action_get_zero_initialized_server() -> rcl_action_server_t {
         unsafe { self::rcl_action_get_zero_initialized_server() }
+    }
+
+    pub fn rcl_action_get_zero_initialized_goal_status_array() -> rcl_action_goal_status_array_t {
+        unsafe { self::rcl_action_get_zero_initialized_goal_status_array() }
     }
 
     pub fn rcl_action_get_zero_initialized_goal_info() -> rcl_action_goal_info_t {
