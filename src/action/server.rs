@@ -23,18 +23,47 @@ use crate::{
     RecvResult,
 };
 
+#[cfg(feature = "galactic")]
+use crate::qos::galactic::*;
+
+#[cfg(feature = "humble")]
+use crate::qos::humble::*;
+
 use super::SendGoalServiceRequest;
 
 type CancelRequest = action_msgs__srv__CancelGoal_Request;
 type CancelResponse = action_msgs__srv__CancelGoal_Response;
 
 pub struct ServerQosOption {
-    goal_service: Profile,
-    result_service: Profile,
-    cancel_service: Profile,
-    feedback_topic: Profile,
-    status_topic: Profile,
-    result_timeout: Duration,
+    pub goal_service: Profile,
+    pub result_service: Profile,
+    pub cancel_service: Profile,
+    pub feedback_topic: Profile,
+    pub status_topic: Profile,
+    pub result_timeout: Duration,
+}
+
+impl Default for ServerQosOption {
+    fn default() -> Self {
+        let status_topic_profile = Profile {
+            history: HistoryPolicy::KeepLast,
+            depth: 1,
+            reliability: ReliabilityPolicy::Reliable,
+            durability: DurabilityPolicy::TransientLocal,
+            liveliness: LivelinessPolicy::SystemDefault,
+            avoid_ros_namespace_conventions: false,
+            ..Default::default()
+        };
+
+        Self {
+            goal_service: Profile::services_default(),
+            result_service: Profile::services_default(),
+            cancel_service: Profile::services_default(),
+            feedback_topic: Profile::default(),
+            status_topic: status_topic_profile,
+            result_timeout: Duration::from_secs(15 * 60),
+        }
+    }
 }
 
 impl From<ServerQosOption> for rcl::rcl_action_server_options_t {
