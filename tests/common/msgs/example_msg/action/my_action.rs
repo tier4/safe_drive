@@ -47,6 +47,19 @@ pub struct MyAction_SendGoal_Request {
     pub goal: MyAction_Goal,
 }
 
+// TODO: derived Clone impl
+impl Clone for MyAction_SendGoal_Request {
+    fn clone(&self) -> Self {
+        let uuid = unique_identifier_msgs::msg::UUID {
+            uuid: self.get_uuid().clone(),
+        };
+        Self {
+            goal_id: uuid,
+            goal: self.goal.clone(),
+        }
+    }
+}
+
 #[repr(C)]
 #[derive(Debug)]
 pub struct MyAction_SendGoal_Response {
@@ -75,7 +88,7 @@ pub struct MyAction_FeedbackMessage {
 }
 
 #[repr(C)]
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct MyAction_Goal {
     pub a: i64,
 }
