@@ -142,15 +142,18 @@ where
     }
 
     pub fn try_recv_goal_request(&mut self) -> RecvResult<(), ()> {
-        let guard = rcl::MT_UNSAFE_FN.lock();
-
         let mut header: rcl::rmw_request_id_t = unsafe { MaybeUninit::zeroed().assume_init() };
         let mut request: SendGoalServiceRequest<T> = unsafe { MaybeUninit::zeroed().assume_init() };
-        match guard.rcl_action_take_goal_request(
-            &self.server,
-            &mut header,
-            &mut request as *const _ as *mut _,
-        ) {
+        let result = {
+            let guard = rcl::MT_UNSAFE_FN.lock();
+            guard.rcl_action_take_goal_request(
+                &self.server,
+                &mut header,
+                &mut request as *const _ as *mut _,
+            )
+        };
+
+        match result {
             Ok(()) => {
                 // get current time
                 let now_nanosec = self.clock.get_now().unwrap();
@@ -174,8 +177,10 @@ where
                     goal_info.stamp.sec = (now_nanosec / 10_i64.pow(9)) as i32;
                     goal_info.stamp.nanosec = (now_nanosec - now_sec * 10_i64.pow(9)) as u32;
 
-                    let goal_handle =
-                        guard.rcl_action_accept_new_goal(&mut self.server, &goal_info);
+                    let goal_handle = {
+                        let guard = rcl::MT_UNSAFE_FN.lock();
+                        guard.rcl_action_accept_new_goal(&mut self.server, &goal_info)
+                    };
                     if goal_handle.is_null() {
                         let msg = unsafe { rcutils_get_error_string() };
                         return RecvResult::Err(format!("Failed to accept new goal: {msg}").into());
@@ -192,6 +197,7 @@ where
                 // let mut response = SendGoalServiceResponse { accepted, stamp };
 
                 // send response to client
+                let guard = rcl::MT_UNSAFE_FN.lock();
                 match guard.rcl_action_send_goal_response(
                     &self.server,
                     &mut header,
