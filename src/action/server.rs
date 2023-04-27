@@ -2,7 +2,7 @@ use std::{ffi::CString, mem::MaybeUninit, sync::Arc, time::Duration};
 
 use crate::{
     clock::Clock,
-    error::{RCLActionError, RCLActionResult},
+    error::{DynError, RCLActionError, RCLActionResult},
     get_allocator,
     msg::{
         builtin_interfaces,
@@ -199,31 +199,36 @@ where
                     Err(e) => return RecvResult::Err(e.into()),
                 }
 
-                // TODO: do decent filtering with callbacks
-                /*
-                let accepted_goals = vec![];
-                let candidates: GoalInfoSeq<0> = process_response.msg.goals_canceling.into();
+                let goal_seq_ptr =
+                    &process_response.msg.goals_canceling as *const _ as *const GoalInfoSeq<0>;
+                let candidates = unsafe { &(*goal_seq_ptr) };
+
+                let mut accepted_goals = vec![];
                 for goal in candidates.iter() {
                     let callback = &self.cancel_request_callback;
-                    let mut accepted = callback(&request);
+                    let accepted = callback(request);
 
                     if accepted {
                         accepted_goals.push(goal);
                     }
                 }
-                */
 
                 let mut cancel_response =
                     rcl::MTSafeFn::rcl_action_get_zero_initialized_cancel_response();
 
-                // cancel_response.msg.return_code = if accepted_goals.is_empty() {
-                //     ERROR_REJECTED
-                // } else {
-                //     ERROR_NONE
-                // };
-                // cancel_response.msg.goals_canceling = accepted_goals;
-                cancel_response.msg.return_code = ERROR_NONE;
-                cancel_response.msg.goals_canceling = process_response.msg.goals_canceling;
+                cancel_response.msg.return_code = if accepted_goals.is_empty() {
+                    ERROR_REJECTED
+                } else {
+                    ERROR_NONE
+                };
+                let seq = action_msgs__msg__GoalInfo__Sequence {
+                    data: accepted_goals.as_mut_ptr() as *mut _ as *mut action_msgs__msg__GoalInfo,
+                    size: accepted_goals.len(),
+                    capacity: accepted_goals.capacity(),
+                };
+                cancel_response.msg.goals_canceling = seq;
+                // cancel_response.msg.return_code = ERROR_NONE;
+                // cancel_response.msg.goals_canceling = process_response.msg.goals_canceling;
 
                 match guard.rcl_action_send_cancel_response(
                     &self.server,
@@ -246,5 +251,29 @@ impl<T: ActionMsg> Drop for Server<T> {
     fn drop(&mut self) {
         let guard = rcl::MT_UNSAFE_FN.lock();
         let _ = guard.rcl_action_server_fini(&mut self.server, unsafe { self.node.as_ptr_mut() });
+    }
+}
+
+impl From<action_msgs__msg__GoalInfo> for GoalInfo {
+    fn from(value: action_msgs__msg__GoalInfo) -> Self {
+        Self {
+            goal_id: value.goal_id.into(),
+            stamp: value.stamp.into(),
+        }
+    }
+}
+
+impl From<unique_identifier_msgs__msg__UUID> for UUID {
+    fn from(value: unique_identifier_msgs__msg__UUID) -> Self {
+        Self { uuid: value.uuid }
+    }
+}
+
+impl From<crate::rcl::builtin_interfaces__msg__Time> for crate::msg::builtin_interfaces__msg__Time {
+    fn from(value: crate::rcl::builtin_interfaces__msg__Time) -> Self {
+        Self {
+            sec: value.sec,
+            nanosec: value.nanosec,
+        }
     }
 }

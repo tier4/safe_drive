@@ -3,7 +3,13 @@ use std::{collections::BTreeMap, ffi::CString, mem::MaybeUninit, sync::Arc};
 use crate::{
     error::{DynError, RCLActionError, RCLActionResult, RCLError},
     get_allocator,
-    msg::{interfaces::action_msgs::msg::GoalStatusArray, ActionMsg},
+    msg::{
+        interfaces::action_msgs::{
+            msg::GoalStatusArray,
+            srv::{CancelGoalRequest, CancelGoalResponse},
+        },
+        ActionMsg,
+    },
     node::Node,
     qos::Profile,
     rcl, RecvResult,
@@ -41,6 +47,7 @@ pub struct Client<T: ActionMsg> {
     node: Arc<Node>,
 
     goal_response_callbacks: BTreeMap<i64, Box<dyn FnOnce(SendGoalServiceResponse<T>)>>,
+    cancel_response_callbacks: BTreeMap<i64, Box<dyn FnOnce(CancelGoalResponse)>>,
     result_response_callbacks: BTreeMap<i64, Box<dyn FnOnce(GetResultServiceResponse<T>)>>,
 }
 
@@ -75,6 +82,7 @@ where
             client,
             node,
             goal_response_callbacks: Default::default(),
+            cancel_response_callbacks: Default::default(),
             result_response_callbacks: Default::default(),
         })
     }
@@ -228,6 +236,62 @@ where
                         return RecvResult::Err(
                             format!(
                                 "The goal callback with sequence number {} was not found",
+                                seq
+                            )
+                            .into(),
+                        );
+                    }
+                }
+
+                RecvResult::Ok(())
+            }
+            Err(RCLActionError::ClientTakeFailed) => RecvResult::RetryLater(()),
+            Err(e) => RecvResult::Err(e.into()),
+        }
+    }
+
+    /// Send a cancel request.
+    pub fn send_cancel_request(
+        &mut self,
+        request: &CancelGoalRequest,
+        callback: Box<dyn FnOnce(CancelGoalResponse)>,
+    ) -> Result<(), DynError> {
+        let guard = rcl::MT_UNSAFE_FN.lock();
+
+        let mut seq: i64 = 0;
+        guard.rcl_action_send_cancel_request(&self.client, request as *const _ as _, &mut seq)?;
+
+        if self.cancel_response_callbacks.contains_key(&seq) {
+            Err(format!(
+                "A cancel callback with sequence number {} already exists",
+                seq
+            )
+            .into())
+        } else {
+            self.cancel_response_callbacks.insert(seq, callback);
+            Ok(())
+        }
+    }
+
+    /// Takes a response for a cancel request.
+    pub fn try_recv_cancel_response(&mut self) -> RecvResult<(), ()> {
+        let guard = rcl::MT_UNSAFE_FN.lock();
+
+        let mut header: rcl::rmw_request_id_t = unsafe { MaybeUninit::zeroed().assume_init() };
+        let mut response: CancelGoalResponse = unsafe { MaybeUninit::zeroed().assume_init() };
+        match guard.rcl_action_take_cancel_response(
+            &self.client,
+            &mut header,
+            &mut response as *const _ as *mut _,
+        ) {
+            Ok(()) => {
+                let seq = header.sequence_number;
+                match self.cancel_response_callbacks.remove(&seq) {
+                    Some(callback) => callback(response),
+                    None => {
+                        return RecvResult::Err(
+                            format!(
+                                "The cancel goal callback with sequence number {} was not found",
                                 seq
                             )
                             .into(),

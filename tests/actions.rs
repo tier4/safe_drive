@@ -9,7 +9,11 @@ use safe_drive::{
     },
     context::Context,
     error::DynError,
-    msg::unique_identifier_msgs::msg::UUID,
+    msg::{
+        builtin_interfaces::UnsafeTime,
+        interfaces::action_msgs::{msg::GoalInfo, srv::CancelGoalRequest},
+        unique_identifier_msgs::msg::UUID,
+    },
     qos::Profile,
     RecvResult,
 };
@@ -45,17 +49,17 @@ fn create_client(
 }
 
 // wait for goal request, then send response by callback
-fn server_recv_goal_request(server: &mut Server<MyAction>) {
+fn server_recv_goal_request(server: &mut Server<MyAction>) -> Result<(), DynError> {
     loop {
         match server.try_recv_goal_request() {
             RecvResult::Ok(_) => {
                 println!("server: accepted goal");
-                break;
+                return Ok(());
             }
             RecvResult::RetryLater(_) => {
                 println!("server: waiting for goal requests...");
             }
-            RecvResult::Err(e) => println!("{:?}", e),
+            RecvResult::Err(e) => return Err(e),
         }
         thread::sleep(Duration::from_secs(1));
     }
@@ -67,6 +71,34 @@ fn client_recv_goal_response(client: &mut Client<MyAction>) -> Result<(), DynErr
             RecvResult::Ok(_) => return Ok(()), // we wait for a single response here
             RecvResult::RetryLater(_) => {
                 println!("retrying...");
+            }
+            RecvResult::Err(e) => return Err(e),
+        }
+        std::thread::sleep(std::time::Duration::from_secs(1));
+    }
+}
+
+fn server_recv_cancel_request(server: &mut Server<MyAction>) -> Result<(), DynError> {
+    loop {
+        match server.try_recv_cancel_request() {
+            RecvResult::Ok(()) => {
+                println!("server: accepted cancellation");
+                return Ok(());
+            }
+            RecvResult::RetryLater(_) => {
+                println!("server: waiting for cancel requests...");
+            }
+            RecvResult::Err(e) => return Err(e),
+        }
+    }
+}
+
+fn client_recv_cancel_response(client: &mut Client<MyAction>) -> Result<(), DynError> {
+    loop {
+        match client.try_recv_cancel_response() {
+            RecvResult::Ok(_) => return Ok(()), // we wait for a single response here
+            RecvResult::RetryLater(_) => {
+                println!("client: waiting for cancel response...");
             }
             RecvResult::Err(e) => return Err(e),
         }
@@ -120,7 +152,7 @@ fn test_action() -> Result<(), DynError> {
                 }
             }
             RecvResult::RetryLater(_) => {
-                println!("retrying...");
+                println!("waiting for feedback...");
             }
             RecvResult::Err(e) => return Err(e.into()),
         }
@@ -158,12 +190,6 @@ fn test_action() -> Result<(), DynError> {
 
 #[test]
 fn test_action_status() -> Result<(), DynError> {
-    #[cfg(feature = "galactic")]
-    use safe_drive::qos::galactic::*;
-
-    #[cfg(feature = "humble")]
-    use safe_drive::qos::humble::*;
-
     let ctx = Context::new()?;
 
     let mut server = create_server(&ctx, "test_action_server_node", "test_action_status", None)?;
@@ -195,6 +221,44 @@ fn test_action_status() -> Result<(), DynError> {
         }
         std::thread::sleep(std::time::Duration::from_secs(1));
     }
+
+    Ok(())
+}
+
+#[test]
+fn test_action_cancel() -> Result<(), DynError> {
+    let ctx = Context::new()?;
+    let mut server = create_server(&ctx, "test_action_server_node", "test_action_status", None)?;
+    let mut client = create_client(&ctx, "test_action_client_node", "test_action_status")?;
+
+    thread::sleep(Duration::from_millis(100));
+
+    let goal = MyAction_Goal { a: 10 };
+    let uuid = [1, 2, 3, 4, 5, 6, 7, 8, 1, 2, 3, 4, 5, 6, 7, 9];
+    let uuid_ = uuid.clone();
+    client.send_goal_with_uuid(goal, uuid, handle_goal_response)?;
+
+    server_recv_goal_request(&mut server)?;
+    client_recv_goal_response(&mut client)?;
+
+    let request = CancelGoalRequest {
+        goal_info: GoalInfo {
+            goal_id: UUID { uuid },
+            stamp: UnsafeTime { sec: 0, nanosec: 0 },
+        },
+    };
+
+    client.send_cancel_request(
+        &request,
+        Box::new(|resp| {
+            println!("client: received cancel response: {:?}", resp);
+        }),
+    );
+
+    server_recv_cancel_request(&mut server)?;
+    client_recv_cancel_response(&mut client)?;
+
+    // TODO: check status to confirm the goal is really being cancelled
 
     Ok(())
 }
