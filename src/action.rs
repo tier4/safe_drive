@@ -3,6 +3,7 @@
 use crate::msg::{ActionGoal, ActionMsg, ActionResult};
 
 pub mod client;
+pub mod handle;
 pub mod server;
 
 type SendGoalServiceRequest<T> = <<T as ActionMsg>::Goal as ActionGoal>::Request;

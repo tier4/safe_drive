@@ -1,3 +1,4 @@
+use crossbeam_channel::{Receiver, Sender};
 use std::{ffi::CString, mem::MaybeUninit, sync::Arc, time::Duration};
 
 use crate::{
@@ -29,7 +30,10 @@ use crate::qos::galactic::*;
 #[cfg(feature = "humble")]
 use crate::qos::humble::*;
 
-use super::SendGoalServiceRequest;
+use super::{
+    handle::{GoalHandle, GoalHandleMessage},
+    SendGoalServiceRequest,
+};
 
 type CancelRequest = action_msgs__srv__CancelGoal_Request;
 type CancelResponse = action_msgs__srv__CancelGoal_Response;
@@ -89,8 +93,12 @@ pub struct Server<T: ActionMsg> {
     clock: Clock,
 
     /// Handler for goal requests from clients.
-    goal_request_callback: Box<dyn Fn(SendGoalServiceRequest<T>) -> bool>,
+    goal_request_callback: Box<dyn Fn(GoalHandle<T>, SendGoalServiceRequest<T>) -> bool>,
     cancel_request_callback: Box<dyn Fn(CancelRequest) -> bool>,
+
+    /// Channels used to communicate with worker threads.
+    rx: Receiver<GoalHandleMessage<T>>,
+    tx: Sender<GoalHandleMessage<T>>,
 }
 
 impl<T> Server<T>
@@ -106,7 +114,7 @@ where
         cancel_request_callback: CR,
     ) -> RCLActionResult<Self>
     where
-        GR: Fn(SendGoalServiceRequest<T>) -> bool + 'static,
+        GR: Fn(GoalHandle<T>, SendGoalServiceRequest<T>) -> bool + 'static,
         CR: Fn(CancelRequest) -> bool + 'static,
     {
         let mut server = rcl::MTSafeFn::rcl_action_get_zero_initialized_server();
@@ -129,12 +137,16 @@ where
             )?;
         }
 
+        let (tx, rx) = crossbeam_channel::unbounded();
+
         let mut server = Self {
             server,
             node,
             clock,
             goal_request_callback: Box::new(goal_request_callback),
             cancel_request_callback: Box::new(cancel_request_callback),
+            rx,
+            tx,
         };
         server.publish_status().unwrap();
 
@@ -164,14 +176,15 @@ where
                 };
 
                 // accept goal if appropriate
+                let uuid = request.get_uuid().clone();
+                let handle = self.create_goal_handle(uuid.clone());
                 let callback = &self.goal_request_callback;
-                let accepted = callback(request.clone());
+                let accepted = callback(handle, request.clone());
 
                 if accepted {
                     // see rcl_interfaces/action_msgs/msg/GoalInfo.msg for definition
                     let mut goal_info = rcl::MTSafeFn::rcl_action_get_zero_initialized_goal_info();
 
-                    let uuid = request.get_uuid().clone();
                     goal_info.goal_id = unique_identifier_msgs__msg__UUID { uuid };
 
                     goal_info.stamp.sec = (now_nanosec / 10_i64.pow(9)) as i32;
@@ -296,6 +309,45 @@ where
     }
 
     // TODO: try_recv_data? (see rclcpp's take_data)
+
+    /// Wait for messages from goal handles.
+    pub fn recv_data(&mut self) -> RCLActionResult<()> {
+        match self.rx.recv() {
+            Ok(msg) => match msg {
+                GoalHandleMessage::Feedback(mut content) => {
+                    // let msg = T::FeedbackMessage
+                    let guard = rcl::MT_UNSAFE_FN.lock();
+                    guard.rcl_action_publish_feedback(
+                        &mut self.server as *const _ as *mut _,
+                        &mut content as *const _ as *mut _,
+                    )?;
+                }
+                GoalHandleMessage::Result(result) => {
+                    // cache result
+                    // let result = T::Result::new
+                    // create result object
+                    // send _result by rcl method
+
+                    // update status
+                }
+            },
+            Err(e) => todo!(),
+        }
+
+        Ok(())
+    }
+
+    fn create_goal_handle(&self, goal_id: [u8; 16]) -> GoalHandle<T> {
+        GoalHandle::new(goal_id, self.tx.clone())
+    }
+
+    pub(crate) fn as_ptr(&self) -> *const rcl::rcl_action_server_t {
+        &self.server
+    }
+
+    pub(crate) unsafe fn as_ptr_mut(&self) -> *mut rcl::rcl_action_server_t {
+        &self.server as *const _ as *mut _
+    }
 }
 
 impl<T: ActionMsg> Drop for Server<T> {

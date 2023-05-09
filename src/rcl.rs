@@ -551,6 +551,16 @@ impl MTUnsafeFn {
         action_ret_val_to_err(unsafe { self::rcl_action_server_fini(action_server, node) })
     }
 
+    pub fn rcl_action_publish_feedback(
+        &self,
+        action_server: *const rcl_action_server_t,
+        ros_feedback: *mut ::std::os::raw::c_void,
+    ) -> RCLActionResult<()> {
+        action_ret_val_to_err(unsafe {
+            self::rcl_action_publish_feedback(action_server, ros_feedback)
+        })
+    }
+
     pub fn rcl_action_publish_status(
         &self,
         action_server: *const rcl_action_server_t,

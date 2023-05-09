@@ -38,6 +38,8 @@ impl ActionMsg for MyAction {
             goal_id: unique_identifier_msgs::msg::UUID { uuid },
         }
     }
+
+    type ResultContent = MyAction_Result;
 }
 
 #[repr(C)]

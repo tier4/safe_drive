@@ -5,6 +5,7 @@ use safe_drive::{
     self,
     action::{
         client::Client,
+        handle::GoalHandle,
         server::{Server, ServerQosOption},
     },
     context::Context,
@@ -27,8 +28,25 @@ fn create_server(
 ) -> Result<Server<MyAction>, DynError> {
     let node_server = ctx.create_node(node, None, Default::default()).unwrap();
 
-    let goal_callback = |req| {
+    let goal_callback = |handle: GoalHandle<MyAction>, req| {
         println!("Goal request received: {:?}", req);
+
+        std::thread::spawn(move || {
+            for c in 0..=5 {
+                std::thread::sleep(Duration::from_secs(2));
+                println!("server: sending feedback {c}");
+                let feedback = MyAction_Feedback { c };
+                // TODO: ergonomics
+                let msg = MyAction_FeedbackMessage {
+                    goal_id: UUID {
+                        uuid: handle.goal_id,
+                    },
+                    feedback,
+                };
+                handle.feedback(msg);
+            }
+        });
+
         true
     };
     let cancel_callback = |req| {
@@ -106,6 +124,19 @@ fn client_recv_cancel_response(client: &mut Client<MyAction>) -> Result<(), DynE
     }
 }
 
+fn client_recv_result_response(client: &mut Client<MyAction>) -> Result<(), DynError> {
+    loop {
+        match client.try_recv_result_response() {
+            RecvResult::Ok(_) => return Ok(()), // we wait for a single result here
+            RecvResult::RetryLater(_) => {
+                println!("client: waiting for result response...");
+            }
+            RecvResult::Err(e) => return Err(e),
+        }
+        std::thread::sleep(std::time::Duration::from_secs(1));
+    }
+}
+
 fn handle_goal_response(resp: MyAction_SendGoal_Response) {
     println!(
         "Goal response received: accepted = {}, timestamp = {:?}",
@@ -117,7 +148,22 @@ fn handle_goal_response(resp: MyAction_SendGoal_Response) {
 fn test_action() -> Result<(), DynError> {
     let ctx = Context::new()?;
 
-    let mut server = create_server(&ctx, "test_action_server_node", "test_action", None)?;
+    let (tx, rx) = crossbeam_channel::bounded(0);
+    let handle = std::thread::spawn({
+        let ctx = ctx.clone();
+        move || {
+            let mut server =
+                create_server(&ctx, "test_action_server_node", "test_action", None).unwrap();
+
+            rx.recv();
+            server_recv_goal_request(&mut server);
+
+            loop {
+                server.recv_data();
+            }
+        }
+    });
+
     let mut client = create_client(&ctx, "test_action_client_node", "test_action")?;
 
     // wait for action server
@@ -136,8 +182,7 @@ fn test_action() -> Result<(), DynError> {
     let uuid = [1, 2, 3, 4, 5, 6, 7, 8, 1, 2, 3, 4, 5, 6, 7, 8];
     let uuid_ = uuid.clone();
     client.send_goal_with_uuid(goal, uuid, handle_goal_response)?;
-
-    server_recv_goal_request(&mut server);
+    tx.send(());
     client_recv_goal_response(&mut client);
 
     // get feedback (wait for five feedback messages)
@@ -174,16 +219,8 @@ fn test_action() -> Result<(), DynError> {
     )?;
 
     // get result
-    loop {
-        match client.try_recv_result_response() {
-            RecvResult::Ok(_) => break, // we wait for a single result here
-            RecvResult::RetryLater(_) => {
-                println!("retrying...");
-            }
-            RecvResult::Err(e) => println!("Error: {}", e),
-        }
-        std::thread::sleep(std::time::Duration::from_secs(1));
-    }
+
+    client_recv_result_response(&mut client)?;
 
     Ok(())
 }
