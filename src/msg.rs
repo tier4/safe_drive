@@ -46,6 +46,10 @@ pub trait ActionMsg {
     ) -> <Self::Goal as ActionGoal>::Request;
 
     type ResultContent: TypeSupport;
+    fn new_result_response(
+        status: u8,
+        result: Self::ResultContent,
+    ) -> <Self::Result as ActionResult>::Response;
 }
 
 pub trait ActionGoal {

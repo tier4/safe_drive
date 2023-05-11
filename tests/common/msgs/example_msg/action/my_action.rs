@@ -40,6 +40,13 @@ impl ActionMsg for MyAction {
     }
 
     type ResultContent = MyAction_Result;
+
+    fn new_result_response(
+        status: u8,
+        result: Self::ResultContent,
+    ) -> <Self::Result as ActionResult>::Response {
+        MyAction_GetResult_Response { status, result }
+    }
 }
 
 #[repr(C)]

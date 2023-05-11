@@ -1,5 +1,5 @@
-use crossbeam_channel::{Receiver, Sender};
-use std::{ffi::CString, mem::MaybeUninit, sync::Arc, time::Duration};
+use crossbeam_channel::{Receiver, Sender, TryRecvError};
+use std::{collections::BTreeMap, ffi::CString, mem::MaybeUninit, sync::Arc, time::Duration};
 
 use crate::{
     clock::Clock,
@@ -31,8 +31,8 @@ use crate::qos::galactic::*;
 use crate::qos::humble::*;
 
 use super::{
-    handle::{GoalHandle, GoalHandleMessage},
-    SendGoalServiceRequest,
+    handle::{GoalHandle, GoalHandleMessage, GoalHandleMessageContent},
+    GetResultServiceRequest, SendGoalServiceRequest,
 };
 
 type CancelRequest = action_msgs__srv__CancelGoal_Request;
@@ -99,6 +99,20 @@ pub struct Server<T: ActionMsg> {
     /// Channels used to communicate with worker threads.
     rx: Receiver<GoalHandleMessage<T>>,
     tx: Sender<GoalHandleMessage<T>>,
+
+    /// Once the server has calculated the result for a goal, it is kept here and the result requests are responsed with the result value in this map.
+    results: BTreeMap<[u8; 16], T::ResultContent>,
+}
+
+// These constants are defined in action_msgs.
+pub enum GoalStatus {
+    Unknown = 0,
+    Accepted = 1,
+    Executing = 2,
+    Canceling = 3,
+    Succeeded = 4,
+    Canceled = 5,
+    Aborted = 6,
 }
 
 impl<T> Server<T>
@@ -147,6 +161,7 @@ where
             cancel_request_callback: Box::new(cancel_request_callback),
             rx,
             tx,
+            results: BTreeMap::new(),
         };
         server.publish_status().unwrap();
 
@@ -297,6 +312,53 @@ where
         }
     }
 
+    pub fn try_recv_result_request(&mut self) -> RecvResult<(), ()> {
+        let guard = rcl::MT_UNSAFE_FN.lock();
+
+        let mut header: rcl::rmw_request_id_t = unsafe { MaybeUninit::zeroed().assume_init() };
+        let mut request: GetResultServiceRequest<T> =
+            unsafe { MaybeUninit::zeroed().assume_init() };
+
+        let take_result = {
+            let guard = rcl::MT_UNSAFE_FN.lock();
+            guard.rcl_action_take_result_request(
+                &self.server,
+                &mut header,
+                &mut request as *const _ as *mut _,
+            )
+        };
+
+        match take_result {
+            Ok(()) => {
+                match self.results.remove(request.get_uuid().into()) {
+                    Some(result) => {
+                        // TODO: what is status?
+                        let mut response =
+                            T::new_result_response(GoalStatus::Succeeded as u8, result);
+                        let guard = rcl::MT_UNSAFE_FN.lock();
+                        match guard.rcl_action_send_result_response(
+                            &self.server,
+                            &mut header,
+                            &mut response as *const _ as *mut _,
+                        ) {
+                            Ok(()) => RecvResult::Ok(()),
+                            Err(e) => RecvResult::Err(e.into()),
+                        }
+                    }
+                    None => RecvResult::Err(
+                        format!(
+                            "The result for the goal (uuid: {:?}) is not available yet",
+                            request.get_uuid()
+                        )
+                        .into(),
+                    ),
+                }
+            }
+            Err(RCLActionError::ServerTakeFailed) => RecvResult::RetryLater(()),
+            Err(e) => RecvResult::Err(e.into()),
+        }
+    }
+
     // TODO: when to publish?
     fn publish_status(&mut self) -> Result<(), DynError> {
         let guard = rcl::MT_UNSAFE_FN.lock();
@@ -311,26 +373,57 @@ where
     // TODO: try_recv_data? (see rclcpp's take_data)
 
     /// Wait for messages from goal handles.
-    pub fn recv_data(&mut self) -> RCLActionResult<()> {
+    pub fn recv_data(&mut self) -> Result<(), DynError> {
         match self.rx.recv() {
-            Ok(msg) => match msg {
-                GoalHandleMessage::Feedback(mut content) => {
-                    // let msg = T::FeedbackMessage
-                    let guard = rcl::MT_UNSAFE_FN.lock();
-                    guard.rcl_action_publish_feedback(
-                        &mut self.server as *const _ as *mut _,
-                        &mut content as *const _ as *mut _,
-                    )?;
-                }
-                GoalHandleMessage::Result(result) => {
-                    // cache result
-                    // let result = T::Result::new
-                    // create result object
-                    // send _result by rcl method
+            Ok(GoalHandleMessage { goal_id, content }) => {
+                match content {
+                    GoalHandleMessageContent::Feedback(mut feedback) => {
+                        let guard = rcl::MT_UNSAFE_FN.lock();
+                        guard.rcl_action_publish_feedback(
+                            &mut self.server as *const _ as *mut _,
+                            &mut feedback as *const _ as *mut _,
+                        )?;
+                    }
+                    GoalHandleMessageContent::Result(result) => {
+                        // cache result for later use
+                        let old = self.results.insert(goal_id, result);
+                        if let Some(_) = old {
+                            return Err("the result for the goal already exists; it should be set only once".into());
+                        }
 
-                    // update status
+                        // update status
+                    }
                 }
-            },
+            }
+            Err(e) => todo!(),
+        }
+
+        Ok(())
+    }
+
+    pub fn try_recv_data(&mut self) -> Result<(), DynError> {
+        match self.rx.try_recv() {
+            Ok(GoalHandleMessage { goal_id, content }) => {
+                match content {
+                    GoalHandleMessageContent::Feedback(mut feedback) => {
+                        let guard = rcl::MT_UNSAFE_FN.lock();
+                        guard.rcl_action_publish_feedback(
+                            &mut self.server as *const _ as *mut _,
+                            &mut feedback as *const _ as *mut _,
+                        )?;
+                    }
+                    GoalHandleMessageContent::Result(result) => {
+                        // cache result for later use
+                        let old = self.results.insert(goal_id, result);
+                        if let Some(_) = old {
+                            return Err("the result for the goal already exists; it should be set only once".into());
+                        }
+
+                        // update status
+                    }
+                }
+            }
+            Err(TryRecvError::Empty) => {}
             Err(e) => todo!(),
         }
 

@@ -111,6 +111,21 @@ fn server_recv_cancel_request(server: &mut Server<MyAction>) -> Result<(), DynEr
     }
 }
 
+fn server_recv_result_request(server: &mut Server<MyAction>) -> Result<(), DynError> {
+    loop {
+        match server.try_recv_result_request() {
+            RecvResult::Ok(()) => {
+                println!("server: received result request");
+                return Ok(());
+            }
+            RecvResult::RetryLater(_) => {
+                println!("server: waiting for result requests...");
+            }
+            RecvResult::Err(e) => return Err(e),
+        }
+    }
+}
+
 fn client_recv_cancel_response(client: &mut Client<MyAction>) -> Result<(), DynError> {
     loop {
         match client.try_recv_cancel_response() {
@@ -159,7 +174,16 @@ fn test_action() -> Result<(), DynError> {
             server_recv_goal_request(&mut server);
 
             loop {
-                server.recv_data();
+                server.try_recv_data();
+                // server.recv_data();
+                if let Ok(()) = rx.try_recv() {
+                    break;
+                }
+            }
+
+            loop {
+                thread::sleep(Duration::from_millis(500));
+                server_recv_result_request(&mut server);
             }
         }
     });
@@ -219,8 +243,9 @@ fn test_action() -> Result<(), DynError> {
     )?;
 
     // get result
-
+    tx.send(());
     client_recv_result_response(&mut client)?;
+    tx.send(());
 
     Ok(())
 }
