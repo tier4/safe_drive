@@ -36,7 +36,6 @@ use super::{
 };
 
 type CancelRequest = action_msgs__srv__CancelGoal_Request;
-type CancelResponse = action_msgs__srv__CancelGoal_Response;
 
 pub struct ServerQosOption {
     pub goal_service: Profile,
@@ -134,7 +133,7 @@ where
         let mut server = rcl::MTSafeFn::rcl_action_get_zero_initialized_server();
         let options = qos
             .map(rcl::rcl_action_server_options_t::from)
-            .unwrap_or(rcl::MTSafeFn::rcl_action_server_get_default_options());
+            .unwrap_or_else(rcl::MTSafeFn::rcl_action_server_get_default_options);
         // TODO: reconcile RCLResult and RCLActionResult to avoid unwrap
         let clock = Clock::new().unwrap();
         let action_name = CString::new(action_name).unwrap_or_default();
@@ -191,10 +190,10 @@ where
                 };
 
                 // accept goal if appropriate
-                let uuid = request.get_uuid().clone();
-                let handle = self.create_goal_handle(uuid.clone());
+                let uuid = *request.get_uuid();
+                let handle = self.create_goal_handle(uuid);
                 let callback = &self.goal_request_callback;
-                let accepted = callback(handle, request.clone());
+                let accepted = callback(handle, request);
 
                 if accepted {
                     // see rcl_interfaces/action_msgs/msg/GoalInfo.msg for definition
@@ -295,8 +294,6 @@ where
                     capacity: accepted_goals.capacity(),
                 };
                 cancel_response.msg.goals_canceling = seq;
-                // cancel_response.msg.return_code = ERROR_NONE;
-                // cancel_response.msg.goals_canceling = process_response.msg.goals_canceling;
 
                 match guard.rcl_action_send_cancel_response(
                     &self.server,
@@ -327,7 +324,7 @@ where
         };
 
         match take_result {
-            Ok(()) => match self.results.remove(request.get_uuid().into()) {
+            Ok(()) => match self.results.remove(request.get_uuid()) {
                 Some(result) => {
                     let mut response = T::new_result_response(GoalStatus::Succeeded as u8, result);
                     let guard = rcl::MT_UNSAFE_FN.lock();
@@ -412,8 +409,6 @@ where
                         if old.is_some() {
                             return Err("the result for the goal already exists; it should be set only once".into());
                         }
-
-                        // update status
                     }
                 }
             }

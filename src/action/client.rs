@@ -1,4 +1,9 @@
-use std::{collections::BTreeMap, ffi::CString, mem::MaybeUninit, sync::Arc};
+use std::{
+    collections::{btree_map::Entry::Vacant, BTreeMap},
+    ffi::CString,
+    mem::MaybeUninit,
+    sync::Arc,
+};
 
 use crate::{
     error::{DynError, RCLActionError, RCLActionResult, RCLError},
@@ -64,7 +69,7 @@ where
         let mut client = rcl::MTSafeFn::rcl_action_get_zero_initialized_client();
         let options = qos
             .map(rcl::rcl_action_client_options_t::from)
-            .unwrap_or(rcl::MTSafeFn::rcl_action_client_get_default_options());
+            .unwrap_or_else(rcl::MTSafeFn::rcl_action_client_get_default_options);
         let action_name = CString::new(action_name).unwrap_or_default();
 
         {
@@ -143,15 +148,15 @@ where
             &mut seq,
         )?;
 
-        if self.goal_response_callbacks.contains_key(&seq) {
+        if let Vacant(e) = self.goal_response_callbacks.entry(seq) {
+            e.insert(callback);
+            Ok(())
+        } else {
             Err(format!(
                 "A goal callback with sequence number {} already exists",
                 seq
             )
             .into())
-        } else {
-            self.goal_response_callbacks.insert(seq, callback);
-            Ok(())
         }
     }
 
@@ -190,6 +195,7 @@ where
         }
     }
 
+    /// Send a result request to the server.
     pub fn send_result_request(
         &mut self,
         data: &GetResultServiceRequest<T>,
@@ -204,15 +210,15 @@ where
             &mut seq,
         )?;
 
-        if self.result_response_callbacks.contains_key(&seq) {
+        if let Vacant(e) = self.result_response_callbacks.entry(seq) {
+            e.insert(callback);
+            Ok(())
+        } else {
             Err(format!(
                 "A result callback with sequence number {} already exists",
                 seq
             )
             .into())
-        } else {
-            self.result_response_callbacks.insert(seq, callback);
-            Ok(())
         }
     }
 
@@ -261,15 +267,15 @@ where
         let mut seq: i64 = 0;
         guard.rcl_action_send_cancel_request(&self.client, request as *const _ as _, &mut seq)?;
 
-        if self.cancel_response_callbacks.contains_key(&seq) {
+        if let Vacant(e) = self.cancel_response_callbacks.entry(seq) {
+            e.insert(callback);
+            Ok(())
+        } else {
             Err(format!(
                 "A cancel callback with sequence number {} already exists",
                 seq
             )
             .into())
-        } else {
-            self.cancel_response_callbacks.insert(seq, callback);
-            Ok(())
         }
     }
 

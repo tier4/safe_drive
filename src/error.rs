@@ -122,7 +122,7 @@ pub(crate) fn action_ret_val_to_err(n: rcl::rcl_ret_t) -> RCLActionResult<()> {
         rcl::RCL_RET_ACTION_GOAL_HANDLE_INVALID => Err(RCLActionError::GoalHandleInvalid),
         rcl::RCL_RET_ACTION_GOAL_EVENT_INVALID => Err(RCLActionError::GoalEventInvalid),
 
-        other => ret_val_to_err(n).map_err(RCLActionError::RCLError),
+        _ => ret_val_to_err(n).map_err(RCLActionError::RCLError),
     }
 }
 
