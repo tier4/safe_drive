@@ -313,8 +313,6 @@ where
     }
 
     pub fn try_recv_result_request(&mut self) -> RecvResult<(), ()> {
-        let guard = rcl::MT_UNSAFE_FN.lock();
-
         let mut header: rcl::rmw_request_id_t = unsafe { MaybeUninit::zeroed().assume_init() };
         let mut request: GetResultServiceRequest<T> =
             unsafe { MaybeUninit::zeroed().assume_init() };
@@ -329,31 +327,27 @@ where
         };
 
         match take_result {
-            Ok(()) => {
-                match self.results.remove(request.get_uuid().into()) {
-                    Some(result) => {
-                        // TODO: what is status?
-                        let mut response =
-                            T::new_result_response(GoalStatus::Succeeded as u8, result);
-                        let guard = rcl::MT_UNSAFE_FN.lock();
-                        match guard.rcl_action_send_result_response(
-                            &self.server,
-                            &mut header,
-                            &mut response as *const _ as *mut _,
-                        ) {
-                            Ok(()) => RecvResult::Ok(()),
-                            Err(e) => RecvResult::Err(e.into()),
-                        }
+            Ok(()) => match self.results.remove(request.get_uuid().into()) {
+                Some(result) => {
+                    let mut response = T::new_result_response(GoalStatus::Succeeded as u8, result);
+                    let guard = rcl::MT_UNSAFE_FN.lock();
+                    match guard.rcl_action_send_result_response(
+                        &self.server,
+                        &mut header,
+                        &mut response as *const _ as *mut _,
+                    ) {
+                        Ok(()) => RecvResult::Ok(()),
+                        Err(e) => RecvResult::Err(e.into()),
                     }
-                    None => RecvResult::Err(
-                        format!(
-                            "The result for the goal (uuid: {:?}) is not available yet",
-                            request.get_uuid()
-                        )
-                        .into(),
-                    ),
                 }
-            }
+                None => RecvResult::Err(
+                    format!(
+                        "The result for the goal (uuid: {:?}) is not available yet",
+                        request.get_uuid()
+                    )
+                    .into(),
+                ),
+            },
             Err(RCLActionError::ServerTakeFailed) => RecvResult::RetryLater(()),
             Err(e) => RecvResult::Err(e.into()),
         }
@@ -387,11 +381,9 @@ where
                     GoalHandleMessageContent::Result(result) => {
                         // cache result for later use
                         let old = self.results.insert(goal_id, result);
-                        if let Some(_) = old {
+                        if old.is_some() {
                             return Err("the result for the goal already exists; it should be set only once".into());
                         }
-
-                        // update status
                     }
                 }
             }
@@ -402,6 +394,8 @@ where
     }
 
     pub fn try_recv_data(&mut self) -> Result<(), DynError> {
+        let _ = self.try_recv_result_request();
+
         match self.rx.try_recv() {
             Ok(GoalHandleMessage { goal_id, content }) => {
                 match content {
@@ -415,7 +409,7 @@ where
                     GoalHandleMessageContent::Result(result) => {
                         // cache result for later use
                         let old = self.results.insert(goal_id, result);
-                        if let Some(_) = old {
+                        if old.is_some() {
                             return Err("the result for the goal already exists; it should be set only once".into());
                         }
 
