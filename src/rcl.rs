@@ -648,6 +648,34 @@ impl MTUnsafeFn {
         })
     }
 
+    pub fn rcl_action_wait_set_add_action_client(
+        &self,
+        wait_set: *mut rcl_wait_set_t,
+        action_client: *const rcl_action_client_t,
+        client_index: *mut size_t,
+        subscription_index: *mut size_t,
+    ) -> RCLActionResult<()> {
+        action_ret_val_to_err(unsafe {
+            self::rcl_action_wait_set_add_action_client(
+                wait_set,
+                action_client,
+                client_index,
+                subscription_index,
+            )
+        })
+    }
+
+    pub fn rcl_action_wait_set_add_action_server(
+        &self,
+        wait_set: *mut rcl_wait_set_t,
+        action_server: *const rcl_action_server_t,
+        service_index: *mut size_t,
+    ) -> RCLActionResult<()> {
+        action_ret_val_to_err(unsafe {
+            self::rcl_action_wait_set_add_action_server(wait_set, action_server, service_index)
+        })
+    }
+
     pub fn rcutils_reset_error(&self) {
         unsafe { self::rcutils_reset_error() };
     }
