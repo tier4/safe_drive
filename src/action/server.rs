@@ -18,8 +18,8 @@ use crate::{
     qos::Profile,
     rcl::{
         self, action_msgs__msg__GoalInfo, action_msgs__msg__GoalInfo__Sequence,
-        action_msgs__srv__CancelGoal_Request, action_msgs__srv__CancelGoal_Response,
-        rcl_action_cancel_request_t, rcutils_get_error_string, unique_identifier_msgs__msg__UUID,
+        action_msgs__srv__CancelGoal_Request, rcl_action_cancel_request_t,
+        rcutils_get_error_string, unique_identifier_msgs__msg__UUID,
     },
     RecvResult,
 };
@@ -85,10 +85,31 @@ impl From<ServerQosOption> for rcl::rcl_action_server_options_t {
     }
 }
 
+// These constants are defined in action_msgs.
+pub enum GoalStatus {
+    Unknown = 0,
+    Accepted = 1,
+    Executing = 2,
+    Canceling = 3,
+    Succeeded = 4,
+    Canceled = 5,
+    Aborted = 6,
+}
+
+pub(crate) struct ActionServerData {
+    pub server: rcl::rcl_action_server_t,
+    pub node: Arc<Node>,
+}
+
+impl ActionServerData {
+    pub(crate) unsafe fn as_ptr_mut(&self) -> *mut rcl::rcl_action_server_t {
+        &self.server as *const _ as *mut _
+    }
+}
+
 /// An action server.
 pub struct Server<T: ActionMsg> {
-    server: rcl::rcl_action_server_t,
-    node: Arc<Node>,
+    data: Arc<ActionServerData>,
     clock: Clock,
 
     /// Handler for goal requests from clients.
@@ -101,17 +122,6 @@ pub struct Server<T: ActionMsg> {
 
     /// Once the server has calculated the result for a goal, it is kept here and the result requests are responsed with the result value in this map.
     results: BTreeMap<[u8; 16], T::ResultContent>,
-}
-
-// These constants are defined in action_msgs.
-pub enum GoalStatus {
-    Unknown = 0,
-    Accepted = 1,
-    Executing = 2,
-    Canceling = 3,
-    Succeeded = 4,
-    Canceled = 5,
-    Aborted = 6,
 }
 
 impl<T> Server<T>
@@ -153,8 +163,7 @@ where
         let (tx, rx) = crossbeam_channel::unbounded();
 
         let mut server = Self {
-            server,
-            node,
+            data: Arc::new(ActionServerData { server, node }),
             clock,
             goal_request_callback: Box::new(goal_request_callback),
             cancel_request_callback: Box::new(cancel_request_callback),
@@ -173,7 +182,7 @@ where
         let result = {
             let guard = rcl::MT_UNSAFE_FN.lock();
             guard.rcl_action_take_goal_request(
-                &self.server,
+                &self.data.server,
                 &mut header,
                 &mut request as *const _ as *mut _,
             )
@@ -206,7 +215,10 @@ where
 
                     let goal_handle = {
                         let guard = rcl::MT_UNSAFE_FN.lock();
-                        guard.rcl_action_accept_new_goal(&mut self.server, &goal_info)
+                        guard.rcl_action_accept_new_goal(
+                            unsafe { self.data.as_ptr_mut() },
+                            &goal_info,
+                        )
                     };
                     if goal_handle.is_null() {
                         let msg = unsafe { rcutils_get_error_string() };
@@ -226,7 +238,7 @@ where
                 // send response to client
                 let guard = rcl::MT_UNSAFE_FN.lock();
                 match guard.rcl_action_send_goal_response(
-                    &self.server,
+                    &self.data.server,
                     &mut header,
                     &mut response as *const _ as *mut _,
                 ) {
@@ -247,7 +259,7 @@ where
             rcl::MTSafeFn::rcl_action_get_zero_initialized_cancel_request();
 
         match guard.rcl_action_take_cancel_request(
-            &self.server,
+            &self.data.server,
             &mut header,
             &mut request as *const _ as *mut _,
         ) {
@@ -257,7 +269,7 @@ where
 
                 // compute which exact goals are requested to be cancelled
                 match guard.rcl_action_process_cancel_request(
-                    &self.server,
+                    &self.data.server,
                     &request,
                     &mut process_response as *const _ as *mut _,
                 ) {
@@ -296,7 +308,7 @@ where
                 cancel_response.msg.goals_canceling = seq;
 
                 match guard.rcl_action_send_cancel_response(
-                    &self.server,
+                    &self.data.server,
                     &mut header,
                     &mut cancel_response.msg as *const _ as *mut _,
                 ) {
@@ -317,7 +329,7 @@ where
         let take_result = {
             let guard = rcl::MT_UNSAFE_FN.lock();
             guard.rcl_action_take_result_request(
-                &self.server,
+                &self.data.server,
                 &mut header,
                 &mut request as *const _ as *mut _,
             )
@@ -329,7 +341,7 @@ where
                     let mut response = T::new_result_response(GoalStatus::Succeeded as u8, result);
                     let guard = rcl::MT_UNSAFE_FN.lock();
                     match guard.rcl_action_send_result_response(
-                        &self.server,
+                        &self.data.server,
                         &mut header,
                         &mut response as *const _ as *mut _,
                     ) {
@@ -355,8 +367,8 @@ where
         let guard = rcl::MT_UNSAFE_FN.lock();
 
         let mut status = rcl::MTSafeFn::rcl_action_get_zero_initialized_goal_status_array();
-        guard.rcl_action_get_goal_status_array(&self.server, &mut status)?;
-        guard.rcl_action_publish_status(&self.server, &status as *const _ as *const _)?;
+        guard.rcl_action_get_goal_status_array(&self.data.server, &mut status)?;
+        guard.rcl_action_publish_status(&self.data.server, &status as *const _ as *const _)?;
 
         Ok(())
     }
@@ -371,7 +383,7 @@ where
                     GoalHandleMessageContent::Feedback(mut feedback) => {
                         let guard = rcl::MT_UNSAFE_FN.lock();
                         guard.rcl_action_publish_feedback(
-                            &mut self.server as *const _ as *mut _,
+                            unsafe { self.data.as_ptr_mut() },
                             &mut feedback as *const _ as *mut _,
                         )?;
                     }
@@ -399,7 +411,7 @@ where
                     GoalHandleMessageContent::Feedback(mut feedback) => {
                         let guard = rcl::MT_UNSAFE_FN.lock();
                         guard.rcl_action_publish_feedback(
-                            &mut self.server as *const _ as *mut _,
+                            unsafe { self.data.as_ptr_mut() },
                             &mut feedback as *const _ as *mut _,
                         )?;
                     }
@@ -422,20 +434,14 @@ where
     fn create_goal_handle(&self, goal_id: [u8; 16]) -> GoalHandle<T> {
         GoalHandle::new(goal_id, self.tx.clone())
     }
-
-    pub(crate) fn as_ptr(&self) -> *const rcl::rcl_action_server_t {
-        &self.server
-    }
-
-    pub(crate) unsafe fn as_ptr_mut(&self) -> *mut rcl::rcl_action_server_t {
-        &self.server as *const _ as *mut _
-    }
 }
 
 impl<T: ActionMsg> Drop for Server<T> {
     fn drop(&mut self) {
         let guard = rcl::MT_UNSAFE_FN.lock();
-        let _ = guard.rcl_action_server_fini(&mut self.server, unsafe { self.node.as_ptr_mut() });
+        let _ = guard.rcl_action_server_fini(unsafe { self.data.as_ptr_mut() }, unsafe {
+            self.data.node.as_ptr_mut()
+        });
     }
 }
 

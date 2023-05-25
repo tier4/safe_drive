@@ -55,6 +55,7 @@
 
 use self::guard_condition::{GuardCondition, RCLGuardCondition};
 use crate::{
+    action::server::ActionServerData,
     context::Context,
     delta_list::DeltaList,
     error::{DynError, RCLError, RCLResult},
@@ -156,6 +157,10 @@ pub struct Selector {
     services: BTreeMap<*const rcl::rcl_service_t, ConditionHandler<Arc<ServerData>>>,
     clients: BTreeMap<*const rcl::rcl_client_t, ConditionHandler<Arc<ClientData>>>,
     subscriptions: BTreeMap<*const rcl::rcl_subscription_t, ConditionHandler<Arc<RCLSubscription>>>,
+    action_servers:
+        BTreeMap<*const rcl::rcl_action_server_t, ConditionHandler<Arc<ActionServerData>>>,
+    // action_clients:
+    // BTreeMap<*const rcl::rcl_action_client_t, ConditionHandler<Arc<ActionClientData>>>,
     cond: BTreeMap<*const rcl::rcl_guard_condition_t, ConditionHandler<Arc<RCLGuardCondition>>>,
     timer_ids: BTreeSet<u64>,
     timer_id: u64,
@@ -205,6 +210,8 @@ impl Selector {
             subscriptions: Default::default(),
             services: Default::default(),
             clients: Default::default(),
+            action_servers: Default::default(),
+            // action_clients: Default::default(),
             cond: Default::default(),
             timer_ids: Default::default(),
             timer_id: 0,
@@ -789,6 +796,17 @@ impl Selector {
             // set services
             for (_, h) in self.services.iter() {
                 guard.rcl_wait_set_add_service(&mut self.wait_set, &h.event.service, null_mut())?;
+            }
+
+            // set action clients
+
+            // set action servers
+            for (_, h) in self.action_servers.iter() {
+                guard.rcl_action_wait_set_add_action_server(
+                    &mut self.wait_set,
+                    &h.event.server,
+                    null_mut(),
+                )?;
             }
         }
 
