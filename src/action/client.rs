@@ -107,12 +107,17 @@ where
                 eprintln!("Invalid node (the shutdown has started?)");
                 Ok(false)
             }
-            Err(e) => Err(e.into()),
+            Err(e) => Err(e),
         }
     }
 
     // Send a goal request to the server. the UUID are automatically attached.
-    // pub fn send_goal(&mut self, goal: &<<T as ActionMsg>::Goal as ServiceMsg>
+    // pub fn send_goal<GR>(&mut self, goal: <T as ActionMsg>::Goal, callback: GR) -> Result<(), DynError>
+    // where GR: FnOnce(SendGoalServiceResponse<T>) {
+    //     let request = <T as ActionMsg>::new_goal_request(
+
+    //     goal, uuid);
+    //         self.send_goal_request(&request,Box::new(callback) )
 
     // )
 

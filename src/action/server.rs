@@ -1,4 +1,5 @@
 use crossbeam_channel::{Receiver, Sender, TryRecvError};
+use parking_lot::Mutex;
 use std::{collections::BTreeMap, ffi::CString, mem::MaybeUninit, sync::Arc, time::Duration};
 
 use crate::{
@@ -18,8 +19,7 @@ use crate::{
     qos::Profile,
     rcl::{
         self, action_msgs__msg__GoalInfo, action_msgs__msg__GoalInfo__Sequence,
-        action_msgs__srv__CancelGoal_Request, rcl_action_cancel_request_t,
-        rcutils_get_error_string, unique_identifier_msgs__msg__UUID,
+        rcl_action_cancel_request_t, rcutils_get_error_string, unique_identifier_msgs__msg__UUID,
     },
     RecvResult,
 };
@@ -32,10 +32,8 @@ use crate::qos::humble::*;
 
 use super::{
     handle::{GoalHandle, GoalHandleMessage, GoalHandleMessageContent},
-    GetResultServiceRequest, SendGoalServiceRequest,
+    CancelRequest, GetResultServiceRequest, SendGoalServiceRequest,
 };
-
-type CancelRequest = action_msgs__srv__CancelGoal_Request;
 
 pub struct ServerQosOption {
     pub goal_service: Profile,
@@ -96,20 +94,26 @@ pub enum GoalStatus {
     Aborted = 6,
 }
 
-pub(crate) struct ActionServerData {
+pub(crate) struct ActionServerData<T: ActionMsg> {
     pub server: rcl::rcl_action_server_t,
     pub node: Arc<Node>,
+
+    /// Once the server has completed the result for a goal, it is kept here and the result requests are responsed with the result value in this map.
+    pub results: Mutex<BTreeMap<[u8; 16], T::ResultContent>>,
 }
 
-impl ActionServerData {
+impl<T: ActionMsg> ActionServerData<T> {
     pub(crate) unsafe fn as_ptr_mut(&self) -> *mut rcl::rcl_action_server_t {
         &self.server as *const _ as *mut _
     }
 }
 
+unsafe impl<T: ActionMsg> Sync for ActionServerData<T> {}
+unsafe impl<T: ActionMsg> Send for ActionServerData<T> {}
+
 /// An action server.
 pub struct Server<T: ActionMsg> {
-    data: Arc<ActionServerData>,
+    pub(crate) data: Arc<ActionServerData<T>>,
     clock: Clock,
 
     /// Handler for goal requests from clients.
@@ -119,9 +123,6 @@ pub struct Server<T: ActionMsg> {
     /// Channels used to communicate with worker threads.
     rx: Receiver<GoalHandleMessage<T>>,
     tx: Sender<GoalHandleMessage<T>>,
-
-    /// Once the server has calculated the result for a goal, it is kept here and the result requests are responsed with the result value in this map.
-    results: BTreeMap<[u8; 16], T::ResultContent>,
 }
 
 impl<T> Server<T>
@@ -162,14 +163,17 @@ where
 
         let (tx, rx) = crossbeam_channel::unbounded();
 
-        let mut server = Self {
-            data: Arc::new(ActionServerData { server, node }),
+        let server = Self {
+            data: Arc::new(ActionServerData {
+                server,
+                node,
+                results: Mutex::new(BTreeMap::new()),
+            }),
             clock,
             goal_request_callback: Box::new(goal_request_callback),
             cancel_request_callback: Box::new(cancel_request_callback),
             rx,
             tx,
-            results: BTreeMap::new(),
         };
         server.publish_status().unwrap();
 
@@ -300,12 +304,11 @@ where
                 } else {
                     ERROR_NONE
                 };
-                let seq = action_msgs__msg__GoalInfo__Sequence {
+                cancel_response.msg.goals_canceling = action_msgs__msg__GoalInfo__Sequence {
                     data: accepted_goals.as_mut_ptr() as *mut _ as *mut action_msgs__msg__GoalInfo,
-                    size: accepted_goals.len(),
-                    capacity: accepted_goals.capacity(),
+                    size: accepted_goals.len() as rcl::size_t,
+                    capacity: accepted_goals.capacity() as rcl::size_t,
                 };
-                cancel_response.msg.goals_canceling = seq;
 
                 match guard.rcl_action_send_cancel_response(
                     &self.data.server,
@@ -336,34 +339,41 @@ where
         };
 
         match take_result {
-            Ok(()) => match self.results.remove(request.get_uuid()) {
-                Some(result) => {
-                    let mut response = T::new_result_response(GoalStatus::Succeeded as u8, result);
-                    let guard = rcl::MT_UNSAFE_FN.lock();
-                    match guard.rcl_action_send_result_response(
-                        &self.data.server,
-                        &mut header,
-                        &mut response as *const _ as *mut _,
-                    ) {
-                        Ok(()) => RecvResult::Ok(()),
-                        Err(e) => RecvResult::Err(e.into()),
+            Ok(()) => {
+                let removed = {
+                    let mut results = self.data.results.lock();
+                    results.remove(request.get_uuid())
+                };
+                match removed {
+                    Some(result) => {
+                        let mut response =
+                            T::new_result_response(GoalStatus::Succeeded as u8, result);
+                        let guard = rcl::MT_UNSAFE_FN.lock();
+                        match guard.rcl_action_send_result_response(
+                            &self.data.server,
+                            &mut header,
+                            &mut response as *const _ as *mut _,
+                        ) {
+                            Ok(()) => RecvResult::Ok(()),
+                            Err(e) => RecvResult::Err(e.into()),
+                        }
                     }
+                    None => RecvResult::Err(
+                        format!(
+                            "The result for the goal (uuid: {:?}) is not available yet",
+                            request.get_uuid()
+                        )
+                        .into(),
+                    ),
                 }
-                None => RecvResult::Err(
-                    format!(
-                        "The result for the goal (uuid: {:?}) is not available yet",
-                        request.get_uuid()
-                    )
-                    .into(),
-                ),
-            },
+            }
             Err(RCLActionError::ServerTakeFailed) => RecvResult::RetryLater(()),
             Err(e) => RecvResult::Err(e.into()),
         }
     }
 
     // TODO: when to publish?
-    fn publish_status(&mut self) -> Result<(), DynError> {
+    fn publish_status(&self) -> Result<(), DynError> {
         let guard = rcl::MT_UNSAFE_FN.lock();
 
         let mut status = rcl::MTSafeFn::rcl_action_get_zero_initialized_goal_status_array();
@@ -372,8 +382,6 @@ where
 
         Ok(())
     }
-
-    // TODO: try_recv_data? (see rclcpp's take_data)
 
     /// Wait for messages from goal handles.
     pub fn recv_data(&mut self) -> Result<(), DynError> {
@@ -389,8 +397,8 @@ where
                     }
                     GoalHandleMessageContent::Result(result) => {
                         // cache result for later use
-                        let old = self.results.insert(goal_id, result);
-                        if old.is_some() {
+                        let mut results = self.data.results.lock();
+                        if let Some(_) = results.insert(goal_id, result) {
                             return Err("the result for the goal already exists; it should be set only once".into());
                         }
                     }
@@ -417,8 +425,8 @@ where
                     }
                     GoalHandleMessageContent::Result(result) => {
                         // cache result for later use
-                        let old = self.results.insert(goal_id, result);
-                        if old.is_some() {
+                        let mut results = self.data.results.lock();
+                        if let Some(_) = results.insert(goal_id, result) {
                             return Err("the result for the goal already exists; it should be set only once".into());
                         }
                     }
@@ -432,7 +440,7 @@ where
     }
 
     fn create_goal_handle(&self, goal_id: [u8; 16]) -> GoalHandle<T> {
-        GoalHandle::new(goal_id, self.tx.clone())
+        GoalHandle::new(goal_id, self.data.clone(), self.tx.clone())
     }
 }
 

@@ -1,6 +1,7 @@
 pub mod common;
 
 use common::msgs::example_msg::action::*;
+use crossbeam_channel::Sender;
 use safe_drive::{
     self,
     action::{
@@ -334,6 +335,112 @@ fn test_action_cancel() -> Result<(), DynError> {
     client_recv_cancel_response(&mut client)?;
 
     // TODO: check status to confirm the goal is really being cancelled
+
+    Ok(())
+}
+
+#[test]
+fn test_action_selector() -> Result<(), DynError> {
+    let ctx = Context::new()?;
+
+    let (tx, rx): (Sender<GoalHandle<MyAction>>, _) = crossbeam_channel::bounded(0);
+
+    let mut client = create_client(&ctx, "test_action_client_node", "test_action_selector")?;
+
+    let mut selector = ctx.create_selector()?;
+    let server = create_server(
+        &ctx,
+        "test_action_server_node",
+        "test_action_selector",
+        None,
+    )?;
+
+    // send goal request
+    let uuid = [1, 2, 3, 4, 5, 6, 7, 8, 1, 2, 3, 4, 5, 6, 7, 8];
+    let uuid_ = uuid.clone();
+    let goal = MyAction_Goal { a: 10 };
+    client.send_goal_with_uuid(goal, uuid, handle_goal_response)?;
+
+    thread::sleep(Duration::from_millis(100));
+
+    selector.add_action_server(
+        server,
+        move |handle, req| {
+            println!("Goal request received: {:?}", req);
+
+            let hdl = std::thread::Builder::new()
+                .name("worker".into())
+                .spawn(move || {
+                    for c in 0..=5 {
+                        std::thread::sleep(Duration::from_secs(2));
+                        println!("server worker: sending feedback {c}");
+                        let feedback = MyAction_Feedback { c };
+                        // TODO: ergonomics
+                        let msg = MyAction_FeedbackMessage {
+                            goal_id: UUID {
+                                uuid: handle.goal_id,
+                            },
+                            feedback,
+                        };
+                        handle.feedback(msg).unwrap();
+                    }
+
+                    println!("server worker: sending result");
+                    handle.finish(MyAction_Result { b: 500 }).unwrap();
+
+                    loop {
+                        std::thread::sleep(Duration::from_secs(5));
+                    }
+                })
+                .unwrap();
+
+            true
+        },
+        move |req| {
+            println!("Cancel request received: {:?}", req);
+            true
+        },
+    );
+    selector.wait()?;
+
+    client_recv_goal_response(&mut client).unwrap();
+
+    // get feedback (wait for five feedback messages)
+    let mut received = 0;
+    loop {
+        match client.try_recv_feedback() {
+            RecvResult::Ok(feedback) => {
+                println!("Feedback received: {:?}", feedback);
+                received += 1;
+                if received > 5 {
+                    break;
+                }
+            }
+            RecvResult::RetryLater(_) => {
+                println!("waiting for feedback...");
+            }
+            RecvResult::Err(e) => return Err(e.into()),
+        }
+        std::thread::sleep(std::time::Duration::from_secs(1));
+    }
+
+    let mut goal_id = UUID::new().unwrap();
+    goal_id.uuid = uuid_;
+    let result_req = MyAction_GetResult_Request { goal_id };
+    client.send_result_request(
+        &result_req,
+        Box::new(|resp| {
+            println!(
+                "Result response received: status = {}, result = {}",
+                resp.status, resp.result.b
+            );
+        }),
+    )?;
+
+    selector.wait()?;
+
+    // get result
+    client_recv_result_response(&mut client)?;
 
     Ok(())
 }

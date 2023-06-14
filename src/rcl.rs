@@ -676,6 +676,26 @@ impl MTUnsafeFn {
         })
     }
 
+    pub fn rcl_action_server_wait_set_get_entities_ready(
+        &self,
+        wait_set: *const rcl_wait_set_t,
+        action_server: *const rcl_action_server_t,
+        is_goal_request_ready: *mut bool,
+        is_cancel_request_ready: *mut bool,
+        is_result_request_ready: *mut bool,
+        is_goal_expired: *mut bool,
+    ) -> RCLActionResult<()> {
+        action_ret_val_to_err(unsafe {
+            self::rcl_action_server_wait_set_get_entities_ready(
+                wait_set,
+                action_server,
+                is_goal_request_ready,
+                is_cancel_request_ready,
+                is_result_request_ready,
+                is_goal_expired,
+            )
+        })
+    }
     pub fn rcutils_reset_error(&self) {
         unsafe { self::rcutils_reset_error() };
     }

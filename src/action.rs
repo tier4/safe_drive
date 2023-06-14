@@ -1,15 +1,19 @@
 //! Actions
 
-use crate::msg::{ActionGoal, ActionMsg, ActionResult};
+use crate::{
+    msg::{ActionGoal, ActionMsg, ActionResult},
+    rcl::action_msgs__srv__CancelGoal_Request,
+};
 
 pub mod client;
 pub mod handle;
 pub mod server;
 
-type SendGoalServiceRequest<T> = <<T as ActionMsg>::Goal as ActionGoal>::Request;
+pub type SendGoalServiceRequest<T> = <<T as ActionMsg>::Goal as ActionGoal>::Request;
 type SendGoalServiceResponse<T> = <<T as ActionMsg>::Goal as ActionGoal>::Response;
 type GetResultServiceRequest<T> = <<T as ActionMsg>::Result as ActionResult>::Request;
 type GetResultServiceResponse<T> = <<T as ActionMsg>::Result as ActionResult>::Response;
+pub type CancelRequest = action_msgs__srv__CancelGoal_Request;
 
 #[derive(Debug, Copy, Clone, PartialEq, Eq)]
 pub enum GoalStatus {
