@@ -1,4 +1,3 @@
-use crossbeam_channel::{Receiver, Sender, TryRecvError};
 use parking_lot::Mutex;
 use std::{collections::BTreeMap, ffi::CString, mem::MaybeUninit, sync::Arc, time::Duration};
 
@@ -30,10 +29,7 @@ use crate::qos::galactic::*;
 #[cfg(feature = "humble")]
 use crate::qos::humble::*;
 
-use super::{
-    handle::{GoalHandle, GoalHandleMessage, GoalHandleMessageContent},
-    CancelRequest, GetResultServiceRequest, SendGoalServiceRequest,
-};
+use super::{handle::GoalHandle, CancelRequest, GetResultServiceRequest, SendGoalServiceRequest};
 
 pub struct ServerQosOption {
     pub goal_service: Profile,
@@ -119,10 +115,6 @@ pub struct Server<T: ActionMsg> {
     /// Handler for goal requests from clients.
     goal_request_callback: Box<dyn Fn(GoalHandle<T>, SendGoalServiceRequest<T>) -> bool>,
     cancel_request_callback: Box<dyn Fn(CancelRequest) -> bool>,
-
-    /// Channels used to communicate with worker threads.
-    rx: Receiver<GoalHandleMessage<T>>,
-    tx: Sender<GoalHandleMessage<T>>,
 }
 
 impl<T> Server<T>
@@ -161,8 +153,6 @@ where
             )?;
         }
 
-        let (tx, rx) = crossbeam_channel::unbounded();
-
         let server = Self {
             data: Arc::new(ActionServerData {
                 server,
@@ -172,8 +162,6 @@ where
             clock,
             goal_request_callback: Box::new(goal_request_callback),
             cancel_request_callback: Box::new(cancel_request_callback),
-            rx,
-            tx,
         };
         server.publish_status().unwrap();
 
@@ -383,64 +371,13 @@ where
         Ok(())
     }
 
-    /// Wait for messages from goal handles.
-    pub fn recv_data(&mut self) -> Result<(), DynError> {
-        match self.rx.recv() {
-            Ok(GoalHandleMessage { goal_id, content }) => {
-                match content {
-                    GoalHandleMessageContent::Feedback(mut feedback) => {
-                        let guard = rcl::MT_UNSAFE_FN.lock();
-                        guard.rcl_action_publish_feedback(
-                            unsafe { self.data.as_ptr_mut() },
-                            &mut feedback as *const _ as *mut _,
-                        )?;
-                    }
-                    GoalHandleMessageContent::Result(result) => {
-                        // cache result for later use
-                        let mut results = self.data.results.lock();
-                        if let Some(_) = results.insert(goal_id, result) {
-                            return Err("the result for the goal already exists; it should be set only once".into());
-                        }
-                    }
-                }
-            }
-            Err(e) => todo!(),
-        }
-
-        Ok(())
-    }
-
     pub fn try_recv_data(&mut self) -> Result<(), DynError> {
         let _ = self.try_recv_result_request();
-
-        match self.rx.try_recv() {
-            Ok(GoalHandleMessage { goal_id, content }) => {
-                match content {
-                    GoalHandleMessageContent::Feedback(mut feedback) => {
-                        let guard = rcl::MT_UNSAFE_FN.lock();
-                        guard.rcl_action_publish_feedback(
-                            unsafe { self.data.as_ptr_mut() },
-                            &mut feedback as *const _ as *mut _,
-                        )?;
-                    }
-                    GoalHandleMessageContent::Result(result) => {
-                        // cache result for later use
-                        let mut results = self.data.results.lock();
-                        if let Some(_) = results.insert(goal_id, result) {
-                            return Err("the result for the goal already exists; it should be set only once".into());
-                        }
-                    }
-                }
-            }
-            Err(TryRecvError::Empty) => {}
-            Err(e) => todo!(),
-        }
-
         Ok(())
     }
 
     fn create_goal_handle(&self, goal_id: [u8; 16]) -> GoalHandle<T> {
-        GoalHandle::new(goal_id, self.data.clone(), self.tx.clone())
+        GoalHandle::new(goal_id, self.data.clone())
     }
 }
 

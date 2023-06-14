@@ -80,7 +80,6 @@ use std::{
     ptr::null_mut,
     rc::Rc,
     sync::Arc,
-    thread,
     time::{Duration, SystemTime},
 };
 
@@ -1233,7 +1232,7 @@ fn notify_action_server(
     wait_set: *const rcl::rcl_wait_set_t,
 ) -> RCLActionResult<()> {
     let it = m
-        .into_iter()
+        .iter_mut()
         .map(|(server, handler)| {
             let mut is_goal_request_ready = false;
             let mut is_cancel_request_ready = false;
@@ -1267,7 +1266,7 @@ fn notify_action_server(
         })
         .collect::<RCLActionResult<Vec<Option<(_, _)>>>>()?
         .into_iter()
-        .filter_map(|x| x)
+        .flatten()
         .map(|(server, handler)| (*server, handler.clone()));
     *m = BTreeMap::from_iter(it);
 

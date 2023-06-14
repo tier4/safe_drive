@@ -1,7 +1,6 @@
 pub mod common;
 
 use common::msgs::example_msg::action::*;
-use crossbeam_channel::Sender;
 use safe_drive::{
     self,
     action::{
@@ -16,7 +15,6 @@ use safe_drive::{
         interfaces::action_msgs::{msg::GoalInfo, srv::CancelGoalRequest},
         unique_identifier_msgs::msg::UUID,
     },
-    qos::Profile,
     RecvResult,
 };
 use std::{sync::Arc, thread, time::Duration};
@@ -32,9 +30,9 @@ fn create_server(
     let goal_callback = |handle: GoalHandle<MyAction>, req| {
         println!("Goal request received: {:?}", req);
 
-        let hdl = std::thread::Builder::new()
+        std::thread::Builder::new()
             .name("worker".into())
-            .spawn(move || {
+            .spawn(move || -> Result<(), DynError> {
                 for c in 0..=5 {
                     std::thread::sleep(Duration::from_secs(2));
                     println!("server worker: sending feedback {c}");
@@ -46,15 +44,13 @@ fn create_server(
                         },
                         feedback,
                     };
-                    handle.feedback(msg);
+                    handle.feedback(msg)?;
                 }
 
                 println!("server worker: sending result");
-                handle.finish(MyAction_Result { b: 500 });
+                handle.finish(MyAction_Result { b: 500 })?;
 
-                loop {
-                    std::thread::sleep(Duration::from_secs(5));
-                }
+                Ok(())
             })
             .unwrap();
 
@@ -177,39 +173,34 @@ fn test_action() -> Result<(), DynError> {
     let ctx = Context::new()?;
 
     let (tx, rx) = crossbeam_channel::bounded(0);
-    let handle = std::thread::Builder::new()
+    std::thread::Builder::new()
         .name("t_a_server".into())
         .spawn({
             let ctx = ctx.clone();
-            move || {
+            move || -> Result<(), DynError> {
                 let mut server =
-                    create_server(&ctx, "test_action_server_node", "test_action", None).unwrap();
+                    create_server(&ctx, "test_action_server_node", "test_action", None)?;
 
-                rx.recv();
-                server_recv_goal_request(&mut server);
+                rx.recv()?;
+                server_recv_goal_request(&mut server)?;
                 // rx.recv();
 
                 loop {
-                    server.try_recv_data().unwrap();
-                    // server.recv_data();
+                    server.try_recv_data()?;
                     if let Ok(()) = rx.try_recv() {
                         break;
                     }
                     thread::sleep(Duration::from_millis(500));
                 }
 
-                server_recv_result_request(&mut server);
+                server_recv_result_request(&mut server)?;
+                Ok(())
             }
-        });
+        })
+        .unwrap();
 
     let mut client = create_client(&ctx, "test_action_client_node", "test_action")?;
 
-    // wait for action server
-    // loop {
-    // if client.is_server_available()? {
-    // break;
-    // }
-    // }
     thread::sleep(Duration::from_millis(100));
 
     // send goal request
@@ -220,7 +211,7 @@ fn test_action() -> Result<(), DynError> {
     let uuid = [1, 2, 3, 4, 5, 6, 7, 8, 1, 2, 3, 4, 5, 6, 7, 8];
     let uuid_ = uuid.clone();
     client.send_goal_with_uuid(goal, uuid, handle_goal_response)?;
-    tx.send(());
+    tx.send(())?;
     client_recv_goal_response(&mut client).unwrap();
 
     // get feedback (wait for five feedback messages)
@@ -242,7 +233,7 @@ fn test_action() -> Result<(), DynError> {
         std::thread::sleep(std::time::Duration::from_secs(1));
     }
 
-    tx.send(());
+    tx.send(())?;
 
     // TODO: UUID can't be cloned?
     let mut goal_id = UUID::new().unwrap();
@@ -279,8 +270,8 @@ fn test_action_status() -> Result<(), DynError> {
 
     client.send_goal_with_uuid(goal, uuid, handle_goal_response)?;
 
-    server_recv_goal_request(&mut server);
-    client_recv_goal_response(&mut client);
+    server_recv_goal_request(&mut server)?;
+    client_recv_goal_response(&mut client)?;
 
     // Once the goal is accepted, get status for all the ongoing goals.
     // There should be at least one ongoing goal which has been requested earlier in this test.
@@ -311,7 +302,6 @@ fn test_action_cancel() -> Result<(), DynError> {
 
     let goal = MyAction_Goal { a: 10 };
     let uuid = [1, 2, 3, 4, 5, 6, 7, 8, 1, 2, 3, 4, 5, 6, 7, 9];
-    let uuid_ = uuid.clone();
     client.send_goal_with_uuid(goal, uuid, handle_goal_response)?;
 
     server_recv_goal_request(&mut server)?;
@@ -329,7 +319,7 @@ fn test_action_cancel() -> Result<(), DynError> {
         Box::new(|resp| {
             println!("client: received cancel response: {:?}", resp);
         }),
-    );
+    )?;
 
     server_recv_cancel_request(&mut server)?;
     client_recv_cancel_response(&mut client)?;
@@ -342,8 +332,6 @@ fn test_action_cancel() -> Result<(), DynError> {
 #[test]
 fn test_action_selector() -> Result<(), DynError> {
     let ctx = Context::new()?;
-
-    let (tx, rx): (Sender<GoalHandle<MyAction>>, _) = crossbeam_channel::bounded(0);
 
     let mut client = create_client(&ctx, "test_action_client_node", "test_action_selector")?;
 
@@ -368,7 +356,7 @@ fn test_action_selector() -> Result<(), DynError> {
         move |handle, req| {
             println!("Goal request received: {:?}", req);
 
-            let hdl = std::thread::Builder::new()
+            std::thread::Builder::new()
                 .name("worker".into())
                 .spawn(move || {
                     for c in 0..=5 {
