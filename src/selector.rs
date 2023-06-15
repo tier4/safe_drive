@@ -55,15 +55,23 @@
 
 use self::guard_condition::{GuardCondition, RCLGuardCondition};
 use crate::{
-    action::{self, handle::GoalHandle, CancelRequest, SendGoalServiceRequest},
+    action::{self, handle::GoalHandle, SendGoalServiceRequest},
     context::Context,
     delta_list::DeltaList,
     error::{DynError, RCLActionResult, RCLError, RCLResult},
     get_allocator,
     logger::{pr_error_in, pr_fatal_in, Logger},
-    msg::{ActionMsg, ServiceMsg, TypeSupport},
+    msg::{
+        interfaces::action_msgs::{
+            msg::{GoalInfo, GoalInfoSeq},
+            srv::{ERROR_NONE, ERROR_REJECTED},
+        },
+        ActionMsg, ServiceMsg, TypeSupport,
+    },
     parameter::{ParameterServer, Parameters},
-    rcl::{self, rcl_action_server_t},
+    rcl::{
+        self, action_msgs__msg__GoalInfo, action_msgs__msg__GoalInfo__Sequence, rcl_action_server_t,
+    },
     service::{
         client::{ClientData, ClientRecv},
         server::{Server, ServerData},
@@ -555,11 +563,11 @@ impl Selector {
         &mut self,
         server: action::server::Server<T>,
         mut goal_handler: GR,
-        mut cancel_goal_handler: CR,
+        cancel_goal_handler: CR,
     ) -> bool
     where
         GR: Fn(GoalHandle<T>, SendGoalServiceRequest<T>) -> bool + 'static,
-        CR: Fn(CancelRequest) -> bool + 'static,
+        CR: Fn(&GoalInfo) -> bool + 'static,
     {
         let server = Arc::new(Mutex::new(server));
         let goal = {
@@ -568,16 +576,6 @@ impl Selector {
                 let start = SystemTime::now();
                 let dur = Duration::from_millis(1);
                 let mut server = server.lock();
-
-                // let handle = std::thread::Builder::new()
-                //     .name("t_a_server".into())
-                //     .spawn({
-                //         move || loop {
-                //             // TODO: share ActionServerData n Arc?
-                //             server.try_recv_data().unwrap();
-                //             thread::sleep(Duration::from_millis(500));
-                //         }
-                //     });
 
                 loop {
                     match server.try_recv_goal_request() {
@@ -618,8 +616,70 @@ impl Selector {
 
                 loop {
                     match server.try_recv_cancel_request() {
-                        RecvResult::Ok(()) => {}
-                        RecvResult::RetryLater(_) => return CallbackResult::Ok,
+                        RecvResult::Ok((mut header, request)) => {
+                            let guard = rcl::MT_UNSAFE_FN.lock();
+                            let mut process_response =
+                                rcl::MTSafeFn::rcl_action_get_zero_initialized_cancel_response();
+
+                            // compute which exact goals are requested to be cancelled
+                            // TODO: handle ERROR_UNKNOWN_GOAL_ID etc.
+                            if let Err(e) = guard.rcl_action_process_cancel_request(
+                                unsafe { server.data.as_ptr_mut() },
+                                &request,
+                                &mut process_response as *const _ as *mut _,
+                            ) {
+                                let logger = Logger::new("safe_drive");
+                                pr_error_in!(
+                                    logger,
+                                    "failed to send cancel responses from action server: {}",
+                                    e
+                                );
+                                return CallbackResult::Remove;
+                            }
+
+                            let goal_seq_ptr = &process_response.msg.goals_canceling as *const _
+                                as *const GoalInfoSeq<0>;
+                            let candidates = unsafe { &(*goal_seq_ptr) };
+
+                            let mut accepted_goals: Vec<_> = candidates
+                                .iter()
+                                .filter(|goal| (&cancel_goal_handler)(goal))
+                                .collect();
+
+                            let mut cancel_response =
+                                rcl::MTSafeFn::rcl_action_get_zero_initialized_cancel_response();
+
+                            cancel_response.msg.return_code = if accepted_goals.is_empty() {
+                                ERROR_REJECTED
+                            } else {
+                                ERROR_NONE
+                            };
+                            cancel_response.msg.goals_canceling =
+                                action_msgs__msg__GoalInfo__Sequence {
+                                    data: accepted_goals.as_mut_ptr() as *mut _
+                                        as *mut action_msgs__msg__GoalInfo,
+                                    size: accepted_goals.len() as rcl::size_t,
+                                    capacity: accepted_goals.capacity() as rcl::size_t,
+                                };
+
+                            match guard.rcl_action_send_cancel_response(
+                                unsafe { server.data.as_ptr_mut() },
+                                &mut header,
+                                &mut cancel_response.msg as *const _ as *mut _,
+                            ) {
+                                Ok(()) => return CallbackResult::Ok,
+                                Err(e) => {
+                                    let logger = Logger::new("safe_drive");
+                                    pr_error_in!(
+                                        logger,
+                                        "failed to send cancel responses from action server: {}",
+                                        e
+                                    );
+                                    return CallbackResult::Remove;
+                                }
+                            }
+                        }
+                        RecvResult::RetryLater(_) => {}
                         RecvResult::Err(e) => {
                             let logger = Logger::new("safe_drive");
                             pr_error_in!(

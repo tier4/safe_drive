@@ -6,19 +6,14 @@ use crate::{
     error::{DynError, RCLActionError, RCLActionResult},
     get_allocator,
     msg::{
-        builtin_interfaces,
-        interfaces::action_msgs::{
-            msg::{GoalInfo, GoalInfoSeq},
-            srv::{ERROR_NONE, ERROR_REJECTED},
-        },
-        unique_identifier_msgs::msg::UUID,
-        ActionGoal, ActionMsg, GetUUID, GoalResponse,
+        builtin_interfaces, interfaces::action_msgs::msg::GoalInfo,
+        unique_identifier_msgs::msg::UUID, ActionGoal, ActionMsg, GetUUID, GoalResponse,
     },
     node::Node,
     qos::Profile,
     rcl::{
-        self, action_msgs__msg__GoalInfo, action_msgs__msg__GoalInfo__Sequence,
-        rcl_action_cancel_request_t, rcutils_get_error_string, unique_identifier_msgs__msg__UUID,
+        self, action_msgs__msg__GoalInfo, rcl_action_cancel_request_t, rcutils_get_error_string,
+        unique_identifier_msgs__msg__UUID,
     },
     RecvResult,
 };
@@ -29,7 +24,7 @@ use crate::qos::galactic::*;
 #[cfg(feature = "humble")]
 use crate::qos::humble::*;
 
-use super::{handle::GoalHandle, CancelRequest, GetResultServiceRequest, SendGoalServiceRequest};
+use super::{handle::GoalHandle, GetResultServiceRequest, SendGoalServiceRequest};
 
 pub struct ServerQosOption {
     pub goal_service: Profile,
@@ -114,7 +109,6 @@ pub struct Server<T: ActionMsg> {
 
     /// Handler for goal requests from clients.
     goal_request_callback: Box<dyn Fn(GoalHandle<T>, SendGoalServiceRequest<T>) -> bool>,
-    cancel_request_callback: Box<dyn Fn(CancelRequest) -> bool>,
 }
 
 impl<T> Server<T>
@@ -122,16 +116,14 @@ where
     T: ActionMsg,
 {
     /// Create a server.
-    pub fn new<GR, CR>(
+    pub fn new<GR>(
         node: Arc<Node>,
         action_name: &str,
         qos: Option<ServerQosOption>,
         goal_request_callback: GR,
-        cancel_request_callback: CR,
     ) -> RCLActionResult<Self>
     where
         GR: Fn(GoalHandle<T>, SendGoalServiceRequest<T>) -> bool + 'static,
-        CR: Fn(CancelRequest) -> bool + 'static,
     {
         let mut server = rcl::MTSafeFn::rcl_action_get_zero_initialized_server();
         let options = qos
@@ -161,7 +153,6 @@ where
             }),
             clock,
             goal_request_callback: Box::new(goal_request_callback),
-            cancel_request_callback: Box::new(cancel_request_callback),
         };
         server.publish_status().unwrap();
 
@@ -193,15 +184,13 @@ where
                 // accept goal if appropriate
                 let uuid = *request.get_uuid();
                 let handle = self.create_goal_handle(uuid);
-                let callback = &self.goal_request_callback;
-                let accepted = callback(handle, request);
+                let accepted = (&self.goal_request_callback)(handle, request);
 
                 if accepted {
                     // see rcl_interfaces/action_msgs/msg/GoalInfo.msg for definition
                     let mut goal_info = rcl::MTSafeFn::rcl_action_get_zero_initialized_goal_info();
 
                     goal_info.goal_id = unique_identifier_msgs__msg__UUID { uuid };
-
                     goal_info.stamp.sec = (now_nanosec / 10_i64.pow(9)) as i32;
                     goal_info.stamp.nanosec = (now_nanosec - now_sec * 10_i64.pow(9)) as u32;
 
@@ -221,11 +210,8 @@ where
                 }
 
                 // TODO: Make SendgoalServiceResponse independent of T (edit safe-drive-msg)
-                // SendGoal
                 type GoalResponse<T> = <<T as ActionMsg>::Goal as ActionGoal>::Response;
-
                 let mut response = GoalResponse::<T>::new(accepted, stamp);
-                // let mut response = SendGoalServiceResponse { accepted, stamp };
 
                 // send response to client
                 let guard = rcl::MT_UNSAFE_FN.lock();
@@ -243,7 +229,9 @@ where
         }
     }
 
-    pub fn try_recv_cancel_request(&mut self) -> RecvResult<(), ()> {
+    pub fn try_recv_cancel_request(
+        &mut self,
+    ) -> RecvResult<(rcl::rmw_request_id_t, rcl_action_cancel_request_t), ()> {
         let guard = rcl::MT_UNSAFE_FN.lock();
 
         let mut header: rcl::rmw_request_id_t = unsafe { MaybeUninit::zeroed().assume_init() };
@@ -255,58 +243,7 @@ where
             &mut header,
             &mut request as *const _ as *mut _,
         ) {
-            Ok(()) => {
-                let mut process_response =
-                    rcl::MTSafeFn::rcl_action_get_zero_initialized_cancel_response();
-
-                // compute which exact goals are requested to be cancelled
-                match guard.rcl_action_process_cancel_request(
-                    &self.data.server,
-                    &request,
-                    &mut process_response as *const _ as *mut _,
-                ) {
-                    Ok(()) => {}
-                    // TODO: handle ERROR_UNKNOWN_GOAL_ID etc.
-                    Err(e) => return RecvResult::Err(e.into()),
-                }
-
-                let goal_seq_ptr =
-                    &process_response.msg.goals_canceling as *const _ as *const GoalInfoSeq<0>;
-                let candidates = unsafe { &(*goal_seq_ptr) };
-
-                let mut accepted_goals = vec![];
-                for goal in candidates.iter() {
-                    let callback = &self.cancel_request_callback;
-                    let accepted = callback(request);
-
-                    if accepted {
-                        accepted_goals.push(goal);
-                    }
-                }
-
-                let mut cancel_response =
-                    rcl::MTSafeFn::rcl_action_get_zero_initialized_cancel_response();
-
-                cancel_response.msg.return_code = if accepted_goals.is_empty() {
-                    ERROR_REJECTED
-                } else {
-                    ERROR_NONE
-                };
-                cancel_response.msg.goals_canceling = action_msgs__msg__GoalInfo__Sequence {
-                    data: accepted_goals.as_mut_ptr() as *mut _ as *mut action_msgs__msg__GoalInfo,
-                    size: accepted_goals.len() as rcl::size_t,
-                    capacity: accepted_goals.capacity() as rcl::size_t,
-                };
-
-                match guard.rcl_action_send_cancel_response(
-                    &self.data.server,
-                    &mut header,
-                    &mut cancel_response.msg as *const _ as *mut _,
-                ) {
-                    Ok(()) => RecvResult::Ok(()),
-                    Err(e) => RecvResult::Err(e.into()),
-                }
-            }
+            Ok(()) => RecvResult::Ok((header, request)),
             Err(RCLActionError::ServerTakeFailed) => RecvResult::RetryLater(()),
             Err(e) => RecvResult::Err(e.into()),
         }

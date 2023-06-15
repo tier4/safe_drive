@@ -56,12 +56,8 @@ fn create_server(
 
         true
     };
-    let cancel_callback = |req| {
-        println!("Cancel request received: {:?}", req);
-        true
-    };
 
-    Server::new(node_server, action, qos, goal_callback, cancel_callback).map_err(|e| e.into())
+    Server::new(node_server, action, qos, goal_callback).map_err(|e| e.into())
 }
 
 fn create_client(
@@ -106,7 +102,7 @@ fn client_recv_goal_response(client: &mut Client<MyAction>) -> Result<(), DynErr
 fn server_recv_cancel_request(server: &mut Server<MyAction>) -> Result<(), DynError> {
     loop {
         match server.try_recv_cancel_request() {
-            RecvResult::Ok(()) => {
+            RecvResult::Ok(_) => {
                 println!("server: accepted cancellation");
                 return Ok(());
             }
@@ -351,44 +347,10 @@ fn test_action_selector() -> Result<(), DynError> {
 
     thread::sleep(Duration::from_millis(100));
 
-    selector.add_action_server(
-        server,
-        move |handle, req| {
-            println!("Goal request received: {:?}", req);
-
-            std::thread::Builder::new()
-                .name("worker".into())
-                .spawn(move || {
-                    for c in 0..=5 {
-                        std::thread::sleep(Duration::from_secs(2));
-                        println!("server worker: sending feedback {c}");
-                        let feedback = MyAction_Feedback { c };
-                        // TODO: ergonomics
-                        let msg = MyAction_FeedbackMessage {
-                            goal_id: UUID {
-                                uuid: handle.goal_id,
-                            },
-                            feedback,
-                        };
-                        handle.feedback(msg).unwrap();
-                    }
-
-                    println!("server worker: sending result");
-                    handle.finish(MyAction_Result { b: 500 }).unwrap();
-
-                    loop {
-                        std::thread::sleep(Duration::from_secs(5));
-                    }
-                })
-                .unwrap();
-
-            true
-        },
-        move |req| {
-            println!("Cancel request received: {:?}", req);
-            true
-        },
-    );
+    selector.add_action_server(server, goal_handler, move |goal| {
+        println!("Cancel request received for goal {:?}", goal);
+        true
+    });
     selector.wait()?;
 
     client_recv_goal_response(&mut client).unwrap();
@@ -431,4 +393,87 @@ fn test_action_selector() -> Result<(), DynError> {
     client_recv_result_response(&mut client)?;
 
     Ok(())
+}
+
+#[test]
+fn test_action_selector_cancel() -> Result<(), DynError> {
+    let ctx = Context::new()?;
+
+    let mut client = create_client(
+        &ctx,
+        "test_action_client_node",
+        "test_action_selector_cancel",
+    )?;
+
+    let mut selector = ctx.create_selector()?;
+    let server = create_server(
+        &ctx,
+        "test_action_server_node",
+        "test_action_selector_cancel",
+        None,
+    )?;
+
+    // send goal request
+    let uuid = [1, 2, 3, 4, 5, 6, 7, 8, 1, 2, 3, 4, 5, 6, 7, 8];
+    let uuid_ = uuid.clone();
+    let goal = MyAction_Goal { a: 10 };
+    client.send_goal_with_uuid(goal, uuid, handle_goal_response)?;
+
+    selector.add_action_server(server, goal_handler, move |goal| {
+        println!("Cancel request received for goal {:?}", goal);
+        true
+    });
+    selector.wait()?;
+
+    client_recv_goal_response(&mut client).unwrap();
+
+    let request = CancelGoalRequest {
+        goal_info: GoalInfo {
+            goal_id: UUID { uuid: uuid_ },
+            stamp: UnsafeTime { sec: 0, nanosec: 0 },
+        },
+    };
+    client.send_cancel_request(
+        &request,
+        Box::new(|resp| {
+            println!("client: received cancel response: {:?}", resp);
+        }),
+    )?;
+    selector.wait()?;
+
+    client_recv_cancel_response(&mut client)?;
+
+    Ok(())
+}
+
+fn goal_handler(handle: GoalHandle<MyAction>, req: MyAction_SendGoal_Request) -> bool {
+    println!("Goal request received: {:?}", req);
+
+    std::thread::Builder::new()
+        .name("worker".into())
+        .spawn(move || {
+            for c in 0..=5 {
+                std::thread::sleep(Duration::from_secs(2));
+                println!("server worker: sending feedback {c}");
+                let feedback = MyAction_Feedback { c };
+                // TODO: ergonomics
+                let msg = MyAction_FeedbackMessage {
+                    goal_id: UUID {
+                        uuid: handle.goal_id,
+                    },
+                    feedback,
+                };
+                handle.feedback(msg).unwrap();
+            }
+
+            println!("server worker: sending result");
+            handle.finish(MyAction_Result { b: 500 }).unwrap();
+
+            loop {
+                std::thread::sleep(Duration::from_secs(5));
+            }
+        })
+        .unwrap();
+
+    true
 }
