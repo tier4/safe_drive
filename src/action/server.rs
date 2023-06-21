@@ -86,7 +86,7 @@ pub enum GoalStatus {
 }
 
 pub(crate) struct ActionServerData<T: ActionMsg> {
-    pub server: rcl::rcl_action_server_t,
+    server: rcl::rcl_action_server_t,
     pub node: Arc<Node>,
 
     /// Once the server has completed the result for a goal, it is kept here and the result requests are responsed with the result value in this map.
@@ -249,7 +249,9 @@ where
         }
     }
 
-    pub fn try_recv_result_request(&mut self) -> RecvResult<(), ()> {
+    pub fn try_recv_result_request(
+        &mut self,
+    ) -> RecvResult<(rcl::rmw_request_id_t, GetResultServiceRequest<T>), ()> {
         let mut header: rcl::rmw_request_id_t = unsafe { MaybeUninit::zeroed().assume_init() };
         let mut request: GetResultServiceRequest<T> =
             unsafe { MaybeUninit::zeroed().assume_init() };
@@ -264,34 +266,7 @@ where
         };
 
         match take_result {
-            Ok(()) => {
-                let removed = {
-                    let mut results = self.data.results.lock();
-                    results.remove(request.get_uuid())
-                };
-                match removed {
-                    Some(result) => {
-                        let mut response =
-                            T::new_result_response(GoalStatus::Succeeded as u8, result);
-                        let guard = rcl::MT_UNSAFE_FN.lock();
-                        match guard.rcl_action_send_result_response(
-                            &self.data.server,
-                            &mut header,
-                            &mut response as *const _ as *mut _,
-                        ) {
-                            Ok(()) => RecvResult::Ok(()),
-                            Err(e) => RecvResult::Err(e.into()),
-                        }
-                    }
-                    None => RecvResult::Err(
-                        format!(
-                            "The result for the goal (uuid: {:?}) is not available yet",
-                            request.get_uuid()
-                        )
-                        .into(),
-                    ),
-                }
-            }
+            Ok(()) => RecvResult::Ok((header, request)),
             Err(RCLActionError::ServerTakeFailed) => RecvResult::RetryLater(()),
             Err(e) => RecvResult::Err(e.into()),
         }

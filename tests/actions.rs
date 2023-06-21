@@ -118,7 +118,7 @@ fn server_recv_cancel_request(server: &mut Server<MyAction>) -> Result<(), DynEr
 fn server_recv_result_request(server: &mut Server<MyAction>) -> Result<(), DynError> {
     loop {
         match server.try_recv_result_request() {
-            RecvResult::Ok(()) => {
+            RecvResult::Ok((_, _)) => {
                 println!("server: received result request");
                 return Ok(());
             }

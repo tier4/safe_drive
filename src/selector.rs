@@ -55,7 +55,7 @@
 
 use self::guard_condition::{GuardCondition, RCLGuardCondition};
 use crate::{
-    action::{self, handle::GoalHandle, SendGoalServiceRequest},
+    action::{self, handle::GoalHandle, GoalStatus, SendGoalServiceRequest},
     context::Context,
     delta_list::DeltaList,
     error::{DynError, RCLActionResult, RCLError, RCLResult},
@@ -66,7 +66,7 @@ use crate::{
             msg::{GoalInfo, GoalInfoSeq},
             srv::{ERROR_NONE, ERROR_REJECTED},
         },
-        ActionMsg, ServiceMsg, TypeSupport,
+        ActionMsg, GetUUID, ServiceMsg, TypeSupport,
     },
     parameter::{ParameterServer, Parameters},
     rcl::{
@@ -710,8 +710,45 @@ impl Selector {
 
                 loop {
                     match server.try_recv_result_request() {
-                        RecvResult::Ok(()) => {}
-                        RecvResult::RetryLater(_) => return CallbackResult::Ok,
+                        RecvResult::Ok((mut header, request)) => {
+                            let removed = {
+                                let mut results = server.data.results.lock();
+                                results.remove(request.get_uuid())
+                            };
+                            match removed {
+                                Some(result) => {
+                                    let mut response =
+                                        T::new_result_response(GoalStatus::Succeeded as u8, result);
+                                    let guard = rcl::MT_UNSAFE_FN.lock();
+                                    match guard.rcl_action_send_result_response(
+                                        unsafe { server.data.as_ptr_mut() },
+                                        &mut header,
+                                        &mut response as *const _ as *mut _,
+                                    ) {
+                                        Ok(()) => return CallbackResult::Ok,
+                                        Err(e) => {
+                                            let logger = Logger::new("safe_drive");
+                                            pr_error_in!(
+                                        logger,
+                                        "failed to send cancel responses from action server: {}",
+                                        e
+                                    );
+                                            return CallbackResult::Remove;
+                                        }
+                                    }
+                                }
+                                None => {
+                                    let logger = Logger::new("safe_drive");
+                                    pr_error_in!(
+                                        logger,
+                                        "The result for the goal (uuid: {:?}) is not available yet",
+                                        request.get_uuid()
+                                    );
+                                    return CallbackResult::Remove;
+                                }
+                            }
+                        }
+                        RecvResult::RetryLater(_) => {}
                         RecvResult::Err(e) => {
                             let logger = Logger::new("safe_drive");
                             pr_error_in!(
