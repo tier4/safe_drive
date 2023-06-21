@@ -6,14 +6,14 @@ use crate::{
     error::{DynError, RCLActionError, RCLActionResult},
     get_allocator,
     msg::{
-        builtin_interfaces, interfaces::action_msgs::msg::GoalInfo,
-        unique_identifier_msgs::msg::UUID, ActionGoal, ActionMsg, GetUUID, GoalResponse,
+        builtin_interfaces::UnsafeTime, interfaces::action_msgs::msg::GoalInfo,
+        unique_identifier_msgs::msg::UUID, ActionGoal, ActionMsg, GoalResponse,
     },
     node::Node,
     qos::Profile,
     rcl::{
-        self, action_msgs__msg__GoalInfo, rcl_action_cancel_request_t, rcutils_get_error_string,
-        unique_identifier_msgs__msg__UUID,
+        self, action_msgs__msg__GoalInfo, rcl_action_cancel_request_t, rcl_action_goal_handle_t,
+        rcl_action_server_t, rmw_request_id_t, unique_identifier_msgs__msg__UUID,
     },
     RecvResult,
 };
@@ -106,9 +106,6 @@ unsafe impl<T: ActionMsg> Send for ActionServerData<T> {}
 pub struct Server<T: ActionMsg> {
     pub(crate) data: Arc<ActionServerData<T>>,
     clock: Clock,
-
-    /// Handler for goal requests from clients.
-    goal_request_callback: Box<dyn Fn(GoalHandle<T>, SendGoalServiceRequest<T>) -> bool>,
 }
 
 impl<T> Server<T>
@@ -116,15 +113,11 @@ where
     T: ActionMsg,
 {
     /// Create a server.
-    pub fn new<GR>(
+    pub fn new(
         node: Arc<Node>,
         action_name: &str,
         qos: Option<ServerQosOption>,
-        goal_request_callback: GR,
-    ) -> RCLActionResult<Self>
-    where
-        GR: Fn(GoalHandle<T>, SendGoalServiceRequest<T>) -> bool + 'static,
-    {
+    ) -> RCLActionResult<Self> {
         let mut server = rcl::MTSafeFn::rcl_action_get_zero_initialized_server();
         let options = qos
             .map(rcl::rcl_action_server_options_t::from)
@@ -152,14 +145,15 @@ where
                 results: Mutex::new(BTreeMap::new()),
             }),
             clock,
-            goal_request_callback: Box::new(goal_request_callback),
         };
         server.publish_status().unwrap();
 
         Ok(server)
     }
 
-    pub fn try_recv_goal_request(&mut self) -> RecvResult<(), ()> {
+    pub fn try_recv_goal_request(
+        &mut self,
+    ) -> RecvResult<(rcl::rmw_request_id_t, SendGoalServiceRequest<T>), ()> {
         let mut header: rcl::rmw_request_id_t = unsafe { MaybeUninit::zeroed().assume_init() };
         let mut request: SendGoalServiceRequest<T> = unsafe { MaybeUninit::zeroed().assume_init() };
         let result = {
@@ -172,58 +166,7 @@ where
         };
 
         match result {
-            Ok(()) => {
-                // get current time
-                let now_nanosec = self.clock.get_now().unwrap();
-                let now_sec = now_nanosec / 10_i64.pow(9);
-                let stamp = builtin_interfaces::UnsafeTime {
-                    sec: now_sec as i32,
-                    nanosec: (now_nanosec - now_sec * 10_i64.pow(9)) as u32,
-                };
-
-                // accept goal if appropriate
-                let uuid = *request.get_uuid();
-                let handle = self.create_goal_handle(uuid);
-                let accepted = (&self.goal_request_callback)(handle, request);
-
-                if accepted {
-                    // see rcl_interfaces/action_msgs/msg/GoalInfo.msg for definition
-                    let mut goal_info = rcl::MTSafeFn::rcl_action_get_zero_initialized_goal_info();
-
-                    goal_info.goal_id = unique_identifier_msgs__msg__UUID { uuid };
-                    goal_info.stamp.sec = (now_nanosec / 10_i64.pow(9)) as i32;
-                    goal_info.stamp.nanosec = (now_nanosec - now_sec * 10_i64.pow(9)) as u32;
-
-                    let goal_handle = {
-                        let guard = rcl::MT_UNSAFE_FN.lock();
-                        guard.rcl_action_accept_new_goal(
-                            unsafe { self.data.as_ptr_mut() },
-                            &goal_info,
-                        )
-                    };
-                    if goal_handle.is_null() {
-                        let msg = unsafe { rcutils_get_error_string() };
-                        return RecvResult::Err(format!("Failed to accept new goal: {msg}").into());
-                    }
-
-                    self.publish_status().unwrap();
-                }
-
-                // TODO: Make SendgoalServiceResponse independent of T (edit safe-drive-msg)
-                type GoalResponse<T> = <<T as ActionMsg>::Goal as ActionGoal>::Response;
-                let mut response = GoalResponse::<T>::new(accepted, stamp);
-
-                // send response to client
-                let guard = rcl::MT_UNSAFE_FN.lock();
-                match guard.rcl_action_send_goal_response(
-                    &self.data.server,
-                    &mut header,
-                    &mut response as *const _ as *mut _,
-                ) {
-                    Ok(()) => RecvResult::Ok(()),
-                    Err(e) => RecvResult::Err(e.into()),
-                }
-            }
+            Ok(()) => RecvResult::Ok((header, request)),
             Err(RCLActionError::ServerTakeFailed) => RecvResult::RetryLater(()),
             Err(e) => RecvResult::Err(e.into()),
         }
@@ -272,6 +215,53 @@ where
         }
     }
 
+    /// Send a response for SendGoal service, and accept the goal if `accepted` is true.
+    pub(crate) fn handle_goal(
+        &mut self,
+        accepted: bool,
+        mut header: rmw_request_id_t,
+        goal_id: [u8; 16],
+    ) -> Result<(), DynError> {
+        let timestamp = self.get_timestamp();
+        if accepted {
+            self.accept_goal(goal_id, Some(timestamp))?;
+        }
+
+        // TODO: Make SendgoalServiceResponse independent of T (edit safe-drive-msg)
+        type GoalResponse<T> = <<T as ActionMsg>::Goal as ActionGoal>::Response;
+        let mut response = GoalResponse::<T>::new(accepted, timestamp);
+
+        // send response to client
+        let guard = rcl::MT_UNSAFE_FN.lock();
+        guard.rcl_action_send_goal_response(
+            unsafe { self.data.as_ptr_mut() },
+            &mut header,
+            &mut response as *const _ as *mut _,
+        )?;
+
+        Ok(())
+    }
+
+    pub(crate) fn accept_goal(
+        &mut self,
+        goal_id: [u8; 16],
+        timestamp: Option<UnsafeTime>,
+    ) -> Result<(), DynError> {
+        let timestamp = timestamp.unwrap_or_else(|| self.get_timestamp());
+        // see rcl_interfaces/action_msgs/msg/GoalInfo.msg for definition
+        let mut goal_info = rcl::MTSafeFn::rcl_action_get_zero_initialized_goal_info();
+
+        goal_info.goal_id = unique_identifier_msgs__msg__UUID { uuid: goal_id };
+        goal_info.stamp.sec = timestamp.sec;
+        goal_info.stamp.nanosec = timestamp.nanosec;
+
+        rcl_action_accept_new_goal(unsafe { self.data.as_ptr_mut() }, &goal_info)?;
+
+        self.publish_status()?;
+
+        Ok(())
+    }
+
     // TODO: when to publish?
     fn publish_status(&self) -> Result<(), DynError> {
         let guard = rcl::MT_UNSAFE_FN.lock();
@@ -288,8 +278,17 @@ where
         Ok(())
     }
 
-    fn create_goal_handle(&self, goal_id: [u8; 16]) -> GoalHandle<T> {
+    pub(crate) fn create_goal_handle(&self, goal_id: [u8; 16]) -> GoalHandle<T> {
         GoalHandle::new(goal_id, self.data.clone())
+    }
+
+    fn get_timestamp(&mut self) -> UnsafeTime {
+        let now_nanosec = self.clock.get_now().unwrap();
+        let now_sec = now_nanosec / 10_i64.pow(9);
+        UnsafeTime {
+            sec: now_sec as i32,
+            nanosec: (now_nanosec - now_sec * 10_i64.pow(9)) as u32,
+        }
     }
 }
 
@@ -324,4 +323,20 @@ impl From<crate::rcl::builtin_interfaces__msg__Time> for crate::msg::builtin_int
             nanosec: value.nanosec,
         }
     }
+}
+
+fn rcl_action_accept_new_goal(
+    server: *mut rcl_action_server_t,
+    goal_info: &action_msgs__msg__GoalInfo,
+) -> Result<*mut rcl_action_goal_handle_t, rcl::rcutils_error_string_t> {
+    let goal_handle = {
+        let guard = rcl::MT_UNSAFE_FN.lock();
+        guard.rcl_action_accept_new_goal(server, goal_info)
+    };
+    if goal_handle.is_null() {
+        let msg = unsafe { rcl::rcutils_get_error_string() };
+        return Err(msg);
+    }
+
+    Ok(goal_handle)
 }

@@ -27,37 +27,7 @@ fn create_server(
 ) -> Result<Server<MyAction>, DynError> {
     let node_server = ctx.create_node(node, None, Default::default()).unwrap();
 
-    let goal_callback = |handle: GoalHandle<MyAction>, req| {
-        println!("Goal request received: {:?}", req);
-
-        std::thread::Builder::new()
-            .name("worker".into())
-            .spawn(move || -> Result<(), DynError> {
-                for c in 0..=5 {
-                    std::thread::sleep(Duration::from_secs(2));
-                    println!("server worker: sending feedback {c}");
-                    let feedback = MyAction_Feedback { c };
-                    // TODO: ergonomics
-                    let msg = MyAction_FeedbackMessage {
-                        goal_id: UUID {
-                            uuid: handle.goal_id,
-                        },
-                        feedback,
-                    };
-                    handle.feedback(msg)?;
-                }
-
-                println!("server worker: sending result");
-                handle.finish(MyAction_Result { b: 500 })?;
-
-                Ok(())
-            })
-            .unwrap();
-
-        true
-    };
-
-    Server::new(node_server, action, qos, goal_callback).map_err(|e| e.into())
+    Server::new(node_server, action, qos).map_err(|e| e.into())
 }
 
 fn create_client(

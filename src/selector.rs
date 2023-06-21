@@ -562,7 +562,7 @@ impl Selector {
     pub fn add_action_server<T: ActionMsg + 'static, GR, CR>(
         &mut self,
         server: action::server::Server<T>,
-        mut goal_handler: GR,
+        goal_handler: GR,
         cancel_goal_handler: CR,
     ) -> bool
     where
@@ -579,12 +579,20 @@ impl Selector {
 
                 loop {
                     match server.try_recv_goal_request() {
-                        RecvResult::Ok(_) => {
-                            // TODO: callback
-                        }
-                        RecvResult::RetryLater(()) => {
+                        RecvResult::Ok((header, request)) => {
+                            let uuid = *request.get_uuid();
+                            let handle = server.create_goal_handle(uuid);
+                            let accepted = (&goal_handler)(handle, request);
+
+                            if let Err(e) = server.handle_goal(accepted, header, uuid) {
+                                let logger = Logger::new("safe_drive");
+                                pr_error_in!(logger, "Failed to accept new goal: {}", e);
+                                return CallbackResult::Remove;
+                            }
+
                             return CallbackResult::Ok;
                         }
+                        RecvResult::RetryLater(()) => {}
                         RecvResult::Err(e) => {
                             let logger = Logger::new("safe_drive");
                             pr_error_in!(

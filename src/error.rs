@@ -152,3 +152,5 @@ impl std::fmt::Display for rcl::rcutils_error_string_t {
         write!(f, "{}", s)
     }
 }
+
+impl Error for rcl::rcutils_error_string_t {}
