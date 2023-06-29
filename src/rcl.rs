@@ -696,6 +696,30 @@ impl MTUnsafeFn {
             )
         })
     }
+
+    pub fn rcl_action_client_wait_set_get_entities_ready(
+        &self,
+        wait_set: *const rcl_wait_set_t,
+        action_client: *const rcl_action_client_t,
+        is_feedback_ready: *mut bool,
+        is_status_ready: *mut bool,
+        is_goal_response_ready: *mut bool,
+        is_cancel_response_ready: *mut bool,
+        is_result_response_ready: *mut bool,
+    ) -> RCLActionResult<()> {
+        action_ret_val_to_err(unsafe {
+            self::rcl_action_client_wait_set_get_entities_ready(
+                wait_set,
+                action_client,
+                is_feedback_ready,
+                is_status_ready,
+                is_goal_response_ready,
+                is_cancel_response_ready,
+                is_result_response_ready,
+            )
+        })
+    }
+
     pub fn rcutils_reset_error(&self) {
         unsafe { self::rcutils_reset_error() };
     }
@@ -866,6 +890,46 @@ impl MTSafeFn {
     ) -> RCLActionResult<()> {
         action_ret_val_to_err(unsafe {
             self::rcl_action_send_result_request(action_client, ros_result_request, sequence_number)
+        })
+    }
+
+    pub fn rcl_action_server_wait_set_get_num_entities(
+        action_server: *const rcl_action_server_t,
+        num_subscriptions: *mut size_t,
+        num_guard_conditions: *mut size_t,
+        num_timers: *mut size_t,
+        num_clients: *mut size_t,
+        num_services: *mut size_t,
+    ) -> RCLActionResult<()> {
+        action_ret_val_to_err(unsafe {
+            self::rcl_action_server_wait_set_get_num_entities(
+                action_server,
+                num_subscriptions,
+                num_guard_conditions,
+                num_timers,
+                num_clients,
+                num_services,
+            )
+        })
+    }
+
+    pub fn rcl_action_client_wait_set_get_num_entities(
+        action_client: *const rcl_action_client_t,
+        num_subscriptions: *mut size_t,
+        num_guard_conditions: *mut size_t,
+        num_timers: *mut size_t,
+        num_clients: *mut size_t,
+        num_services: *mut size_t,
+    ) -> RCLActionResult<()> {
+        action_ret_val_to_err(unsafe {
+            self::rcl_action_client_wait_set_get_num_entities(
+                action_client,
+                num_subscriptions,
+                num_guard_conditions,
+                num_timers,
+                num_clients,
+                num_services,
+            )
         })
     }
 
