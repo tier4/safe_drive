@@ -1,8 +1,10 @@
 use std::{
     collections::{btree_map::Entry::Vacant, BTreeMap},
     ffi::CString,
+    marker::PhantomData,
     mem::MaybeUninit,
     sync::Arc,
+    time::Duration,
 };
 
 use crate::{
@@ -17,7 +19,9 @@ use crate::{
     },
     node::Node,
     qos::Profile,
-    rcl, RecvResult,
+    rcl,
+    selector::Selector,
+    PhantomUnsync, RecvResult,
 };
 
 use super::{
@@ -46,14 +50,25 @@ impl From<ClientQosOption> for rcl::rcl_action_client_options_t {
     }
 }
 
+pub(crate) struct ClientData {
+    pub(crate) client: rcl::rcl_action_client_t,
+    pub(crate) node: Arc<Node>,
+}
+
+impl Drop for ClientData {
+    fn drop(&mut self) {
+        let guard = rcl::MT_UNSAFE_FN.lock();
+        let _ = guard.rcl_action_client_fini(&mut self.client, unsafe { self.node.as_ptr_mut() });
+    }
+}
+
+unsafe impl Sync for ClientData {}
+unsafe impl Send for ClientData {}
+
 /// An action client.
 pub struct Client<T: ActionMsg> {
-    client: rcl::rcl_action_client_t,
-    node: Arc<Node>,
-
-    goal_response_callbacks: BTreeMap<i64, Box<dyn FnOnce(SendGoalServiceResponse<T>)>>,
-    cancel_response_callbacks: BTreeMap<i64, Box<dyn FnOnce(CancelGoalResponse)>>,
-    result_response_callbacks: BTreeMap<i64, Box<dyn FnOnce(GetResultServiceResponse<T>)>>,
+    data: Arc<ClientData>,
+    _phantom: PhantomData<T>,
 }
 
 impl<T> Client<T>
@@ -84,11 +99,8 @@ where
         }
 
         Ok(Self {
-            client,
-            node,
-            goal_response_callbacks: Default::default(),
-            cancel_response_callbacks: Default::default(),
-            result_response_callbacks: Default::default(),
+            data: Arc::new(ClientData { client, node }),
+            _phantom: Default::default(),
         })
     }
 
@@ -97,8 +109,8 @@ where
 
         let mut is_available = false;
         match guard.rcl_action_server_is_available(
-            self.node.as_ptr(),
-            &self.client,
+            self.data.node.as_ptr(),
+            &self.data.client,
             &mut is_available as *mut _,
         ) {
             Ok(()) => Ok(is_available),
@@ -123,81 +135,31 @@ where
 
     /// Send a goal request to the server with given uuid. the uuid can be any 16-bit slice [u8; 16] i.e. does not have to
     /// strictly conform to the UUID v4 standard.
-    pub fn send_goal_with_uuid<GR>(
-        &mut self,
+    pub fn send_goal_with_uuid(
+        self,
         goal: <T as ActionMsg>::GoalContent,
         uuid: [u8; 16],
-        callback: GR,
-    ) -> Result<(), DynError>
-    where
-        GR: FnOnce(SendGoalServiceResponse<T>) + 'static,
-    {
+    ) -> Result<ClientGoalRecv<T>, DynError> {
         let request = <T as ActionMsg>::new_goal_request(goal, uuid);
-        let boxed = Box::new(callback);
-        self.send_goal_request(&request, boxed)
+        self.send_goal_request(&request)
     }
 
     /// Send a goal request.
     pub fn send_goal_request(
-        &mut self,
+        self,
         data: &SendGoalServiceRequest<T>,
-        callback: Box<dyn FnOnce(SendGoalServiceResponse<T>)>,
-    ) -> Result<(), DynError> {
-        // TODO: use mutex?
-        // TODO: callbacks are FnMut? Fn? FnOnce?
-
+    ) -> Result<ClientGoalRecv<T>, DynError> {
         let mut seq: i64 = 0;
         rcl::MTSafeFn::rcl_action_send_goal_request(
-            &self.client,
-            data as *const SendGoalServiceRequest<T> as _,
+            &self.data.client,
+            data as *const _ as _,
             &mut seq,
         )?;
 
-        if let Vacant(e) = self.goal_response_callbacks.entry(seq) {
-            e.insert(callback);
-            Ok(())
-        } else {
-            Err(format!(
-                "A goal callback with sequence number {} already exists",
-                seq
-            )
-            .into())
-        }
-    }
-
-    // TODO: what should be the second type argument for RecvResult
-    // TODO: return Result<()>?
-    pub fn try_recv_goal_response(&mut self) -> RecvResult<(), ()> {
-        let guard = rcl::MT_UNSAFE_FN.lock();
-
-        let mut header: rcl::rmw_request_id_t = unsafe { MaybeUninit::zeroed().assume_init() };
-        let mut response: SendGoalServiceResponse<T> =
-            unsafe { MaybeUninit::zeroed().assume_init() };
-        match guard.rcl_action_take_goal_response(
-            &self.client,
-            &mut header,
-            &mut response as *const _ as *mut _,
-        ) {
-            Ok(()) => {
-                let seq = header.sequence_number;
-                match self.goal_response_callbacks.remove(&seq) {
-                    Some(callback) => callback(response),
-                    None => {
-                        return RecvResult::Err(
-                            format!(
-                                "The goal callback with sequence number {} was not found",
-                                seq
-                            )
-                            .into(),
-                        );
-                    }
-                }
-
-                RecvResult::Ok(())
-            }
-            Err(RCLActionError::ClientTakeFailed) => RecvResult::RetryLater(()),
-            Err(e) => RecvResult::Err(e.into()),
-        }
+        Ok(ClientGoalRecv {
+            inner: ClientRecv::new(self.data),
+            seq,
+        })
     }
 
     /// Send a result request to the server.
@@ -270,51 +232,13 @@ where
         let guard = rcl::MT_UNSAFE_FN.lock();
 
         let mut seq: i64 = 0;
-        guard.rcl_action_send_cancel_request(&self.client, request as *const _ as _, &mut seq)?;
+        guard.rcl_action_send_cancel_request(
+            &self.data.client,
+            request as *const _ as _,
+            &mut seq,
+        )?;
 
-        if let Vacant(e) = self.cancel_response_callbacks.entry(seq) {
-            e.insert(callback);
-            Ok(())
-        } else {
-            Err(format!(
-                "A cancel callback with sequence number {} already exists",
-                seq
-            )
-            .into())
-        }
-    }
-
-    /// Takes a response for a cancel request.
-    pub fn try_recv_cancel_response(&mut self) -> RecvResult<(), ()> {
-        let guard = rcl::MT_UNSAFE_FN.lock();
-
-        let mut header: rcl::rmw_request_id_t = unsafe { MaybeUninit::zeroed().assume_init() };
-        let mut response: CancelGoalResponse = unsafe { MaybeUninit::zeroed().assume_init() };
-        match guard.rcl_action_take_cancel_response(
-            &self.client,
-            &mut header,
-            &mut response as *const _ as *mut _,
-        ) {
-            Ok(()) => {
-                let seq = header.sequence_number;
-                match self.cancel_response_callbacks.remove(&seq) {
-                    Some(callback) => callback(response),
-                    None => {
-                        return RecvResult::Err(
-                            format!(
-                                "The cancel goal callback with sequence number {} was not found",
-                                seq
-                            )
-                            .into(),
-                        );
-                    }
-                }
-
-                RecvResult::Ok(())
-            }
-            Err(RCLActionError::ClientTakeFailed) => RecvResult::RetryLater(()),
-            Err(e) => RecvResult::Err(e.into()),
-        }
+        todo!()
     }
 
     // Takes a feedback for the goal.
@@ -323,7 +247,8 @@ where
 
         let mut feedback: <T as ActionMsg>::Feedback =
             unsafe { MaybeUninit::zeroed().assume_init() };
-        match guard.rcl_action_take_feedback(&self.client, &mut feedback as *const _ as *mut _) {
+        match guard.rcl_action_take_feedback(&self.data.client, &mut feedback as *const _ as *mut _)
+        {
             Ok(()) => RecvResult::Ok(feedback),
             Err(RCLActionError::ClientTakeFailed) => RecvResult::RetryLater(()),
             Err(e) => RecvResult::Err(e.into()),
@@ -336,7 +261,9 @@ where
         let guard = rcl::MT_UNSAFE_FN.lock();
 
         let mut status_array: GoalStatusArray = unsafe { MaybeUninit::zeroed().assume_init() };
-        match guard.rcl_action_take_status(&self.client, &mut status_array as *const _ as *mut _) {
+        match guard
+            .rcl_action_take_status(&self.data.client, &mut status_array as *const _ as *mut _)
+        {
             Ok(()) => RecvResult::Ok(status_array),
             Err(RCLActionError::ClientTakeFailed) => RecvResult::RetryLater(()),
             Err(e) => RecvResult::Err(e.into()),
@@ -344,9 +271,120 @@ where
     }
 }
 
-impl<T: ActionMsg> Drop for Client<T> {
-    fn drop(&mut self) {
+#[derive(Clone)]
+pub struct ClientRecv<T> {
+    data: Arc<ClientData>,
+    _phantom: PhantomData<T>,
+    _unsync: PhantomUnsync,
+}
+
+impl<T: ActionMsg> ClientRecv<T> {
+    fn new(data: Arc<ClientData>) -> Self {
+        Self {
+            data,
+            _phantom: Default::default(),
+            _unsync: Default::default(),
+        }
+    }
+}
+
+#[derive(Clone)]
+pub struct ClientGoalRecv<T> {
+    inner: ClientRecv<T>,
+    seq: i64,
+}
+
+impl<T: ActionMsg> ClientGoalRecv<T> {
+    fn try_recv(
+        self,
+    ) -> RecvResult<(Client<T>, SendGoalServiceResponse<T>, rcl::rmw_request_id_t), Self> {
         let guard = rcl::MT_UNSAFE_FN.lock();
-        let _ = guard.rcl_action_client_fini(&mut self.client, unsafe { self.node.as_ptr_mut() });
+
+        let mut header: rcl::rmw_request_id_t = unsafe { MaybeUninit::zeroed().assume_init() };
+        let mut response: SendGoalServiceResponse<T> =
+            unsafe { MaybeUninit::zeroed().assume_init() };
+        match guard.rcl_action_take_goal_response(
+            &self.inner.data.client,
+            &mut header,
+            &mut response as *const _ as *mut _,
+        ) {
+            Ok(()) => {
+                if header.sequence_number == self.seq {
+                    let client = Client {
+                        data: self.inner.data,
+                        _phantom: Default::default(),
+                    };
+                    RecvResult::Ok((client, response, header))
+                } else {
+                    RecvResult::RetryLater(self)
+                }
+            }
+            Err(RCLActionError::ClientTakeFailed) => RecvResult::RetryLater(self),
+            Err(e) => RecvResult::Err(e.into()),
+        }
+    }
+
+    /// Wait until the client receives a response or the duration `t` elapses.
+    pub fn recv_timeout(
+        self,
+        t: Duration,
+        selector: &mut Selector,
+    ) -> RecvResult<(Client<T>, SendGoalServiceResponse<T>, rcl::rmw_request_id_t), Self> {
+        selector.add_action_client(&self.inner.data.client);
+
+        match selector.wait_timeout(t) {
+            Ok(true) => self.try_recv(),
+            Ok(false) => RecvResult::RetryLater(self),
+            Err(e) => RecvResult::Err(e),
+        }
+    }
+}
+
+#[derive(Clone)]
+pub struct ClientCancelRecv<T> {
+    inner: ClientRecv<T>,
+    seq: i64,
+}
+
+impl<T: ActionMsg> ClientCancelRecv<T> {
+    fn try_recv(self) -> RecvResult<(Client<T>, CancelGoalResponse, rcl::rmw_request_id_t), Self> {
+        let guard = rcl::MT_UNSAFE_FN.lock();
+
+        let mut header: rcl::rmw_request_id_t = unsafe { MaybeUninit::zeroed().assume_init() };
+        let mut response: CancelGoalResponse = unsafe { MaybeUninit::zeroed().assume_init() };
+        match guard.rcl_action_take_cancel_response(
+            &self.inner.data.client,
+            &mut header,
+            &mut response as *const _ as *mut _,
+        ) {
+            Ok(()) => {
+                if header.sequence_number == self.seq {
+                    let client = Client {
+                        data: self.inner.data,
+                        _phantom: Default::default(),
+                    };
+                    RecvResult::Ok((client, response, header))
+                } else {
+                    RecvResult::RetryLater(self)
+                }
+            }
+            Err(RCLActionError::ClientTakeFailed) => RecvResult::RetryLater(self),
+            Err(e) => RecvResult::Err(e.into()),
+        }
+    }
+
+    /// Wait until the client receives a response or the duration `t` elapses.
+    fn recv_timeout(
+        self,
+        t: Duration,
+        selector: &mut Selector,
+    ) -> RecvResult<(Client<T>, CancelGoalResponse, rcl::rmw_request_id_t), Self> {
+        selector.add_action_client(&self.inner.data.client);
+
+        match selector.wait_timeout(t) {
+            Ok(true) => self.try_recv(),
+            Ok(false) => RecvResult::RetryLater(self),
+            Err(e) => RecvResult::Err(e),
+        }
     }
 }

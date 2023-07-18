@@ -123,11 +123,11 @@ type ActionHandler = Rc<RefCell<dyn FnMut() -> CallbackResult>>;
 #[derive(Clone)]
 struct ActionClientConditionHandler {
     client: *const rcl_action_client_t,
-    feedback_handler: ActionHandler,
-    status_handler: ActionHandler,
-    goal_handler: ActionHandler,
-    cancel_goal_handler: ActionHandler,
-    result_handler: ActionHandler,
+    feedback_handler: Option<ActionHandler>,
+    status_handler: Option<ActionHandler>,
+    goal_handler: Option<ActionHandler>,
+    cancel_goal_handler: Option<ActionHandler>,
+    result_handler: Option<ActionHandler>,
 }
 
 #[derive(Clone)]
@@ -832,6 +832,20 @@ impl Selector {
         );
     }
 
+    pub(crate) fn add_action_client(&mut self, client: *const rcl::rcl_action_client_t) {
+        self.action_clients.insert(
+            client,
+            ActionClientConditionHandler {
+                feedback_handler: None,
+                status_handler: None,
+                goal_handler: None,
+                cancel_goal_handler: None,
+                result_handler: None,
+                client,
+            },
+        );
+    }
+
     pub(crate) fn add_guard_condition(
         &mut self,
         cond: &GuardCondition,
@@ -1496,15 +1510,30 @@ fn notify_action_client(
             }
 
             if (is_feedback_ready
-                && (handler.feedback_handler.borrow_mut())() == CallbackResult::Remove)
+                && handler
+                    .feedback_handler
+                    .clone()
+                    .is_some_and(|h| (h.borrow_mut())() == CallbackResult::Remove))
                 || (is_status_ready
-                    && (handler.status_handler.borrow_mut())() == CallbackResult::Remove)
+                    && handler
+                        .status_handler
+                        .clone()
+                        .is_some_and(|h| (h.borrow_mut())() == CallbackResult::Remove))
                 || (is_goal_response_ready
-                    && (handler.goal_handler.borrow_mut())() == CallbackResult::Remove)
+                    && handler
+                        .goal_handler
+                        .clone()
+                        .is_some_and(|h| (h.borrow_mut())() == CallbackResult::Remove))
                 || (is_cancel_response_ready
-                    && (handler.cancel_goal_handler.borrow_mut())() == CallbackResult::Remove)
+                    && handler
+                        .cancel_goal_handler
+                        .clone()
+                        .is_some_and(|h| (h.borrow_mut())() == CallbackResult::Remove))
                 || (is_result_response_ready
-                    && (handler.result_handler.borrow_mut())() == CallbackResult::Remove)
+                    && handler
+                        .result_handler
+                        .clone()
+                        .is_some_and(|h| (h.borrow_mut())() == CallbackResult::Remove))
             {
                 Ok(None)
             } else {
