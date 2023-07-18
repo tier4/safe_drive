@@ -225,10 +225,9 @@ where
 
     /// Send a cancel request.
     pub fn send_cancel_request(
-        &mut self,
+        self,
         request: &CancelGoalRequest,
-        callback: Box<dyn FnOnce(CancelGoalResponse)>,
-    ) -> Result<(), DynError> {
+    ) -> Result<ClientCancelRecv<T>, DynError> {
         let guard = rcl::MT_UNSAFE_FN.lock();
 
         let mut seq: i64 = 0;
@@ -238,7 +237,10 @@ where
             &mut seq,
         )?;
 
-        todo!()
+        Ok(ClientCancelRecv {
+            inner: ClientRecv::new(self.data),
+            seq,
+        })
     }
 
     // Takes a feedback for the goal.
@@ -295,7 +297,7 @@ pub struct ClientGoalRecv<T> {
 }
 
 impl<T: ActionMsg> ClientGoalRecv<T> {
-    fn try_recv(
+    pub fn try_recv(
         self,
     ) -> RecvResult<(Client<T>, SendGoalServiceResponse<T>, rcl::rmw_request_id_t), Self> {
         let guard = rcl::MT_UNSAFE_FN.lock();
@@ -347,7 +349,9 @@ pub struct ClientCancelRecv<T> {
 }
 
 impl<T: ActionMsg> ClientCancelRecv<T> {
-    fn try_recv(self) -> RecvResult<(Client<T>, CancelGoalResponse, rcl::rmw_request_id_t), Self> {
+    pub fn try_recv(
+        self,
+    ) -> RecvResult<(Client<T>, CancelGoalResponse, rcl::rmw_request_id_t), Self> {
         let guard = rcl::MT_UNSAFE_FN.lock();
 
         let mut header: rcl::rmw_request_id_t = unsafe { MaybeUninit::zeroed().assume_init() };
@@ -374,7 +378,7 @@ impl<T: ActionMsg> ClientCancelRecv<T> {
     }
 
     /// Wait until the client receives a response or the duration `t` elapses.
-    fn recv_timeout(
+    pub fn recv_timeout(
         self,
         t: Duration,
         selector: &mut Selector,
