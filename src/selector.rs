@@ -1344,7 +1344,7 @@ impl Selector {
         }
 
         let n_servers = self.action_servers.len() as rcl::size_t;
-        let n_clients = self.action_servers.len() as rcl::size_t;
+        let n_clients = self.action_clients.len() as rcl::size_t;
 
         Ok(EntitySize {
             subscriptions: self.subscriptions.len() as rcl::size_t
