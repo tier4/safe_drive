@@ -214,6 +214,19 @@ where
         }
     }
 
+    pub fn recv_feedback_timeout(
+        &self,
+        t: Duration,
+        selector: &mut Selector,
+    ) -> RecvResult<<T as ActionMsg>::Feedback, ()> {
+        selector.add_action_client(&self.data.client);
+        match selector.wait_timeout(t) {
+            Ok(true) => self.try_recv_feedback(),
+            Ok(false) => RecvResult::RetryLater(()),
+            Err(e) => RecvResult::Err(e),
+        }
+    }
+
     // Takes a status message for all the ongoing goals.
     // TODO: maybe return status_array.status_list. could it be cloned?
     pub fn try_recv_status(&self) -> RecvResult<GoalStatusArray, ()> {
@@ -226,6 +239,20 @@ where
             Ok(()) => RecvResult::Ok(status_array),
             Err(RCLActionError::ClientTakeFailed) => RecvResult::RetryLater(()),
             Err(e) => RecvResult::Err(e.into()),
+        }
+    }
+
+    /// Wait until the client receives a status message or the duration `t` elapses.
+    pub fn recv_status_timeout(
+        &self,
+        t: Duration,
+        selector: &mut Selector,
+    ) -> RecvResult<GoalStatusArray, ()> {
+        selector.add_action_client(&self.data.client);
+        match selector.wait_timeout(t) {
+            Ok(true) => self.try_recv_status(),
+            Ok(false) => RecvResult::RetryLater(()),
+            Err(e) => RecvResult::Err(e),
         }
     }
 }

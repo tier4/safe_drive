@@ -1,7 +1,14 @@
 use std::sync::Arc;
 
-use super::server::ActionServerData;
-use crate::{error::DynError, msg::ActionMsg, rcl};
+use super::{
+    server::{publish_status, ActionServerData},
+    GoalStatus,
+};
+use crate::{
+    error::DynError,
+    msg::{interfaces::action_msgs::msg::GoalStatusSeq, ActionMsg},
+    rcl::{self, rcl_action_goal_status_array_t},
+};
 
 /// GoalHandle contains information about an action goal and is used by server worker threads to send feedback and results.
 pub struct GoalHandle<T: ActionMsg> {
@@ -35,6 +42,26 @@ where
             )
             .into());
         }
+
+        // publish_status(unsafe { self.data.as_ptr_mut() });
+
+        let guard = rcl::MT_UNSAFE_FN.lock();
+
+        let server = unsafe { self.data.as_ptr_mut() };
+        let mut statuses: rcl_action_goal_status_array_t =
+            rcl::MTSafeFn::rcl_action_get_zero_initialized_goal_status_array();
+        guard.rcl_action_get_goal_status_array(server, &mut statuses)?;
+        let status_seq_ptr = &mut statuses.msg.status_list as *mut _ as *mut GoalStatusSeq<0>;
+        let status_seq = unsafe { &mut (*status_seq_ptr) };
+
+        for status in status_seq.iter_mut() {
+            if status.goal_info.goal_id.uuid == self.goal_id {
+                status.status = GoalStatus::Succeeded.into();
+                break;
+            }
+        }
+        guard.rcl_action_publish_status(server, &statuses as *const _ as *const _)?;
+
         Ok(())
     }
 
