@@ -1,11 +1,7 @@
 use std::sync::Arc;
 
 use super::{server::ActionServerData, update_goal_status, GoalStatus};
-use crate::{
-    error::DynError,
-    msg::{interfaces::action_msgs::msg::GoalStatusSeq, ActionMsg},
-    rcl::{self, rcl_action_goal_status_array_t},
-};
+use crate::{error::DynError, msg::ActionMsg, rcl};
 
 /// GoalHandle contains information about an action goal and is used by server worker threads to send feedback and results.
 pub struct GoalHandle<T: ActionMsg> {
@@ -32,7 +28,7 @@ where
 
     pub fn finish(&self, result: T::ResultContent) -> Result<(), DynError> {
         let mut results = self.data.results.lock();
-        if let Some(_) = results.insert(self.goal_id, result) {
+        if results.insert(self.goal_id, result).is_some() {
             return Err(format!(
                 "the result for the goal (id: {:?}) already exists; it should be set only once",
                 self.goal_id

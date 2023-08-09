@@ -66,7 +66,7 @@ use crate::{
             msg::{GoalInfo, GoalInfoSeq},
             srv::{ERROR_NONE, ERROR_REJECTED},
         },
-        ActionMsg, GetUUID, ServiceMsg, TypeSupport,
+        ActionMsg, ServiceMsg, TypeSupport,
     },
     parameter::{ParameterServer, Parameters},
     rcl::{
@@ -574,11 +574,12 @@ impl Selector {
     /// # Example
     /// ```
     /// selector.add_action_server(server, |handle, req| {
-    ///        true
-    ///      },
-    ///   // always accept cancel
-    ///   |req| { true }
-    /// })
+    ///   // spawn a worker thread ...
+    ///
+    ///   true // return true to accept the goal
+    /// },
+    ///   |req| { true } // return true to cancel the goal
+    /// );
     /// ```
     pub fn add_action_server<T: ActionMsg + 'static, GR, CR>(
         &mut self,
@@ -603,7 +604,7 @@ impl Selector {
                         RecvResult::Ok((header, request)) => {
                             let uuid = *request.get_uuid();
                             let handle = server.create_goal_handle(uuid);
-                            let accepted = (&goal_handler)(handle, request);
+                            let accepted = goal_handler(handle, request);
 
                             if let Err(e) = server.handle_goal(accepted, header, uuid) {
                                 let logger = Logger::new("safe_drive");
@@ -676,7 +677,7 @@ impl Selector {
 
                             let mut accepted_goals: Vec<_> = candidates
                                 .iter()
-                                .filter(|goal| (&cancel_goal_handler)(goal))
+                                .filter(|goal| cancel_goal_handler(goal))
                                 .collect();
 
                             let accepted_uuids: Vec<[u8; 16]> = accepted_goals

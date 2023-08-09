@@ -1,11 +1,4 @@
-use std::{
-    collections::{btree_map::Entry::Vacant, BTreeMap},
-    ffi::CString,
-    marker::PhantomData,
-    mem::MaybeUninit,
-    sync::Arc,
-    time::Duration,
-};
+use std::{ffi::CString, marker::PhantomData, mem::MaybeUninit, sync::Arc, time::Duration};
 
 use crate::{
     error::{DynError, RCLActionError, RCLActionResult, RCLError},
