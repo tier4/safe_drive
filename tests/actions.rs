@@ -50,14 +50,7 @@ fn goal_handler(handle: GoalHandle<MyAction>, req: MyAction_SendGoal_Request) ->
                 std::thread::sleep(Duration::from_secs(2));
                 println!("server worker: sending feedback {c}");
                 let feedback = MyAction_Feedback { c };
-                // TODO: ergonomics
-                let msg = MyAction_FeedbackMessage {
-                    goal_id: UUID {
-                        uuid: handle.goal_id,
-                    },
-                    feedback,
-                };
-                handle.feedback(msg).unwrap();
+                handle.feedback(feedback).unwrap();
             }
 
             println!("server worker: sending result");

@@ -50,6 +50,9 @@ pub trait ActionMsg {
         status: u8,
         result: Self::ResultContent,
     ) -> <Self::Result as ActionResult>::Response;
+
+    type FeedbackContent: TypeSupport;
+    fn new_feedback_message(feedback: Self::FeedbackContent, uuid: [u8; 16]) -> Self::Feedback;
 }
 
 pub trait ActionGoal {

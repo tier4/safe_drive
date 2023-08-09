@@ -17,11 +17,13 @@ where
         Self { goal_id, data }
     }
 
-    pub fn feedback(&self, mut content: T::Feedback) -> Result<(), DynError> {
+    pub fn feedback(&self, content: T::FeedbackContent) -> Result<(), DynError> {
+        let mut msg = <T as ActionMsg>::new_feedback_message(content, self.goal_id);
+
         let guard = rcl::MT_UNSAFE_FN.lock();
         guard.rcl_action_publish_feedback(
             unsafe { self.data.as_ptr_mut() },
-            &mut content as *const _ as *mut _,
+            &mut msg as *const _ as *mut _,
         )?;
         Ok(())
     }
