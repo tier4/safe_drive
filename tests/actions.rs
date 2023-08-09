@@ -40,13 +40,6 @@ fn create_client(
     Client::new(node_client, action, None).map_err(|e| e.into())
 }
 
-fn handle_goal_response(resp: MyAction_SendGoal_Response) {
-    println!(
-        "Goal response received: accepted = {}, timestamp = {:?}",
-        resp.accepted, resp.stamp
-    );
-}
-
 fn goal_handler(handle: GoalHandle<MyAction>, req: MyAction_SendGoal_Request) -> bool {
     println!("Goal request received: {:?}", req);
 
@@ -183,7 +176,6 @@ fn test_action_cancel() -> Result<(), DynError> {
 
     // send goal request
     let uuid = [1, 2, 3, 4, 5, 6, 7, 8, 1, 2, 3, 4, 5, 6, 7, 8];
-    let uuid_ = uuid.clone();
     let goal = MyAction_Goal { a: 10 };
     let mut recv = client.send_goal_with_uuid(goal, uuid)?;
 
@@ -219,14 +211,14 @@ fn test_action_cancel() -> Result<(), DynError> {
     };
     let mut recv = client.send_cancel_request(&request)?;
 
-    let client = loop {
+    loop {
         match recv.recv_timeout(Duration::from_secs(3), &mut selector) {
-            RecvResult::Ok((client, data, header)) => {
+            RecvResult::Ok((_client, data, header)) => {
                 println!(
                     "received cancel goal response: data = {:?}, seq = {}",
                     data, header.sequence_number
                 );
-                break client;
+                break;
             }
             RecvResult::RetryLater(receiver) => {
                 println!("retrying");
@@ -234,7 +226,7 @@ fn test_action_cancel() -> Result<(), DynError> {
             }
             RecvResult::Err(e) => panic!("{}", e),
         }
-    };
+    }
 
     Ok(())
 }

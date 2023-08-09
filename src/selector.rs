@@ -66,7 +66,7 @@ use crate::{
             msg::{GoalInfo, GoalInfoSeq},
             srv::{ERROR_NONE, ERROR_REJECTED},
         },
-        ActionMsg, ServiceMsg, TypeSupport,
+        ActionMsg, GetUUID, ServiceMsg, TypeSupport,
     },
     parameter::{ParameterServer, Parameters},
     rcl::{
