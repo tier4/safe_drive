@@ -7,6 +7,7 @@ use safe_drive::{
         client::Client,
         handle::GoalHandle,
         server::{Server, ServerQosOption},
+        GoalStatus,
     },
     context::Context,
     error::DynError,
@@ -39,381 +40,11 @@ fn create_client(
     Client::new(node_client, action, None).map_err(|e| e.into())
 }
 
-// wait for goal request, then send response by callback
-fn server_recv_goal_request(server: &mut Server<MyAction>) -> Result<(), DynError> {
-    loop {
-        match server.try_recv_goal_request() {
-            RecvResult::Ok(_) => {
-                println!("server: accepted goal");
-                return Ok(());
-            }
-            RecvResult::RetryLater(_) => {
-                println!("server: waiting for goal requests...");
-            }
-            RecvResult::Err(e) => return Err(e),
-        }
-        thread::sleep(Duration::from_secs(1));
-    }
-}
-
-fn client_recv_goal_response(client: &mut Client<MyAction>) -> Result<(), DynError> {
-    loop {
-        match client.try_recv_goal_response() {
-            RecvResult::Ok(_) => return Ok(()), // we wait for a single response here
-            RecvResult::RetryLater(_) => {
-                println!("retrying...");
-            }
-            RecvResult::Err(e) => return Err(e),
-        }
-        std::thread::sleep(std::time::Duration::from_millis(200));
-    }
-}
-
-fn server_recv_cancel_request(server: &mut Server<MyAction>) -> Result<(), DynError> {
-    loop {
-        match server.try_recv_cancel_request() {
-            RecvResult::Ok(_) => {
-                println!("server: accepted cancellation");
-                return Ok(());
-            }
-            RecvResult::RetryLater(_) => {
-                println!("server: waiting for cancel requests...");
-            }
-            RecvResult::Err(e) => return Err(e),
-        }
-        std::thread::sleep(std::time::Duration::from_millis(200));
-    }
-}
-
-fn server_recv_result_request(server: &mut Server<MyAction>) -> Result<(), DynError> {
-    loop {
-        match server.try_recv_result_request() {
-            RecvResult::Ok((_, _)) => {
-                println!("server: received result request");
-                return Ok(());
-            }
-            RecvResult::RetryLater(_) => {
-                println!("server: waiting for result requests...");
-            }
-            RecvResult::Err(e) => return Err(e),
-        }
-        std::thread::sleep(std::time::Duration::from_millis(200));
-    }
-}
-
-fn client_recv_cancel_response(client: &mut Client<MyAction>) -> Result<(), DynError> {
-    loop {
-        match client.try_recv_cancel_response() {
-            RecvResult::Ok(_) => return Ok(()), // we wait for a single response here
-            RecvResult::RetryLater(_) => {
-                println!("client: waiting for cancel response...");
-            }
-            RecvResult::Err(e) => return Err(e),
-        }
-        std::thread::sleep(std::time::Duration::from_secs(1));
-    }
-}
-
-fn client_recv_result_response(client: &mut Client<MyAction>) -> Result<(), DynError> {
-    loop {
-        match client.try_recv_result_response() {
-            RecvResult::Ok(_) => return Ok(()), // we wait for a single result here
-            RecvResult::RetryLater(_) => {
-                println!("client: waiting for result response...");
-            }
-            RecvResult::Err(e) => return Err(e),
-        }
-        std::thread::sleep(std::time::Duration::from_secs(1));
-    }
-}
-
 fn handle_goal_response(resp: MyAction_SendGoal_Response) {
     println!(
         "Goal response received: accepted = {}, timestamp = {:?}",
         resp.accepted, resp.stamp
     );
-}
-
-#[test]
-fn test_action() -> Result<(), DynError> {
-    let ctx = Context::new()?;
-
-    let (tx, rx) = crossbeam_channel::bounded(0);
-    std::thread::Builder::new()
-        .name("t_a_server".into())
-        .spawn({
-            let ctx = ctx.clone();
-            move || -> Result<(), DynError> {
-                let mut server =
-                    create_server(&ctx, "test_action_server_node", "test_action", None)?;
-
-                rx.recv()?;
-                server_recv_goal_request(&mut server)?;
-                // rx.recv();
-
-                loop {
-                    server.try_recv_data()?;
-                    if let Ok(()) = rx.try_recv() {
-                        break;
-                    }
-                    thread::sleep(Duration::from_millis(500));
-                }
-
-                server_recv_result_request(&mut server)?;
-                Ok(())
-            }
-        })
-        .unwrap();
-
-    let mut client = create_client(&ctx, "test_action_client_node", "test_action")?;
-
-    thread::sleep(Duration::from_millis(100));
-
-    // send goal request
-    let goal = MyAction_Goal { a: 10 };
-
-    // TODO: generate UUID w/ uuid crate. rclcpp's ClientBase::generate_goal_id
-    // does not conform to the UUID v4 standard, strictly speaking.
-    let uuid = [1, 2, 3, 4, 5, 6, 7, 8, 1, 2, 3, 4, 5, 6, 7, 8];
-    let uuid_ = uuid.clone();
-    client.send_goal_with_uuid(goal, uuid, handle_goal_response)?;
-    tx.send(())?;
-    client_recv_goal_response(&mut client).unwrap();
-
-    // get feedback (wait for five feedback messages)
-    let mut received = 0;
-    loop {
-        match client.try_recv_feedback() {
-            RecvResult::Ok(feedback) => {
-                println!("Feedback received: {:?}", feedback);
-                received += 1;
-                if received > 5 {
-                    break;
-                }
-            }
-            RecvResult::RetryLater(_) => {
-                println!("waiting for feedback...");
-            }
-            RecvResult::Err(e) => return Err(e.into()),
-        }
-        std::thread::sleep(std::time::Duration::from_secs(1));
-    }
-
-    tx.send(())?;
-
-    // TODO: UUID can't be cloned?
-    let mut goal_id = UUID::new().unwrap();
-    goal_id.uuid = uuid_;
-    let result_req = MyAction_GetResult_Request { goal_id };
-    client.send_result_request(
-        &result_req,
-        Box::new(|resp| {
-            println!(
-                "Result response received: status = {}, result = {}",
-                resp.status, resp.result.b
-            );
-        }),
-    )?;
-
-    // get result
-    client_recv_result_response(&mut client)?;
-
-    Ok(())
-}
-
-#[test]
-fn test_action_status() -> Result<(), DynError> {
-    let ctx = Context::new()?;
-
-    let mut server = create_server(&ctx, "test_action_server_node", "test_action_status", None)?;
-    let mut client = create_client(&ctx, "test_action_client_node", "test_action_status")?;
-
-    thread::sleep(Duration::from_millis(100));
-
-    // send goal request
-    let goal = MyAction_Goal { a: 10 };
-    let uuid = [1, 2, 3, 4, 5, 6, 7, 8, 1, 2, 3, 4, 5, 6, 7, 9];
-
-    client.send_goal_with_uuid(goal, uuid, handle_goal_response)?;
-
-    server_recv_goal_request(&mut server)?;
-    client_recv_goal_response(&mut client)?;
-
-    // Once the goal is accepted, get status for all the ongoing goals.
-    // There should be at least one ongoing goal which has been requested earlier in this test.
-    loop {
-        match client.try_recv_status() {
-            RecvResult::Ok(status_array) => {
-                println!("Status received: {:?}", status_array);
-                break;
-            }
-            RecvResult::RetryLater(_) => {
-                println!("retrying...");
-            }
-            RecvResult::Err(e) => return Err(e.into()),
-        }
-        std::thread::sleep(std::time::Duration::from_secs(1));
-    }
-
-    Ok(())
-}
-
-#[test]
-fn test_action_cancel() -> Result<(), DynError> {
-    let ctx = Context::new()?;
-    let mut server = create_server(&ctx, "test_action_server_node", "test_action_status", None)?;
-    let mut client = create_client(&ctx, "test_action_client_node", "test_action_status")?;
-
-    thread::sleep(Duration::from_millis(100));
-
-    let goal = MyAction_Goal { a: 10 };
-    let uuid = [1, 2, 3, 4, 5, 6, 7, 8, 1, 2, 3, 4, 5, 6, 7, 9];
-    client.send_goal_with_uuid(goal, uuid, handle_goal_response)?;
-
-    server_recv_goal_request(&mut server)?;
-    client_recv_goal_response(&mut client)?;
-
-    let request = CancelGoalRequest {
-        goal_info: GoalInfo {
-            goal_id: UUID { uuid },
-            stamp: UnsafeTime { sec: 0, nanosec: 0 },
-        },
-    };
-
-    client.send_cancel_request(
-        &request,
-        Box::new(|resp| {
-            println!("client: received cancel response: {:?}", resp);
-        }),
-    )?;
-
-    server_recv_cancel_request(&mut server)?;
-    client_recv_cancel_response(&mut client)?;
-
-    // TODO: check status to confirm the goal is really being cancelled
-
-    Ok(())
-}
-
-#[test]
-fn test_action_selector() -> Result<(), DynError> {
-    let ctx = Context::new()?;
-
-    let mut client = create_client(&ctx, "test_action_client_node", "test_action_selector")?;
-
-    let mut selector = ctx.create_selector()?;
-    let server = create_server(
-        &ctx,
-        "test_action_server_node",
-        "test_action_selector",
-        None,
-    )?;
-
-    // send goal request
-    let uuid = [1, 2, 3, 4, 5, 6, 7, 8, 1, 2, 3, 4, 5, 6, 7, 8];
-    let uuid_ = uuid.clone();
-    let goal = MyAction_Goal { a: 10 };
-    client.send_goal_with_uuid(goal, uuid, handle_goal_response)?;
-
-    thread::sleep(Duration::from_millis(100));
-
-    selector.add_action_server(server, goal_handler, move |goal| {
-        println!("Cancel request received for goal {:?}", goal);
-        true
-    });
-    selector.wait()?;
-
-    client_recv_goal_response(&mut client).unwrap();
-
-    // get feedback (wait for five feedback messages)
-    let mut received = 0;
-    loop {
-        match client.try_recv_feedback() {
-            RecvResult::Ok(feedback) => {
-                println!("Feedback received: {:?}", feedback);
-                received += 1;
-                if received > 5 {
-                    break;
-                }
-            }
-            RecvResult::RetryLater(_) => {
-                println!("waiting for feedback...");
-            }
-            RecvResult::Err(e) => return Err(e.into()),
-        }
-        std::thread::sleep(std::time::Duration::from_secs(1));
-    }
-
-    let mut goal_id = UUID::new().unwrap();
-    goal_id.uuid = uuid_;
-    let result_req = MyAction_GetResult_Request { goal_id };
-    client.send_result_request(
-        &result_req,
-        Box::new(|resp| {
-            println!(
-                "Result response received: status = {}, result = {}",
-                resp.status, resp.result.b
-            );
-        }),
-    )?;
-
-    selector.wait()?;
-
-    // get result
-    client_recv_result_response(&mut client)?;
-
-    Ok(())
-}
-
-#[test]
-fn test_action_selector_cancel() -> Result<(), DynError> {
-    let ctx = Context::new()?;
-
-    let mut client = create_client(
-        &ctx,
-        "test_action_client_node",
-        "test_action_selector_cancel",
-    )?;
-
-    let mut selector = ctx.create_selector()?;
-    let server = create_server(
-        &ctx,
-        "test_action_server_node",
-        "test_action_selector_cancel",
-        None,
-    )?;
-
-    // send goal request
-    let uuid = [1, 2, 3, 4, 5, 6, 7, 8, 1, 2, 3, 4, 5, 6, 7, 8];
-    let uuid_ = uuid.clone();
-    let goal = MyAction_Goal { a: 10 };
-    client.send_goal_with_uuid(goal, uuid, handle_goal_response)?;
-
-    selector.add_action_server(server, goal_handler, move |goal| {
-        println!("Cancel request received for goal {:?}", goal);
-        true
-    });
-    selector.wait()?;
-
-    client_recv_goal_response(&mut client).unwrap();
-
-    let request = CancelGoalRequest {
-        goal_info: GoalInfo {
-            goal_id: UUID { uuid: uuid_ },
-            stamp: UnsafeTime { sec: 0, nanosec: 0 },
-        },
-    };
-    client.send_cancel_request(
-        &request,
-        Box::new(|resp| {
-            println!("client: received cancel response: {:?}", resp);
-        }),
-    )?;
-    selector.wait()?;
-
-    client_recv_cancel_response(&mut client)?;
-
-    Ok(())
 }
 
 fn goal_handler(handle: GoalHandle<MyAction>, req: MyAction_SendGoal_Request) -> bool {
@@ -446,4 +77,229 @@ fn goal_handler(handle: GoalHandle<MyAction>, req: MyAction_SendGoal_Request) ->
         .unwrap();
 
     true
+}
+
+#[test]
+fn test_action() -> Result<(), DynError> {
+    let ctx = Context::new()?;
+
+    let client = create_client(&ctx, "test_action_client_node", "test_action_selector")?;
+
+    let mut selector = ctx.create_selector()?;
+    let server = create_server(
+        &ctx,
+        "test_action_server_node",
+        "test_action_selector",
+        None,
+    )?;
+
+    // send goal request
+    let uuid = [1, 2, 3, 4, 5, 6, 7, 8, 1, 2, 3, 4, 5, 6, 7, 7];
+    let uuid_ = uuid;
+    let goal = MyAction_Goal { a: 10 };
+    let mut recv = client.send_goal_with_uuid(goal, uuid)?;
+
+    thread::sleep(Duration::from_millis(100));
+
+    // You don't have to set handlers for incoming result requests since they are processed
+    // automatically.
+    selector.add_action_server(server, goal_handler, move |goal| {
+        println!("Cancel request received for goal {:?}", goal);
+        true
+    });
+    selector.wait()?;
+
+    let client = loop {
+        match recv.recv_timeout(Duration::from_secs(3), &mut selector) {
+            RecvResult::Ok((client, data, header)) => {
+                println!(
+                    "received goal response: accepted = {:?}, seq = {}",
+                    data.accepted, header.sequence_number
+                );
+                break client;
+            }
+            RecvResult::RetryLater(receiver) => {
+                recv = receiver;
+            }
+            RecvResult::Err(e) => panic!("{}", e),
+        }
+    };
+
+    // get feedback (wait for five feedback messages)
+    let mut received = 0;
+    loop {
+        match client.recv_feedback_timeout(Duration::from_secs(3), &mut selector) {
+            RecvResult::Ok(feedback) => {
+                println!("received feedback: {:?}", feedback);
+                received += 1;
+                if received > 5 {
+                    break;
+                }
+            }
+            RecvResult::RetryLater(()) => {}
+            RecvResult::Err(e) => panic!("{}", e),
+        }
+    }
+
+    let mut goal_id = UUID::new().unwrap();
+    goal_id.uuid = uuid_;
+    let result_req = MyAction_GetResult_Request { goal_id };
+    let mut recv = client.send_result_request(&result_req)?;
+
+    selector.wait()?;
+
+    loop {
+        match recv.recv_timeout(Duration::from_secs(3), &mut selector) {
+            RecvResult::Ok((_, data, header)) => {
+                println!(
+                    "received result: result = {:?} status = {:?}, seq = {}",
+                    data.result, data.status, header.sequence_number
+                );
+                break;
+            }
+            RecvResult::RetryLater(receiver) => {
+                recv = receiver;
+            }
+            RecvResult::Err(e) => panic!("{}", e),
+        };
+    }
+
+    Ok(())
+}
+
+#[test]
+fn test_action_cancel() -> Result<(), DynError> {
+    let ctx = Context::new()?;
+
+    let client = create_client(&ctx, "test_action_client_node", "test_action_selector")?;
+
+    let mut selector = ctx.create_selector()?;
+    let server = create_server(
+        &ctx,
+        "test_action_server_node",
+        "test_action_selector",
+        None,
+    )?;
+
+    // send goal request
+    let uuid = [1, 2, 3, 4, 5, 6, 7, 8, 1, 2, 3, 4, 5, 6, 7, 8];
+    let uuid_ = uuid.clone();
+    let goal = MyAction_Goal { a: 10 };
+    let mut recv = client.send_goal_with_uuid(goal, uuid)?;
+
+    thread::sleep(Duration::from_millis(100));
+
+    selector.add_action_server(server, goal_handler, move |goal| {
+        println!("Cancel request received for goal {:?}", goal);
+        true
+    });
+    selector.wait()?;
+
+    let client = loop {
+        match recv.recv_timeout(Duration::from_secs(3), &mut selector) {
+            RecvResult::Ok((client, data, header)) => {
+                println!(
+                    "received goal response: accepted = {:?}, seq = {}",
+                    data.accepted, header.sequence_number
+                );
+                break client;
+            }
+            RecvResult::RetryLater(receiver) => {
+                recv = receiver;
+            }
+            RecvResult::Err(e) => panic!("{}", e),
+        }
+    };
+
+    let request = CancelGoalRequest {
+        goal_info: GoalInfo {
+            goal_id: UUID { uuid },
+            stamp: UnsafeTime { sec: 0, nanosec: 0 },
+        },
+    };
+    let mut recv = client.send_cancel_request(&request)?;
+
+    let client = loop {
+        match recv.recv_timeout(Duration::from_secs(3), &mut selector) {
+            RecvResult::Ok((client, data, header)) => {
+                println!(
+                    "received cancel goal response: data = {:?}, seq = {}",
+                    data, header.sequence_number
+                );
+                break client;
+            }
+            RecvResult::RetryLater(receiver) => {
+                println!("retrying");
+                recv = receiver;
+            }
+            RecvResult::Err(e) => panic!("{}", e),
+        }
+    };
+
+    Ok(())
+}
+
+#[test]
+fn test_action_status() -> Result<(), DynError> {
+    let ctx = Context::new()?;
+
+    let client = create_client(&ctx, "test_action_client_node", "test_action_selector")?;
+
+    let mut selector = ctx.create_selector()?;
+    let server = create_server(
+        &ctx,
+        "test_action_server_node",
+        "test_action_selector",
+        None,
+    )?;
+
+    // send goal request
+    let uuid = [1, 2, 3, 4, 5, 6, 7, 8, 1, 2, 3, 4, 5, 6, 7, 7];
+    let goal = MyAction_Goal { a: 10 };
+    let mut recv = client.send_goal_with_uuid(goal, uuid)?;
+
+    thread::sleep(Duration::from_millis(100));
+
+    selector.add_action_server(server, goal_handler, move |goal| {
+        println!("Cancel request received for goal {:?}", goal);
+        true
+    });
+    selector.wait()?;
+
+    let client = loop {
+        match recv.recv_timeout(Duration::from_secs(3), &mut selector) {
+            RecvResult::Ok((client, data, header)) => {
+                println!(
+                    "received goal response: accepted = {:?}, seq = {}",
+                    data.accepted, header.sequence_number
+                );
+                break client;
+            }
+            RecvResult::RetryLater(receiver) => {
+                // println!("retrying...");
+                recv = receiver;
+            }
+            RecvResult::Err(e) => panic!("{}", e),
+        }
+    };
+
+    // get status
+    loop {
+        match client.recv_status_timeout(Duration::from_secs(3), &mut selector) {
+            RecvResult::Ok(statuses) => {
+                for stat in statuses.status_list.iter() {
+                    if stat.goal_info.goal_id.uuid == uuid {
+                        let status: GoalStatus = stat.status.into();
+                        println!("received status = {:?}", status);
+
+                        if status == GoalStatus::Succeeded {
+                            return Ok(());
+                        }
+                    }
+                }
+            }
+            RecvResult::RetryLater(()) => {}
+            RecvResult::Err(e) => panic!("{}", e),
+        }
+    }
 }

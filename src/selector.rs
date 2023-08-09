@@ -55,7 +55,7 @@
 
 use self::guard_condition::{GuardCondition, RCLGuardCondition};
 use crate::{
-    action::{self, handle::GoalHandle, GoalStatus, SendGoalServiceRequest},
+    action::{self, handle::GoalHandle, update_goal_status, GoalStatus, SendGoalServiceRequest},
     context::Context,
     delta_list::DeltaList,
     error::{DynError, RCLActionResult, RCLError, RCLResult},
@@ -646,24 +646,28 @@ impl Selector {
                 loop {
                     match server.try_recv_cancel_request() {
                         RecvResult::Ok((mut header, request)) => {
-                            let guard = rcl::MT_UNSAFE_FN.lock();
                             let mut process_response =
                                 rcl::MTSafeFn::rcl_action_get_zero_initialized_cancel_response();
+                            {
+                                let guard = rcl::MT_UNSAFE_FN.lock();
 
-                            // compute which exact goals are requested to be cancelled
-                            // TODO: handle ERROR_UNKNOWN_GOAL_ID etc.
-                            if let Err(e) = guard.rcl_action_process_cancel_request(
-                                unsafe { server.data.as_ptr_mut() },
-                                &request,
-                                &mut process_response as *const _ as *mut _,
-                            ) {
-                                let logger = Logger::new("safe_drive");
-                                pr_error_in!(
-                                    logger,
-                                    "failed to send cancel responses from action server: {}",
-                                    e
-                                );
-                                return CallbackResult::Remove;
+                                // compute which exact goals are requested to be cancelled
+                                // TODO: handle ERROR_UNKNOWN_GOAL_ID etc.
+                                if let Err(e) = guard.rcl_action_process_cancel_request(
+                                    unsafe { server.data.as_ptr_mut() },
+                                    &request,
+                                    &mut process_response as *const _ as *mut _,
+                                ) {
+                                    let logger = Logger::new("safe_drive");
+                                    pr_error_in!(
+                                        logger,
+                                        "failed to send cancel responses from action server: {}",
+                                        e
+                                    );
+                                    return CallbackResult::Remove;
+                                }
+
+                                ()
                             }
 
                             let goal_seq_ptr = &process_response.msg.goals_canceling as *const _
@@ -674,6 +678,18 @@ impl Selector {
                                 .iter()
                                 .filter(|goal| (&cancel_goal_handler)(goal))
                                 .collect();
+
+                            let accepted_uuids: Vec<[u8; 16]> = accepted_goals
+                                .iter()
+                                .cloned()
+                                .map(|goal| goal.goal_id.uuid)
+                                .collect();
+                            let server_ptr = unsafe { server.data.as_ptr_mut() };
+                            update_goal_status(server_ptr, &accepted_uuids, GoalStatus::Canceling)
+                                .unwrap_or_else(|err| {
+                                    let logger = Logger::new("safe_drive");
+                                    pr_error_in!(logger, "failed to update goal status: {}", err);
+                                });
 
                             let mut cancel_response =
                                 rcl::MTSafeFn::rcl_action_get_zero_initialized_cancel_response();
@@ -691,20 +707,26 @@ impl Selector {
                                     capacity: accepted_goals.capacity() as rcl::size_t,
                                 };
 
-                            match guard.rcl_action_send_cancel_response(
-                                unsafe { server.data.as_ptr_mut() },
-                                &mut header,
-                                &mut cancel_response.msg as *const _ as *mut _,
-                            ) {
-                                Ok(()) => return CallbackResult::Ok,
-                                Err(e) => {
-                                    let logger = Logger::new("safe_drive");
-                                    pr_error_in!(
+                            {
+                                let guard = rcl::MT_UNSAFE_FN.lock();
+                                let server_ptr = unsafe { server.data.as_ptr_mut() };
+                                match guard.rcl_action_send_cancel_response(
+                                    server_ptr,
+                                    &mut header,
+                                    &mut cancel_response.msg as *const _ as *mut _,
+                                ) {
+                                    Ok(()) => {
+                                        return CallbackResult::Ok;
+                                    }
+                                    Err(e) => {
+                                        let logger = Logger::new("safe_drive");
+                                        pr_error_in!(
                                         logger,
                                         "failed to send cancel responses from action server: {}",
                                         e
                                     );
-                                    return CallbackResult::Remove;
+                                        return CallbackResult::Remove;
+                                    }
                                 }
                             }
                         }
@@ -719,6 +741,7 @@ impl Selector {
                             return CallbackResult::Remove;
                         }
                     }
+
                     if let Ok(t) = start.elapsed() {
                         if t > dur {
                             return CallbackResult::Ok;

@@ -200,7 +200,7 @@ where
         })
     }
 
-    // Takes a feedback for the goal.
+    /// Takes a feedback for the goal.
     pub fn try_recv_feedback(&self) -> RecvResult<<T as ActionMsg>::Feedback, ()> {
         let guard = rcl::MT_UNSAFE_FN.lock();
 
@@ -214,6 +214,7 @@ where
         }
     }
 
+    /// Wait until the client receives a feedback message or the duration `t` elapses.
     pub fn recv_feedback_timeout(
         &self,
         t: Duration,

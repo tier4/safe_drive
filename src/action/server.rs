@@ -24,7 +24,10 @@ use crate::qos::galactic::*;
 #[cfg(feature = "humble")]
 use crate::qos::humble::*;
 
-use super::{handle::GoalHandle, GetResultServiceRequest, SendGoalServiceRequest};
+use super::{
+    handle::GoalHandle, update_goal_status, GetResultServiceRequest, GoalStatus,
+    SendGoalServiceRequest,
+};
 
 pub struct ServerQosOption {
     pub goal_service: Profile,
@@ -72,17 +75,6 @@ impl From<ServerQosOption> for rcl::rcl_action_server_options_t {
             },
         }
     }
-}
-
-// These constants are defined in action_msgs.
-pub enum GoalStatus {
-    Unknown = 0,
-    Accepted = 1,
-    Executing = 2,
-    Canceling = 3,
-    Succeeded = 4,
-    Canceled = 5,
-    Aborted = 6,
 }
 
 pub(crate) struct ActionServerData<T: ActionMsg> {
@@ -146,7 +138,6 @@ where
             }),
             clock,
         };
-        server.publish_status().unwrap();
 
         Ok(server)
     }
@@ -255,20 +246,9 @@ where
         goal_info.stamp.sec = timestamp.sec;
         goal_info.stamp.nanosec = timestamp.nanosec;
 
-        rcl_action_accept_new_goal(unsafe { self.data.as_ptr_mut() }, &goal_info)?;
-
-        self.publish_status()?;
-
-        Ok(())
-    }
-
-    // TODO: when to publish?
-    fn publish_status(&self) -> Result<(), DynError> {
-        let guard = rcl::MT_UNSAFE_FN.lock();
-
-        let mut status = rcl::MTSafeFn::rcl_action_get_zero_initialized_goal_status_array();
-        guard.rcl_action_get_goal_status_array(&self.data.server, &mut status)?;
-        guard.rcl_action_publish_status(&self.data.server, &status as *const _ as *const _)?;
+        let server_ptr = unsafe { self.data.as_ptr_mut() };
+        rcl_action_accept_new_goal(server_ptr, &goal_info)?;
+        update_goal_status(server_ptr, &[goal_id], GoalStatus::Accepted)?;
 
         Ok(())
     }
