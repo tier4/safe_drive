@@ -18,8 +18,8 @@ fn test_pubsub() -> Result<(), Box<dyn Error + Sync + Send + 'static>> {
     let node_sub = ctx.create_node("test_pubusub_sub_node", None, Default::default())?;
 
     // create a publisher and a subscriber
-    let publisher = common::create_publisher(node_pub, TOPIC_NAME)?;
-    let subscriber = common::create_subscriber(node_sub, TOPIC_NAME)?;
+    let publisher = common::create_publisher(node_pub, TOPIC_NAME, true)?;
+    let subscriber = common::create_subscriber(node_sub, TOPIC_NAME, true)?;
 
     // publish a message
     let n = 100;
@@ -55,9 +55,9 @@ fn test_pubsub_string() -> Result<(), Box<dyn Error + Sync + Send + 'static>> {
 
     // create a publisher and a subscriber
     let subscriber =
-        node_sub.create_subscriber::<std_msgs::msg::String>("test_pubsub_string", None)?;
+        node_sub.create_subscriber::<std_msgs::msg::String>("test_pubsub_string", None, true)?;
     let publisher =
-        node_pub.create_publisher::<std_msgs::msg::String>("test_pubsub_string", None)?;
+        node_pub.create_publisher::<std_msgs::msg::String>("test_pubsub_string", None, true)?;
 
     // publish a message
     let mut msg = std_msgs::msg::String::new().unwrap();

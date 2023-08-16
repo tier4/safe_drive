@@ -10,7 +10,8 @@ fn test_subscription() -> Result<(), Box<dyn Error + Sync + Send + 'static>> {
     let node = ctx
         .create_node("test_subscription_node", None, Default::default())
         .unwrap();
-    let subscription = node.create_subscriber::<Num>("test_subscription", Default::default())?;
+    let subscription =
+        node.create_subscriber::<Num>("test_subscription", Default::default(), true)?;
 
     match subscription.try_recv() {
         RecvResult::RetryLater(_) => Ok(()), // must fail because there is no publisher

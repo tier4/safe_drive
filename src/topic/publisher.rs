@@ -16,7 +16,7 @@
 //!
 //! // Create a publisher.
 //! let publisher = node_pub
-//!     .create_publisher::<std_msgs::msg::UInt32>("publisher_rs_topic", None)
+//!     .create_publisher::<std_msgs::msg::UInt32>("publisher_rs_topic", None, true)
 //!     .unwrap();
 //!
 //! // Send a message.
@@ -41,7 +41,7 @@
 //!
 //! // Create a publisher with the QoS profile.
 //! let publisher = node_pub
-//!     .create_publisher::<std_msgs::msg::UInt32>("publisher_rs_topic_qos", Some(profile))
+//!     .create_publisher::<std_msgs::msg::UInt32>("publisher_rs_topic_qos", Some(profile), true)
 //!     .unwrap();
 //! ```
 //!
@@ -78,7 +78,7 @@ use parking_lot::Mutex;
 ///
 /// // Create a publisher.
 /// let publisher = node_pub
-///     .create_publisher::<std_msgs::msg::UInt32>("publish_rs_topic", None)
+///     .create_publisher::<std_msgs::msg::UInt32>("publish_rs_topic", None, true)
 ///     .unwrap();
 ///
 /// // Send a message.
@@ -102,11 +102,19 @@ impl<T: TypeSupport> Publisher<T> {
         node: Arc<Node>,
         topic_name: &str,
         qos: Option<qos::Profile>,
+
+        #[cfg(all(not(feature = "humble"), not(feature = "galactic")))]
+        disable_loaned_message: bool,
     ) -> RCLResult<Self> {
         let mut publisher = rcl::MTSafeFn::rcl_get_zero_initialized_publisher();
 
         let topic_name_c = CString::new(topic_name).unwrap_or_default();
+
+        #[cfg(any(feature = "humble", feature = "galactic"))]
         let options = Options::new(&qos.unwrap_or_default());
+
+        #[cfg(all(not(feature = "humble"), not(feature = "galactic")))]
+        let options = Options::new(&qos.unwrap_or_default(), disable_loaned_message);
 
         {
             let guard = rcl::MT_UNSAFE_FN.lock();
@@ -157,7 +165,7 @@ impl<T: TypeSupport> Publisher<T> {
     ///     .unwrap();
     ///
     /// // Create a publisher.
-    /// let publisher = node.create_publisher("publish_rs_send_topic", None).unwrap();
+    /// let publisher = node.create_publisher("publish_rs_send_topic", None, true).unwrap();
     ///
     /// // Send a message.
     /// let msg = std_msgs::msg::Empty::new().unwrap();
@@ -242,11 +250,19 @@ struct Options {
 }
 
 impl Options {
-    fn new(qos: &qos::Profile) -> Self {
+    fn new(
+        qos: &qos::Profile,
+
+        #[cfg(all(not(feature = "humble"), not(feature = "galactic")))]
+        disable_loaned_message: bool,
+    ) -> Self {
         let options = rcl::rcl_publisher_options_t {
             qos: qos.into(),
             allocator: get_allocator(),
             rmw_publisher_options: rcl::MTSafeFn::rmw_get_default_publisher_options(),
+
+            #[cfg(all(not(feature = "humble"), not(feature = "galactic")))]
+            disable_loaned_message,
         };
         Options { options }
     }

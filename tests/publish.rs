@@ -11,7 +11,7 @@ fn test_publish() -> Result<(), Box<dyn Error + Sync + Send + 'static>> {
         .create_node("test_publish_node", None, Default::default())
         .unwrap();
 
-    let publisher = node.create_publisher::<Num>("test_publish", Default::default())?;
+    let publisher = node.create_publisher::<Num>("test_publish", Default::default(), true)?;
 
     let msg = Num { num: 100 };
     publisher.send(&msg)?;

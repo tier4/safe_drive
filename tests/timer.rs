@@ -43,9 +43,9 @@ fn test_wall_timer() -> Result<(), Box<dyn Error + Sync + Send + 'static>> {
 
     // create a publisher and a subscriber
     let publisher =
-        node.create_publisher::<std_msgs::msg::String>("test_wall_timer_node_pubsub", None)?;
+        node.create_publisher::<std_msgs::msg::String>("test_wall_timer_node_pubsub", None, true)?;
     let subscriber =
-        node.create_subscriber::<std_msgs::msg::String>("test_wall_timer_node_pubsub", None)?;
+        node.create_subscriber::<std_msgs::msg::String>("test_wall_timer_node_pubsub", None, true)?;
 
     // create wall timers
     selector.add_wall_timer(

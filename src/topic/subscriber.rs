@@ -28,12 +28,12 @@
 //!
 //! // Create a subscriber.
 //! let subscriber = node
-//!     .create_subscriber::<std_msgs::msg::UInt32>("subscriber_rs_try_recv_topic", None)
+//!     .create_subscriber::<std_msgs::msg::UInt32>("subscriber_rs_try_recv_topic", None, true)
 //!     .unwrap();
 //!
 //! // Create a publisher.
 //! let publisher = node
-//!     .create_publisher::<std_msgs::msg::UInt32>("subscriber_rs_try_recv_topic", None)
+//!     .create_publisher::<std_msgs::msg::UInt32>("subscriber_rs_try_recv_topic", None, true)
 //!     .unwrap();
 //!
 //! let logger = Logger::new("subscriber_rs");
@@ -72,7 +72,7 @@
 //!
 //! // Create a subscriber.
 //! let subscriber = node_sub
-//!     .create_subscriber::<std_msgs::msg::String>("subscriber_rs_recv_topic", None)
+//!     .create_subscriber::<std_msgs::msg::String>("subscriber_rs_recv_topic", None, true)
 //!     .unwrap();
 //!
 //! // Create tasks.
@@ -119,7 +119,7 @@
 //!
 //! // Use default QoS profile.
 //! let subscriber = node
-//! .create_subscriber::<std_msgs::msg::Empty>("subscriber_rs_topic", None)
+//! .create_subscriber::<std_msgs::msg::Empty>("subscriber_rs_topic", None, true)
 //! .unwrap();
 //! ```
 //!
@@ -143,7 +143,7 @@
 //!
 //! // Specify the QoS profile.
 //! let subscriber = node
-//!     .create_subscriber::<std_msgs::msg::Empty>("subscriber_rs_topic", Some(profile))
+//!     .create_subscriber::<std_msgs::msg::Empty>("subscriber_rs_topic", Some(profile), true)
 //!     .unwrap();
 //! ```
 //!
@@ -225,11 +225,19 @@ impl<T: TypeSupport> Subscriber<T> {
         node: Arc<Node>,
         topic_name: &str,
         qos: Option<qos::Profile>,
+
+        #[cfg(all(not(feature = "humble"), not(feature = "galactic")))]
+        disable_loaned_massage: bool,
     ) -> RCLResult<Self> {
         let mut subscription = Box::new(rcl::MTSafeFn::rcl_get_zero_initialized_subscription());
 
         let topic_name_c = CString::new(topic_name).unwrap_or_default();
+
+        #[cfg(any(feature = "humble", feature = "galactic"))]
         let options = Options::new(&qos.unwrap_or_default());
+
+        #[cfg(all(not(feature = "humble"), not(feature = "galactic")))]
+        let options = Options::new(&qos.unwrap_or_default(), disable_loaned_massage);
 
         {
             let guard = rcl::MT_UNSAFE_FN.lock();
@@ -458,11 +466,19 @@ struct Options {
 }
 
 impl Options {
-    fn new(qos: &qos::Profile) -> Self {
+    fn new(
+        qos: &qos::Profile,
+
+        #[cfg(all(not(feature = "humble"), not(feature = "galactic")))]
+        disable_loaned_message: bool,
+    ) -> Self {
         let options = rcl::rcl_subscription_options_t {
             qos: qos.into(),
             allocator: get_allocator(),
             rmw_subscription_options: rcl::MTSafeFn::rmw_get_default_subscription_options(),
+
+            #[cfg(all(not(feature = "humble"), not(feature = "galactic")))]
+            disable_loaned_message,
         };
         Options { options }
     }

@@ -39,6 +39,19 @@ pub use humble::{
 #[cfg(feature = "humble")]
 pub type size_t = usize;
 
+#[cfg(feature = "iron")]
+mod iron;
+
+#[cfg(feature = "iron")]
+pub(crate) use iron::*;
+#[cfg(feature = "iron")]
+pub use iron::{
+    rosidl_action_type_support_t, rosidl_message_type_support_t, rosidl_service_type_support_t,
+};
+
+#[cfg(feature = "iron")]
+pub type size_t = usize;
+
 use crate::error::{ret_val_to_err, RCLResult};
 use once_cell::sync::Lazy;
 use parking_lot::Mutex;
@@ -398,7 +411,11 @@ impl MTUnsafeLogFn {
         ret_val_to_err(unsafe { self::rcutils_logging_initialize() })
     }
 
-    pub fn rcutils_logging_logger_is_enabled_for(&self, name: *const ::std::os::raw::c_char, severity: i32) -> bool {
+    pub fn rcutils_logging_logger_is_enabled_for(
+        &self,
+        name: *const ::std::os::raw::c_char,
+        severity: i32,
+    ) -> bool {
         unsafe { self::rcutils_logging_logger_is_enabled_for(name, severity) }
     }
 

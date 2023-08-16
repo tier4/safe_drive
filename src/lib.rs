@@ -79,12 +79,12 @@
 //! // The 2nd argument is for QoS.
 //! // If `None` is specified to the 2nd argument, the default QoS will be used.
 //! let publisher = node_pub
-//!     .create_publisher::<std_msgs::msg::String>("example_topic", None)
+//!     .create_publisher::<std_msgs::msg::String>("example_topic", None, true)
 //!     .unwrap();
 //!
 //! // Create a subscriber.
 //! let subscriber = node_sub
-//!     .create_subscriber::<std_msgs::msg::String>("example_topic", None)
+//!     .create_subscriber::<std_msgs::msg::String>("example_topic", None, true)
 //!     .unwrap();
 //!
 //! // Create a selector, which is for IO multiplexing.
@@ -156,12 +156,12 @@
 //!
 //! // Create a publisher.
 //! let publisher = node_pub
-//!     .create_publisher::<std_msgs::msg::String>("example_topic_async", None)
+//!     .create_publisher::<std_msgs::msg::String>("example_topic_async", None, true)
 //!     .unwrap();
 //!
 //! // Create a subscriber.
 //! let subscriber = node_sub
-//!     .create_subscriber::<std_msgs::msg::String>("example_topic_async", None)
+//!     .create_subscriber::<std_msgs::msg::String>("example_topic_async", None, true)
 //!     .unwrap();
 //!
 //! // Create tasks.
@@ -315,7 +315,7 @@ impl<T: msg::ServiceMsg> ST<ClientRecv<T>> {
 #[cfg(feature = "galactic")]
 type RcutilsAllocator = rcl::rcutils_allocator_t;
 
-#[cfg(feature = "humble")]
+#[cfg(any(feature = "humble", feature = "iron"))]
 type RcutilsAllocator = rcl::rcutils_allocator_s;
 
 #[cfg(feature = "custom_alloc")]

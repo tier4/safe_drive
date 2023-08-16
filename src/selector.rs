@@ -20,7 +20,7 @@
 //!
 //! // Create a subscriber.
 //! let subscriber = node_sub
-//!     .create_subscriber::<std_msgs::msg::String>("selector_topic", None)
+//!     .create_subscriber::<std_msgs::msg::String>("selector_topic", None, true)
 //!     .unwrap();
 //!
 //! // Create a selector, which is for IO multiplexing.
@@ -277,7 +277,7 @@ impl Selector {
     ///
     /// fn add_new_subscriber(selector: &mut Selector, node: Arc<Node>) {
     ///     // Create a subscriber.
-    ///     let subscriber = node.create_subscriber("node_name", None).unwrap();
+    ///     let subscriber = node.create_subscriber("node_name", None, true).unwrap();
     ///
     ///     // Add the subscriber with a callback function.
     ///     selector.add_subscriber(

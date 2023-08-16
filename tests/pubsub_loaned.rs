@@ -18,8 +18,8 @@ fn test_pubsub_loaned() -> Result<(), Box<dyn Error + Sync + Send + 'static>> {
     let node_sub = ctx.create_node("test_pubsub_loaned_sub_node", None, Default::default())?;
 
     // create a publisher and a subscriber
-    let publisher = common::create_publisher(node_pub, TOPIC_NAME)?;
-    let subscriber = common::create_subscriber(node_sub, TOPIC_NAME)?;
+    let publisher = common::create_publisher(node_pub, TOPIC_NAME, false)?;
+    let subscriber = common::create_subscriber(node_sub, TOPIC_NAME, false)?;
 
     // publish a message
     let num = 100;
