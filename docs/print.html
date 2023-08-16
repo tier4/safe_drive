@@ -348,7 +348,7 @@ fn main() -&gt; Result&lt;(), DynError&gt; {
     let node = ctx.create_node(&quot;my_talker&quot;, None, Default::default())?;
 
     // Create a publisher.
-    let publisher = node.create_publisher::&lt;std_msgs::msg::String&gt;(&quot;my_topic&quot;, None)?;
+    let publisher = node.create_publisher::&lt;std_msgs::msg::String&gt;(&quot;my_topic&quot;, None, true)?;
 
     // Create a logger.
     let logger = Logger::new(&quot;my_talker&quot;);
@@ -392,7 +392,7 @@ let node = ctx.create_node(&quot;my_talker&quot;, None, Default::default())?;
 <pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
 </span><span class="boring">fn main() {
 </span>// Create a publisher.
-let publisher = node.create_publisher::&lt;std_msgs::msg::String&gt;(&quot;my_topic&quot;, None)?;
+let publisher = node.create_publisher::&lt;std_msgs::msg::String&gt;(&quot;my_topic&quot;, None, true)?;
 <span class="boring">}</span></code></pre></pre>
 <ul>
 <li><code>&lt;std_msgs::msg::String&gt;</code> : the publisher can send values of <code>std_msgs::msg::String</code>.</li>
@@ -515,7 +515,7 @@ fn main() -&gt; Result&lt;(), DynError&gt; {
     let node = ctx.create_node(&quot;my_listener&quot;, None, Default::default())?;
 
     // Create a subscriber.
-    let subscriber = node.create_subscriber::&lt;std_msgs::msg::String&gt;(&quot;my_topic&quot;, None)?;
+    let subscriber = node.create_subscriber::&lt;std_msgs::msg::String&gt;(&quot;my_topic&quot;, None, true)?;
 
     // Create a logger.
     let logger = Logger::new(&quot;my_listener&quot;);
@@ -542,7 +542,7 @@ fn main() -&gt; Result&lt;(), DynError&gt; {
 <pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
 </span><span class="boring">fn main() {
 </span>// Create a subscriber.
-let subscriber = node.create_subscriber::&lt;std_msgs::msg::String&gt;(&quot;my_topic&quot;, None)?;
+let subscriber = node.create_subscriber::&lt;std_msgs::msg::String&gt;(&quot;my_topic&quot;, None, true)?;
 <span class="boring">}</span></code></pre></pre>
 <p>The arguments are as follows.</p>
 <ul>
@@ -652,8 +652,8 @@ fn main() -&gt; Result&lt;(), DynError&gt; {
     // Create a context, a node, a subscriber, a publisher, and a selector.
     let ctx = Context::new()?;
     let node = ctx.create_node(&quot;my_node&quot;, None, Default::default())?;
-    let subscriber = node.create_subscriber::&lt;std_msgs::msg::UInt64&gt;(&quot;my_topic&quot;, None)?;
-    let publisher = node.create_publisher::&lt;std_msgs::msg::UInt64&gt;(&quot;my_topic&quot;, None)?;
+    let subscriber = node.create_subscriber::&lt;std_msgs::msg::UInt64&gt;(&quot;my_topic&quot;, None, true)?;
+    let publisher = node.create_publisher::&lt;std_msgs::msg::UInt64&gt;(&quot;my_topic&quot;, None, true)?;
     let mut selector = ctx.create_selector()?;
 
     // Create a logger.
@@ -903,8 +903,8 @@ async fn main() -&gt; Result&lt;(), DynError&gt; {
     let node = ctx.create_node(&quot;publishers&quot;, None, Default::default())?;
 
     // Create publishers.
-    let publisher1 = node.create_publisher::&lt;std_msgs::msg::String&gt;(&quot;topic1&quot;, None)?;
-    let publisher2 = node.create_publisher::&lt;std_msgs::msg::String&gt;(&quot;topic2&quot;, None)?;
+    let publisher1 = node.create_publisher::&lt;std_msgs::msg::String&gt;(&quot;topic1&quot;, None, true)?;
+    let publisher2 = node.create_publisher::&lt;std_msgs::msg::String&gt;(&quot;topic2&quot;, None, true)?;
 
     // Create a task which sends &quot;Hello, World!&quot;.
     let task1 = async_std::task::spawn(async move {
@@ -966,8 +966,8 @@ async fn main() -&gt; Result&lt;(), DynError&gt; {
     let node = ctx.create_node(&quot;subscribers&quot;, None, Default::default())?;
 
     // Create subscribers.
-    let subscriber1 = node.create_subscriber::&lt;std_msgs::msg::String&gt;(&quot;topic1&quot;, None)?;
-    let subscriber2 = node.create_subscriber::&lt;std_msgs::msg::String&gt;(&quot;topic2&quot;, None)?;
+    let subscriber1 = node.create_subscriber::&lt;std_msgs::msg::String&gt;(&quot;topic1&quot;, None, true)?;
+    let subscriber2 = node.create_subscriber::&lt;std_msgs::msg::String&gt;(&quot;topic2&quot;, None, true)?;
 
     // Receive messages.
     let task1 = async_std::task::spawn(receiver(subscriber1));
@@ -1253,7 +1253,7 @@ fn main() -&gt; Result&lt;(), DynError&gt; {
     let node = ctx.create_node(&quot;talker&quot;, None, Default::default())?;
 
     // Create a publisher.
-    let publisher = node.create_publisher::&lt;my_interfaces::msg::MyMsgs&gt;(&quot;my_topic&quot;, None)?;
+    let publisher = node.create_publisher::&lt;my_interfaces::msg::MyMsgs&gt;(&quot;my_topic&quot;, None, true)?;
 
     // Create a logger.
     let logger = Logger::new(&quot;talker&quot;);
@@ -1378,7 +1378,7 @@ fn main() -&gt; Result&lt;(), DynError&gt; {
     let node = ctx.create_node(&quot;listener&quot;, None, Default::default())?;
 
     // Create a subscriber.
-    let subscriber = node.create_subscriber::&lt;my_interfaces::msg::MyMsgs&gt;(&quot;my_topic&quot;, None)?;
+    let subscriber = node.create_subscriber::&lt;my_interfaces::msg::MyMsgs&gt;(&quot;my_topic&quot;, None, true)?;
 
     // Create a logger.
     let logger = Logger::new(&quot;listener&quot;);
@@ -2242,8 +2242,8 @@ fn main() -&gt; Result&lt;(), Box&lt;dyn Error + Sync + Send + 'static&gt;&gt; {
     std::thread::sleep(Duration::from_millis(500));
 
     // create a publisher and a subscriber
-    let subscriber = node_sub.create_subscriber::&lt;std_msgs::msg::Bool&gt;(TOPIC_NAME, None)?;
-    let publisher = node_pub.create_publisher::&lt;std_msgs::msg::Bool&gt;(TOPIC_NAME, None)?;
+    let subscriber = node_sub.create_subscriber::&lt;std_msgs::msg::Bool&gt;(TOPIC_NAME, None, false)?;
+    let publisher = node_pub.create_publisher::&lt;std_msgs::msg::Bool&gt;(TOPIC_NAME, None, false)?;
 
     let mut loaned = publisher.borrow_loaned_message()?;
     *loaned = std_msgs::msg::Bool::new().ok_or(&quot;failed to new Bool&quot;)?;
@@ -2276,6 +2276,8 @@ publisher.send_loaned(loaned)?; // send message
 <code>send_loaned()</code> sends a message in the borrowed region.
 <code>safe_drive</code> automatically check whether zero copy is available or not,
 and it uses conventional copied APIs if zero copy is not available.</p>
+<p>To enable zero copy, pass <code>false</code> as the 3rd argument to <code>create_subscriber()</code> and <code>create_publisher()</code>,
+which indicates <code>disable_loaned_message</code>.</p>
 <h2 id="setting-up-zero-copy"><a class="header" href="#setting-up-zero-copy">Setting-up Zero Copy</a></h2>
 <p>To enable zero copy, please prepare cyclonedds.xml, which is a configuration file of CycloneDDS, as follows.
 You can use arbitrary name for it.</p>
@@ -2346,8 +2348,8 @@ fn main() -&gt; Result&lt;(), DynError&gt; {
     let selector_client = ctx.create_selector()?;
 
     // Create a subscriber, a client, and a logger.
-    let subscriber = node.create_subscriber::&lt;std_msgs::msg::Empty&gt;(&quot;pubsubsrv_topic&quot;, None)?;
-    let client = node.create_client::&lt;std_srvs::srv::Empty&gt;(&quot;pubsubsrv_service&quot;, None)?;
+    let subscriber = node.create_subscriber::&lt;std_msgs::msg::Empty&gt;(&quot;pubsubsrv_topic&quot;, None, true)?;
+    let client = node.create_client::&lt;std_srvs::srv::Empty&gt;(&quot;pubsubsrv_service&quot;, None, true)?;
 
     worker(selector, selector_client, subscriber, client)?;
 

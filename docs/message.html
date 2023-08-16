@@ -374,7 +374,7 @@ fn main() -&gt; Result&lt;(), DynError&gt; {
     let node = ctx.create_node(&quot;talker&quot;, None, Default::default())?;
 
     // Create a publisher.
-    let publisher = node.create_publisher::&lt;my_interfaces::msg::MyMsgs&gt;(&quot;my_topic&quot;, None)?;
+    let publisher = node.create_publisher::&lt;my_interfaces::msg::MyMsgs&gt;(&quot;my_topic&quot;, None, true)?;
 
     // Create a logger.
     let logger = Logger::new(&quot;talker&quot;);
@@ -499,7 +499,7 @@ fn main() -&gt; Result&lt;(), DynError&gt; {
     let node = ctx.create_node(&quot;listener&quot;, None, Default::default())?;
 
     // Create a subscriber.
-    let subscriber = node.create_subscriber::&lt;my_interfaces::msg::MyMsgs&gt;(&quot;my_topic&quot;, None)?;
+    let subscriber = node.create_subscriber::&lt;my_interfaces::msg::MyMsgs&gt;(&quot;my_topic&quot;, None, true)?;
 
     // Create a logger.
     let logger = Logger::new(&quot;listener&quot;);

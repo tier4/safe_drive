@@ -197,8 +197,8 @@ fn main() -&gt; Result&lt;(), DynError&gt; {
     // Create a context, a node, a subscriber, a publisher, and a selector.
     let ctx = Context::new()?;
     let node = ctx.create_node(&quot;my_node&quot;, None, Default::default())?;
-    let subscriber = node.create_subscriber::&lt;std_msgs::msg::UInt64&gt;(&quot;my_topic&quot;, None)?;
-    let publisher = node.create_publisher::&lt;std_msgs::msg::UInt64&gt;(&quot;my_topic&quot;, None)?;
+    let subscriber = node.create_subscriber::&lt;std_msgs::msg::UInt64&gt;(&quot;my_topic&quot;, None, true)?;
+    let publisher = node.create_publisher::&lt;std_msgs::msg::UInt64&gt;(&quot;my_topic&quot;, None, true)?;
     let mut selector = ctx.create_selector()?;
 
     // Create a logger.

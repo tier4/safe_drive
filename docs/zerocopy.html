@@ -208,8 +208,8 @@ fn main() -&gt; Result&lt;(), Box&lt;dyn Error + Sync + Send + 'static&gt;&gt; {
     std::thread::sleep(Duration::from_millis(500));
 
     // create a publisher and a subscriber
-    let subscriber = node_sub.create_subscriber::&lt;std_msgs::msg::Bool&gt;(TOPIC_NAME, None)?;
-    let publisher = node_pub.create_publisher::&lt;std_msgs::msg::Bool&gt;(TOPIC_NAME, None)?;
+    let subscriber = node_sub.create_subscriber::&lt;std_msgs::msg::Bool&gt;(TOPIC_NAME, None, false)?;
+    let publisher = node_pub.create_publisher::&lt;std_msgs::msg::Bool&gt;(TOPIC_NAME, None, false)?;
 
     let mut loaned = publisher.borrow_loaned_message()?;
     *loaned = std_msgs::msg::Bool::new().ok_or(&quot;failed to new Bool&quot;)?;
@@ -242,6 +242,8 @@ publisher.send_loaned(loaned)?; // send message
 <code>send_loaned()</code> sends a message in the borrowed region.
 <code>safe_drive</code> automatically check whether zero copy is available or not,
 and it uses conventional copied APIs if zero copy is not available.</p>
+<p>To enable zero copy, pass <code>false</code> as the 3rd argument to <code>create_subscriber()</code> and <code>create_publisher()</code>,
+which indicates <code>disable_loaned_message</code>.</p>
 <h2 id="setting-up-zero-copy"><a class="header" href="#setting-up-zero-copy">Setting-up Zero Copy</a></h2>
 <p>To enable zero copy, please prepare cyclonedds.xml, which is a configuration file of CycloneDDS, as follows.
 You can use arbitrary name for it.</p>

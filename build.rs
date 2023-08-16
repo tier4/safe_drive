@@ -32,16 +32,14 @@ fn main() {
     println!("cargo:rustc-link-lib=visualization_msgs__rosidl_generator_c");
     println!("cargo:rustc-link-lib=rcl_interfaces__rosidl_typesupport_c");
     println!("cargo:rustc-link-lib=rcl_interfaces__rosidl_generator_c");
+    println!("cargo:rustc-link-lib=service_msgs__rosidl_typesupport_c");
+    println!("cargo:rustc-link-lib=service_msgs__rosidl_generator_c");
+    println!("cargo:rustc-link-lib=action_msgs__rosidl_typesupport_c");
+    println!("cargo:rustc-link-lib=action_msgs__rosidl_generator_c");
 
     if std::env::var_os("SAFE_DRIVE_TEST").is_some() {
-        println!("cargo:rustc-link-lib=service_msgs__rosidl_typesupport_c");
-        println!("cargo:rustc-link-lib=service_msgs__rosidl_generator_c");
-        println!("cargo:rustc-link-lib=action_msgs__rosidl_typesupport_c");
-        println!("cargo:rustc-link-lib=action_msgs__rosidl_generator_c");
         println!("cargo:rustc-link-lib=example_msg__rosidl_typesupport_c");
         println!("cargo:rustc-link-lib=example_msg__rosidl_generator_c");
-        println!("cargo:rustc-link-lib=rcl_interfaces__rosidl_typesupport_c");
-        println!("cargo:rustc-link-lib=rcl_interfaces__rosidl_generator_c");
         println!("cargo:rustc-link-search=supplements/ros2/install/example_msg/lib");
     }
 

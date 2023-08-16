@@ -38,8 +38,8 @@ fn main() -> Result<(), DynError> {
     let selector_client = ctx.create_selector()?;
 
     // Create a subscriber, a client, and a logger.
-    let subscriber = node.create_subscriber::<std_msgs::msg::Empty>("pubsubsrv_topic", None)?;
-    let client = node.create_client::<std_srvs::srv::Empty>("pubsubsrv_service", None)?;
+    let subscriber = node.create_subscriber::<std_msgs::msg::Empty>("pubsubsrv_topic", None, true)?;
+    let client = node.create_client::<std_srvs::srv::Empty>("pubsubsrv_service", None, true)?;
 
     worker(selector, selector_client, subscriber, client)?;
 

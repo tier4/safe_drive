@@ -265,8 +265,8 @@ async fn main() -&gt; Result&lt;(), DynError&gt; {
     let node = ctx.create_node(&quot;publishers&quot;, None, Default::default())?;
 
     // Create publishers.
-    let publisher1 = node.create_publisher::&lt;std_msgs::msg::String&gt;(&quot;topic1&quot;, None)?;
-    let publisher2 = node.create_publisher::&lt;std_msgs::msg::String&gt;(&quot;topic2&quot;, None)?;
+    let publisher1 = node.create_publisher::&lt;std_msgs::msg::String&gt;(&quot;topic1&quot;, None, true)?;
+    let publisher2 = node.create_publisher::&lt;std_msgs::msg::String&gt;(&quot;topic2&quot;, None, true)?;
 
     // Create a task which sends &quot;Hello, World!&quot;.
     let task1 = async_std::task::spawn(async move {
@@ -328,8 +328,8 @@ async fn main() -&gt; Result&lt;(), DynError&gt; {
     let node = ctx.create_node(&quot;subscribers&quot;, None, Default::default())?;
 
     // Create subscribers.
-    let subscriber1 = node.create_subscriber::&lt;std_msgs::msg::String&gt;(&quot;topic1&quot;, None)?;
-    let subscriber2 = node.create_subscriber::&lt;std_msgs::msg::String&gt;(&quot;topic2&quot;, None)?;
+    let subscriber1 = node.create_subscriber::&lt;std_msgs::msg::String&gt;(&quot;topic1&quot;, None, true)?;
+    let subscriber2 = node.create_subscriber::&lt;std_msgs::msg::String&gt;(&quot;topic2&quot;, None, true)?;
 
     // Receive messages.
     let task1 = async_std::task::spawn(receiver(subscriber1));
