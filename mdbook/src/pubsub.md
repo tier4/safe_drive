@@ -276,7 +276,7 @@ Before compiling, ensure that you load setting of ROS2 as follows.
 If you have already done so, you do not need this.
 
 ```text
-$ . /opt/ros/humble/setup.bash
+$ . /opt/ros/iron/setup.bash
 ```
 
 Then compile by using colcon as follows.
@@ -323,13 +323,13 @@ Add safe_drive to the dependencies as follows.
 ```toml
 # pubsub/src/my_listener/Cargo.toml
 [dependencies]
-safe_drive = "0.2"
+safe_drive = "0.3"
 std_msgs = { path = "/tmp/safe_drive_tutorial/pubsub/std_msgs" }
 
 [package.metadata.ros]
 msg = ["std_msgs"]
 msg_dir = "/tmp/safe_drive_tutorial/pubsub"
-safe_drive_version = "0.2"
+safe_drive_version = "0.3"
 ```
 
 ### Edit `my_listener/src/main.rs`

@@ -9,7 +9,7 @@ Don't forget loading ROS2's environment as follows.
 If you already done so, you do not need this.
 
 ```text
-$ . /opt/ros/humble/setup.bash
+$ . /opt/ros/iron/setup.bash
 ```
 
 ## Wall-timer
@@ -28,7 +28,7 @@ Then, add `safe_drive` to the dependencies of `Cargo.toml`.
 
 ```toml
 [dependencies]
-safe_drive = "0.2"
+safe_drive = "0.3"
 ```
 
 The following code is an example using a wall-timer.

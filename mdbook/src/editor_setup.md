@@ -1,15 +1,15 @@
 # Editor Setting-up
 
-`safe_drive` has features like `humble` or `galactic`, which indicates ROS2 version.
+`safe_drive` has features like `iron`, `humble` or `galactic`, which indicates ROS2 version.
 We recommend pass one of a feature to enable editor's support.
 
 If you use ROS2 humble and Visual Studio Code,
-please add `humble` in `rust-analyzer -> cargo -> features` as follows.
+please add `iron` in `rust-analyzer -> cargo -> features` as follows.
 
 ```json
 {
     "rust-analyzer.cargo.features": [
-        "humble"
+        "iron"
     ]
 }
 ```
