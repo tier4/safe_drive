@@ -20,8 +20,10 @@
 //!
 //! // Create a subscriber.
 //! let subscriber = node_sub
-//!     .create_subscriber::<std_msgs::msg::String>("selector_topic", None, true)
-//!     .unwrap();
+//!     .create_subscriber::<std_msgs::msg::String>("selector_topic", None,
+//!     #[cfg(not(any(feature = "humble", feature = "galactic")))]
+//!     true
+//! ).unwrap();
 //!
 //! // Create a selector, which is for IO multiplexing.
 //! let mut selector = ctx.create_selector().unwrap();
@@ -277,7 +279,10 @@ impl Selector {
     ///
     /// fn add_new_subscriber(selector: &mut Selector, node: Arc<Node>) {
     ///     // Create a subscriber.
-    ///     let subscriber = node.create_subscriber("node_name", None, true).unwrap();
+    ///     let subscriber = node.create_subscriber("node_name", None,
+    ///         #[cfg(not(any(feature = "humble", feature = "galactic")))]
+    ///         true
+    ///     ).unwrap();
     ///
     ///     // Add the subscriber with a callback function.
     ///     selector.add_subscriber(

@@ -16,8 +16,10 @@
 //!
 //! // Create a publisher.
 //! let publisher = node_pub
-//!     .create_publisher::<std_msgs::msg::UInt32>("publisher_rs_topic", None, true)
-//!     .unwrap();
+//!     .create_publisher::<std_msgs::msg::UInt32>("publisher_rs_topic", None,
+//!     #[cfg(not(any(feature = "humble", feature = "galactic")))]
+//!     true
+//! ).unwrap();
 //!
 //! // Send a message.
 //! let mut msg = std_msgs::msg::UInt32::new().unwrap();
@@ -41,8 +43,10 @@
 //!
 //! // Create a publisher with the QoS profile.
 //! let publisher = node_pub
-//!     .create_publisher::<std_msgs::msg::UInt32>("publisher_rs_topic_qos", Some(profile), true)
-//!     .unwrap();
+//!     .create_publisher::<std_msgs::msg::UInt32>("publisher_rs_topic_qos", Some(profile),
+//!     #[cfg(not(any(feature = "humble", feature = "galactic")))]
+//!     true
+//! ).unwrap();
 //! ```
 //!
 //! `None` of the 2nd argument of `create_publisher` is equivalent to `Some(Profile::default())`.
@@ -78,8 +82,10 @@ use parking_lot::Mutex;
 ///
 /// // Create a publisher.
 /// let publisher = node_pub
-///     .create_publisher::<std_msgs::msg::UInt32>("publish_rs_topic", None, true)
-///     .unwrap();
+///     .create_publisher::<std_msgs::msg::UInt32>("publish_rs_topic", None,
+///     #[cfg(not(any(feature = "humble", feature = "galactic")))]
+///     true
+/// ).unwrap();
 ///
 /// // Send a message.
 /// let mut msg = std_msgs::msg::UInt32::new().unwrap();
@@ -165,7 +171,10 @@ impl<T: TypeSupport> Publisher<T> {
     ///     .unwrap();
     ///
     /// // Create a publisher.
-    /// let publisher = node.create_publisher("publish_rs_send_topic", None, true).unwrap();
+    /// let publisher = node.create_publisher("publish_rs_send_topic", None,
+    ///     #[cfg(not(any(feature = "humble", feature = "galactic")))]
+    ///     true
+    /// ).unwrap();
     ///
     /// // Send a message.
     /// let msg = std_msgs::msg::Empty::new().unwrap();
@@ -253,15 +262,14 @@ impl Options {
     fn new(
         qos: &qos::Profile,
 
-        #[cfg(all(not(feature = "humble"), not(feature = "galactic")))]
-        disable_loaned_message: bool,
+        #[cfg(not(any(feature = "humble", feature = "galactic")))] disable_loaned_message: bool,
     ) -> Self {
         let options = rcl::rcl_publisher_options_t {
             qos: qos.into(),
             allocator: get_allocator(),
             rmw_publisher_options: rcl::MTSafeFn::rmw_get_default_publisher_options(),
 
-            #[cfg(all(not(feature = "humble"), not(feature = "galactic")))]
+            #[cfg(not(any(feature = "humble", feature = "galactic")))]
             disable_loaned_message,
         };
         Options { options }

@@ -54,8 +54,19 @@ fn test_pubsub_string() -> Result<(), Box<dyn Error + Sync + Send + 'static>> {
     let node_pub = ctx.create_node("test_pubusub_string_pub_node", None, Default::default())?;
 
     // create a publisher and a subscriber
+    #[cfg(any(feature = "humble", feature = "galactic"))]
+    let subscriber =
+        node_sub.create_subscriber::<std_msgs::msg::String>("test_pubsub_string", None)?;
+
+    #[cfg(any(feature = "humble", feature = "galactic"))]
+    let publisher =
+        node_pub.create_publisher::<std_msgs::msg::String>("test_pubsub_string", None)?;
+
+    #[cfg(not(any(feature = "humble", feature = "galactic")))]
     let subscriber =
         node_sub.create_subscriber::<std_msgs::msg::String>("test_pubsub_string", None, true)?;
+
+    #[cfg(not(any(feature = "humble", feature = "galactic")))]
     let publisher =
         node_pub.create_publisher::<std_msgs::msg::String>("test_pubsub_string", None, true)?;
 

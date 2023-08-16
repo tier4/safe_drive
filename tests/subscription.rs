@@ -10,6 +10,11 @@ fn test_subscription() -> Result<(), Box<dyn Error + Sync + Send + 'static>> {
     let node = ctx
         .create_node("test_subscription_node", None, Default::default())
         .unwrap();
+
+    #[cfg(any(feature = "humble", feature = "galactic"))]
+    let subscription = node.create_subscriber::<Num>("test_subscription", Default::default())?;
+
+    #[cfg(not(any(feature = "humble", feature = "galactic")))]
     let subscription =
         node.create_subscriber::<Num>("test_subscription", Default::default(), true)?;
 

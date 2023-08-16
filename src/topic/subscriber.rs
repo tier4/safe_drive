@@ -28,13 +28,17 @@
 //!
 //! // Create a subscriber.
 //! let subscriber = node
-//!     .create_subscriber::<std_msgs::msg::UInt32>("subscriber_rs_try_recv_topic", None, true)
-//!     .unwrap();
+//!     .create_subscriber::<std_msgs::msg::UInt32>("subscriber_rs_try_recv_topic", None,
+//!     #[cfg(not(any(feature = "humble", feature = "galactic")))]
+//!     true
+//! ).unwrap();
 //!
 //! // Create a publisher.
 //! let publisher = node
-//!     .create_publisher::<std_msgs::msg::UInt32>("subscriber_rs_try_recv_topic", None, true)
-//!     .unwrap();
+//!     .create_publisher::<std_msgs::msg::UInt32>("subscriber_rs_try_recv_topic", None,
+//!     #[cfg(not(any(feature = "humble", feature = "galactic")))]
+//!     true
+//! ).unwrap();
 //!
 //! let logger = Logger::new("subscriber_rs");
 //!
@@ -72,7 +76,10 @@
 //!
 //! // Create a subscriber.
 //! let subscriber = node_sub
-//!     .create_subscriber::<std_msgs::msg::String>("subscriber_rs_recv_topic", None, true)
+//!     .create_subscriber::<std_msgs::msg::String>("subscriber_rs_recv_topic", None,
+//!         #[cfg(not(any(feature = "humble", feature = "galactic")))]
+//!         true
+//!     )
 //!     .unwrap();
 //!
 //! // Create tasks.
@@ -119,7 +126,10 @@
 //!
 //! // Use default QoS profile.
 //! let subscriber = node
-//! .create_subscriber::<std_msgs::msg::Empty>("subscriber_rs_topic", None, true)
+//! .create_subscriber::<std_msgs::msg::Empty>("subscriber_rs_topic", None,
+//!     #[cfg(not(any(feature = "humble", feature = "galactic")))]
+//!     true
+//! )
 //! .unwrap();
 //! ```
 //!
@@ -143,8 +153,10 @@
 //!
 //! // Specify the QoS profile.
 //! let subscriber = node
-//!     .create_subscriber::<std_msgs::msg::Empty>("subscriber_rs_topic", Some(profile), true)
-//!     .unwrap();
+//!     .create_subscriber::<std_msgs::msg::Empty>("subscriber_rs_topic", Some(profile),
+//!     #[cfg(not(any(feature = "humble", feature = "galactic")))]
+//!     true
+//! ).unwrap();
 //! ```
 //!
 //! `None` of the 2nd argument of `create_subscriber` is equivalent to `Some(Profile::default())`.
@@ -469,15 +481,14 @@ impl Options {
     fn new(
         qos: &qos::Profile,
 
-        #[cfg(all(not(feature = "humble"), not(feature = "galactic")))]
-        disable_loaned_message: bool,
+        #[cfg(not(any(feature = "humble", feature = "galactic")))] disable_loaned_message: bool,
     ) -> Self {
         let options = rcl::rcl_subscription_options_t {
             qos: qos.into(),
             allocator: get_allocator(),
             rmw_subscription_options: rcl::MTSafeFn::rmw_get_default_subscription_options(),
 
-            #[cfg(all(not(feature = "humble"), not(feature = "galactic")))]
+            #[cfg(not(any(feature = "humble", feature = "galactic")))]
             disable_loaned_message,
         };
         Options { options }
