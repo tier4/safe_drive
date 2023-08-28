@@ -56,7 +56,7 @@ pub trait ActionMsg {
 }
 
 pub trait ActionGoal {
-    type Request: TypeSupport + GetUUID + Clone;
+    type Request: TypeSupport + GetUUID;
     type Response: TypeSupport + GoalResponse;
     fn type_support() -> *const rcl::rosidl_service_type_support_t;
 }
