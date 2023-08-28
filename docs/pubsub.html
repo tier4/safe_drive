@@ -8,7 +8,6 @@
 
         <!-- Custom HTML head -->
         
-        <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
         <meta name="description" content="">
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <meta name="theme-color" content="#ffffff" />
@@ -33,14 +32,15 @@
 
     </head>
     <body>
+    <div id="body-container">
         <!-- Provide site root to javascript -->
-        <script type="text/javascript">
+        <script>
             var path_to_root = "";
             var default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "navy" : "light";
         </script>
 
         <!-- Work around some values being stored in localStorage wrapped in quotes -->
-        <script type="text/javascript">
+        <script>
             try {
                 var theme = localStorage.getItem('mdbook-theme');
                 var sidebar = localStorage.getItem('mdbook-sidebar');
@@ -56,7 +56,7 @@
         </script>
 
         <!-- Set the theme before any content is loaded, prevents flash -->
-        <script type="text/javascript">
+        <script>
             var theme;
             try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
             if (theme === null || theme === undefined) { theme = default_theme; }
@@ -68,12 +68,14 @@
         </script>
 
         <!-- Hide / unhide sidebar before it is displayed -->
-        <script type="text/javascript">
+        <script>
             var html = document.querySelector('html');
-            var sidebar = 'hidden';
+            var sidebar = null;
             if (document.body.clientWidth >= 1080) {
                 try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
                 sidebar = sidebar || 'visible';
+            } else {
+                sidebar = 'hidden';
             }
             html.classList.remove('sidebar-visible');
             html.classList.add("sidebar-" + sidebar);
@@ -86,11 +88,33 @@
             <div id="sidebar-resize-handle" class="sidebar-resize-handle"></div>
         </nav>
 
+        <!-- Track and set sidebar scroll position -->
+        <script>
+            var sidebarScrollbox = document.querySelector('#sidebar .sidebar-scrollbox');
+            sidebarScrollbox.addEventListener('click', function(e) {
+                if (e.target.tagName === 'A') {
+                    sessionStorage.setItem('sidebar-scroll', sidebarScrollbox.scrollTop);
+                }
+            }, { passive: true });
+            var sidebarScrollTop = sessionStorage.getItem('sidebar-scroll');
+            sessionStorage.removeItem('sidebar-scroll');
+            if (sidebarScrollTop) {
+                // preserve sidebar scroll position when navigating via links within sidebar
+                sidebarScrollbox.scrollTop = sidebarScrollTop;
+            } else {
+                // scroll sidebar to current active section when navigating via "next/previous chapter" buttons
+                var activeSection = document.querySelector('#sidebar .active');
+                if (activeSection) {
+                    activeSection.scrollIntoView({ block: 'center' });
+                }
+            }
+        </script>
+
         <div id="page-wrapper" class="page-wrapper">
 
             <div class="page">
                                 <div id="menu-bar-hover-placeholder"></div>
-                <div id="menu-bar" class="menu-bar sticky bordered">
+                <div id="menu-bar" class="menu-bar sticky">
                     <div class="left-buttons">
                         <button id="sidebar-toggle" class="icon-button" type="button" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
                             <i class="fa fa-bars"></i>
@@ -99,7 +123,7 @@
                             <i class="fa fa-paint-brush"></i>
                         </button>
                         <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
-                            <li role="none"><button role="menuitem" class="theme" id="light">Light (default)</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light</button></li>
                             <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
                             <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
                             <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
@@ -132,7 +156,7 @@
                 </div>
 
                 <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
-                <script type="text/javascript">
+                <script>
                     document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
                     document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
                     Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
@@ -259,7 +283,7 @@ fn main() -&gt; Result&lt;(), DynError&gt; {
     let node = ctx.create_node(&quot;my_talker&quot;, None, Default::default())?;
 
     // Create a publisher.
-    let publisher = node.create_publisher::&lt;std_msgs::msg::String&gt;(&quot;my_topic&quot;, None)?;
+    let publisher = node.create_publisher::&lt;std_msgs::msg::String&gt;(&quot;my_topic&quot;, None, true)?;
 
     // Create a logger.
     let logger = Logger::new(&quot;my_talker&quot;);
@@ -280,16 +304,14 @@ fn main() -&gt; Result&lt;(), DynError&gt; {
         cnt += 1;
         std::thread::sleep(Duration::from_secs(1));
     }
-}
-</code></pre></pre>
+}</code></pre></pre>
 <h4 id="my_talker-in-detail"><a class="header" href="#my_talker-in-detail">my_talker in Detail</a></h4>
 <p><code>create_node</code> creates a node.</p>
 <pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
 </span><span class="boring">fn main() {
 </span>// Create a node.
 let node = ctx.create_node(&quot;my_talker&quot;, None, Default::default())?;
-<span class="boring">}
-</span></code></pre></pre>
+<span class="boring">}</span></code></pre></pre>
 <p>The arguments indicate as follows.</p>
 <ul>
 <li><code>&quot;my_talker&quot;</code> : the name of the node.</li>
@@ -305,9 +327,8 @@ let node = ctx.create_node(&quot;my_talker&quot;, None, Default::default())?;
 <pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
 </span><span class="boring">fn main() {
 </span>// Create a publisher.
-let publisher = node.create_publisher::&lt;std_msgs::msg::String&gt;(&quot;my_topic&quot;, None)?;
-<span class="boring">}
-</span></code></pre></pre>
+let publisher = node.create_publisher::&lt;std_msgs::msg::String&gt;(&quot;my_topic&quot;, None, true)?;
+<span class="boring">}</span></code></pre></pre>
 <ul>
 <li><code>&lt;std_msgs::msg::String&gt;</code> : the publisher can send values of <code>std_msgs::msg::String</code>.</li>
 <li><code>&quot;my_topic&quot;</code> : the topic name to which the publisher send messages.</li>
@@ -322,23 +343,20 @@ msg.data.assign(&amp;data);
 
 // Send a message.
 publisher.send(&amp;msg)?;
-<span class="boring">}
-</span></code></pre></pre>
+<span class="boring">}</span></code></pre></pre>
 <p><code>Logger</code> is used to print some messages.
 It can be created as follows.</p>
 <pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
 </span><span class="boring">fn main() {
 </span>// Create a logger.
 let logger = Logger::new(&quot;my_talker&quot;);
-<span class="boring">}
-</span></code></pre></pre>
+<span class="boring">}</span></code></pre></pre>
 <p>The argument of <code>&quot;my_talker&quot;</code> is the name of the logger.
 To print a message, use <code>pr_*</code> macros as follows.</p>
 <pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
 </span><span class="boring">fn main() {
 </span>pr_info!(logger, &quot;send: {}&quot;, msg.data); // Print log.
-<span class="boring">}
-</span></code></pre></pre>
+<span class="boring">}</span></code></pre></pre>
 <p>There are macros for logging as follows.</p>
 <ul>
 <li><code>pr_debug!</code> : debug</li>
@@ -374,7 +392,7 @@ It contains the package name, maintainer, description, etc, as follows.</p>
 <h3 id="execute-the-talker"><a class="header" href="#execute-the-talker">Execute the Talker</a></h3>
 <p>Before compiling, ensure that you load setting of ROS2 as follows.
 If you have already done so, you do not need this.</p>
-<pre><code class="language-text">$ . /opt/ros/humble/setup.bash
+<pre><code class="language-text">$ . /opt/ros/iron/setup.bash
 </code></pre>
 <p>Then compile by using colcon as follows.
 Before compiling, change the current directory to <code>pubsub</code>,
@@ -407,13 +425,13 @@ We created and will edit files of the listener as follows.</p>
 Add safe_drive to the dependencies as follows.</p>
 <pre><code class="language-toml"># pubsub/src/my_listener/Cargo.toml
 [dependencies]
-safe_drive = &quot;0.2&quot;
+safe_drive = &quot;0.3&quot;
 std_msgs = { path = &quot;/tmp/safe_drive_tutorial/pubsub/std_msgs&quot; }
 
 [package.metadata.ros]
 msg = [&quot;std_msgs&quot;]
 msg_dir = &quot;/tmp/safe_drive_tutorial/pubsub&quot;
-safe_drive_version = &quot;0.2&quot;
+safe_drive_version = &quot;0.3&quot;
 </code></pre>
 <h3 id="edit-my_listenersrcmainrs"><a class="header" href="#edit-my_listenersrcmainrs">Edit <code>my_listener/src/main.rs</code></a></h3>
 <p>To implement subscriber,
@@ -432,7 +450,7 @@ fn main() -&gt; Result&lt;(), DynError&gt; {
     let node = ctx.create_node(&quot;my_listener&quot;, None, Default::default())?;
 
     // Create a subscriber.
-    let subscriber = node.create_subscriber::&lt;std_msgs::msg::String&gt;(&quot;my_topic&quot;, None)?;
+    let subscriber = node.create_subscriber::&lt;std_msgs::msg::String&gt;(&quot;my_topic&quot;, None, true)?;
 
     // Create a logger.
     let logger = Logger::new(&quot;my_listener&quot;);
@@ -452,17 +470,15 @@ fn main() -&gt; Result&lt;(), DynError&gt; {
     loop {
         selector.wait()?;
     }
-}
-</code></pre></pre>
+}</code></pre></pre>
 <h4 id="my_listener-in-detail"><a class="header" href="#my_listener-in-detail"><code>my_listener</code> in Detail</a></h4>
 <p>Similar to the publisher,
 <code>create_subscriber</code> creates a subscriber.</p>
 <pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
 </span><span class="boring">fn main() {
 </span>// Create a subscriber.
-let subscriber = node.create_subscriber::&lt;std_msgs::msg::String&gt;(&quot;my_topic&quot;, None)?;
-<span class="boring">}
-</span></code></pre></pre>
+let subscriber = node.create_subscriber::&lt;std_msgs::msg::String&gt;(&quot;my_topic&quot;, None, true)?;
+<span class="boring">}</span></code></pre></pre>
 <p>The arguments are as follows.</p>
 <ul>
 <li><code>&quot;my_topic&quot;</code> : the name of the topic to which the subscriber is subscribing.</li>
@@ -490,8 +506,7 @@ selector.add_subscriber(
 loop {
     selector.wait()?;
 }
-<span class="boring">}
-</span></code></pre></pre>
+<span class="boring">}</span></code></pre></pre>
 <p>The arguments of <code>add_subscriber</code> method are as follows.</p>
 <ul>
 <li><code>subscriber</code> : the subscriber.</li>
@@ -574,23 +589,24 @@ We are receiving messages sent from <code>my_talker</code>.</p>
 
 
 
-        <script type="text/javascript">
+        <script>
             window.playground_copyable = true;
         </script>
 
 
-        <script src="elasticlunr.min.js" type="text/javascript" charset="utf-8"></script>
-        <script src="mark.min.js" type="text/javascript" charset="utf-8"></script>
-        <script src="searcher.js" type="text/javascript" charset="utf-8"></script>
+        <script src="elasticlunr.min.js"></script>
+        <script src="mark.min.js"></script>
+        <script src="searcher.js"></script>
 
-        <script src="clipboard.min.js" type="text/javascript" charset="utf-8"></script>
-        <script src="highlight.js" type="text/javascript" charset="utf-8"></script>
-        <script src="book.js" type="text/javascript" charset="utf-8"></script>
+        <script src="clipboard.min.js"></script>
+        <script src="highlight.js"></script>
+        <script src="book.js"></script>
 
         <!-- Custom JS scripts -->
-        <script type="text/javascript" src="mermaid.min.js"></script>
-        <script type="text/javascript" src="mermaid-init.js"></script>
+        <script src="mermaid.min.js"></script>
+        <script src="mermaid-init.js"></script>
 
 
+    </div>
     </body>
 </html>

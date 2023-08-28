@@ -11,7 +11,11 @@ fn test_publish() -> Result<(), Box<dyn Error + Sync + Send + 'static>> {
         .create_node("test_publish_node", None, Default::default())
         .unwrap();
 
+    #[cfg(any(feature = "humble", feature = "galactic"))]
     let publisher = node.create_publisher::<Num>("test_publish", Default::default())?;
+
+    #[cfg(not(any(feature = "humble", feature = "galactic")))]
+    let publisher = node.create_publisher::<Num>("test_publish", Default::default(), true)?;
 
     let msg = Num { num: 100 };
     publisher.send(&msg)?;

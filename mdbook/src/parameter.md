@@ -133,7 +133,7 @@ Add `safe_drive` to the dependencies section of `Cargo.toml` as follows.
 
 ```toml
 [dependencies]
-safe_drive = "0.2"
+safe_drive = "0.3"
 ```
 
 ### Edit `param_server/src/main.rs`
@@ -308,7 +308,7 @@ Add `safe_drive` and `tokio` to the dependencies section of `Cargo.toml` as foll
 
 ```toml
 [dependencies]
-safe_drive = "0.2"
+safe_drive = "0.3"
 tokio = { version = "1", features = ["full"] }
 ```
 

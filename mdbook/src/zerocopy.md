@@ -27,7 +27,7 @@ Add `safe_drive` to dependencies section of `Cargo.toml` as follows.
 
 ```toml
 [dependencies]
-safe_drive = "0.2"
+safe_drive = "0.3"
 ```
 
 ## `main.rs`
@@ -56,8 +56,8 @@ fn main() -> Result<(), Box<dyn Error + Sync + Send + 'static>> {
     std::thread::sleep(Duration::from_millis(500));
 
     // create a publisher and a subscriber
-    let subscriber = node_sub.create_subscriber::<std_msgs::msg::Bool>(TOPIC_NAME, None)?;
-    let publisher = node_pub.create_publisher::<std_msgs::msg::Bool>(TOPIC_NAME, None)?;
+    let subscriber = node_sub.create_subscriber::<std_msgs::msg::Bool>(TOPIC_NAME, None, false)?;
+    let publisher = node_pub.create_publisher::<std_msgs::msg::Bool>(TOPIC_NAME, None, false)?;
 
     let mut loaned = publisher.borrow_loaned_message()?;
     *loaned = std_msgs::msg::Bool::new().ok_or("failed to new Bool")?;
@@ -93,6 +93,9 @@ publisher.send_loaned(loaned)?; // send message
 `send_loaned()` sends a message in the borrowed region.
 `safe_drive` automatically check whether zero copy is available or not,
 and it uses conventional copied APIs if zero copy is not available.
+
+To enable zero copy, pass `false` as the 3rd argument to `create_subscriber()` and `create_publisher()`,
+which indicates `disable_loaned_message`.
 
 ## Setting-up Zero Copy
 

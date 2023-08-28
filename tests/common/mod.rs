@@ -22,12 +22,38 @@ use safe_drive::{
 };
 use std::{error::Error, sync::Arc};
 
-pub fn create_publisher(node: Arc<Node>, topic_name: &str) -> RCLResult<Publisher<Num>> {
-    node.create_publisher(topic_name, Default::default())
+pub fn create_publisher(
+    node: Arc<Node>,
+    topic_name: &str,
+    disable_loaned_message: bool,
+) -> RCLResult<Publisher<Num>> {
+    #[cfg(any(feature = "humble", feature = "galactic"))]
+    {
+        drop(disable_loaned_message);
+        node.create_publisher(topic_name, Default::default())
+    }
+
+    #[cfg(not(any(feature = "humble", feature = "galactic")))]
+    {
+        node.create_publisher(topic_name, Default::default(), disable_loaned_message)
+    }
 }
 
-pub fn create_subscriber(node: Arc<Node>, topic_name: &str) -> RCLResult<Subscriber<Num>> {
-    node.create_subscriber(topic_name, Default::default())
+pub fn create_subscriber(
+    node: Arc<Node>,
+    topic_name: &str,
+    disable_loaned_message: bool,
+) -> RCLResult<Subscriber<Num>> {
+    #[cfg(any(feature = "humble", feature = "galactic"))]
+    {
+        drop(disable_loaned_message);
+        node.create_subscriber(topic_name, Default::default())
+    }
+
+    #[cfg(not(any(feature = "humble", feature = "galactic")))]
+    {
+        node.create_subscriber(topic_name, Default::default(), disable_loaned_message)
+    }
 }
 
 pub fn create_server(node: Arc<Node>, service_name: &str) -> RCLResult<Server<AddThreeInts>> {

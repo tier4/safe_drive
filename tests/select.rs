@@ -31,8 +31,8 @@ fn test_select_subscriptions() -> Result<(), Box<dyn Error + Sync + Send + 'stat
     });
 
     // create subscribers
-    let s1 = common::create_subscriber(node_sub1, TOPIC_NAME_1).unwrap();
-    let s2 = common::create_subscriber(node_sub2, TOPIC_NAME_2).unwrap();
+    let s1 = common::create_subscriber(node_sub1, TOPIC_NAME_1, true).unwrap();
+    let s2 = common::create_subscriber(node_sub2, TOPIC_NAME_2, true).unwrap();
 
     let mut selector = ctx.create_selector()?;
 
@@ -71,7 +71,7 @@ fn test_select_subscriptions() -> Result<(), Box<dyn Error + Sync + Send + 'stat
 
 fn pub_thread(node: Arc<Node>, topic_name: &str, dur: Duration, init: i64) {
     // create a publisher
-    let publisher = common::create_publisher(node, topic_name).unwrap();
+    let publisher = common::create_publisher(node, topic_name, true).unwrap();
 
     // publish messages
     for i in 0..COUNT {
@@ -96,7 +96,7 @@ fn test_callback() -> Result<(), Box<dyn Error + Sync + Send + 'static>> {
         pub_thread(node_pub, TOPIC_NAME_3, Duration::from_millis(40), INIT_1)
     });
 
-    let subscriber = common::create_subscriber(node_sub, TOPIC_NAME_3).unwrap();
+    let subscriber = common::create_subscriber(node_sub, TOPIC_NAME_3, true).unwrap();
 
     let cnt = Rc::new(Cell::new(0));
 

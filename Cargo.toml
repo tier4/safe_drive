@@ -1,6 +1,6 @@
 [package]
 name = "safe_drive"
-version = "0.2.0"
+version = "0.3.2"
 edition = "2021"
 authors = [ "Yuuki Takano <yuuki.takano@tier4.jp>, TIER IV, Inc.", "Seio Inoue" ]
 description = "safe_drive: Formally Specified Rust Bindings for ROS2"
@@ -15,7 +15,7 @@ homepage = "https://tier4.github.io/safe_drive"
 
 [dependencies]
 num-traits = "0.2"
-num-derive = "0.3"
+num-derive = "0.4"
 once_cell = "1.14"
 crossbeam-channel = "0.5"
 parking_lot = "0.12"
@@ -46,6 +46,7 @@ features = ["attributes"]
 default = []
 statistics = ["serde", "serde_json"]
 rcl_stat = ["statistics"]
+iron = []
 humble = []
 galactic = []
 custom_alloc = []
@@ -53,7 +54,7 @@ custom_alloc = []
 [package.metadata.docs.rs]
 
 # Features to pass to Cargo (default: [])
-features = ["humble", "custom_alloc"]
+features = ["iron", "custom_alloc"]
 
 # Whether to pass `--all-features` to Cargo (default: false)
 all-features = false

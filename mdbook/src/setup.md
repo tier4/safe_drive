@@ -25,11 +25,11 @@ $ sudo curl -sSL https://raw.githubusercontent.com/ros/rosdistro/master/ros.key 
 
 ```text
 $ sudo apt update
-$ sudo apt install ros-humble-desktop python3-colcon-common-extensions
+$ sudo apt install ros-iron-desktop python3-colcon-common-extensions
 ```
 
 ```text
-$ . /opt/ros/humble/setup.bash
+$ . /opt/ros/iron/setup.bash
 ```
 
 ## Install Colcon-cargo

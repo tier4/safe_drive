@@ -6,6 +6,9 @@ pub mod galactic;
 #[cfg(feature = "humble")]
 pub mod humble;
 
+#[cfg(feature = "iron")]
+pub mod iron;
+
 pub mod policy;
 
 // pub mod policy;
@@ -198,7 +201,7 @@ impl From<&Profile> for rcl::rmw_qos_profile_t {
         }
     }
 
-    #[cfg(feature = "humble")]
+    #[cfg(any(feature = "humble", feature = "iron"))]
     fn from(qos: &Profile) -> Self {
         rcl::rmw_qos_profile_t {
             history: ToPrimitive::to_u32(&qos.history)

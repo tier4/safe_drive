@@ -35,6 +35,8 @@ fn main() {
     println!("cargo:rustc-link-lib=visualization_msgs__rosidl_generator_c");
     println!("cargo:rustc-link-lib=rcl_interfaces__rosidl_typesupport_c");
     println!("cargo:rustc-link-lib=rcl_interfaces__rosidl_generator_c");
+    println!("cargo:rustc-link-lib=action_msgs__rosidl_typesupport_c");
+    println!("cargo:rustc-link-lib=action_msgs__rosidl_generator_c");
 
     if std::env::var_os("SAFE_DRIVE_TEST").is_some() {
         println!("cargo:rustc-link-lib=example_msg__rosidl_typesupport_c");
@@ -51,6 +53,11 @@ fn main() {
 
     if let Some(e) = std::env::var_os("ROS_DISTRO") {
         match e.to_str().unwrap() {
+            "iron" => {
+                println!("cargo:rustc-link-lib=service_msgs__rosidl_typesupport_c");
+                println!("cargo:rustc-link-lib=service_msgs__rosidl_generator_c");
+                println!("cargo:rustc-cfg=feature=\"iron\"");
+            }
             "humble" => println!("cargo:rustc-cfg=feature=\"humble\""),
             "galactic" => println!("cargo:rustc-cfg=feature=\"galactic\""),
             _ => (),

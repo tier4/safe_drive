@@ -153,7 +153,7 @@ fn main() -> Result<(), DynError> {
     let node = ctx.create_node("my_talker", None, Default::default())?;
 
     // Create a publisher.
-    let publisher = node.create_publisher::<std_msgs::msg::String>("my_topic", None)?;
+    let publisher = node.create_publisher::<std_msgs::msg::String>("my_topic", None, true)?;
 
     // Create a logger.
     let logger = Logger::new("my_talker");
@@ -198,7 +198,7 @@ The arguments indicate as follows.
 
 ```rust
 // Create a publisher.
-let publisher = node.create_publisher::<std_msgs::msg::String>("my_topic", None)?;
+let publisher = node.create_publisher::<std_msgs::msg::String>("my_topic", None, true)?;
 ```
 
 - `<std_msgs::msg::String>` : the publisher can send values of `std_msgs::msg::String`.
@@ -276,7 +276,7 @@ Before compiling, ensure that you load setting of ROS2 as follows.
 If you have already done so, you do not need this.
 
 ```text
-$ . /opt/ros/humble/setup.bash
+$ . /opt/ros/iron/setup.bash
 ```
 
 Then compile by using colcon as follows.
@@ -323,13 +323,13 @@ Add safe_drive to the dependencies as follows.
 ```toml
 # pubsub/src/my_listener/Cargo.toml
 [dependencies]
-safe_drive = "0.2"
+safe_drive = "0.3"
 std_msgs = { path = "/tmp/safe_drive_tutorial/pubsub/std_msgs" }
 
 [package.metadata.ros]
 msg = ["std_msgs"]
 msg_dir = "/tmp/safe_drive_tutorial/pubsub"
-safe_drive_version = "0.2"
+safe_drive_version = "0.3"
 ```
 
 ### Edit `my_listener/src/main.rs`
@@ -353,7 +353,7 @@ fn main() -> Result<(), DynError> {
     let node = ctx.create_node("my_listener", None, Default::default())?;
 
     // Create a subscriber.
-    let subscriber = node.create_subscriber::<std_msgs::msg::String>("my_topic", None)?;
+    let subscriber = node.create_subscriber::<std_msgs::msg::String>("my_topic", None, true)?;
 
     // Create a logger.
     let logger = Logger::new("my_listener");
@@ -383,7 +383,7 @@ Similar to the publisher,
 
 ```rust
 // Create a subscriber.
-let subscriber = node.create_subscriber::<std_msgs::msg::String>("my_topic", None)?;
+let subscriber = node.create_subscriber::<std_msgs::msg::String>("my_topic", None, true)?;
 ```
 
 The arguments are as follows.

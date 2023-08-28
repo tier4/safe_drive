@@ -22,10 +22,10 @@ fn test_async_pubsub() -> Result<(), Box<dyn Error + Sync + Send + 'static>> {
     let node_sub = ctx.create_node("test_async_sub_node", None, Default::default())?;
 
     // create a publisher
-    let p = common::create_publisher(node_pub, TOPIC_NAME).unwrap();
+    let p = common::create_publisher(node_pub, TOPIC_NAME, true).unwrap();
 
     // create a subscriber
-    let s = common::create_subscriber(node_sub, TOPIC_NAME).unwrap();
+    let s = common::create_subscriber(node_sub, TOPIC_NAME, true).unwrap();
 
     // create tasks
     async_std::task::block_on(async {

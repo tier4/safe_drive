@@ -114,15 +114,34 @@ impl Node {
     /// use std::sync::Arc;
     ///
     /// fn create_new_publisher(node: Arc<Node>) -> Publisher<std_msgs::msg::Bool> {
-    ///     node.create_publisher("topic_name", None).unwrap()
+    ///     #[cfg(not(any(feature = "humble", feature = "galactic")))]
+    ///     {
+    ///         node.create_publisher("topic_name", None, true).unwrap()
+    ///     }
+    ///
+    ///     #[cfg(any(feature = "humble", feature = "galactic"))]
+    ///     {
+    ///         node.create_publisher("topic_name", None).unwrap()
+    ///     }
     /// }
     /// ```
     pub fn create_publisher<T: TypeSupport>(
         self: &Arc<Self>,
         topic_name: &str,
         qos: Option<qos::Profile>,
+
+        #[cfg(all(not(feature = "humble"), not(feature = "galactic")))]
+        disable_loaned_massage: bool,
     ) -> RCLResult<Publisher<T>> {
-        Publisher::new(self.clone(), topic_name, qos)
+        #[cfg(all(not(feature = "humble"), not(feature = "galactic")))]
+        {
+            Publisher::new(self.clone(), topic_name, qos, disable_loaned_massage)
+        }
+
+        #[cfg(any(feature = "humble", feature = "galactic"))]
+        {
+            Publisher::new(self.clone(), topic_name, qos)
+        }
     }
 
     /// Create a subscriber.
@@ -138,15 +157,33 @@ impl Node {
     /// use std::sync::Arc;
     ///
     /// fn create_new_subscriber(node: Arc<Node>) -> Subscriber<std_msgs::msg::Bool> {
-    ///     node.create_subscriber("topic_name", None).unwrap()
+    ///     #[cfg(any(feature = "humble", feature = "galactic"))]
+    ///     {
+    ///         node.create_subscriber("topic_name", None).unwrap()
+    ///     }
+    ///
+    ///     #[cfg(not(any(feature = "humble", feature = "galactic")))]
+    ///     {
+    ///         node.create_subscriber("topic_name", None, true).unwrap()
+    ///     }
     /// }
     /// ```
     pub fn create_subscriber<T: TypeSupport>(
         self: &Arc<Self>,
         topic_name: &str,
         qos: Option<qos::Profile>,
+
+        #[cfg(not(any(feature = "humble", feature = "galactic")))] disable_loaned_massage: bool,
     ) -> RCLResult<Subscriber<T>> {
-        Subscriber::new(self.clone(), topic_name, qos)
+        #[cfg(not(any(feature = "humble", feature = "galactic")))]
+        {
+            Subscriber::new(self.clone(), topic_name, qos, disable_loaned_massage)
+        }
+
+        #[cfg(any(feature = "humble", feature = "galactic"))]
+        {
+            Subscriber::new(self.clone(), topic_name, qos)
+        }
     }
 
     /// Create a server.
