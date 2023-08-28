@@ -69,15 +69,10 @@ fn goal_handler(handle: GoalHandle<MyAction>, req: MyAction_SendGoal_Request) ->
 fn test_action() -> Result<(), DynError> {
     let ctx = Context::new()?;
 
-    let client = create_client(&ctx, "test_action_client_node", "test_action_selector")?;
+    let client = create_client(&ctx, "test_action_client", "test_action")?;
 
     let mut selector = ctx.create_selector()?;
-    let server = create_server(
-        &ctx,
-        "test_action_server_node",
-        "test_action_selector",
-        None,
-    )?;
+    let server = create_server(&ctx, "test_action_server", "test_action", None)?;
 
     // send goal request
     let uuid = [1, 2, 3, 4, 5, 6, 7, 8, 1, 2, 3, 4, 5, 6, 7, 7];
@@ -157,13 +152,13 @@ fn test_action() -> Result<(), DynError> {
 fn test_action_cancel() -> Result<(), DynError> {
     let ctx = Context::new()?;
 
-    let client = create_client(&ctx, "test_action_client_node", "test_action_selector")?;
+    let client = create_client(&ctx, "test_action_cancel_client", "test_action_cancel")?;
 
     let mut selector = ctx.create_selector()?;
     let server = create_server(
         &ctx,
-        "test_action_server_node",
-        "test_action_selector",
+        "test_action_cancel_server",
+        "test_action_cancel",
         None,
     )?;
 
@@ -228,13 +223,13 @@ fn test_action_cancel() -> Result<(), DynError> {
 fn test_action_status() -> Result<(), DynError> {
     let ctx = Context::new()?;
 
-    let client = create_client(&ctx, "test_action_client_node", "test_action_selector")?;
+    let client = create_client(&ctx, "test_action_status_client", "test_action_status")?;
 
     let mut selector = ctx.create_selector()?;
     let server = create_server(
         &ctx,
-        "test_action_server_node",
-        "test_action_selector",
+        "test_action_status_server",
+        "test_action_status",
         None,
     )?;
 

@@ -572,14 +572,31 @@ impl Selector {
     /// Requests for goal results are automatically handled.
     ///
     /// # Example
-    /// ```
-    /// selector.add_action_server(server, |handle, req| {
-    ///   // spawn a worker thread ...
+    /// ```ignore
+    /// # // Ignoring this code block since common module is not available in doc tests.
+    /// # use safe_drive::{selector::Selector, action::server::Server, msg::ActionMsg};
+    /// # use common::msgs::example_msg::action::*;
+    ///  
+    /// fn add_action_server(selector: &mut Selector, server: Server<MyAction>) {
+    ///     selector.add_action_server(server,
+    ///         // handler for goal requests
+    ///         |handle, req| {
+    ///             // spawn a worker thread
+    ///             std::thread::spawn(move || {
+    ///                 // send a feedback
+    ///                 let feedback = MyAction_Feedback { c: 4 };
+    ///                 handle.feedback(feedback).unwrap();
     ///
-    ///   true // return true to accept the goal
-    /// },
-    ///   |req| { true } // return true to cancel the goal
-    /// );
+    ///                 // send a result when finished
+    ///                 handle.finish(MyAction_Result { b: 500 }).unwrap();
+    ///             });
+    ///
+    ///             true // return true to accept the goal
+    ///         },
+    ///         /// handler for cancel requests
+    ///         |req| { true } // return true to cancel the goal
+    ///     );
+    /// }
     /// ```
     pub fn add_action_server<T: ActionMsg + 'static, GR, CR>(
         &mut self,
