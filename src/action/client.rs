@@ -14,6 +14,7 @@ use crate::{
     qos::Profile,
     rcl,
     selector::Selector,
+    signal_handler::Signaled,
     PhantomUnsync, RecvResult,
 };
 
@@ -142,6 +143,10 @@ where
         self,
         data: &SendGoalServiceRequest<T>,
     ) -> Result<ClientGoalRecv<T>, DynError> {
+        if crate::is_halt() {
+            return Err(Signaled.into());
+        }
+
         let mut seq: i64 = 0;
         rcl::MTSafeFn::rcl_action_send_goal_request(
             &self.data.client,
