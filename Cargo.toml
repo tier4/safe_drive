@@ -37,6 +37,7 @@ version = "0.5"
 
 [dev-dependencies]
 futures = "0.3"
+rand = "0.8"
 
 [dev-dependencies.async-std]
 version = "1.12"

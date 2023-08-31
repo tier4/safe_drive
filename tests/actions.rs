@@ -75,7 +75,7 @@ fn test_action() -> Result<(), DynError> {
     let server = create_server(&ctx, "test_action_server", "test_action", None)?;
 
     // send goal request
-    let uuid = [1, 2, 3, 4, 5, 6, 7, 8, 1, 2, 3, 4, 5, 6, 7, 7];
+    let uuid: [u8; 16] = rand::random();
     let uuid_ = uuid;
     let goal = MyAction_Goal { a: 10 };
     let mut recv = client.send_goal_with_uuid(goal, uuid)?;
@@ -163,7 +163,7 @@ fn test_action_cancel() -> Result<(), DynError> {
     )?;
 
     // send goal request
-    let uuid = [1, 2, 3, 4, 5, 6, 7, 8, 1, 2, 3, 4, 5, 6, 7, 8];
+    let uuid: [u8; 16] = rand::random();
     let goal = MyAction_Goal { a: 10 };
     let mut recv = client.send_goal_with_uuid(goal, uuid)?;
 
@@ -234,16 +234,13 @@ fn test_action_status() -> Result<(), DynError> {
     )?;
 
     // send goal request
-    let uuid = [1, 2, 3, 4, 5, 6, 7, 8, 1, 2, 3, 4, 5, 6, 7, 7];
+    let uuid: [u8; 16] = rand::random();
     let goal = MyAction_Goal { a: 10 };
     let mut recv = client.send_goal_with_uuid(goal, uuid)?;
 
     thread::sleep(Duration::from_millis(100));
 
-    selector.add_action_server(server, goal_handler, move |goal| {
-        println!("Cancel request received for goal {:?}", goal);
-        true
-    });
+    selector.add_action_server(server, goal_handler, move |goal| true);
     selector.wait()?;
 
     let client = loop {
@@ -256,7 +253,6 @@ fn test_action_status() -> Result<(), DynError> {
                 break client;
             }
             RecvResult::RetryLater(receiver) => {
-                // println!("retrying...");
                 recv = receiver;
             }
             RecvResult::Err(e) => panic!("{}", e),
