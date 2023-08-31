@@ -24,6 +24,9 @@ use crate::qos::galactic::*;
 #[cfg(feature = "humble")]
 use crate::qos::humble::*;
 
+#[cfg(feature = "iron")]
+use crate::qos::iron::*;
+
 use super::{
     handle::GoalHandle, update_goal_status, GetResultServiceRequest, GoalStatus,
     SendGoalServiceRequest,

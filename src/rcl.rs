@@ -52,19 +52,6 @@ pub use iron::{
 #[cfg(feature = "iron")]
 pub type size_t = usize;
 
-#[cfg(feature = "iron")]
-mod iron;
-
-#[cfg(feature = "iron")]
-pub(crate) use iron::*;
-#[cfg(feature = "iron")]
-pub use iron::{
-    rosidl_action_type_support_t, rosidl_message_type_support_t, rosidl_service_type_support_t,
-};
-
-#[cfg(feature = "iron")]
-pub type size_t = usize;
-
 use crate::error::{action_ret_val_to_err, ret_val_to_err, RCLActionResult, RCLResult};
 use once_cell::sync::Lazy;
 use parking_lot::Mutex;
