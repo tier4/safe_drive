@@ -8,10 +8,12 @@ use crate::{
 };
 use once_cell::sync::Lazy;
 use parking_lot::{lock_api::MutexGuard, Mutex, RawMutex};
-use signal_hook::{
-    consts::*,
-    iterator::{Handle, Signals, SignalsInfo},
-};
+use signal_hook::consts::*;
+
+#[cfg(not(target_os = "windows"))]
+use signal_hook::iterator::{Handle, Signals, SignalsInfo};
+#[cfg(target_os = "windows")]
+use std::sync::Arc;
 use std::{
     collections::BTreeMap,
     error::Error,
@@ -30,9 +32,13 @@ type ConditionSet = BTreeMap<KeyCond, GuardCondition>;
 
 static INITIALIZER: InitOnce = InitOnce::new();
 static GUARD_COND: Lazy<Mutex<ConditionSet>> = Lazy::new(|| Mutex::new(ConditionSet::new()));
+#[cfg(not(target_os = "windows"))]
 static SIGHDL: Lazy<Mutex<Option<Handle>>> = Lazy::new(|| Mutex::new(None));
 static THREAD: Lazy<Mutex<Option<JoinHandle<()>>>> = Lazy::new(|| Mutex::new(None));
+#[cfg(not(target_os = "windows"))]
 static IS_HALT: AtomicBool = AtomicBool::new(false);
+#[cfg(target_os = "windows")]
+static IS_HALT: Lazy<Arc<AtomicBool>> = Lazy::new(|| Arc::new(AtomicBool::new(false)));
 
 #[derive(Debug)]
 pub struct Signaled;
@@ -45,6 +51,7 @@ impl Display for Signaled {
 
 impl Error for Signaled {}
 
+#[cfg(not(target_os = "windows"))]
 pub(crate) fn init() {
     INITIALIZER.init(
         || {
@@ -55,6 +62,19 @@ pub(crate) fn init() {
             *guard = Some(handle);
 
             let th = thread::spawn(move || handler(signals));
+            *THREAD.lock() = Some(th);
+        },
+        (),
+    );
+}
+
+#[cfg(target_os = "windows")]
+pub(crate) fn init() {
+    INITIALIZER.init(
+        || {
+            let term = Arc::clone(&IS_HALT);
+            signal_hook::flag::register(SIGTERM | SIGINT, Arc::clone(&term)).unwrap();
+            let th = thread::spawn(move || handler(term));
             *THREAD.lock() = Some(th);
         },
         (),
@@ -77,6 +97,7 @@ pub fn is_halt() -> bool {
     IS_HALT.load(Ordering::Relaxed)
 }
 
+#[cfg(not(target_os = "windows"))]
 pub(crate) fn halt() {
     let mut sig = SIGHDL.lock();
     let sig = if let Some(sig) = std::mem::replace(&mut *sig, None) {
@@ -94,12 +115,15 @@ pub(crate) fn halt() {
     };
     th.join().unwrap();
 }
+#[cfg(target_os = "windows")]
+pub(crate) fn halt() {}
 
 fn get_guard_condition() -> MutexGuard<'static, RawMutex, ConditionSet> {
     init();
     GUARD_COND.lock()
 }
 
+#[cfg(not(target_os = "windows"))]
 fn handler(mut signals: SignalsInfo) {
     for signal in signals.forever() {
         match signal {
@@ -119,4 +143,11 @@ fn handler(mut signals: SignalsInfo) {
             _ => unreachable!(),
         }
     }
+}
+
+#[cfg(target_os = "windows")]
+fn handler(term: Arc<AtomicBool>) {
+    while !term.load(Ordering::Relaxed) {}
+    let logger = Logger::new("safe_drive");
+    pr_info_in!(logger, "Received signal");
 }
