@@ -153,7 +153,7 @@ fn main() -> Result<(), DynError> {
     let node = ctx.create_node("my_talker", None, Default::default())?;
 
     // Create a publisher.
-    let publisher = node.create_publisher::<std_msgs::msg::String>("my_topic", None, true)?;
+    let publisher = node.create_publisher::<std_msgs::msg::String>("my_topic", None)?;
 
     // Create a logger.
     let logger = Logger::new("my_talker");
@@ -198,7 +198,7 @@ The arguments indicate as follows.
 
 ```rust
 // Create a publisher.
-let publisher = node.create_publisher::<std_msgs::msg::String>("my_topic", None, true)?;
+let publisher = node.create_publisher::<std_msgs::msg::String>("my_topic", None)?;
 ```
 
 - `<std_msgs::msg::String>` : the publisher can send values of `std_msgs::msg::String`.
@@ -353,7 +353,7 @@ fn main() -> Result<(), DynError> {
     let node = ctx.create_node("my_listener", None, Default::default())?;
 
     // Create a subscriber.
-    let subscriber = node.create_subscriber::<std_msgs::msg::String>("my_topic", None, true)?;
+    let subscriber = node.create_subscriber::<std_msgs::msg::String>("my_topic", None)?;
 
     // Create a logger.
     let logger = Logger::new("my_listener");
@@ -383,7 +383,7 @@ Similar to the publisher,
 
 ```rust
 // Create a subscriber.
-let subscriber = node.create_subscriber::<std_msgs::msg::String>("my_topic", None, true)?;
+let subscriber = node.create_subscriber::<std_msgs::msg::String>("my_topic", None)?;
 ```
 
 The arguments are as follows.
