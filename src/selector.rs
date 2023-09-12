@@ -57,14 +57,24 @@
 
 use self::guard_condition::{GuardCondition, RCLGuardCondition};
 use crate::{
+    action::{self, handle::GoalHandle, update_goal_status, GoalStatus, SendGoalServiceRequest},
     context::Context,
     delta_list::DeltaList,
-    error::{DynError, RCLError, RCLResult},
+    error::{DynError, RCLActionResult, RCLError, RCLResult},
     get_allocator,
     logger::{pr_error_in, pr_fatal_in, Logger},
-    msg::{ServiceMsg, TypeSupport},
+    msg::{
+        interfaces::action_msgs::{
+            msg::{GoalInfo, GoalInfoSeq},
+            srv::{ERROR_NONE, ERROR_REJECTED},
+        },
+        ActionMsg, GetUUID, ServiceMsg, TypeSupport,
+    },
     parameter::{ParameterServer, Parameters},
-    rcl,
+    rcl::{
+        self, action_msgs__msg__GoalInfo, action_msgs__msg__GoalInfo__Sequence,
+        rcl_action_client_t, rcl_action_server_t,
+    },
     service::{
         client::{ClientData, ClientRecv},
         server::{Server, ServerData},
@@ -75,7 +85,7 @@ use crate::{
     PhantomUnsend, PhantomUnsync, RecvResult, ST,
 };
 use std::{
-    cell::Cell,
+    cell::{Cell, RefCell},
     collections::{BTreeMap, BTreeSet},
     mem::replace,
     ptr::null_mut,
@@ -84,6 +94,7 @@ use std::{
     time::{Duration, SystemTime},
 };
 
+use parking_lot::Mutex;
 #[cfg(feature = "statistics")]
 use serde::Serialize;
 
@@ -107,6 +118,26 @@ struct ConditionHandler<T> {
     is_once: bool,
     event: T,
     handler: Option<Box<dyn FnMut() -> CallbackResult>>,
+}
+
+type ActionHandler = Rc<RefCell<dyn FnMut() -> CallbackResult>>;
+
+#[derive(Clone)]
+struct ActionClientConditionHandler {
+    client: *const rcl_action_client_t,
+    feedback_handler: Option<ActionHandler>,
+    status_handler: Option<ActionHandler>,
+    goal_handler: Option<ActionHandler>,
+    cancel_goal_handler: Option<ActionHandler>,
+    result_handler: Option<ActionHandler>,
+}
+
+#[derive(Clone)]
+struct ActionServerConditionHandler {
+    server: *const rcl_action_server_t,
+    goal_handler: ActionHandler,
+    cancel_goal_handler: ActionHandler,
+    result_handler: ActionHandler,
 }
 
 enum TimerType {
@@ -137,6 +168,15 @@ pub struct Statistics {
     pub wall_timer: BTreeMap<String, SerializableTimeStat>, // wall timers
 }
 
+struct EntitySize {
+    subscriptions: rcl::size_t,
+    guard_condititons: rcl::size_t,
+    timers: rcl::size_t,
+    clients: rcl::size_t,
+    services: rcl::size_t,
+    events: rcl::size_t,
+}
+
 /// Selector invokes callback functions associated with subscribers, services, timers, or condition variables.
 /// Selector cannot send to another thread and shared by multiple threads.
 /// So, use this for single threaded execution.
@@ -158,6 +198,8 @@ pub struct Selector {
     services: BTreeMap<*const rcl::rcl_service_t, ConditionHandler<Arc<ServerData>>>,
     clients: BTreeMap<*const rcl::rcl_client_t, ConditionHandler<Arc<ClientData>>>,
     subscriptions: BTreeMap<*const rcl::rcl_subscription_t, ConditionHandler<Arc<RCLSubscription>>>,
+    action_servers: BTreeMap<*const rcl::rcl_action_server_t, ActionServerConditionHandler>,
+    action_clients: BTreeMap<*const rcl::rcl_action_client_t, ActionClientConditionHandler>,
     cond: BTreeMap<*const rcl::rcl_guard_condition_t, ConditionHandler<Arc<RCLGuardCondition>>>,
     timer_ids: BTreeSet<u64>,
     timer_id: u64,
@@ -207,6 +249,8 @@ impl Selector {
             subscriptions: Default::default(),
             services: Default::default(),
             clients: Default::default(),
+            action_servers: Default::default(),
+            action_clients: Default::default(),
             cond: Default::default(),
             timer_ids: Default::default(),
             timer_id: 0,
@@ -525,6 +569,329 @@ impl Selector {
         );
     }
 
+    /// Register an action server with a callback. The callback is invoked when
+    /// requests from action clients arrive.
+    /// - `goal_handler` is invoked when the action server receives a new goal.
+    /// - `cancel_goal_handler` is invoked when the action server receives a
+    /// request to cancel a goal.
+    /// Requests for goal results are automatically handled.
+    ///
+    /// # Example
+    /// ```ignore
+    /// # // Ignoring this code block since common module is not available in doc tests.
+    /// # use safe_drive::{selector::Selector, action::server::Server, msg::ActionMsg};
+    /// # use common::msgs::example_msg::action::*;
+    ///  
+    /// fn add_action_server(selector: &mut Selector, server: Server<MyAction>) {
+    ///     selector.add_action_server(server,
+    ///         // handler for goal requests
+    ///         |handle, req| {
+    ///             // spawn a worker thread
+    ///             std::thread::spawn(move || {
+    ///                 // send a feedback
+    ///                 let feedback = MyAction_Feedback { c: 4 };
+    ///                 handle.feedback(feedback).unwrap();
+    ///
+    ///                 // send a result when finished
+    ///                 handle.finish(MyAction_Result { b: 500 }).unwrap();
+    ///             });
+    ///
+    ///             true // return true to accept the goal
+    ///         },
+    ///         /// handler for cancel requests
+    ///         |req| { true } // return true to cancel the goal
+    ///     );
+    /// }
+    /// ```
+    pub fn add_action_server<T: ActionMsg + 'static, GR, CR>(
+        &mut self,
+        server: action::server::Server<T>,
+        goal_handler: GR,
+        cancel_goal_handler: CR,
+    ) -> bool
+    where
+        GR: Fn(GoalHandle<T>, SendGoalServiceRequest<T>) -> bool + 'static,
+        CR: Fn(&GoalInfo) -> bool + 'static,
+    {
+        let server = Arc::new(Mutex::new(server));
+        let goal = {
+            let server = server.clone();
+            move || {
+                let start = SystemTime::now();
+                let dur = Duration::from_millis(1);
+                let mut server = server.lock();
+
+                loop {
+                    match server.try_recv_goal_request() {
+                        RecvResult::Ok((header, request)) => {
+                            let uuid = *request.get_uuid();
+                            let handle = server.create_goal_handle(uuid);
+                            let accepted = goal_handler(handle, request);
+
+                            if let Err(e) = server.handle_goal(accepted, header, uuid) {
+                                let logger = Logger::new("safe_drive");
+                                pr_error_in!(logger, "Failed to accept new goal: {}", e);
+                                return CallbackResult::Remove;
+                            }
+
+                            return CallbackResult::Ok;
+                        }
+                        RecvResult::RetryLater(()) => {}
+                        RecvResult::Err(e) => {
+                            let logger = Logger::new("safe_drive");
+                            pr_error_in!(
+                                logger,
+                                "failed try_recv_goal_request() of action server: {}",
+                                e
+                            );
+                            return CallbackResult::Remove;
+                        }
+                    }
+
+                    if let Ok(t) = start.elapsed() {
+                        if t > dur {
+                            return CallbackResult::Ok;
+                        }
+                    } else {
+                        return CallbackResult::Ok;
+                    }
+                }
+            }
+        };
+
+        let cancel = {
+            let server = server.clone();
+            move || {
+                let start = SystemTime::now();
+                let dur = Duration::from_millis(1);
+                let mut server = server.lock();
+
+                loop {
+                    match server.try_recv_cancel_request() {
+                        RecvResult::Ok((mut header, request)) => {
+                            let mut process_response =
+                                rcl::MTSafeFn::rcl_action_get_zero_initialized_cancel_response();
+                            {
+                                let guard = rcl::MT_UNSAFE_FN.lock();
+
+                                // compute which exact goals are requested to be cancelled
+                                // TODO: handle ERROR_UNKNOWN_GOAL_ID etc.
+                                if let Err(e) = guard.rcl_action_process_cancel_request(
+                                    unsafe { server.data.as_ptr_mut() },
+                                    &request,
+                                    &mut process_response as *const _ as *mut _,
+                                ) {
+                                    let logger = Logger::new("safe_drive");
+                                    pr_error_in!(
+                                        logger,
+                                        "failed to send cancel responses from action server: {}",
+                                        e
+                                    );
+                                    return CallbackResult::Remove;
+                                }
+
+                                ()
+                            }
+
+                            let goal_seq_ptr = &process_response.msg.goals_canceling as *const _
+                                as *const GoalInfoSeq<0>;
+                            let candidates = unsafe { &(*goal_seq_ptr) };
+
+                            let mut accepted_goals: Vec<_> = candidates
+                                .iter()
+                                .filter(|goal| cancel_goal_handler(goal))
+                                .collect();
+
+                            let accepted_uuids: Vec<[u8; 16]> = accepted_goals
+                                .iter()
+                                .cloned()
+                                .map(|goal| goal.goal_id.uuid)
+                                .collect();
+                            let server_ptr = unsafe { server.data.as_ptr_mut() };
+                            update_goal_status(server_ptr, &accepted_uuids, GoalStatus::Canceling)
+                                .unwrap_or_else(|err| {
+                                    let logger = Logger::new("safe_drive");
+                                    pr_error_in!(logger, "failed to update goal status: {}", err);
+                                });
+
+                            let mut cancel_response =
+                                rcl::MTSafeFn::rcl_action_get_zero_initialized_cancel_response();
+
+                            cancel_response.msg.return_code = if accepted_goals.is_empty() {
+                                ERROR_REJECTED
+                            } else {
+                                ERROR_NONE
+                            };
+                            cancel_response.msg.goals_canceling =
+                                action_msgs__msg__GoalInfo__Sequence {
+                                    data: accepted_goals.as_mut_ptr() as *mut _
+                                        as *mut action_msgs__msg__GoalInfo,
+                                    size: accepted_goals.len() as rcl::size_t,
+                                    capacity: accepted_goals.capacity() as rcl::size_t,
+                                };
+
+                            {
+                                let guard = rcl::MT_UNSAFE_FN.lock();
+                                let server_ptr = unsafe { server.data.as_ptr_mut() };
+                                match guard.rcl_action_send_cancel_response(
+                                    server_ptr,
+                                    &mut header,
+                                    &mut cancel_response.msg as *const _ as *mut _,
+                                ) {
+                                    Ok(()) => {
+                                        return CallbackResult::Ok;
+                                    }
+                                    Err(e) => {
+                                        let logger = Logger::new("safe_drive");
+                                        pr_error_in!(
+                                        logger,
+                                        "failed to send cancel responses from action server: {}",
+                                        e
+                                    );
+                                        return CallbackResult::Remove;
+                                    }
+                                }
+                            }
+                        }
+                        RecvResult::RetryLater(_) => {}
+                        RecvResult::Err(e) => {
+                            let logger = Logger::new("safe_drive");
+                            pr_error_in!(
+                                logger,
+                                "failed try_recv_cancel_request() of action server: {}",
+                                e
+                            );
+                            return CallbackResult::Remove;
+                        }
+                    }
+
+                    if let Ok(t) = start.elapsed() {
+                        if t > dur {
+                            return CallbackResult::Ok;
+                        }
+                    } else {
+                        return CallbackResult::Ok;
+                    }
+                }
+            }
+        };
+
+        let result = {
+            let server = server.clone();
+            move || {
+                let start = SystemTime::now();
+                let dur = Duration::from_millis(1);
+                let mut server = server.lock();
+
+                loop {
+                    match server.try_recv_result_request() {
+                        RecvResult::Ok((mut header, request)) => {
+                            let removed = {
+                                let mut results = server.data.results.lock();
+                                results.remove(request.get_uuid())
+                            };
+                            match removed {
+                                Some(result) => {
+                                    let mut response =
+                                        T::new_result_response(GoalStatus::Succeeded as u8, result);
+                                    let guard = rcl::MT_UNSAFE_FN.lock();
+                                    match guard.rcl_action_send_result_response(
+                                        unsafe { server.data.as_ptr_mut() },
+                                        &mut header,
+                                        &mut response as *const _ as *mut _,
+                                    ) {
+                                        Ok(()) => return CallbackResult::Ok,
+                                        Err(e) => {
+                                            let logger = Logger::new("safe_drive");
+                                            pr_error_in!(
+                                        logger,
+                                        "failed to send cancel responses from action server: {}",
+                                        e
+                                    );
+                                            return CallbackResult::Remove;
+                                        }
+                                    }
+                                }
+                                None => {
+                                    let logger = Logger::new("safe_drive");
+                                    pr_error_in!(
+                                        logger,
+                                        "The result for the goal (uuid: {:?}) is not available yet",
+                                        request.get_uuid()
+                                    );
+                                    return CallbackResult::Remove;
+                                }
+                            }
+                        }
+                        RecvResult::RetryLater(_) => {}
+                        RecvResult::Err(e) => {
+                            let logger = Logger::new("safe_drive");
+                            pr_error_in!(
+                                logger,
+                                "failed try_recv_result_request() of action server: {}",
+                                e
+                            );
+                            return CallbackResult::Remove;
+                        }
+                    }
+                    if let Ok(t) = start.elapsed() {
+                        if t > dur {
+                            return CallbackResult::Ok;
+                        }
+                    } else {
+                        return CallbackResult::Ok;
+                    }
+                }
+            }
+        };
+
+        let server = server.lock();
+        let context_ptr = server.data.node.context.as_ptr();
+        if self.context.as_ptr() == context_ptr {
+            self.add_action_server_data(
+                unsafe { server.data.as_ptr_mut() },
+                Rc::new(RefCell::new(goal)),
+                Rc::new(RefCell::new(cancel)),
+                Rc::new(RefCell::new(result)),
+            );
+            true
+        } else {
+            false
+        }
+    }
+
+    pub(crate) fn add_action_server_data(
+        &mut self,
+        server: *mut rcl::rcl_action_server_t,
+        goal_handler: Rc<RefCell<dyn FnMut() -> CallbackResult>>,
+        cancel_goal_handler: Rc<RefCell<dyn FnMut() -> CallbackResult>>,
+        result_handler: Rc<RefCell<dyn FnMut() -> CallbackResult>>,
+    ) {
+        self.action_servers.insert(
+            server,
+            ActionServerConditionHandler {
+                server,
+                goal_handler,
+                cancel_goal_handler,
+                result_handler,
+            },
+        );
+    }
+
+    pub(crate) fn add_action_client(&mut self, client: *const rcl::rcl_action_client_t) {
+        self.action_clients.insert(
+            client,
+            ActionClientConditionHandler {
+                feedback_handler: None,
+                status_handler: None,
+                goal_handler: None,
+                cancel_goal_handler: None,
+                result_handler: None,
+                client,
+            },
+        );
+    }
+
     pub(crate) fn add_guard_condition(
         &mut self,
         cond: &GuardCondition,
@@ -758,14 +1125,16 @@ impl Selector {
         {
             let guard = rcl::MT_UNSAFE_FN.lock();
             guard.rcl_wait_set_clear(&mut self.wait_set)?;
+
+            let entities = self.get_num_entities()?;
             guard.rcl_wait_set_resize(
                 &mut self.wait_set,
-                self.subscriptions.len() as rcl::size_t,
-                self.cond.len() as rcl::size_t,
-                0,
-                self.clients.len() as rcl::size_t,
-                self.services.len() as rcl::size_t,
-                0,
+                entities.subscriptions,
+                entities.guard_condititons,
+                entities.timers,
+                entities.clients,
+                entities.services,
+                entities.events,
             )?;
 
             // set subscriptions
@@ -794,6 +1163,25 @@ impl Selector {
             // set services
             for (_, h) in self.services.iter() {
                 guard.rcl_wait_set_add_service(&mut self.wait_set, &h.event.service, null_mut())?;
+            }
+
+            // set action clients
+            for (_, h) in self.action_clients.iter() {
+                guard.rcl_action_wait_set_add_action_client(
+                    &mut self.wait_set,
+                    h.client,
+                    null_mut(),
+                    null_mut(),
+                )?;
+            }
+
+            // set action servers
+            for (_, h) in self.action_servers.iter() {
+                guard.rcl_action_wait_set_add_action_server(
+                    &mut self.wait_set,
+                    h.server,
+                    null_mut(),
+                )?;
             }
         }
 
@@ -835,6 +1223,9 @@ impl Selector {
 
             // notify guard conditions
             notify(&mut self.cond, self.wait_set.guard_conditions);
+
+            notify_action_server(&mut self.action_servers, &self.wait_set)?;
+            notify_action_client(&mut self.action_clients, &self.wait_set)?;
         }
 
         Ok(())
@@ -959,6 +1350,65 @@ impl Selector {
             self.add_timer_inner(dur, handler, TimerType::WallTimer(name, dur));
         }
     }
+
+    /// Calculates how many entities (e.g. subscriptions, timers) the selector has to wait for.
+    fn get_num_entities(&self) -> RCLActionResult<EntitySize> {
+        // Action servers and action clients work on several underlying entities.
+        let mut action_server_subscriptions_size = 0;
+        let mut action_server_guard_conditions_size = 0;
+        let mut action_server_timers_size = 0;
+        let mut action_server_clients_size = 0;
+        let mut action_server_services_size = 0;
+
+        let mut action_client_subscriptions_size = 0;
+        let mut action_client_guard_conditions_size = 0;
+        let mut action_client_timers_size = 0;
+        let mut action_client_clients_size = 0;
+        let mut action_client_services_size = 0;
+
+        // All the action servers (and action clients) have the same number of entities, so we are just checking how many entities the first server has to wait for, instead of calling rcl_action_server_wait_set_get_num_entities multiple times.
+        if let Some((server, _)) = self.action_servers.first_key_value() {
+            rcl::MTSafeFn::rcl_action_server_wait_set_get_num_entities(
+                *server,
+                &mut action_server_subscriptions_size,
+                &mut action_server_guard_conditions_size,
+                &mut action_server_timers_size,
+                &mut action_server_clients_size,
+                &mut action_server_services_size,
+            )?;
+        }
+
+        if let Some((client, _)) = self.action_clients.first_key_value() {
+            rcl::MTSafeFn::rcl_action_client_wait_set_get_num_entities(
+                *client,
+                &mut action_client_subscriptions_size,
+                &mut action_client_guard_conditions_size,
+                &mut action_client_timers_size,
+                &mut action_client_clients_size,
+                &mut action_client_services_size,
+            )?;
+        }
+
+        let n_servers = self.action_servers.len() as rcl::size_t;
+        let n_clients = self.action_clients.len() as rcl::size_t;
+
+        Ok(EntitySize {
+            subscriptions: self.subscriptions.len() as rcl::size_t
+                + action_server_subscriptions_size * n_servers
+                + action_client_subscriptions_size * n_clients,
+            guard_condititons: self.cond.len() as rcl::size_t
+                + action_server_guard_conditions_size * n_servers
+                + action_client_guard_conditions_size * n_clients,
+            timers: action_server_timers_size * n_servers + action_client_timers_size * n_clients,
+            clients: self.clients.len() as rcl::size_t
+                + action_server_clients_size * n_servers
+                + action_client_clients_size * n_clients,
+            services: self.services.len() as rcl::size_t
+                + action_server_services_size * n_servers
+                + action_client_services_size * n_clients,
+            events: 0,
+        })
+    }
 }
 
 impl Drop for Selector {
@@ -1029,6 +1479,120 @@ fn notify<K, V>(m: &mut BTreeMap<*const K, ConditionHandler<V>>, array: *const *
             }
         }
     }
+}
+
+/// Scan the waitset to see if there are any updates for action servers.
+fn notify_action_server(
+    m: &mut BTreeMap<*const rcl_action_server_t, ActionServerConditionHandler>,
+    wait_set: *const rcl::rcl_wait_set_t,
+) -> RCLActionResult<()> {
+    let it = m
+        .iter_mut()
+        .map(|(server, handler)| {
+            let mut is_goal_request_ready = false;
+            let mut is_cancel_request_ready = false;
+            let mut is_result_request_ready = false;
+            // TODO: handle expired goals
+            let mut is_goal_expired = false;
+
+            {
+                let guard = rcl::MT_UNSAFE_FN.lock();
+                guard.rcl_action_server_wait_set_get_entities_ready(
+                    wait_set,
+                    *server,
+                    &mut is_goal_request_ready,
+                    &mut is_cancel_request_ready,
+                    &mut is_result_request_ready,
+                    &mut is_goal_expired,
+                )?;
+            }
+
+            if (is_goal_request_ready
+                && (handler.goal_handler.borrow_mut())() == CallbackResult::Remove)
+                || (is_cancel_request_ready
+                    && (handler.cancel_goal_handler.borrow_mut())() == CallbackResult::Remove)
+                || (is_result_request_ready
+                    && (handler.result_handler.borrow_mut())() == CallbackResult::Remove)
+            {
+                Ok(None)
+            } else {
+                Ok(Some((server, handler)))
+            }
+        })
+        .collect::<RCLActionResult<Vec<Option<(_, _)>>>>()?
+        .into_iter()
+        .flatten()
+        .map(|(server, handler)| (*server, handler.clone()));
+    *m = BTreeMap::from_iter(it);
+
+    Ok(())
+}
+
+/// Scan the waitset to see if there are any updates for action clients.
+fn notify_action_client(
+    m: &mut BTreeMap<*const rcl_action_client_t, ActionClientConditionHandler>,
+    wait_set: *const rcl::rcl_wait_set_t,
+) -> RCLActionResult<()> {
+    let it = m
+        .iter_mut()
+        .map(|(client, handler)| {
+            let mut is_feedback_ready = false;
+            let mut is_status_ready = false;
+            let mut is_goal_response_ready = false;
+            let mut is_cancel_response_ready = false;
+            let mut is_result_response_ready = false;
+
+            {
+                let guard = rcl::MT_UNSAFE_FN.lock();
+                guard.rcl_action_client_wait_set_get_entities_ready(
+                    wait_set,
+                    *client,
+                    &mut is_feedback_ready,
+                    &mut is_status_ready,
+                    &mut is_goal_response_ready,
+                    &mut is_cancel_response_ready,
+                    &mut is_result_response_ready,
+                )?;
+            }
+
+            if (is_feedback_ready
+                && handler
+                    .feedback_handler
+                    .clone()
+                    .is_some_and(|h| (h.borrow_mut())() == CallbackResult::Remove))
+                || (is_status_ready
+                    && handler
+                        .status_handler
+                        .clone()
+                        .is_some_and(|h| (h.borrow_mut())() == CallbackResult::Remove))
+                || (is_goal_response_ready
+                    && handler
+                        .goal_handler
+                        .clone()
+                        .is_some_and(|h| (h.borrow_mut())() == CallbackResult::Remove))
+                || (is_cancel_response_ready
+                    && handler
+                        .cancel_goal_handler
+                        .clone()
+                        .is_some_and(|h| (h.borrow_mut())() == CallbackResult::Remove))
+                || (is_result_response_ready
+                    && handler
+                        .result_handler
+                        .clone()
+                        .is_some_and(|h| (h.borrow_mut())() == CallbackResult::Remove))
+            {
+                Ok(None)
+            } else {
+                Ok(Some((client, handler)))
+            }
+        })
+        .collect::<RCLActionResult<Vec<Option<(_, _)>>>>()?
+        .into_iter()
+        .flatten()
+        .map(|(server, handler)| (*server, handler.clone()));
+    *m = BTreeMap::from_iter(it);
+
+    Ok(())
 }
 
 #[cfg(test)]

@@ -1,11 +1,14 @@
 fn main() {
     println!("cargo:rustc-link-lib=rcl");
+    println!("cargo:rustc-link-lib=rcl_action");
     println!("cargo:rustc-link-lib=rcutils");
     println!("cargo:rustc-link-lib=rmw");
     println!("cargo:rustc-link-lib=rosidl_runtime_c");
 
     println!("cargo:rustc-link-lib=actionlib_msgs__rosidl_typesupport_c");
     println!("cargo:rustc-link-lib=actionlib_msgs__rosidl_generator_c");
+    println!("cargo:rustc-link-lib=action_msgs__rosidl_typesupport_c");
+    println!("cargo:rustc-link-lib=action_msgs__rosidl_generator_c");
     println!("cargo:rustc-link-lib=builtin_interfaces__rosidl_typesupport_c");
     println!("cargo:rustc-link-lib=builtin_interfaces__rosidl_generator_c");
     println!("cargo:rustc-link-lib=diagnostic_msgs__rosidl_typesupport_c");

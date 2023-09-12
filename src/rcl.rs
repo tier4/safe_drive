@@ -52,7 +52,7 @@ pub use iron::{
 #[cfg(feature = "iron")]
 pub type size_t = usize;
 
-use crate::error::{ret_val_to_err, RCLResult};
+use crate::error::{action_ret_val_to_err, ret_val_to_err, RCLActionResult, RCLResult};
 use once_cell::sync::Lazy;
 use parking_lot::Mutex;
 
@@ -387,6 +387,18 @@ impl MTUnsafeFn {
         })
     }
 
+    pub fn rcl_ros_clock_init(
+        &self,
+        clock: *mut rcl_clock_t,
+        allocator: *mut rcl_allocator_t,
+    ) -> RCLResult<()> {
+        ret_val_to_err(unsafe { self::rcl_ros_clock_init(clock, allocator) })
+    }
+
+    pub fn rcl_ros_clock_fini(&self, clock: *mut rcl_clock_t) -> RCLResult<()> {
+        ret_val_to_err(unsafe { self::rcl_ros_clock_fini(clock) })
+    }
+
     pub fn rcl_return_loaned_message_from_subscription(
         &self,
         subscription: *const rcl_subscription_t,
@@ -394,6 +406,330 @@ impl MTUnsafeFn {
     ) -> RCLResult<()> {
         ret_val_to_err(unsafe {
             self::rcl_return_loaned_message_from_subscription(subscription, loaned_message)
+        })
+    }
+
+    pub fn rcl_action_client_init(
+        &self,
+        action_client: *mut rcl_action_client_t,
+        node: *mut rcl_node_t,
+        type_support: *const rosidl_action_type_support_t,
+        action_name: *const ::std::os::raw::c_char,
+        options: *const rcl_action_client_options_t,
+    ) -> RCLActionResult<()> {
+        action_ret_val_to_err(unsafe {
+            self::rcl_action_client_init(action_client, node, type_support, action_name, options)
+        })
+    }
+
+    pub fn rcl_action_client_fini(
+        &self,
+        action_client: *mut rcl_action_client_t,
+        node: *mut rcl_node_t,
+    ) -> RCLActionResult<()> {
+        action_ret_val_to_err(unsafe { self::rcl_action_client_fini(action_client, node) })
+    }
+
+    pub fn rcl_action_server_is_available(
+        &self,
+        node: *const rcl_node_t,
+        client: *const rcl_action_client_t,
+        is_available: *mut bool,
+    ) -> RCLActionResult<()> {
+        action_ret_val_to_err(unsafe {
+            self::rcl_action_server_is_available(node, client, is_available)
+        })
+    }
+
+    pub fn rcl_action_take_goal_response(
+        &self,
+        action_client: *const rcl_action_client_t,
+        response_header: *mut rmw_request_id_t,
+        ros_goal_response: *mut ::std::os::raw::c_void,
+    ) -> RCLActionResult<()> {
+        action_ret_val_to_err(unsafe {
+            self::rcl_action_take_goal_response(action_client, response_header, ros_goal_response)
+        })
+    }
+
+    pub fn rcl_action_take_feedback(
+        &self,
+        action_client: *const rcl_action_client_t,
+        ros_feedback: *mut ::std::os::raw::c_void,
+    ) -> RCLActionResult<()> {
+        action_ret_val_to_err(unsafe {
+            self::rcl_action_take_feedback(action_client, ros_feedback)
+        })
+    }
+
+    pub fn rcl_action_take_status(
+        &self,
+        action_client: *const rcl_action_client_t,
+        ros_status_array: *mut ::std::os::raw::c_void,
+    ) -> RCLActionResult<()> {
+        action_ret_val_to_err(unsafe {
+            self::rcl_action_take_status(action_client, ros_status_array)
+        })
+    }
+
+    pub fn rcl_action_take_result_request(
+        &self,
+        action_server: *const rcl_action_server_t,
+        request_header: *mut rmw_request_id_t,
+        ros_result_request: *mut ::std::os::raw::c_void,
+    ) -> RCLActionResult<()> {
+        action_ret_val_to_err(unsafe {
+            self::rcl_action_take_result_request(action_server, request_header, ros_result_request)
+        })
+    }
+
+    pub fn rcl_action_send_result_response(
+        &self,
+        action_server: *const rcl_action_server_t,
+        response_header: *mut rmw_request_id_t,
+        ros_result_response: *mut ::std::os::raw::c_void,
+    ) -> RCLActionResult<()> {
+        action_ret_val_to_err(unsafe {
+            self::rcl_action_send_result_response(
+                action_server,
+                response_header,
+                ros_result_response,
+            )
+        })
+    }
+
+    pub fn rcl_action_take_result_response(
+        &self,
+        action_client: *const rcl_action_client_t,
+        response_header: *mut rmw_request_id_t,
+        ros_result: *mut ::std::os::raw::c_void,
+    ) -> RCLActionResult<()> {
+        action_ret_val_to_err(unsafe {
+            self::rcl_action_take_result_response(action_client, response_header, ros_result)
+        })
+    }
+
+    pub fn rcl_action_send_cancel_request(
+        &self,
+        action_client: *const rcl_action_client_t,
+        ros_cancel_request: *const ::std::os::raw::c_void,
+        sequence_number: *mut i64,
+    ) -> RCLActionResult<()> {
+        action_ret_val_to_err(unsafe {
+            self::rcl_action_send_cancel_request(action_client, ros_cancel_request, sequence_number)
+        })
+    }
+
+    pub fn rcl_action_take_cancel_response(
+        &self,
+        action_client: *const rcl_action_client_t,
+        response_header: *mut rmw_request_id_t,
+        ros_cancel_response: *mut ::std::os::raw::c_void,
+    ) -> RCLActionResult<()> {
+        action_ret_val_to_err(unsafe {
+            self::rcl_action_take_cancel_response(
+                action_client,
+                response_header,
+                ros_cancel_response,
+            )
+        })
+    }
+
+    pub fn rcl_action_server_init(
+        &self,
+        action_server: *mut rcl_action_server_t,
+        node: *mut rcl_node_t,
+        clock: *mut rcl_clock_t,
+        type_support: *const rosidl_action_type_support_t,
+        action_name: *const ::std::os::raw::c_char,
+        options: *const rcl_action_server_options_t,
+    ) -> RCLActionResult<()> {
+        action_ret_val_to_err(unsafe {
+            self::rcl_action_server_init(
+                action_server,
+                node,
+                clock,
+                type_support,
+                action_name,
+                options,
+            )
+        })
+    }
+
+    pub fn rcl_action_server_fini(
+        &self,
+        action_server: *mut rcl_action_server_t,
+        node: *mut rcl_node_t,
+    ) -> RCLActionResult<()> {
+        action_ret_val_to_err(unsafe { self::rcl_action_server_fini(action_server, node) })
+    }
+
+    pub fn rcl_action_publish_feedback(
+        &self,
+        action_server: *const rcl_action_server_t,
+        ros_feedback: *mut ::std::os::raw::c_void,
+    ) -> RCLActionResult<()> {
+        action_ret_val_to_err(unsafe {
+            self::rcl_action_publish_feedback(action_server, ros_feedback)
+        })
+    }
+
+    pub fn rcl_action_publish_status(
+        &self,
+        action_server: *const rcl_action_server_t,
+        status_message: *const ::std::os::raw::c_void,
+    ) -> RCLActionResult<()> {
+        action_ret_val_to_err(unsafe {
+            self::rcl_action_publish_status(action_server, status_message)
+        })
+    }
+
+    pub fn rcl_action_get_goal_status_array(
+        &self,
+        action_server: *const rcl_action_server_t,
+        status_message: *mut rcl_action_goal_status_array_t,
+    ) -> RCLActionResult<()> {
+        action_ret_val_to_err(unsafe {
+            self::rcl_action_get_goal_status_array(action_server, status_message)
+        })
+    }
+
+    pub fn rcl_action_take_goal_request(
+        &self,
+        action_server: *const rcl_action_server_t,
+        request_header: *mut rmw_request_id_t,
+        ros_goal_request: *mut ::std::os::raw::c_void,
+    ) -> RCLActionResult<()> {
+        action_ret_val_to_err(unsafe {
+            self::rcl_action_take_goal_request(action_server, request_header, ros_goal_request)
+        })
+    }
+
+    pub fn rcl_action_send_goal_response(
+        &self,
+        action_server: *const rcl_action_server_t,
+        response_header: *mut rmw_request_id_t,
+        ros_goal_response: *mut ::std::os::raw::c_void,
+    ) -> RCLActionResult<()> {
+        action_ret_val_to_err(unsafe {
+            self::rcl_action_send_goal_response(action_server, response_header, ros_goal_response)
+        })
+    }
+
+    pub fn rcl_action_accept_new_goal(
+        &self,
+        action_server: *mut rcl_action_server_t,
+        goal_info: *const rcl_action_goal_info_t,
+    ) -> *mut rcl_action_goal_handle_t {
+        unsafe { self::rcl_action_accept_new_goal(action_server, goal_info) }
+    }
+
+    pub fn rcl_action_take_cancel_request(
+        &self,
+        action_server: *const rcl_action_server_t,
+        request_header: *mut rmw_request_id_t,
+        ros_cancel_request: *mut ::std::os::raw::c_void,
+    ) -> RCLActionResult<()> {
+        action_ret_val_to_err(unsafe {
+            self::rcl_action_take_cancel_request(action_server, request_header, ros_cancel_request)
+        })
+    }
+
+    pub fn rcl_action_process_cancel_request(
+        &self,
+        action_server: *const rcl_action_server_t,
+        cancel_request: *const rcl_action_cancel_request_t,
+        cancel_response: *mut rcl_action_cancel_response_t,
+    ) -> RCLActionResult<()> {
+        action_ret_val_to_err(unsafe {
+            self::rcl_action_process_cancel_request(action_server, cancel_request, cancel_response)
+        })
+    }
+
+    pub fn rcl_action_send_cancel_response(
+        &self,
+        action_server: *const rcl_action_server_t,
+        response_header: *mut rmw_request_id_t,
+        ros_cancel_response: *mut ::std::os::raw::c_void,
+    ) -> RCLActionResult<()> {
+        action_ret_val_to_err(unsafe {
+            self::rcl_action_send_cancel_response(
+                action_server,
+                response_header,
+                ros_cancel_response,
+            )
+        })
+    }
+
+    pub fn rcl_action_wait_set_add_action_client(
+        &self,
+        wait_set: *mut rcl_wait_set_t,
+        action_client: *const rcl_action_client_t,
+        client_index: *mut size_t,
+        subscription_index: *mut size_t,
+    ) -> RCLActionResult<()> {
+        action_ret_val_to_err(unsafe {
+            self::rcl_action_wait_set_add_action_client(
+                wait_set,
+                action_client,
+                client_index,
+                subscription_index,
+            )
+        })
+    }
+
+    pub fn rcl_action_wait_set_add_action_server(
+        &self,
+        wait_set: *mut rcl_wait_set_t,
+        action_server: *const rcl_action_server_t,
+        service_index: *mut size_t,
+    ) -> RCLActionResult<()> {
+        action_ret_val_to_err(unsafe {
+            self::rcl_action_wait_set_add_action_server(wait_set, action_server, service_index)
+        })
+    }
+
+    pub fn rcl_action_server_wait_set_get_entities_ready(
+        &self,
+        wait_set: *const rcl_wait_set_t,
+        action_server: *const rcl_action_server_t,
+        is_goal_request_ready: *mut bool,
+        is_cancel_request_ready: *mut bool,
+        is_result_request_ready: *mut bool,
+        is_goal_expired: *mut bool,
+    ) -> RCLActionResult<()> {
+        action_ret_val_to_err(unsafe {
+            self::rcl_action_server_wait_set_get_entities_ready(
+                wait_set,
+                action_server,
+                is_goal_request_ready,
+                is_cancel_request_ready,
+                is_result_request_ready,
+                is_goal_expired,
+            )
+        })
+    }
+
+    pub fn rcl_action_client_wait_set_get_entities_ready(
+        &self,
+        wait_set: *const rcl_wait_set_t,
+        action_client: *const rcl_action_client_t,
+        is_feedback_ready: *mut bool,
+        is_status_ready: *mut bool,
+        is_goal_response_ready: *mut bool,
+        is_cancel_response_ready: *mut bool,
+        is_result_response_ready: *mut bool,
+    ) -> RCLActionResult<()> {
+        action_ret_val_to_err(unsafe {
+            self::rcl_action_client_wait_set_get_entities_ready(
+                wait_set,
+                action_client,
+                is_feedback_ready,
+                is_status_ready,
+                is_goal_response_ready,
+                is_cancel_response_ready,
+                is_result_response_ready,
+            )
         })
     }
 
@@ -435,6 +771,10 @@ pub(crate) struct MTSafeFn;
 impl MTSafeFn {
     pub fn rcl_get_zero_initialized_context() -> rcl_context_t {
         unsafe { self::rcl_get_zero_initialized_context() }
+    }
+
+    pub fn rcl_context_is_valid(context: *const rcl_context_t) -> bool {
+        unsafe { self::rcl_context_is_valid(context) }
     }
 
     pub fn rcl_shutdown(context: *mut rcl_context_t) -> RCLResult<()> {
@@ -533,5 +873,104 @@ impl MTSafeFn {
         sequence_number: *mut i64,
     ) -> RCLResult<()> {
         ret_val_to_err(unsafe { self::rcl_send_request(client, ros_request, sequence_number) })
+    }
+
+    pub fn rcl_clock_get_now(
+        clock: *mut rcl_clock_t,
+        time_point_value: *mut rcl_time_point_value_t,
+    ) -> RCLResult<()> {
+        ret_val_to_err(unsafe { self::rcl_clock_get_now(clock, time_point_value) })
+    }
+
+    pub fn rcl_action_get_zero_initialized_client() -> rcl_action_client_t {
+        unsafe { self::rcl_action_get_zero_initialized_client() }
+    }
+
+    pub fn rcl_action_client_get_default_options() -> rcl_action_client_options_t {
+        unsafe { self::rcl_action_client_get_default_options() }
+    }
+
+    pub fn rcl_action_send_goal_request(
+        action_client: *const rcl_action_client_t,
+        ros_goal_request: *const ::std::os::raw::c_void,
+        sequence_number: *mut i64,
+    ) -> RCLActionResult<()> {
+        action_ret_val_to_err(unsafe {
+            self::rcl_action_send_goal_request(action_client, ros_goal_request, sequence_number)
+        })
+    }
+
+    pub fn rcl_action_send_result_request(
+        action_client: *const rcl_action_client_t,
+        ros_result_request: *mut ::std::os::raw::c_void,
+        sequence_number: *mut i64,
+    ) -> RCLActionResult<()> {
+        action_ret_val_to_err(unsafe {
+            self::rcl_action_send_result_request(action_client, ros_result_request, sequence_number)
+        })
+    }
+
+    pub fn rcl_action_server_wait_set_get_num_entities(
+        action_server: *const rcl_action_server_t,
+        num_subscriptions: *mut size_t,
+        num_guard_conditions: *mut size_t,
+        num_timers: *mut size_t,
+        num_clients: *mut size_t,
+        num_services: *mut size_t,
+    ) -> RCLActionResult<()> {
+        action_ret_val_to_err(unsafe {
+            self::rcl_action_server_wait_set_get_num_entities(
+                action_server,
+                num_subscriptions,
+                num_guard_conditions,
+                num_timers,
+                num_clients,
+                num_services,
+            )
+        })
+    }
+
+    pub fn rcl_action_client_wait_set_get_num_entities(
+        action_client: *const rcl_action_client_t,
+        num_subscriptions: *mut size_t,
+        num_guard_conditions: *mut size_t,
+        num_timers: *mut size_t,
+        num_clients: *mut size_t,
+        num_services: *mut size_t,
+    ) -> RCLActionResult<()> {
+        action_ret_val_to_err(unsafe {
+            self::rcl_action_client_wait_set_get_num_entities(
+                action_client,
+                num_subscriptions,
+                num_guard_conditions,
+                num_timers,
+                num_clients,
+                num_services,
+            )
+        })
+    }
+
+    pub fn rcl_action_get_zero_initialized_server() -> rcl_action_server_t {
+        unsafe { self::rcl_action_get_zero_initialized_server() }
+    }
+
+    pub fn rcl_action_get_zero_initialized_goal_status_array() -> rcl_action_goal_status_array_t {
+        unsafe { self::rcl_action_get_zero_initialized_goal_status_array() }
+    }
+
+    pub fn rcl_action_get_zero_initialized_goal_info() -> rcl_action_goal_info_t {
+        unsafe { self::rcl_action_get_zero_initialized_goal_info() }
+    }
+
+    pub fn rcl_action_server_get_default_options() -> rcl_action_server_options_t {
+        unsafe { self::rcl_action_server_get_default_options() }
+    }
+
+    pub fn rcl_action_get_zero_initialized_cancel_request() -> rcl_action_cancel_request_t {
+        unsafe { self::rcl_action_get_zero_initialized_cancel_request() }
+    }
+
+    pub fn rcl_action_get_zero_initialized_cancel_response() -> rcl_action_cancel_response_t {
+        unsafe { self::rcl_action_get_zero_initialized_cancel_response() }
     }
 }
