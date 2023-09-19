@@ -1283,11 +1283,14 @@ impl<'a> Future for AsyncWait<'a> {
 impl<'a> Drop for AsyncWait<'a> {
     fn drop(&mut self) {
         let mut guard = SELECTOR.lock();
-        guard
+        if guard
             .send_command(
                 &self.param_server.node.context,
                 Command::RemoveConditionVar(self.param_server.cond_callback.clone()),
             )
-            .unwrap();
+            .is_err()
+        {
+            return;
+        }
     }
 }
