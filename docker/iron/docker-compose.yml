@@ -1,13 +1,13 @@
 version: '3'
 services:
-  safe_drive:
+  safe_drive_iron:
     build:
       context: .
     stdin_open: true
     tty: true
     working_dir: "/safe_drive"
     volumes:
-      - "../:/safe_drive"
+      - "../../:/safe_drive"
     cap_add:
       - SYS_PTRACE
       - SYS_ADMIN

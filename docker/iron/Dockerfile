@@ -30,7 +30,7 @@ RUN . /root/.cargo/env && \
 RUN pip install git+https://github.com/tier4/colcon-cargo.git && \
     pip install git+https://github.com/colcon/colcon-ros-cargo.git
 
-COPY zshenv /root/.zshenv
-COPY zshrc /root/.zshrc
+COPY ../zshenv /root/.zshenv
+COPY ../zshrc /root/.zshrc
 
 ENTRYPOINT ["zsh"]
