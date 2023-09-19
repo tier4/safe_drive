@@ -535,6 +535,9 @@ impl<T> std::ops::DerefMut for TakenMsg<T> {
     }
 }
 
+unsafe impl<T> Sync for TakenMsg<T> {}
+unsafe impl<T> Send for TakenMsg<T> {}
+
 fn take<T>(subscription: &Arc<RCLSubscription>) -> RCLResult<TakenMsg<T>> {
     if rcl::MTSafeFn::rcl_subscription_can_loan_messages(subscription.subscription.as_ref()) {
         take_loaned_message(subscription.clone()).map(TakenMsg::Loaned)
