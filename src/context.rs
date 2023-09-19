@@ -77,6 +77,8 @@ impl Context {
                 options.as_ptr(),
                 &mut context,
             )?;
+
+            guard.rcl_logging_configure(&context.global_arguments, &crate::get_allocator())?;
         }
 
         let context = Arc::new(Context { context });

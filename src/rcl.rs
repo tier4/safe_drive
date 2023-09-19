@@ -736,6 +736,14 @@ impl MTUnsafeFn {
     pub fn rcutils_reset_error(&self) {
         unsafe { self::rcutils_reset_error() };
     }
+
+    pub fn rcl_logging_configure(
+        &self,
+        global_args: *const rcl_arguments_t,
+        allocator: *const rcl_allocator_t,
+    ) -> RCLResult<()> {
+        ret_val_to_err(unsafe { self::rcl_logging_configure(global_args, allocator) })
+    }
 }
 
 impl MTUnsafeLogFn {
