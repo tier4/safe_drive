@@ -744,6 +744,10 @@ impl MTUnsafeFn {
     ) -> RCLResult<()> {
         ret_val_to_err(unsafe { self::rcl_logging_configure(global_args, allocator) })
     }
+
+    pub fn rcl_logging_fini(&self) -> RCLResult<()> {
+        ret_val_to_err(unsafe { self::rcl_logging_fini() })
+    }
 }
 
 impl MTUnsafeLogFn {

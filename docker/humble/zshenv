@@ -1,0 +1,3 @@
+. "$HOME/.cargo/env"
+source /opt/ros/humble/setup.zsh
+source /opt/ros/humble/share/ros2cli/environment/ros2-argcomplete.zsh

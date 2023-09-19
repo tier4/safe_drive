@@ -1,13 +1,13 @@
-mod key_value;
-mod field_type;
-mod type_description;
-mod individual_type_description;
 mod field;
+mod field_type;
+mod individual_type_description;
+mod key_value;
+mod type_description;
 mod type_source;
 
-pub use key_value::*;
-pub use field_type::*;
-pub use type_description::*;
-pub use individual_type_description::*;
 pub use field::*;
+pub use field_type::*;
+pub use individual_type_description::*;
+pub use key_value::*;
+pub use type_description::*;
 pub use type_source::*;

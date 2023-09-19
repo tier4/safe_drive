@@ -1,7 +1,14 @@
-use safe_drive::{msg::{ActionMsg, ActionGoal, ActionResult, GetUUID, GoalResponse, ResultResponse, TypeSupport, builtin_interfaces::UnsafeTime, unique_identifier_msgs}, rcl};
+use safe_drive::{
+    msg::{
+        builtin_interfaces::UnsafeTime, unique_identifier_msgs, ActionGoal, ActionMsg,
+        ActionResult, GetUUID, GoalResponse, ResultResponse, TypeSupport,
+    },
+    rcl,
+};
 
 extern "C" {
-    fn rosidl_typesupport_c__get_action_type_support_handle__example_msg__action__MyAction() -> *const rcl::rosidl_action_type_support_t;
+    fn rosidl_typesupport_c__get_action_type_support_handle__example_msg__action__MyAction(
+    ) -> *const rcl::rosidl_action_type_support_t;
 }
 
 #[derive(Debug)]
@@ -91,11 +98,21 @@ pub struct MyAction_Goal {
 extern "C" {
     fn example_msg__action__MyAction_Goal__init(msg: *mut MyAction_Goal) -> bool;
     fn example_msg__action__MyAction_Goal__fini(msg: *mut MyAction_Goal);
-    fn example_msg__action__MyAction_Goal__are_equal(lhs: *const MyAction_Goal, rhs: *const MyAction_Goal) -> bool;
-    fn example_msg__action__MyAction_Goal__Sequence__init(msg: *mut MyAction_GoalSeqRaw, size: usize) -> bool;
+    fn example_msg__action__MyAction_Goal__are_equal(
+        lhs: *const MyAction_Goal,
+        rhs: *const MyAction_Goal,
+    ) -> bool;
+    fn example_msg__action__MyAction_Goal__Sequence__init(
+        msg: *mut MyAction_GoalSeqRaw,
+        size: usize,
+    ) -> bool;
     fn example_msg__action__MyAction_Goal__Sequence__fini(msg: *mut MyAction_GoalSeqRaw);
-    fn example_msg__action__MyAction_Goal__Sequence__are_equal(lhs: *const MyAction_GoalSeqRaw, rhs: *const MyAction_GoalSeqRaw) -> bool;
-    fn rosidl_typesupport_c__get_message_type_support_handle__example_msg__action__MyAction_Goal() -> *const rcl::rosidl_message_type_support_t;
+    fn example_msg__action__MyAction_Goal__Sequence__are_equal(
+        lhs: *const MyAction_GoalSeqRaw,
+        rhs: *const MyAction_GoalSeqRaw,
+    ) -> bool;
+    fn rosidl_typesupport_c__get_message_type_support_handle__example_msg__action__MyAction_Goal(
+    ) -> *const rcl::rosidl_message_type_support_t;
 }
 
 impl TypeSupport for MyAction_Goal {
@@ -108,17 +125,23 @@ impl TypeSupport for MyAction_Goal {
 
 impl PartialEq for MyAction_Goal {
     fn eq(&self, other: &Self) -> bool {
-        unsafe {
-            example_msg__action__MyAction_Goal__are_equal(self, other)
-        }
+        unsafe { example_msg__action__MyAction_Goal__are_equal(self, other) }
     }
 }
 
 impl<const N: usize> PartialEq for MyAction_GoalSeq<N> {
     fn eq(&self, other: &Self) -> bool {
         unsafe {
-            let msg1 = MyAction_GoalSeqRaw{ data: self.data, size: self.size, capacity: self.capacity };
-            let msg2 = MyAction_GoalSeqRaw{ data: other.data, size: other.size, capacity: other.capacity };
+            let msg1 = MyAction_GoalSeqRaw {
+                data: self.data,
+                size: self.size,
+                capacity: self.capacity,
+            };
+            let msg2 = MyAction_GoalSeqRaw {
+                data: other.data,
+                size: other.size,
+                capacity: other.capacity,
+            };
             example_msg__action__MyAction_Goal__Sequence__are_equal(&msg1, &msg2)
         }
     }
@@ -171,7 +194,11 @@ impl<const N: usize> MyAction_GoalSeq<N> {
         }
         let mut msg: MyAction_GoalSeqRaw = unsafe { std::mem::MaybeUninit::zeroed().assume_init() };
         if unsafe { example_msg__action__MyAction_Goal__Sequence__init(&mut msg, size) } {
-            Some(Self { data: msg.data, size: msg.size, capacity: msg.capacity })
+            Some(Self {
+                data: msg.data,
+                size: msg.size,
+                capacity: msg.capacity,
+            })
         } else {
             None
         }
@@ -179,7 +206,11 @@ impl<const N: usize> MyAction_GoalSeq<N> {
 
     pub fn null() -> Self {
         let msg: MyAction_GoalSeqRaw = unsafe { std::mem::MaybeUninit::zeroed().assume_init() };
-        Self { data: msg.data, size: msg.size, capacity: msg.capacity }
+        Self {
+            data: msg.data,
+            size: msg.size,
+            capacity: msg.capacity,
+        }
     }
 
     pub fn as_slice(&self) -> &[MyAction_Goal] {
@@ -219,7 +250,11 @@ impl<const N: usize> MyAction_GoalSeq<N> {
 
 impl<const N: usize> Drop for MyAction_GoalSeq<N> {
     fn drop(&mut self) {
-        let mut msg = MyAction_GoalSeqRaw{ data: self.data, size: self.size, capacity: self.capacity };
+        let mut msg = MyAction_GoalSeqRaw {
+            data: self.data,
+            size: self.size,
+            capacity: self.capacity,
+        };
         unsafe { example_msg__action__MyAction_Goal__Sequence__fini(&mut msg) };
     }
 }
@@ -228,13 +263,27 @@ unsafe impl<const N: usize> Send for MyAction_GoalSeq<N> {}
 unsafe impl<const N: usize> Sync for MyAction_GoalSeq<N> {}
 
 extern "C" {
-    fn example_msg__action__MyAction_SendGoal_Request__init(msg: *mut MyAction_SendGoal_Request) -> bool;
+    fn example_msg__action__MyAction_SendGoal_Request__init(
+        msg: *mut MyAction_SendGoal_Request,
+    ) -> bool;
     fn example_msg__action__MyAction_SendGoal_Request__fini(msg: *mut MyAction_SendGoal_Request);
-    fn example_msg__action__MyAction_SendGoal_Request__are_equal(lhs: *const MyAction_SendGoal_Request, rhs: *const MyAction_SendGoal_Request) -> bool;
-    fn example_msg__action__MyAction_SendGoal_Request__Sequence__init(msg: *mut MyAction_SendGoal_RequestSeqRaw, size: usize) -> bool;
-    fn example_msg__action__MyAction_SendGoal_Request__Sequence__fini(msg: *mut MyAction_SendGoal_RequestSeqRaw);
-    fn example_msg__action__MyAction_SendGoal_Request__Sequence__are_equal(lhs: *const MyAction_SendGoal_RequestSeqRaw, rhs: *const MyAction_SendGoal_RequestSeqRaw) -> bool;
-    fn rosidl_typesupport_c__get_message_type_support_handle__example_msg__action__MyAction_SendGoal_Request() -> *const rcl::rosidl_message_type_support_t;
+    fn example_msg__action__MyAction_SendGoal_Request__are_equal(
+        lhs: *const MyAction_SendGoal_Request,
+        rhs: *const MyAction_SendGoal_Request,
+    ) -> bool;
+    fn example_msg__action__MyAction_SendGoal_Request__Sequence__init(
+        msg: *mut MyAction_SendGoal_RequestSeqRaw,
+        size: usize,
+    ) -> bool;
+    fn example_msg__action__MyAction_SendGoal_Request__Sequence__fini(
+        msg: *mut MyAction_SendGoal_RequestSeqRaw,
+    );
+    fn example_msg__action__MyAction_SendGoal_Request__Sequence__are_equal(
+        lhs: *const MyAction_SendGoal_RequestSeqRaw,
+        rhs: *const MyAction_SendGoal_RequestSeqRaw,
+    ) -> bool;
+    fn rosidl_typesupport_c__get_message_type_support_handle__example_msg__action__MyAction_SendGoal_Request(
+    ) -> *const rcl::rosidl_message_type_support_t;
 }
 
 impl TypeSupport for MyAction_SendGoal_Request {
@@ -247,17 +296,23 @@ impl TypeSupport for MyAction_SendGoal_Request {
 
 impl PartialEq for MyAction_SendGoal_Request {
     fn eq(&self, other: &Self) -> bool {
-        unsafe {
-            example_msg__action__MyAction_SendGoal_Request__are_equal(self, other)
-        }
+        unsafe { example_msg__action__MyAction_SendGoal_Request__are_equal(self, other) }
     }
 }
 
 impl<const N: usize> PartialEq for MyAction_SendGoal_RequestSeq<N> {
     fn eq(&self, other: &Self) -> bool {
         unsafe {
-            let msg1 = MyAction_SendGoal_RequestSeqRaw{ data: self.data, size: self.size, capacity: self.capacity };
-            let msg2 = MyAction_SendGoal_RequestSeqRaw{ data: other.data, size: other.size, capacity: other.capacity };
+            let msg1 = MyAction_SendGoal_RequestSeqRaw {
+                data: self.data,
+                size: self.size,
+                capacity: self.capacity,
+            };
+            let msg2 = MyAction_SendGoal_RequestSeqRaw {
+                data: other.data,
+                size: other.size,
+                capacity: other.capacity,
+            };
             example_msg__action__MyAction_SendGoal_Request__Sequence__are_equal(&msg1, &msg2)
         }
     }
@@ -308,17 +363,28 @@ impl<const N: usize> MyAction_SendGoal_RequestSeq<N> {
             // the size exceeds in the maximum number
             return None;
         }
-        let mut msg: MyAction_SendGoal_RequestSeqRaw = unsafe { std::mem::MaybeUninit::zeroed().assume_init() };
-        if unsafe { example_msg__action__MyAction_SendGoal_Request__Sequence__init(&mut msg, size) } {
-            Some(Self { data: msg.data, size: msg.size, capacity: msg.capacity })
+        let mut msg: MyAction_SendGoal_RequestSeqRaw =
+            unsafe { std::mem::MaybeUninit::zeroed().assume_init() };
+        if unsafe { example_msg__action__MyAction_SendGoal_Request__Sequence__init(&mut msg, size) }
+        {
+            Some(Self {
+                data: msg.data,
+                size: msg.size,
+                capacity: msg.capacity,
+            })
         } else {
             None
         }
     }
 
     pub fn null() -> Self {
-        let msg: MyAction_SendGoal_RequestSeqRaw = unsafe { std::mem::MaybeUninit::zeroed().assume_init() };
-        Self { data: msg.data, size: msg.size, capacity: msg.capacity }
+        let msg: MyAction_SendGoal_RequestSeqRaw =
+            unsafe { std::mem::MaybeUninit::zeroed().assume_init() };
+        Self {
+            data: msg.data,
+            size: msg.size,
+            capacity: msg.capacity,
+        }
     }
 
     pub fn as_slice(&self) -> &[MyAction_SendGoal_Request] {
@@ -358,7 +424,11 @@ impl<const N: usize> MyAction_SendGoal_RequestSeq<N> {
 
 impl<const N: usize> Drop for MyAction_SendGoal_RequestSeq<N> {
     fn drop(&mut self) {
-        let mut msg = MyAction_SendGoal_RequestSeqRaw{ data: self.data, size: self.size, capacity: self.capacity };
+        let mut msg = MyAction_SendGoal_RequestSeqRaw {
+            data: self.data,
+            size: self.size,
+            capacity: self.capacity,
+        };
         unsafe { example_msg__action__MyAction_SendGoal_Request__Sequence__fini(&mut msg) };
     }
 }
@@ -367,13 +437,27 @@ unsafe impl<const N: usize> Send for MyAction_SendGoal_RequestSeq<N> {}
 unsafe impl<const N: usize> Sync for MyAction_SendGoal_RequestSeq<N> {}
 
 extern "C" {
-    fn example_msg__action__MyAction_SendGoal_Response__init(msg: *mut MyAction_SendGoal_Response) -> bool;
+    fn example_msg__action__MyAction_SendGoal_Response__init(
+        msg: *mut MyAction_SendGoal_Response,
+    ) -> bool;
     fn example_msg__action__MyAction_SendGoal_Response__fini(msg: *mut MyAction_SendGoal_Response);
-    fn example_msg__action__MyAction_SendGoal_Response__are_equal(lhs: *const MyAction_SendGoal_Response, rhs: *const MyAction_SendGoal_Response) -> bool;
-    fn example_msg__action__MyAction_SendGoal_Response__Sequence__init(msg: *mut MyAction_SendGoal_ResponseSeqRaw, size: usize) -> bool;
-    fn example_msg__action__MyAction_SendGoal_Response__Sequence__fini(msg: *mut MyAction_SendGoal_ResponseSeqRaw);
-    fn example_msg__action__MyAction_SendGoal_Response__Sequence__are_equal(lhs: *const MyAction_SendGoal_ResponseSeqRaw, rhs: *const MyAction_SendGoal_ResponseSeqRaw) -> bool;
-    fn rosidl_typesupport_c__get_message_type_support_handle__example_msg__action__MyAction_SendGoal_Response() -> *const rcl::rosidl_message_type_support_t;
+    fn example_msg__action__MyAction_SendGoal_Response__are_equal(
+        lhs: *const MyAction_SendGoal_Response,
+        rhs: *const MyAction_SendGoal_Response,
+    ) -> bool;
+    fn example_msg__action__MyAction_SendGoal_Response__Sequence__init(
+        msg: *mut MyAction_SendGoal_ResponseSeqRaw,
+        size: usize,
+    ) -> bool;
+    fn example_msg__action__MyAction_SendGoal_Response__Sequence__fini(
+        msg: *mut MyAction_SendGoal_ResponseSeqRaw,
+    );
+    fn example_msg__action__MyAction_SendGoal_Response__Sequence__are_equal(
+        lhs: *const MyAction_SendGoal_ResponseSeqRaw,
+        rhs: *const MyAction_SendGoal_ResponseSeqRaw,
+    ) -> bool;
+    fn rosidl_typesupport_c__get_message_type_support_handle__example_msg__action__MyAction_SendGoal_Response(
+    ) -> *const rcl::rosidl_message_type_support_t;
 }
 
 impl TypeSupport for MyAction_SendGoal_Response {
@@ -386,17 +470,23 @@ impl TypeSupport for MyAction_SendGoal_Response {
 
 impl PartialEq for MyAction_SendGoal_Response {
     fn eq(&self, other: &Self) -> bool {
-        unsafe {
-            example_msg__action__MyAction_SendGoal_Response__are_equal(self, other)
-        }
+        unsafe { example_msg__action__MyAction_SendGoal_Response__are_equal(self, other) }
     }
 }
 
 impl<const N: usize> PartialEq for MyAction_SendGoal_ResponseSeq<N> {
     fn eq(&self, other: &Self) -> bool {
         unsafe {
-            let msg1 = MyAction_SendGoal_ResponseSeqRaw{ data: self.data, size: self.size, capacity: self.capacity };
-            let msg2 = MyAction_SendGoal_ResponseSeqRaw{ data: other.data, size: other.size, capacity: other.capacity };
+            let msg1 = MyAction_SendGoal_ResponseSeqRaw {
+                data: self.data,
+                size: self.size,
+                capacity: self.capacity,
+            };
+            let msg2 = MyAction_SendGoal_ResponseSeqRaw {
+                data: other.data,
+                size: other.size,
+                capacity: other.capacity,
+            };
             example_msg__action__MyAction_SendGoal_Response__Sequence__are_equal(&msg1, &msg2)
         }
     }
@@ -447,17 +537,29 @@ impl<const N: usize> MyAction_SendGoal_ResponseSeq<N> {
             // the size exceeds in the maximum number
             return None;
         }
-        let mut msg: MyAction_SendGoal_ResponseSeqRaw = unsafe { std::mem::MaybeUninit::zeroed().assume_init() };
-        if unsafe { example_msg__action__MyAction_SendGoal_Response__Sequence__init(&mut msg, size) } {
-            Some(Self { data: msg.data, size: msg.size, capacity: msg.capacity })
+        let mut msg: MyAction_SendGoal_ResponseSeqRaw =
+            unsafe { std::mem::MaybeUninit::zeroed().assume_init() };
+        if unsafe {
+            example_msg__action__MyAction_SendGoal_Response__Sequence__init(&mut msg, size)
+        } {
+            Some(Self {
+                data: msg.data,
+                size: msg.size,
+                capacity: msg.capacity,
+            })
         } else {
             None
         }
     }
 
     pub fn null() -> Self {
-        let msg: MyAction_SendGoal_ResponseSeqRaw = unsafe { std::mem::MaybeUninit::zeroed().assume_init() };
-        Self { data: msg.data, size: msg.size, capacity: msg.capacity }
+        let msg: MyAction_SendGoal_ResponseSeqRaw =
+            unsafe { std::mem::MaybeUninit::zeroed().assume_init() };
+        Self {
+            data: msg.data,
+            size: msg.size,
+            capacity: msg.capacity,
+        }
     }
 
     pub fn as_slice(&self) -> &[MyAction_SendGoal_Response] {
@@ -497,7 +599,11 @@ impl<const N: usize> MyAction_SendGoal_ResponseSeq<N> {
 
 impl<const N: usize> Drop for MyAction_SendGoal_ResponseSeq<N> {
     fn drop(&mut self) {
-        let mut msg = MyAction_SendGoal_ResponseSeqRaw{ data: self.data, size: self.size, capacity: self.capacity };
+        let mut msg = MyAction_SendGoal_ResponseSeqRaw {
+            data: self.data,
+            size: self.size,
+            capacity: self.capacity,
+        };
         unsafe { example_msg__action__MyAction_SendGoal_Response__Sequence__fini(&mut msg) };
     }
 }
@@ -506,7 +612,8 @@ unsafe impl<const N: usize> Send for MyAction_SendGoal_ResponseSeq<N> {}
 unsafe impl<const N: usize> Sync for MyAction_SendGoal_ResponseSeq<N> {}
 
 extern "C" {
-    fn rosidl_typesupport_c__get_service_type_support_handle__example_msg__action__MyAction_SendGoal() -> *const rcl::rosidl_service_type_support_t;
+    fn rosidl_typesupport_c__get_service_type_support_handle__example_msg__action__MyAction_SendGoal(
+    ) -> *const rcl::rosidl_service_type_support_t;
 }
 
 #[derive(Debug)]
@@ -545,7 +652,6 @@ impl GoalResponse for MyAction_SendGoal_Response {
     }
 }
 
-
 #[repr(C)]
 #[derive(Debug)]
 pub struct MyAction_Result {
@@ -555,11 +661,21 @@ pub struct MyAction_Result {
 extern "C" {
     fn example_msg__action__MyAction_Result__init(msg: *mut MyAction_Result) -> bool;
     fn example_msg__action__MyAction_Result__fini(msg: *mut MyAction_Result);
-    fn example_msg__action__MyAction_Result__are_equal(lhs: *const MyAction_Result, rhs: *const MyAction_Result) -> bool;
-    fn example_msg__action__MyAction_Result__Sequence__init(msg: *mut MyAction_ResultSeqRaw, size: usize) -> bool;
+    fn example_msg__action__MyAction_Result__are_equal(
+        lhs: *const MyAction_Result,
+        rhs: *const MyAction_Result,
+    ) -> bool;
+    fn example_msg__action__MyAction_Result__Sequence__init(
+        msg: *mut MyAction_ResultSeqRaw,
+        size: usize,
+    ) -> bool;
     fn example_msg__action__MyAction_Result__Sequence__fini(msg: *mut MyAction_ResultSeqRaw);
-    fn example_msg__action__MyAction_Result__Sequence__are_equal(lhs: *const MyAction_ResultSeqRaw, rhs: *const MyAction_ResultSeqRaw) -> bool;
-    fn rosidl_typesupport_c__get_message_type_support_handle__example_msg__action__MyAction_Result() -> *const rcl::rosidl_message_type_support_t;
+    fn example_msg__action__MyAction_Result__Sequence__are_equal(
+        lhs: *const MyAction_ResultSeqRaw,
+        rhs: *const MyAction_ResultSeqRaw,
+    ) -> bool;
+    fn rosidl_typesupport_c__get_message_type_support_handle__example_msg__action__MyAction_Result(
+    ) -> *const rcl::rosidl_message_type_support_t;
 }
 
 impl TypeSupport for MyAction_Result {
@@ -572,17 +688,23 @@ impl TypeSupport for MyAction_Result {
 
 impl PartialEq for MyAction_Result {
     fn eq(&self, other: &Self) -> bool {
-        unsafe {
-            example_msg__action__MyAction_Result__are_equal(self, other)
-        }
+        unsafe { example_msg__action__MyAction_Result__are_equal(self, other) }
     }
 }
 
 impl<const N: usize> PartialEq for MyAction_ResultSeq<N> {
     fn eq(&self, other: &Self) -> bool {
         unsafe {
-            let msg1 = MyAction_ResultSeqRaw{ data: self.data, size: self.size, capacity: self.capacity };
-            let msg2 = MyAction_ResultSeqRaw{ data: other.data, size: other.size, capacity: other.capacity };
+            let msg1 = MyAction_ResultSeqRaw {
+                data: self.data,
+                size: self.size,
+                capacity: self.capacity,
+            };
+            let msg2 = MyAction_ResultSeqRaw {
+                data: other.data,
+                size: other.size,
+                capacity: other.capacity,
+            };
             example_msg__action__MyAction_Result__Sequence__are_equal(&msg1, &msg2)
         }
     }
@@ -633,9 +755,14 @@ impl<const N: usize> MyAction_ResultSeq<N> {
             // the size exceeds in the maximum number
             return None;
         }
-        let mut msg: MyAction_ResultSeqRaw = unsafe { std::mem::MaybeUninit::zeroed().assume_init() };
+        let mut msg: MyAction_ResultSeqRaw =
+            unsafe { std::mem::MaybeUninit::zeroed().assume_init() };
         if unsafe { example_msg__action__MyAction_Result__Sequence__init(&mut msg, size) } {
-            Some(Self { data: msg.data, size: msg.size, capacity: msg.capacity })
+            Some(Self {
+                data: msg.data,
+                size: msg.size,
+                capacity: msg.capacity,
+            })
         } else {
             None
         }
@@ -643,7 +770,11 @@ impl<const N: usize> MyAction_ResultSeq<N> {
 
     pub fn null() -> Self {
         let msg: MyAction_ResultSeqRaw = unsafe { std::mem::MaybeUninit::zeroed().assume_init() };
-        Self { data: msg.data, size: msg.size, capacity: msg.capacity }
+        Self {
+            data: msg.data,
+            size: msg.size,
+            capacity: msg.capacity,
+        }
     }
 
     pub fn as_slice(&self) -> &[MyAction_Result] {
@@ -683,7 +814,11 @@ impl<const N: usize> MyAction_ResultSeq<N> {
 
 impl<const N: usize> Drop for MyAction_ResultSeq<N> {
     fn drop(&mut self) {
-        let mut msg = MyAction_ResultSeqRaw{ data: self.data, size: self.size, capacity: self.capacity };
+        let mut msg = MyAction_ResultSeqRaw {
+            data: self.data,
+            size: self.size,
+            capacity: self.capacity,
+        };
         unsafe { example_msg__action__MyAction_Result__Sequence__fini(&mut msg) };
     }
 }
@@ -692,13 +827,27 @@ unsafe impl<const N: usize> Send for MyAction_ResultSeq<N> {}
 unsafe impl<const N: usize> Sync for MyAction_ResultSeq<N> {}
 
 extern "C" {
-    fn example_msg__action__MyAction_GetResult_Request__init(msg: *mut MyAction_GetResult_Request) -> bool;
+    fn example_msg__action__MyAction_GetResult_Request__init(
+        msg: *mut MyAction_GetResult_Request,
+    ) -> bool;
     fn example_msg__action__MyAction_GetResult_Request__fini(msg: *mut MyAction_GetResult_Request);
-    fn example_msg__action__MyAction_GetResult_Request__are_equal(lhs: *const MyAction_GetResult_Request, rhs: *const MyAction_GetResult_Request) -> bool;
-    fn example_msg__action__MyAction_GetResult_Request__Sequence__init(msg: *mut MyAction_GetResult_RequestSeqRaw, size: usize) -> bool;
-    fn example_msg__action__MyAction_GetResult_Request__Sequence__fini(msg: *mut MyAction_GetResult_RequestSeqRaw);
-    fn example_msg__action__MyAction_GetResult_Request__Sequence__are_equal(lhs: *const MyAction_GetResult_RequestSeqRaw, rhs: *const MyAction_GetResult_RequestSeqRaw) -> bool;
-    fn rosidl_typesupport_c__get_message_type_support_handle__example_msg__action__MyAction_GetResult_Request() -> *const rcl::rosidl_message_type_support_t;
+    fn example_msg__action__MyAction_GetResult_Request__are_equal(
+        lhs: *const MyAction_GetResult_Request,
+        rhs: *const MyAction_GetResult_Request,
+    ) -> bool;
+    fn example_msg__action__MyAction_GetResult_Request__Sequence__init(
+        msg: *mut MyAction_GetResult_RequestSeqRaw,
+        size: usize,
+    ) -> bool;
+    fn example_msg__action__MyAction_GetResult_Request__Sequence__fini(
+        msg: *mut MyAction_GetResult_RequestSeqRaw,
+    );
+    fn example_msg__action__MyAction_GetResult_Request__Sequence__are_equal(
+        lhs: *const MyAction_GetResult_RequestSeqRaw,
+        rhs: *const MyAction_GetResult_RequestSeqRaw,
+    ) -> bool;
+    fn rosidl_typesupport_c__get_message_type_support_handle__example_msg__action__MyAction_GetResult_Request(
+    ) -> *const rcl::rosidl_message_type_support_t;
 }
 
 impl TypeSupport for MyAction_GetResult_Request {
@@ -711,17 +860,23 @@ impl TypeSupport for MyAction_GetResult_Request {
 
 impl PartialEq for MyAction_GetResult_Request {
     fn eq(&self, other: &Self) -> bool {
-        unsafe {
-            example_msg__action__MyAction_GetResult_Request__are_equal(self, other)
-        }
+        unsafe { example_msg__action__MyAction_GetResult_Request__are_equal(self, other) }
     }
 }
 
 impl<const N: usize> PartialEq for MyAction_GetResult_RequestSeq<N> {
     fn eq(&self, other: &Self) -> bool {
         unsafe {
-            let msg1 = MyAction_GetResult_RequestSeqRaw{ data: self.data, size: self.size, capacity: self.capacity };
-            let msg2 = MyAction_GetResult_RequestSeqRaw{ data: other.data, size: other.size, capacity: other.capacity };
+            let msg1 = MyAction_GetResult_RequestSeqRaw {
+                data: self.data,
+                size: self.size,
+                capacity: self.capacity,
+            };
+            let msg2 = MyAction_GetResult_RequestSeqRaw {
+                data: other.data,
+                size: other.size,
+                capacity: other.capacity,
+            };
             example_msg__action__MyAction_GetResult_Request__Sequence__are_equal(&msg1, &msg2)
         }
     }
@@ -772,17 +927,29 @@ impl<const N: usize> MyAction_GetResult_RequestSeq<N> {
             // the size exceeds in the maximum number
             return None;
         }
-        let mut msg: MyAction_GetResult_RequestSeqRaw = unsafe { std::mem::MaybeUninit::zeroed().assume_init() };
-        if unsafe { example_msg__action__MyAction_GetResult_Request__Sequence__init(&mut msg, size) } {
-            Some(Self { data: msg.data, size: msg.size, capacity: msg.capacity })
+        let mut msg: MyAction_GetResult_RequestSeqRaw =
+            unsafe { std::mem::MaybeUninit::zeroed().assume_init() };
+        if unsafe {
+            example_msg__action__MyAction_GetResult_Request__Sequence__init(&mut msg, size)
+        } {
+            Some(Self {
+                data: msg.data,
+                size: msg.size,
+                capacity: msg.capacity,
+            })
         } else {
             None
         }
     }
 
     pub fn null() -> Self {
-        let msg: MyAction_GetResult_RequestSeqRaw = unsafe { std::mem::MaybeUninit::zeroed().assume_init() };
-        Self { data: msg.data, size: msg.size, capacity: msg.capacity }
+        let msg: MyAction_GetResult_RequestSeqRaw =
+            unsafe { std::mem::MaybeUninit::zeroed().assume_init() };
+        Self {
+            data: msg.data,
+            size: msg.size,
+            capacity: msg.capacity,
+        }
     }
 
     pub fn as_slice(&self) -> &[MyAction_GetResult_Request] {
@@ -822,7 +989,11 @@ impl<const N: usize> MyAction_GetResult_RequestSeq<N> {
 
 impl<const N: usize> Drop for MyAction_GetResult_RequestSeq<N> {
     fn drop(&mut self) {
-        let mut msg = MyAction_GetResult_RequestSeqRaw{ data: self.data, size: self.size, capacity: self.capacity };
+        let mut msg = MyAction_GetResult_RequestSeqRaw {
+            data: self.data,
+            size: self.size,
+            capacity: self.capacity,
+        };
         unsafe { example_msg__action__MyAction_GetResult_Request__Sequence__fini(&mut msg) };
     }
 }
@@ -831,13 +1002,29 @@ unsafe impl<const N: usize> Send for MyAction_GetResult_RequestSeq<N> {}
 unsafe impl<const N: usize> Sync for MyAction_GetResult_RequestSeq<N> {}
 
 extern "C" {
-    fn example_msg__action__MyAction_GetResult_Response__init(msg: *mut MyAction_GetResult_Response) -> bool;
-    fn example_msg__action__MyAction_GetResult_Response__fini(msg: *mut MyAction_GetResult_Response);
-    fn example_msg__action__MyAction_GetResult_Response__are_equal(lhs: *const MyAction_GetResult_Response, rhs: *const MyAction_GetResult_Response) -> bool;
-    fn example_msg__action__MyAction_GetResult_Response__Sequence__init(msg: *mut MyAction_GetResult_ResponseSeqRaw, size: usize) -> bool;
-    fn example_msg__action__MyAction_GetResult_Response__Sequence__fini(msg: *mut MyAction_GetResult_ResponseSeqRaw);
-    fn example_msg__action__MyAction_GetResult_Response__Sequence__are_equal(lhs: *const MyAction_GetResult_ResponseSeqRaw, rhs: *const MyAction_GetResult_ResponseSeqRaw) -> bool;
-    fn rosidl_typesupport_c__get_message_type_support_handle__example_msg__action__MyAction_GetResult_Response() -> *const rcl::rosidl_message_type_support_t;
+    fn example_msg__action__MyAction_GetResult_Response__init(
+        msg: *mut MyAction_GetResult_Response,
+    ) -> bool;
+    fn example_msg__action__MyAction_GetResult_Response__fini(
+        msg: *mut MyAction_GetResult_Response,
+    );
+    fn example_msg__action__MyAction_GetResult_Response__are_equal(
+        lhs: *const MyAction_GetResult_Response,
+        rhs: *const MyAction_GetResult_Response,
+    ) -> bool;
+    fn example_msg__action__MyAction_GetResult_Response__Sequence__init(
+        msg: *mut MyAction_GetResult_ResponseSeqRaw,
+        size: usize,
+    ) -> bool;
+    fn example_msg__action__MyAction_GetResult_Response__Sequence__fini(
+        msg: *mut MyAction_GetResult_ResponseSeqRaw,
+    );
+    fn example_msg__action__MyAction_GetResult_Response__Sequence__are_equal(
+        lhs: *const MyAction_GetResult_ResponseSeqRaw,
+        rhs: *const MyAction_GetResult_ResponseSeqRaw,
+    ) -> bool;
+    fn rosidl_typesupport_c__get_message_type_support_handle__example_msg__action__MyAction_GetResult_Response(
+    ) -> *const rcl::rosidl_message_type_support_t;
 }
 
 impl TypeSupport for MyAction_GetResult_Response {
@@ -850,17 +1037,23 @@ impl TypeSupport for MyAction_GetResult_Response {
 
 impl PartialEq for MyAction_GetResult_Response {
     fn eq(&self, other: &Self) -> bool {
-        unsafe {
-            example_msg__action__MyAction_GetResult_Response__are_equal(self, other)
-        }
+        unsafe { example_msg__action__MyAction_GetResult_Response__are_equal(self, other) }
     }
 }
 
 impl<const N: usize> PartialEq for MyAction_GetResult_ResponseSeq<N> {
     fn eq(&self, other: &Self) -> bool {
         unsafe {
-            let msg1 = MyAction_GetResult_ResponseSeqRaw{ data: self.data, size: self.size, capacity: self.capacity };
-            let msg2 = MyAction_GetResult_ResponseSeqRaw{ data: other.data, size: other.size, capacity: other.capacity };
+            let msg1 = MyAction_GetResult_ResponseSeqRaw {
+                data: self.data,
+                size: self.size,
+                capacity: self.capacity,
+            };
+            let msg2 = MyAction_GetResult_ResponseSeqRaw {
+                data: other.data,
+                size: other.size,
+                capacity: other.capacity,
+            };
             example_msg__action__MyAction_GetResult_Response__Sequence__are_equal(&msg1, &msg2)
         }
     }
@@ -911,17 +1104,29 @@ impl<const N: usize> MyAction_GetResult_ResponseSeq<N> {
             // the size exceeds in the maximum number
             return None;
         }
-        let mut msg: MyAction_GetResult_ResponseSeqRaw = unsafe { std::mem::MaybeUninit::zeroed().assume_init() };
-        if unsafe { example_msg__action__MyAction_GetResult_Response__Sequence__init(&mut msg, size) } {
-            Some(Self { data: msg.data, size: msg.size, capacity: msg.capacity })
+        let mut msg: MyAction_GetResult_ResponseSeqRaw =
+            unsafe { std::mem::MaybeUninit::zeroed().assume_init() };
+        if unsafe {
+            example_msg__action__MyAction_GetResult_Response__Sequence__init(&mut msg, size)
+        } {
+            Some(Self {
+                data: msg.data,
+                size: msg.size,
+                capacity: msg.capacity,
+            })
         } else {
             None
         }
     }
 
     pub fn null() -> Self {
-        let msg: MyAction_GetResult_ResponseSeqRaw = unsafe { std::mem::MaybeUninit::zeroed().assume_init() };
-        Self { data: msg.data, size: msg.size, capacity: msg.capacity }
+        let msg: MyAction_GetResult_ResponseSeqRaw =
+            unsafe { std::mem::MaybeUninit::zeroed().assume_init() };
+        Self {
+            data: msg.data,
+            size: msg.size,
+            capacity: msg.capacity,
+        }
     }
 
     pub fn as_slice(&self) -> &[MyAction_GetResult_Response] {
@@ -961,7 +1166,11 @@ impl<const N: usize> MyAction_GetResult_ResponseSeq<N> {
 
 impl<const N: usize> Drop for MyAction_GetResult_ResponseSeq<N> {
     fn drop(&mut self) {
-        let mut msg = MyAction_GetResult_ResponseSeqRaw{ data: self.data, size: self.size, capacity: self.capacity };
+        let mut msg = MyAction_GetResult_ResponseSeqRaw {
+            data: self.data,
+            size: self.size,
+            capacity: self.capacity,
+        };
         unsafe { example_msg__action__MyAction_GetResult_Response__Sequence__fini(&mut msg) };
     }
 }
@@ -970,7 +1179,8 @@ unsafe impl<const N: usize> Send for MyAction_GetResult_ResponseSeq<N> {}
 unsafe impl<const N: usize> Sync for MyAction_GetResult_ResponseSeq<N> {}
 
 extern "C" {
-    fn rosidl_typesupport_c__get_service_type_support_handle__example_msg__action__MyAction_GetResult() -> *const rcl::rosidl_service_type_support_t;
+    fn rosidl_typesupport_c__get_service_type_support_handle__example_msg__action__MyAction_GetResult(
+    ) -> *const rcl::rosidl_service_type_support_t;
 }
 
 #[derive(Debug)]
@@ -998,7 +1208,6 @@ impl ResultResponse for MyAction_GetResult_Response {
     }
 }
 
-
 #[repr(C)]
 #[derive(Debug)]
 pub struct MyAction_Feedback {
@@ -1008,11 +1217,21 @@ pub struct MyAction_Feedback {
 extern "C" {
     fn example_msg__action__MyAction_Feedback__init(msg: *mut MyAction_Feedback) -> bool;
     fn example_msg__action__MyAction_Feedback__fini(msg: *mut MyAction_Feedback);
-    fn example_msg__action__MyAction_Feedback__are_equal(lhs: *const MyAction_Feedback, rhs: *const MyAction_Feedback) -> bool;
-    fn example_msg__action__MyAction_Feedback__Sequence__init(msg: *mut MyAction_FeedbackSeqRaw, size: usize) -> bool;
+    fn example_msg__action__MyAction_Feedback__are_equal(
+        lhs: *const MyAction_Feedback,
+        rhs: *const MyAction_Feedback,
+    ) -> bool;
+    fn example_msg__action__MyAction_Feedback__Sequence__init(
+        msg: *mut MyAction_FeedbackSeqRaw,
+        size: usize,
+    ) -> bool;
     fn example_msg__action__MyAction_Feedback__Sequence__fini(msg: *mut MyAction_FeedbackSeqRaw);
-    fn example_msg__action__MyAction_Feedback__Sequence__are_equal(lhs: *const MyAction_FeedbackSeqRaw, rhs: *const MyAction_FeedbackSeqRaw) -> bool;
-    fn rosidl_typesupport_c__get_message_type_support_handle__example_msg__action__MyAction_Feedback() -> *const rcl::rosidl_message_type_support_t;
+    fn example_msg__action__MyAction_Feedback__Sequence__are_equal(
+        lhs: *const MyAction_FeedbackSeqRaw,
+        rhs: *const MyAction_FeedbackSeqRaw,
+    ) -> bool;
+    fn rosidl_typesupport_c__get_message_type_support_handle__example_msg__action__MyAction_Feedback(
+    ) -> *const rcl::rosidl_message_type_support_t;
 }
 
 impl TypeSupport for MyAction_Feedback {
@@ -1025,17 +1244,23 @@ impl TypeSupport for MyAction_Feedback {
 
 impl PartialEq for MyAction_Feedback {
     fn eq(&self, other: &Self) -> bool {
-        unsafe {
-            example_msg__action__MyAction_Feedback__are_equal(self, other)
-        }
+        unsafe { example_msg__action__MyAction_Feedback__are_equal(self, other) }
     }
 }
 
 impl<const N: usize> PartialEq for MyAction_FeedbackSeq<N> {
     fn eq(&self, other: &Self) -> bool {
         unsafe {
-            let msg1 = MyAction_FeedbackSeqRaw{ data: self.data, size: self.size, capacity: self.capacity };
-            let msg2 = MyAction_FeedbackSeqRaw{ data: other.data, size: other.size, capacity: other.capacity };
+            let msg1 = MyAction_FeedbackSeqRaw {
+                data: self.data,
+                size: self.size,
+                capacity: self.capacity,
+            };
+            let msg2 = MyAction_FeedbackSeqRaw {
+                data: other.data,
+                size: other.size,
+                capacity: other.capacity,
+            };
             example_msg__action__MyAction_Feedback__Sequence__are_equal(&msg1, &msg2)
         }
     }
@@ -1086,9 +1311,14 @@ impl<const N: usize> MyAction_FeedbackSeq<N> {
             // the size exceeds in the maximum number
             return None;
         }
-        let mut msg: MyAction_FeedbackSeqRaw = unsafe { std::mem::MaybeUninit::zeroed().assume_init() };
+        let mut msg: MyAction_FeedbackSeqRaw =
+            unsafe { std::mem::MaybeUninit::zeroed().assume_init() };
         if unsafe { example_msg__action__MyAction_Feedback__Sequence__init(&mut msg, size) } {
-            Some(Self { data: msg.data, size: msg.size, capacity: msg.capacity })
+            Some(Self {
+                data: msg.data,
+                size: msg.size,
+                capacity: msg.capacity,
+            })
         } else {
             None
         }
@@ -1096,7 +1326,11 @@ impl<const N: usize> MyAction_FeedbackSeq<N> {
 
     pub fn null() -> Self {
         let msg: MyAction_FeedbackSeqRaw = unsafe { std::mem::MaybeUninit::zeroed().assume_init() };
-        Self { data: msg.data, size: msg.size, capacity: msg.capacity }
+        Self {
+            data: msg.data,
+            size: msg.size,
+            capacity: msg.capacity,
+        }
     }
 
     pub fn as_slice(&self) -> &[MyAction_Feedback] {
@@ -1136,7 +1370,11 @@ impl<const N: usize> MyAction_FeedbackSeq<N> {
 
 impl<const N: usize> Drop for MyAction_FeedbackSeq<N> {
     fn drop(&mut self) {
-        let mut msg = MyAction_FeedbackSeqRaw{ data: self.data, size: self.size, capacity: self.capacity };
+        let mut msg = MyAction_FeedbackSeqRaw {
+            data: self.data,
+            size: self.size,
+            capacity: self.capacity,
+        };
         unsafe { example_msg__action__MyAction_Feedback__Sequence__fini(&mut msg) };
     }
 }
@@ -1145,13 +1383,27 @@ unsafe impl<const N: usize> Send for MyAction_FeedbackSeq<N> {}
 unsafe impl<const N: usize> Sync for MyAction_FeedbackSeq<N> {}
 
 extern "C" {
-    fn example_msg__action__MyAction_FeedbackMessage__init(msg: *mut MyAction_FeedbackMessage) -> bool;
+    fn example_msg__action__MyAction_FeedbackMessage__init(
+        msg: *mut MyAction_FeedbackMessage,
+    ) -> bool;
     fn example_msg__action__MyAction_FeedbackMessage__fini(msg: *mut MyAction_FeedbackMessage);
-    fn example_msg__action__MyAction_FeedbackMessage__are_equal(lhs: *const MyAction_FeedbackMessage, rhs: *const MyAction_FeedbackMessage) -> bool;
-    fn example_msg__action__MyAction_FeedbackMessage__Sequence__init(msg: *mut MyAction_FeedbackMessageSeqRaw, size: usize) -> bool;
-    fn example_msg__action__MyAction_FeedbackMessage__Sequence__fini(msg: *mut MyAction_FeedbackMessageSeqRaw);
-    fn example_msg__action__MyAction_FeedbackMessage__Sequence__are_equal(lhs: *const MyAction_FeedbackMessageSeqRaw, rhs: *const MyAction_FeedbackMessageSeqRaw) -> bool;
-    fn rosidl_typesupport_c__get_message_type_support_handle__example_msg__action__MyAction_FeedbackMessage() -> *const rcl::rosidl_message_type_support_t;
+    fn example_msg__action__MyAction_FeedbackMessage__are_equal(
+        lhs: *const MyAction_FeedbackMessage,
+        rhs: *const MyAction_FeedbackMessage,
+    ) -> bool;
+    fn example_msg__action__MyAction_FeedbackMessage__Sequence__init(
+        msg: *mut MyAction_FeedbackMessageSeqRaw,
+        size: usize,
+    ) -> bool;
+    fn example_msg__action__MyAction_FeedbackMessage__Sequence__fini(
+        msg: *mut MyAction_FeedbackMessageSeqRaw,
+    );
+    fn example_msg__action__MyAction_FeedbackMessage__Sequence__are_equal(
+        lhs: *const MyAction_FeedbackMessageSeqRaw,
+        rhs: *const MyAction_FeedbackMessageSeqRaw,
+    ) -> bool;
+    fn rosidl_typesupport_c__get_message_type_support_handle__example_msg__action__MyAction_FeedbackMessage(
+    ) -> *const rcl::rosidl_message_type_support_t;
 }
 
 impl TypeSupport for MyAction_FeedbackMessage {
@@ -1164,17 +1416,23 @@ impl TypeSupport for MyAction_FeedbackMessage {
 
 impl PartialEq for MyAction_FeedbackMessage {
     fn eq(&self, other: &Self) -> bool {
-        unsafe {
-            example_msg__action__MyAction_FeedbackMessage__are_equal(self, other)
-        }
+        unsafe { example_msg__action__MyAction_FeedbackMessage__are_equal(self, other) }
     }
 }
 
 impl<const N: usize> PartialEq for MyAction_FeedbackMessageSeq<N> {
     fn eq(&self, other: &Self) -> bool {
         unsafe {
-            let msg1 = MyAction_FeedbackMessageSeqRaw{ data: self.data, size: self.size, capacity: self.capacity };
-            let msg2 = MyAction_FeedbackMessageSeqRaw{ data: other.data, size: other.size, capacity: other.capacity };
+            let msg1 = MyAction_FeedbackMessageSeqRaw {
+                data: self.data,
+                size: self.size,
+                capacity: self.capacity,
+            };
+            let msg2 = MyAction_FeedbackMessageSeqRaw {
+                data: other.data,
+                size: other.size,
+                capacity: other.capacity,
+            };
             example_msg__action__MyAction_FeedbackMessage__Sequence__are_equal(&msg1, &msg2)
         }
     }
@@ -1225,17 +1483,28 @@ impl<const N: usize> MyAction_FeedbackMessageSeq<N> {
             // the size exceeds in the maximum number
             return None;
         }
-        let mut msg: MyAction_FeedbackMessageSeqRaw = unsafe { std::mem::MaybeUninit::zeroed().assume_init() };
-        if unsafe { example_msg__action__MyAction_FeedbackMessage__Sequence__init(&mut msg, size) } {
-            Some(Self { data: msg.data, size: msg.size, capacity: msg.capacity })
+        let mut msg: MyAction_FeedbackMessageSeqRaw =
+            unsafe { std::mem::MaybeUninit::zeroed().assume_init() };
+        if unsafe { example_msg__action__MyAction_FeedbackMessage__Sequence__init(&mut msg, size) }
+        {
+            Some(Self {
+                data: msg.data,
+                size: msg.size,
+                capacity: msg.capacity,
+            })
         } else {
             None
         }
     }
 
     pub fn null() -> Self {
-        let msg: MyAction_FeedbackMessageSeqRaw = unsafe { std::mem::MaybeUninit::zeroed().assume_init() };
-        Self { data: msg.data, size: msg.size, capacity: msg.capacity }
+        let msg: MyAction_FeedbackMessageSeqRaw =
+            unsafe { std::mem::MaybeUninit::zeroed().assume_init() };
+        Self {
+            data: msg.data,
+            size: msg.size,
+            capacity: msg.capacity,
+        }
     }
 
     pub fn as_slice(&self) -> &[MyAction_FeedbackMessage] {
@@ -1275,7 +1544,11 @@ impl<const N: usize> MyAction_FeedbackMessageSeq<N> {
 
 impl<const N: usize> Drop for MyAction_FeedbackMessageSeq<N> {
     fn drop(&mut self) {
-        let mut msg = MyAction_FeedbackMessageSeqRaw{ data: self.data, size: self.size, capacity: self.capacity };
+        let mut msg = MyAction_FeedbackMessageSeqRaw {
+            data: self.data,
+            size: self.size,
+            capacity: self.capacity,
+        };
         unsafe { example_msg__action__MyAction_FeedbackMessage__Sequence__fini(&mut msg) };
     }
 }

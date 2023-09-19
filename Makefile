@@ -15,8 +15,8 @@ $(SUBDIRS): FORCE
 FORCE:
 
 test:
-	# cargo test test_async_service -- --nocapture --exact
-	cargo test --features custom_alloc -- --nocapture
+	# cargo test test_client_wait -- --nocapture --exact
+	cargo test -- --nocapture
 
 check:
 	cargo check

@@ -35,7 +35,7 @@ We specified and tested as follows.
 
 - [x] Iron
 - [x] Humble
-- [x] Galactic
+- [ ] Galactic (EOL)
 
 ## Supporting DDS
 

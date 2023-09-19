@@ -7,6 +7,7 @@
 #![allow(unused_imports)]
 #![allow(clippy::upper_case_acronyms)]
 
+pub mod action_msg;
 pub mod msgs;
 
 use msgs::example_msg::{msg::Num, srv::AddThreeInts};
@@ -29,7 +30,7 @@ pub fn create_publisher(
 ) -> RCLResult<Publisher<Num>> {
     #[cfg(any(feature = "humble", feature = "galactic"))]
     {
-        drop(disable_loaned_message);
+        let _ = disable_loaned_message;
         node.create_publisher(topic_name, Default::default())
     }
 
@@ -46,7 +47,7 @@ pub fn create_subscriber(
 ) -> RCLResult<Subscriber<Num>> {
     #[cfg(any(feature = "humble", feature = "galactic"))]
     {
-        drop(disable_loaned_message);
+        let _ = disable_loaned_message;
         node.create_subscriber(topic_name, Default::default())
     }
 

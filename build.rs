@@ -99,7 +99,10 @@ fn main() {
 
     println!("cargo:rerun-if-env-changed=ROS_DISTRO");
     let distro_name = std::env::var_os("ROS_DISTRO");
-    match &*distro_name.and_then(|v| v.into_string().ok()).unwrap_or("".to_string()) {
+    match &*distro_name
+        .and_then(|v| v.into_string().ok())
+        .unwrap_or("".to_string())
+    {
         "iron" => {
             println!("cargo:rustc-link-lib=service_msgs__rosidl_typesupport_c");
             println!("cargo:rustc-link-lib=service_msgs__rosidl_generator_c");
@@ -115,6 +118,6 @@ fn main() {
             println!("cargo:rustc-link-lib=service_msgs__rosidl_typesupport_c");
             println!("cargo:rustc-link-lib=service_msgs__rosidl_generator_c");
             println!("cargo:rustc-cfg=feature=\"{default}\"");
-        },
+        }
     }
 }

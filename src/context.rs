@@ -79,6 +79,7 @@ impl Context {
             )?;
 
             guard.rcl_logging_configure(&context.global_arguments, &crate::get_allocator())?;
+            guard.rcl_logging_fini()?;
         }
 
         let context = Arc::new(Context { context });
@@ -212,9 +213,7 @@ unsafe impl Send for Context {}
 #[no_mangle]
 pub(crate) extern "C" fn remove_context() {
     {
-        if SELECTOR.lock().halt().is_err() {
-            return;
-        }
+        let _ = SELECTOR.lock().halt();
     }
     signal_handler::halt();
 

@@ -1,6 +1,6 @@
 pub mod common;
 
-use common::msgs::example_msg::action::*;
+use common::action_msg::action::my_action::*;
 use safe_drive::{
     self,
     action::{
@@ -240,7 +240,7 @@ fn test_action_status() -> Result<(), DynError> {
 
     thread::sleep(Duration::from_millis(100));
 
-    selector.add_action_server(server, goal_handler, move |goal| true);
+    selector.add_action_server(server, goal_handler, move |_goal| true);
     selector.wait()?;
 
     let client = loop {
