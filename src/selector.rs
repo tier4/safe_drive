@@ -1559,27 +1559,32 @@ fn notify_action_client(
                 && handler
                     .feedback_handler
                     .clone()
-                    .is_some_and(|h| (h.borrow_mut())() == CallbackResult::Remove))
+                    .map(|h| (h.borrow_mut())() == CallbackResult::Remove)
+                    .unwrap_or(false))
                 || (is_status_ready
                     && handler
                         .status_handler
                         .clone()
-                        .is_some_and(|h| (h.borrow_mut())() == CallbackResult::Remove))
+                        .map(|h| (h.borrow_mut())() == CallbackResult::Remove)
+                        .unwrap_or(false))
                 || (is_goal_response_ready
                     && handler
                         .goal_handler
                         .clone()
-                        .is_some_and(|h| (h.borrow_mut())() == CallbackResult::Remove))
+                        .map(|h| (h.borrow_mut())() == CallbackResult::Remove)
+                        .unwrap_or(false))
                 || (is_cancel_response_ready
                     && handler
                         .cancel_goal_handler
                         .clone()
-                        .is_some_and(|h| (h.borrow_mut())() == CallbackResult::Remove))
+                        .map(|h| (h.borrow_mut())() == CallbackResult::Remove)
+                        .unwrap_or(false))
                 || (is_result_response_ready
                     && handler
                         .result_handler
                         .clone()
-                        .is_some_and(|h| (h.borrow_mut())() == CallbackResult::Remove))
+                        .map(|h| (h.borrow_mut())() == CallbackResult::Remove)
+                        .unwrap_or(false))
             {
                 Ok(None)
             } else {
