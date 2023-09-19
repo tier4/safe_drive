@@ -210,7 +210,9 @@ unsafe impl Send for Context {}
 #[no_mangle]
 pub(crate) extern "C" fn remove_context() {
     {
-        SELECTOR.lock().halt().unwrap();
+        if SELECTOR.lock().halt().is_err() {
+            return;
+        }
     }
     signal_handler::halt();
 
