@@ -1,10 +1,15 @@
 use parking_lot::Mutex;
-use std::{collections::BTreeMap, ffi::CString, mem::MaybeUninit, sync::Arc, time::Duration};
+use pin_project::{pin_project, pinned_drop};
+use std::future::Future;
+use std::{
+    collections::BTreeMap, ffi::CString, mem::MaybeUninit, pin::Pin, sync::Arc, task::Poll,
+    time::Duration,
+};
 
 use crate::{
     clock::Clock,
     error::{DynError, RCLActionError, RCLActionResult},
-    get_allocator,
+    get_allocator, is_halt,
     msg::{
         builtin_interfaces::UnsafeTime, interfaces::action_msgs::msg::GoalInfo,
         unique_identifier_msgs::msg::UUID, ActionGoal, ActionMsg, GoalResponse,
@@ -15,6 +20,11 @@ use crate::{
         self, action_msgs__msg__GoalInfo, rcl_action_cancel_request_t, rcl_action_goal_handle_t,
         rcl_action_server_t, rmw_request_id_t, unique_identifier_msgs__msg__UUID,
     },
+    selector::{
+        async_selector::{Command, SELECTOR},
+        CallbackResult,
+    },
+    signal_handler::Signaled,
     RecvResult,
 };
 
@@ -80,27 +90,27 @@ impl From<ServerQosOption> for rcl::rcl_action_server_options_t {
     }
 }
 
-pub(crate) struct ActionServerData<T: ActionMsg> {
-    server: rcl::rcl_action_server_t,
+pub(crate) struct ServerData {
+    pub(crate) server: rcl::rcl_action_server_t,
     pub node: Arc<Node>,
-
-    /// Once the server has completed the result for a goal, it is kept here and the result requests are responsed with the result value in this map.
-    pub results: Mutex<BTreeMap<[u8; 16], T::ResultContent>>,
 }
 
-impl<T: ActionMsg> ActionServerData<T> {
+impl ServerData {
     pub(crate) unsafe fn as_ptr_mut(&self) -> *mut rcl::rcl_action_server_t {
         &self.server as *const _ as *mut _
     }
 }
 
-unsafe impl<T: ActionMsg> Sync for ActionServerData<T> {}
-unsafe impl<T: ActionMsg> Send for ActionServerData<T> {}
+unsafe impl Sync for ServerData {}
+unsafe impl Send for ServerData {}
 
 /// An action server.
 pub struct Server<T: ActionMsg> {
-    pub(crate) data: Arc<ActionServerData<T>>,
+    pub(crate) data: Arc<ServerData>,
     clock: Clock,
+
+    /// Once the server has completed the result for a goal, it is kept here and the result requests are responsed with the result value in this map.
+    pub(crate) results: Arc<Mutex<BTreeMap<[u8; 16], T::ResultContent>>>,
 }
 
 impl<T> Server<T>
@@ -134,12 +144,9 @@ where
         }
 
         let server = Self {
-            data: Arc::new(ActionServerData {
-                server,
-                node,
-                results: Mutex::new(BTreeMap::new()),
-            }),
+            data: Arc::new(ServerData { server, node }),
             clock,
+            results: Arc::new(Mutex::new(BTreeMap::new())),
         };
 
         Ok(server)
@@ -262,7 +269,7 @@ where
     }
 
     pub(crate) fn create_goal_handle(&self, goal_id: [u8; 16]) -> GoalHandle<T> {
-        GoalHandle::new(goal_id, self.data.clone())
+        GoalHandle::new(goal_id, self.data.clone(), self.results.clone())
     }
 
     fn get_timestamp(&mut self) -> UnsafeTime {
@@ -273,6 +280,36 @@ where
             nanosec: (now_nanosec - now_sec * 10_i64.pow(9)) as u32,
         }
     }
+
+    pub async fn recv_goal_request(
+        self,
+    ) -> Result<(rmw_request_id_t, SendGoalServiceRequest<T>), DynError> {
+        AsyncGoalReceiver {
+            server: self,
+            is_waiting: false,
+        }
+        .await
+    }
+
+    pub async fn recv_cancel_request(
+        self,
+    ) -> Result<(rmw_request_id_t, rcl_action_cancel_request_t), DynError> {
+        AsyncCancelReceiver {
+            server: self,
+            is_waiting: false,
+        }
+        .await
+    }
+
+    pub async fn recv_result_request(
+        self,
+    ) -> Result<(rmw_request_id_t, GetResultServiceRequest<T>), DynError> {
+        AsyncResultReceiver {
+            server: self,
+            is_waiting: false,
+        }
+        .await
+    }
 }
 
 impl<T: ActionMsg> Drop for Server<T> {
@@ -281,6 +318,201 @@ impl<T: ActionMsg> Drop for Server<T> {
         let _ = guard.rcl_action_server_fini(unsafe { self.data.as_ptr_mut() }, unsafe {
             self.data.node.as_ptr_mut()
         });
+    }
+}
+
+#[pin_project(PinnedDrop)]
+#[must_use]
+pub struct AsyncGoalReceiver<T: ActionMsg> {
+    server: Server<T>,
+    is_waiting: bool,
+}
+
+impl<T: ActionMsg> Future for AsyncGoalReceiver<T> {
+    type Output = Result<(rmw_request_id_t, SendGoalServiceRequest<T>), DynError>;
+
+    fn poll(
+        self: std::pin::Pin<&mut Self>,
+        cx: &mut std::task::Context<'_>,
+    ) -> std::task::Poll<Self::Output> {
+        if is_halt() {
+            return Poll::Ready(Err(Signaled.into()));
+        }
+
+        let this = self.project();
+        *this.is_waiting = false;
+
+        match this.server.try_recv_goal_request() {
+            RecvResult::Ok(result) => Poll::Ready(Ok(result)),
+            RecvResult::RetryLater(_) => {
+                let mut waker = Some(cx.waker().clone());
+                let mut guard = SELECTOR.lock();
+
+                match guard.send_command(
+                    &this.server.data.node.context,
+                    Command::ActionServer {
+                        data: this.server.data.clone(),
+                        goal: Box::new(move || {
+                            let w = waker.take().unwrap();
+                            w.wake();
+                            CallbackResult::Remove
+                        }),
+                        cancel: Box::new(move || CallbackResult::Ok),
+                        result: Box::new(move || CallbackResult::Ok),
+                    },
+                ) {
+                    Ok(_) => {
+                        *this.is_waiting = true;
+                        Poll::Pending
+                    }
+                    Err(e) => Poll::Ready(Err(e)),
+                }
+            }
+            RecvResult::Err(e) => Poll::Ready(Err(e.into())),
+        }
+    }
+}
+
+#[pinned_drop]
+impl<T: ActionMsg> PinnedDrop for AsyncGoalReceiver<T> {
+    fn drop(self: Pin<&mut Self>) {
+        if self.is_waiting {
+            let mut guard = SELECTOR.lock();
+            guard.send_command(
+                &self.server.data.node.context,
+                Command::RemoveActionServer(self.server.data.clone()),
+            );
+        }
+    }
+}
+
+#[pin_project(PinnedDrop)]
+#[must_use]
+pub struct AsyncCancelReceiver<T: ActionMsg> {
+    server: Server<T>,
+    is_waiting: bool,
+}
+
+impl<T: ActionMsg> Future for AsyncCancelReceiver<T> {
+    type Output = Result<(rmw_request_id_t, rcl_action_cancel_request_t), DynError>;
+
+    fn poll(
+        self: std::pin::Pin<&mut Self>,
+        cx: &mut std::task::Context<'_>,
+    ) -> std::task::Poll<Self::Output> {
+        if is_halt() {
+            return Poll::Ready(Err(Signaled.into()));
+        }
+
+        let this = self.project();
+        *this.is_waiting = false;
+
+        match this.server.try_recv_cancel_request() {
+            RecvResult::Ok(result) => Poll::Ready(Ok(result)),
+            RecvResult::RetryLater(_) => {
+                let mut waker = Some(cx.waker().clone());
+                let mut guard = SELECTOR.lock();
+
+                match guard.send_command(
+                    &this.server.data.node.context,
+                    Command::ActionServer {
+                        data: this.server.data.clone(),
+                        goal: Box::new(move || CallbackResult::Ok),
+                        cancel: Box::new(move || {
+                            let w = waker.take().unwrap();
+                            w.wake();
+                            CallbackResult::Remove
+                        }),
+                        result: Box::new(move || CallbackResult::Ok),
+                    },
+                ) {
+                    Ok(_) => {
+                        *this.is_waiting = true;
+                        Poll::Pending
+                    }
+                    Err(e) => Poll::Ready(Err(e)),
+                }
+            }
+            RecvResult::Err(e) => Poll::Ready(Err(e.into())),
+        }
+    }
+}
+
+#[pinned_drop]
+impl<T: ActionMsg> PinnedDrop for AsyncCancelReceiver<T> {
+    fn drop(self: Pin<&mut Self>) {
+        if self.is_waiting {
+            let mut guard = SELECTOR.lock();
+            guard.send_command(
+                &self.server.data.node.context,
+                Command::RemoveActionServer(self.server.data.clone()),
+            );
+        }
+    }
+}
+
+#[pin_project(PinnedDrop)]
+#[must_use]
+pub struct AsyncResultReceiver<T: ActionMsg> {
+    server: Server<T>,
+    is_waiting: bool,
+}
+
+impl<T: ActionMsg> Future for AsyncResultReceiver<T> {
+    type Output = Result<(rmw_request_id_t, GetResultServiceRequest<T>), DynError>;
+
+    fn poll(
+        self: std::pin::Pin<&mut Self>,
+        cx: &mut std::task::Context<'_>,
+    ) -> std::task::Poll<Self::Output> {
+        if is_halt() {
+            return Poll::Ready(Err(Signaled.into()));
+        }
+
+        let this = self.project();
+        *this.is_waiting = false;
+
+        match this.server.try_recv_result_request() {
+            RecvResult::Ok(result) => Poll::Ready(Ok(result)),
+            RecvResult::RetryLater(_) => {
+                let mut waker = Some(cx.waker().clone());
+                let mut guard = SELECTOR.lock();
+
+                match guard.send_command(
+                    &this.server.data.node.context,
+                    Command::ActionServer {
+                        data: this.server.data.clone(),
+                        goal: Box::new(move || CallbackResult::Ok),
+                        cancel: Box::new(move || {
+                            let w = waker.take().unwrap();
+                            w.wake();
+                            CallbackResult::Remove
+                        }),
+                        result: Box::new(move || CallbackResult::Ok),
+                    },
+                ) {
+                    Ok(_) => {
+                        *this.is_waiting = true;
+                        Poll::Pending
+                    }
+                    Err(e) => Poll::Ready(Err(e)),
+                }
+            }
+            RecvResult::Err(e) => Poll::Ready(Err(e.into())),
+        }
+    }
+}
+
+#[pinned_drop]
+impl<T: ActionMsg> PinnedDrop for AsyncResultReceiver<T> {
+    fn drop(self: Pin<&mut Self>) {
+        if self.is_waiting {
+            let mut guard = SELECTOR.lock();
+            guard.send_command(
+                &self.server.data.node.context,
+                Command::RemoveActionServer(self.server.data.clone()),
+            );
+        }
     }
 }
 

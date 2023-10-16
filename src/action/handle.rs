@@ -1,20 +1,30 @@
-use std::sync::Arc;
+use parking_lot::Mutex;
+use std::{collections::BTreeMap, sync::Arc};
 
-use super::{server::ActionServerData, update_goal_status, GoalStatus};
+use super::{server::ServerData, update_goal_status, GoalStatus};
 use crate::{error::DynError, msg::ActionMsg, rcl};
 
 /// GoalHandle contains information about an action goal and is used by server worker threads to send feedback and results.
 pub struct GoalHandle<T: ActionMsg> {
     pub goal_id: [u8; 16],
-    data: Arc<ActionServerData<T>>,
+    data: Arc<ServerData>,
+    pub results: Arc<Mutex<BTreeMap<[u8; 16], T::ResultContent>>>,
 }
 
 impl<T> GoalHandle<T>
 where
     T: ActionMsg,
 {
-    pub(crate) fn new(goal_id: [u8; 16], data: Arc<ActionServerData<T>>) -> Self {
-        Self { goal_id, data }
+    pub(crate) fn new(
+        goal_id: [u8; 16],
+        data: Arc<ServerData>,
+        results: Arc<Mutex<BTreeMap<[u8; 16], T::ResultContent>>>,
+    ) -> Self {
+        Self {
+            goal_id,
+            data,
+            results,
+        }
     }
 
     pub fn feedback(&self, content: T::FeedbackContent) -> Result<(), DynError> {
@@ -29,7 +39,7 @@ where
     }
 
     pub fn finish(&self, result: T::ResultContent) -> Result<(), DynError> {
-        let mut results = self.data.results.lock();
+        let mut results = self.results.lock();
         if results.insert(self.goal_id, result).is_some() {
             return Err(format!(
                 "the result for the goal (id: {:?}) already exists; it should be set only once",
