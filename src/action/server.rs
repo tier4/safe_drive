@@ -1,11 +1,13 @@
 use parking_lot::Mutex;
 use pin_project::{pin_project, pinned_drop};
 use std::future::Future;
+use std::marker::PhantomData;
 use std::{
     collections::BTreeMap, ffi::CString, mem::MaybeUninit, pin::Pin, sync::Arc, task::Poll,
     time::Duration,
 };
 
+use crate::PhantomUnsync;
 use crate::{
     clock::Clock,
     error::{DynError, RCLActionError, RCLActionResult},
@@ -107,7 +109,7 @@ unsafe impl Send for ServerData {}
 /// An action server.
 pub struct Server<T: ActionMsg> {
     pub(crate) data: Arc<ServerData>,
-    clock: Clock,
+    clock: Arc<Mutex<Clock>>,
 
     /// Once the server has completed the result for a goal, it is kept here and the result requests are responsed with the result value in this map.
     pub(crate) results: Arc<Mutex<BTreeMap<[u8; 16], T::ResultContent>>>,
@@ -136,7 +138,7 @@ where
             guard.rcl_action_server_init(
                 &mut server,
                 unsafe { node.as_ptr_mut() },
-                clock.as_ptr_mut(),
+                unsafe { clock.as_ptr_mut() },
                 T::type_support(),
                 action_name.as_ptr(),
                 &options,
@@ -145,7 +147,7 @@ where
 
         let server = Self {
             data: Arc::new(ServerData { server, node }),
-            clock,
+            clock: Arc::new(Mutex::new(clock)),
             results: Arc::new(Mutex::new(BTreeMap::new())),
         };
 
@@ -273,7 +275,8 @@ where
     }
 
     fn get_timestamp(&mut self) -> UnsafeTime {
-        let now_nanosec = self.clock.get_now().unwrap();
+        let mut clock = self.clock.lock();
+        let now_nanosec = clock.get_now().unwrap();
         let now_sec = now_nanosec / 10_i64.pow(9);
         UnsafeTime {
             sec: now_sec as i32,
@@ -283,7 +286,7 @@ where
 
     pub async fn recv_goal_request(
         self,
-    ) -> Result<(rmw_request_id_t, SendGoalServiceRequest<T>), DynError> {
+    ) -> Result<(Server<T>, rmw_request_id_t, SendGoalServiceRequest<T>), DynError> {
         AsyncGoalReceiver {
             server: self,
             is_waiting: false,
@@ -321,6 +324,18 @@ impl<T: ActionMsg> Drop for Server<T> {
     }
 }
 
+pub struct ServerStatus<T: ActionMsg> {
+    data: Arc<ServerData>,
+    results: Arc<Mutex<BTreeMap<[u8; 16], T::ResultContent>>>,
+}
+
+pub struct ServerGoalSend<T> {
+    data: Arc<ServerData>,
+    request_id: rmw_request_id_t,
+    _phantom: PhantomData<T>,
+    _unsync: PhantomUnsync,
+}
+
 #[pin_project(PinnedDrop)]
 #[must_use]
 pub struct AsyncGoalReceiver<T: ActionMsg> {
@@ -329,7 +344,7 @@ pub struct AsyncGoalReceiver<T: ActionMsg> {
 }
 
 impl<T: ActionMsg> Future for AsyncGoalReceiver<T> {
-    type Output = Result<(rmw_request_id_t, SendGoalServiceRequest<T>), DynError>;
+    type Output = Result<(Server<T>, rmw_request_id_t, SendGoalServiceRequest<T>), DynError>;
 
     fn poll(
         self: std::pin::Pin<&mut Self>,
@@ -343,7 +358,10 @@ impl<T: ActionMsg> Future for AsyncGoalReceiver<T> {
         *this.is_waiting = false;
 
         match this.server.try_recv_goal_request() {
-            RecvResult::Ok(result) => Poll::Ready(Ok(result)),
+            RecvResult::Ok((request, header)) => {
+                let server = this.server.clone();
+                return Poll::Ready(Ok((server, request, header)));
+            }
             RecvResult::RetryLater(_) => {
                 let mut waker = Some(cx.waker().clone());
                 let mut guard = SELECTOR.lock();
@@ -512,6 +530,16 @@ impl<T: ActionMsg> PinnedDrop for AsyncResultReceiver<T> {
                 &self.server.data.node.context,
                 Command::RemoveActionServer(self.server.data.clone()),
             );
+        }
+    }
+}
+
+impl<T: ActionMsg> Clone for Server<T> {
+    fn clone(&self) -> Self {
+        Self {
+            data: self.data.clone(),
+            clock: self.clock.clone(),
+            results: self.results.clone(),
         }
     }
 }
