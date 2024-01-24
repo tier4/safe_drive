@@ -106,6 +106,8 @@ fn main() {
         "iron" => {
             println!("cargo:rustc-link-lib=service_msgs__rosidl_typesupport_c");
             println!("cargo:rustc-link-lib=service_msgs__rosidl_generator_c");
+            println!("cargo:rustc-link-lib=type_description_interfaces__rosidl_typesupport_c");
+            println!("cargo:rustc-link-lib=type_description_interfaces__rosidl_generator_c");
             println!("cargo:rustc-cfg=feature=\"iron\"");
         }
         "humble" => println!("cargo:rustc-cfg=feature=\"humble\""),
