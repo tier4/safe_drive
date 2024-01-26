@@ -80,15 +80,11 @@
 //! // If `None` is specified to the 2nd argument, the default QoS will be used.
 //! let publisher = node_pub
 //!     .create_publisher::<std_msgs::msg::String>("example_topic", None,
-//!     #[cfg(not(any(feature = "humble", feature = "galactic")))]
-//!     true
 //! ).unwrap();
 //!
 //! // Create a subscriber.
 //! let subscriber = node_sub
 //!     .create_subscriber::<std_msgs::msg::String>("example_topic", None,
-//!     #[cfg(not(any(feature = "humble", feature = "galactic")))]
-//!     true
 //! ).unwrap();
 //!
 //! // Create a selector, which is for IO multiplexing.
@@ -161,15 +157,11 @@
 //! // Create a publisher.
 //! let publisher = node_pub
 //!     .create_publisher::<std_msgs::msg::String>("example_topic_async", None,
-//!     #[cfg(not(any(feature = "humble", feature = "galactic")))]
-//!     true
 //! ).unwrap();
 //!
 //! // Create a subscriber.
 //! let subscriber = node_sub
 //!     .create_subscriber::<std_msgs::msg::String>("example_topic_async", None,
-//!     #[cfg(not(any(feature = "humble", feature = "galactic")))]
-//!     true
 //! ).unwrap();
 //!
 //! // Create tasks.

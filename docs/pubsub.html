@@ -1,5 +1,5 @@
 <!DOCTYPE HTML>
-<html lang="en" class="sidebar-visible no-js light">
+<html lang="en" class="light" dir="ltr">
     <head>
         <!-- Book generated using mdBook -->
         <meta charset="UTF-8">
@@ -10,7 +10,7 @@
         
         <meta name="description" content="">
         <meta name="viewport" content="width=device-width, initial-scale=1">
-        <meta name="theme-color" content="#ffffff" />
+        <meta name="theme-color" content="#ffffff">
 
         <link rel="icon" href="favicon.svg">
         <link rel="shortcut icon" href="favicon.png">
@@ -31,7 +31,7 @@
         <!-- Custom theme stylesheets -->
 
     </head>
-    <body>
+    <body class="sidebar-visible no-js">
     <div id="body-container">
         <!-- Provide site root to javascript -->
         <script>
@@ -61,31 +61,38 @@
             try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
             if (theme === null || theme === undefined) { theme = default_theme; }
             var html = document.querySelector('html');
-            html.classList.remove('no-js')
             html.classList.remove('light')
             html.classList.add(theme);
-            html.classList.add('js');
+            var body = document.querySelector('body');
+            body.classList.remove('no-js')
+            body.classList.add('js');
         </script>
+
+        <input type="checkbox" id="sidebar-toggle-anchor" class="hidden">
 
         <!-- Hide / unhide sidebar before it is displayed -->
         <script>
-            var html = document.querySelector('html');
+            var body = document.querySelector('body');
             var sidebar = null;
+            var sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
             if (document.body.clientWidth >= 1080) {
                 try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
                 sidebar = sidebar || 'visible';
             } else {
                 sidebar = 'hidden';
             }
-            html.classList.remove('sidebar-visible');
-            html.classList.add("sidebar-" + sidebar);
+            sidebar_toggle.checked = sidebar === 'visible';
+            body.classList.remove('sidebar-visible');
+            body.classList.add("sidebar-" + sidebar);
         </script>
 
         <nav id="sidebar" class="sidebar" aria-label="Table of contents">
             <div class="sidebar-scrollbox">
                 <ol class="chapter"><li class="chapter-item expanded "><a href="index.html"><strong aria-hidden="true">1.</strong> Top</a></li><li class="chapter-item expanded "><a href="tutorial.html"><strong aria-hidden="true">2.</strong> Tutorial</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="setup.html"><strong aria-hidden="true">2.1.</strong> Setting-up</a></li><li class="chapter-item expanded "><a href="pubsub.html" class="active"><strong aria-hidden="true">2.2.</strong> Publish and Subscribe</a></li><li class="chapter-item expanded "><a href="timer.html"><strong aria-hidden="true">2.3.</strong> Timer</a></li><li class="chapter-item expanded "><a href="multi_pubsub.html"><strong aria-hidden="true">2.4.</strong> Multi-threaded Publish and Subscribe</a></li><li class="chapter-item expanded "><a href="message.html"><strong aria-hidden="true">2.5.</strong> User Defined Data Structure</a></li><li class="chapter-item expanded "><a href="service.html"><strong aria-hidden="true">2.6.</strong> Service</a></li><li class="chapter-item expanded "><a href="parameter.html"><strong aria-hidden="true">2.7.</strong> Parameter</a></li><li class="chapter-item expanded "><a href="zerocopy.html"><strong aria-hidden="true">2.8.</strong> Zero Copy Publish and Subscribe</a></li><li class="chapter-item expanded "><a href="allocator.html"><strong aria-hidden="true">2.9.</strong> Custom Memory Allocator</a></li><li class="chapter-item expanded "><a href="pusbsub_and_service.html"><strong aria-hidden="true">2.10.</strong> Request to Server in Callback</a></li></ol></li><li class="chapter-item expanded "><a href="contribution.html"><strong aria-hidden="true">3.</strong> Contribution Guide</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="setup_contribution.html"><strong aria-hidden="true">3.1.</strong> Setting-up for Contribution</a></li><li class="chapter-item expanded "><a href="build_and_test.html"><strong aria-hidden="true">3.2.</strong> Build and Test</a></li><li class="chapter-item expanded "><a href="editor_setup.html"><strong aria-hidden="true">3.3.</strong> Editor Setting-up</a></li><li class="chapter-item expanded "><a href="internal_msgs.html"><strong aria-hidden="true">3.4.</strong> Generating Messages Included by safe_drive</a></li><li class="chapter-item expanded "><a href="c_apis.html"><strong aria-hidden="true">3.5.</strong> C APIs</a></li><li class="chapter-item expanded "><a href="document.html"><strong aria-hidden="true">3.6.</strong> Documentation</a></li></ol></li></ol>
             </div>
-            <div id="sidebar-resize-handle" class="sidebar-resize-handle"></div>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle">
+                <div class="sidebar-resize-indicator"></div>
+            </div>
         </nav>
 
         <!-- Track and set sidebar scroll position -->
@@ -116,9 +123,9 @@
                                 <div id="menu-bar-hover-placeholder"></div>
                 <div id="menu-bar" class="menu-bar sticky">
                     <div class="left-buttons">
-                        <button id="sidebar-toggle" class="icon-button" type="button" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                        <label id="sidebar-toggle" class="icon-button" for="sidebar-toggle-anchor" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
                             <i class="fa fa-bars"></i>
-                        </button>
+                        </label>
                         <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
                             <i class="fa fa-paint-brush"></i>
                         </button>
@@ -233,13 +240,13 @@ Currently, safe_drive's repository is private,
 and we need to specify the path as follows.</p>
 <p><code>pubsub/src/my_talker/Cargo.toml</code></p>
 <pre><code class="language-toml">[dependencies]
-safe_drive = &quot;0.2&quot;
+safe_drive = &quot;0.3&quot;
 std_msgs = { path = &quot;/tmp/safe_drive_tutorial/pubsub/std_msgs&quot; }
 
 [package.metadata.ros]
 msg = [&quot;std_msgs&quot;]
 msg_dir = &quot;/tmp/safe_drive_tutorial/pubsub&quot;
-safe_drive_version = &quot;0.2&quot;
+safe_drive_version = &quot;0.3&quot;
 </code></pre>
 <h3 id="edit-my_talkersrcmainrs"><a class="header" href="#edit-my_talkersrcmainrs">Edit <code>my_talker/src/main.rs</code></a></h3>
 <p>my_talker is very simple.
@@ -283,7 +290,7 @@ fn main() -&gt; Result&lt;(), DynError&gt; {
     let node = ctx.create_node(&quot;my_talker&quot;, None, Default::default())?;
 
     // Create a publisher.
-    let publisher = node.create_publisher::&lt;std_msgs::msg::String&gt;(&quot;my_topic&quot;, None, true)?;
+    let publisher = node.create_publisher::&lt;std_msgs::msg::String&gt;(&quot;my_topic&quot;, None)?;
 
     // Create a logger.
     let logger = Logger::new(&quot;my_talker&quot;);
@@ -327,7 +334,7 @@ let node = ctx.create_node(&quot;my_talker&quot;, None, Default::default())?;
 <pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
 </span><span class="boring">fn main() {
 </span>// Create a publisher.
-let publisher = node.create_publisher::&lt;std_msgs::msg::String&gt;(&quot;my_topic&quot;, None, true)?;
+let publisher = node.create_publisher::&lt;std_msgs::msg::String&gt;(&quot;my_topic&quot;, None)?;
 <span class="boring">}</span></code></pre></pre>
 <ul>
 <li><code>&lt;std_msgs::msg::String&gt;</code> : the publisher can send values of <code>std_msgs::msg::String</code>.</li>
@@ -450,7 +457,7 @@ fn main() -&gt; Result&lt;(), DynError&gt; {
     let node = ctx.create_node(&quot;my_listener&quot;, None, Default::default())?;
 
     // Create a subscriber.
-    let subscriber = node.create_subscriber::&lt;std_msgs::msg::String&gt;(&quot;my_topic&quot;, None, true)?;
+    let subscriber = node.create_subscriber::&lt;std_msgs::msg::String&gt;(&quot;my_topic&quot;, None)?;
 
     // Create a logger.
     let logger = Logger::new(&quot;my_listener&quot;);
@@ -477,7 +484,7 @@ fn main() -&gt; Result&lt;(), DynError&gt; {
 <pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
 </span><span class="boring">fn main() {
 </span>// Create a subscriber.
-let subscriber = node.create_subscriber::&lt;std_msgs::msg::String&gt;(&quot;my_topic&quot;, None, true)?;
+let subscriber = node.create_subscriber::&lt;std_msgs::msg::String&gt;(&quot;my_topic&quot;, None)?;
 <span class="boring">}</span></code></pre></pre>
 <p>The arguments are as follows.</p>
 <ul>
@@ -565,7 +572,7 @@ We are receiving messages sent from <code>my_talker</code>.</p>
                                 <i class="fa fa-angle-left"></i>
                             </a>
 
-                            <a rel="next" href="timer.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                            <a rel="next prefetch" href="timer.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                                 <i class="fa fa-angle-right"></i>
                             </a>
 
@@ -579,7 +586,7 @@ We are receiving messages sent from <code>my_talker</code>.</p>
                         <i class="fa fa-angle-left"></i>
                     </a>
 
-                    <a rel="next" href="timer.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                    <a rel="next prefetch" href="timer.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                         <i class="fa fa-angle-right"></i>
                     </a>
             </nav>

@@ -32,6 +32,14 @@ use std::{env, ffi::CString, sync::Arc};
 
 static CONTEXT: Lazy<Mutex<Option<Arc<Context>>>> = Lazy::new(|| Mutex::new(None));
 
+static CARGS: Lazy<Vec<usize>> = Lazy::new(|| {
+    let cstr_args: Vec<_> = env::args().map(|s| CString::new(s).unwrap()).collect();
+    cstr_args
+        .into_iter()
+        .map(|s| s.into_raw() as usize)
+        .collect()
+});
+
 /// Context of ROS2.
 pub struct Context {
     context: rcl::rcl_context_t,
@@ -61,10 +69,6 @@ impl Context {
         // allocate context
         let mut context = rcl::MTSafeFn::rcl_get_zero_initialized_context();
 
-        // convert Args to Vec<*const c_ptr>
-        let cstr_args: Vec<_> = env::args().map(|s| CString::new(s).unwrap()).collect();
-        let args: Vec<_> = cstr_args.iter().map(|s| s.as_ptr()).collect();
-
         let options = InitOptions::new()?;
 
         {
@@ -72,8 +76,8 @@ impl Context {
 
             // initialize context
             guard.rcl_init(
-                args.len() as i32,
-                args.as_ptr(),
+                CARGS.len() as i32,
+                CARGS.as_ptr() as *const *const i8,
                 options.as_ptr(),
                 &mut context,
             )?;
@@ -122,7 +126,8 @@ impl Context {
         namespace: Option<&str>,
         options: NodeOptions,
     ) -> RCLResult<Arc<Node>> {
-        Node::new(self.clone(), name, namespace, options)
+        let a = self.clone();
+        Node::new(a, name, namespace, options)
     }
 
     /// Create a new selector.

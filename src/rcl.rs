@@ -40,6 +40,7 @@ pub use humble::{
 pub type size_t = usize;
 
 #[cfg(feature = "iron")]
+#[allow(unused_imports)]
 mod iron;
 
 #[cfg(feature = "iron")]

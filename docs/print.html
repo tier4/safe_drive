@@ -1,17 +1,17 @@
 <!DOCTYPE HTML>
-<html lang="en" class="sidebar-visible no-js light">
+<html lang="en" class="light" dir="ltr">
     <head>
         <!-- Book generated using mdBook -->
         <meta charset="UTF-8">
         <title>safe_drive: Formally Specified Rust Bindings for ROS2</title>
-        <meta name="robots" content="noindex" />
+        <meta name="robots" content="noindex">
 
 
         <!-- Custom HTML head -->
         
         <meta name="description" content="">
         <meta name="viewport" content="width=device-width, initial-scale=1">
-        <meta name="theme-color" content="#ffffff" />
+        <meta name="theme-color" content="#ffffff">
 
         <link rel="icon" href="favicon.svg">
         <link rel="shortcut icon" href="favicon.png">
@@ -32,7 +32,7 @@
         <!-- Custom theme stylesheets -->
 
     </head>
-    <body>
+    <body class="sidebar-visible no-js">
     <div id="body-container">
         <!-- Provide site root to javascript -->
         <script>
@@ -62,31 +62,38 @@
             try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
             if (theme === null || theme === undefined) { theme = default_theme; }
             var html = document.querySelector('html');
-            html.classList.remove('no-js')
             html.classList.remove('light')
             html.classList.add(theme);
-            html.classList.add('js');
+            var body = document.querySelector('body');
+            body.classList.remove('no-js')
+            body.classList.add('js');
         </script>
+
+        <input type="checkbox" id="sidebar-toggle-anchor" class="hidden">
 
         <!-- Hide / unhide sidebar before it is displayed -->
         <script>
-            var html = document.querySelector('html');
+            var body = document.querySelector('body');
             var sidebar = null;
+            var sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
             if (document.body.clientWidth >= 1080) {
                 try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
                 sidebar = sidebar || 'visible';
             } else {
                 sidebar = 'hidden';
             }
-            html.classList.remove('sidebar-visible');
-            html.classList.add("sidebar-" + sidebar);
+            sidebar_toggle.checked = sidebar === 'visible';
+            body.classList.remove('sidebar-visible');
+            body.classList.add("sidebar-" + sidebar);
         </script>
 
         <nav id="sidebar" class="sidebar" aria-label="Table of contents">
             <div class="sidebar-scrollbox">
                 <ol class="chapter"><li class="chapter-item expanded "><a href="index.html"><strong aria-hidden="true">1.</strong> Top</a></li><li class="chapter-item expanded "><a href="tutorial.html"><strong aria-hidden="true">2.</strong> Tutorial</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="setup.html"><strong aria-hidden="true">2.1.</strong> Setting-up</a></li><li class="chapter-item expanded "><a href="pubsub.html"><strong aria-hidden="true">2.2.</strong> Publish and Subscribe</a></li><li class="chapter-item expanded "><a href="timer.html"><strong aria-hidden="true">2.3.</strong> Timer</a></li><li class="chapter-item expanded "><a href="multi_pubsub.html"><strong aria-hidden="true">2.4.</strong> Multi-threaded Publish and Subscribe</a></li><li class="chapter-item expanded "><a href="message.html"><strong aria-hidden="true">2.5.</strong> User Defined Data Structure</a></li><li class="chapter-item expanded "><a href="service.html"><strong aria-hidden="true">2.6.</strong> Service</a></li><li class="chapter-item expanded "><a href="parameter.html"><strong aria-hidden="true">2.7.</strong> Parameter</a></li><li class="chapter-item expanded "><a href="zerocopy.html"><strong aria-hidden="true">2.8.</strong> Zero Copy Publish and Subscribe</a></li><li class="chapter-item expanded "><a href="allocator.html"><strong aria-hidden="true">2.9.</strong> Custom Memory Allocator</a></li><li class="chapter-item expanded "><a href="pusbsub_and_service.html"><strong aria-hidden="true">2.10.</strong> Request to Server in Callback</a></li></ol></li><li class="chapter-item expanded "><a href="contribution.html"><strong aria-hidden="true">3.</strong> Contribution Guide</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="setup_contribution.html"><strong aria-hidden="true">3.1.</strong> Setting-up for Contribution</a></li><li class="chapter-item expanded "><a href="build_and_test.html"><strong aria-hidden="true">3.2.</strong> Build and Test</a></li><li class="chapter-item expanded "><a href="editor_setup.html"><strong aria-hidden="true">3.3.</strong> Editor Setting-up</a></li><li class="chapter-item expanded "><a href="internal_msgs.html"><strong aria-hidden="true">3.4.</strong> Generating Messages Included by safe_drive</a></li><li class="chapter-item expanded "><a href="c_apis.html"><strong aria-hidden="true">3.5.</strong> C APIs</a></li><li class="chapter-item expanded "><a href="document.html"><strong aria-hidden="true">3.6.</strong> Documentation</a></li></ol></li></ol>
             </div>
-            <div id="sidebar-resize-handle" class="sidebar-resize-handle"></div>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle">
+                <div class="sidebar-resize-indicator"></div>
+            </div>
         </nav>
 
         <!-- Track and set sidebar scroll position -->
@@ -117,9 +124,9 @@
                                 <div id="menu-bar-hover-placeholder"></div>
                 <div id="menu-bar" class="menu-bar sticky">
                     <div class="left-buttons">
-                        <button id="sidebar-toggle" class="icon-button" type="button" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                        <label id="sidebar-toggle" class="icon-button" for="sidebar-toggle-anchor" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
                             <i class="fa fa-bars"></i>
-                        </button>
+                        </label>
                         <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
                             <i class="fa fa-paint-brush"></i>
                         </button>
@@ -298,13 +305,13 @@ Currently, safe_drive's repository is private,
 and we need to specify the path as follows.</p>
 <p><code>pubsub/src/my_talker/Cargo.toml</code></p>
 <pre><code class="language-toml">[dependencies]
-safe_drive = &quot;0.2&quot;
+safe_drive = &quot;0.3&quot;
 std_msgs = { path = &quot;/tmp/safe_drive_tutorial/pubsub/std_msgs&quot; }
 
 [package.metadata.ros]
 msg = [&quot;std_msgs&quot;]
 msg_dir = &quot;/tmp/safe_drive_tutorial/pubsub&quot;
-safe_drive_version = &quot;0.2&quot;
+safe_drive_version = &quot;0.3&quot;
 </code></pre>
 <h3 id="edit-my_talkersrcmainrs"><a class="header" href="#edit-my_talkersrcmainrs">Edit <code>my_talker/src/main.rs</code></a></h3>
 <p>my_talker is very simple.
@@ -348,7 +355,7 @@ fn main() -&gt; Result&lt;(), DynError&gt; {
     let node = ctx.create_node(&quot;my_talker&quot;, None, Default::default())?;
 
     // Create a publisher.
-    let publisher = node.create_publisher::&lt;std_msgs::msg::String&gt;(&quot;my_topic&quot;, None, true)?;
+    let publisher = node.create_publisher::&lt;std_msgs::msg::String&gt;(&quot;my_topic&quot;, None)?;
 
     // Create a logger.
     let logger = Logger::new(&quot;my_talker&quot;);
@@ -392,7 +399,7 @@ let node = ctx.create_node(&quot;my_talker&quot;, None, Default::default())?;
 <pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
 </span><span class="boring">fn main() {
 </span>// Create a publisher.
-let publisher = node.create_publisher::&lt;std_msgs::msg::String&gt;(&quot;my_topic&quot;, None, true)?;
+let publisher = node.create_publisher::&lt;std_msgs::msg::String&gt;(&quot;my_topic&quot;, None)?;
 <span class="boring">}</span></code></pre></pre>
 <ul>
 <li><code>&lt;std_msgs::msg::String&gt;</code> : the publisher can send values of <code>std_msgs::msg::String</code>.</li>
@@ -515,7 +522,7 @@ fn main() -&gt; Result&lt;(), DynError&gt; {
     let node = ctx.create_node(&quot;my_listener&quot;, None, Default::default())?;
 
     // Create a subscriber.
-    let subscriber = node.create_subscriber::&lt;std_msgs::msg::String&gt;(&quot;my_topic&quot;, None, true)?;
+    let subscriber = node.create_subscriber::&lt;std_msgs::msg::String&gt;(&quot;my_topic&quot;, None)?;
 
     // Create a logger.
     let logger = Logger::new(&quot;my_listener&quot;);
@@ -542,7 +549,7 @@ fn main() -&gt; Result&lt;(), DynError&gt; {
 <pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
 </span><span class="boring">fn main() {
 </span>// Create a subscriber.
-let subscriber = node.create_subscriber::&lt;std_msgs::msg::String&gt;(&quot;my_topic&quot;, None, true)?;
+let subscriber = node.create_subscriber::&lt;std_msgs::msg::String&gt;(&quot;my_topic&quot;, None)?;
 <span class="boring">}</span></code></pre></pre>
 <p>The arguments are as follows.</p>
 <ul>
@@ -652,8 +659,8 @@ fn main() -&gt; Result&lt;(), DynError&gt; {
     // Create a context, a node, a subscriber, a publisher, and a selector.
     let ctx = Context::new()?;
     let node = ctx.create_node(&quot;my_node&quot;, None, Default::default())?;
-    let subscriber = node.create_subscriber::&lt;std_msgs::msg::UInt64&gt;(&quot;my_topic&quot;, None, true)?;
-    let publisher = node.create_publisher::&lt;std_msgs::msg::UInt64&gt;(&quot;my_topic&quot;, None, true)?;
+    let subscriber = node.create_subscriber::&lt;std_msgs::msg::UInt64&gt;(&quot;my_topic&quot;, None)?;
+    let publisher = node.create_publisher::&lt;std_msgs::msg::UInt64&gt;(&quot;my_topic&quot;, None)?;
     let mut selector = ctx.create_selector()?;
 
     // Create a logger.
@@ -903,8 +910,8 @@ async fn main() -&gt; Result&lt;(), DynError&gt; {
     let node = ctx.create_node(&quot;publishers&quot;, None, Default::default())?;
 
     // Create publishers.
-    let publisher1 = node.create_publisher::&lt;std_msgs::msg::String&gt;(&quot;topic1&quot;, None, true)?;
-    let publisher2 = node.create_publisher::&lt;std_msgs::msg::String&gt;(&quot;topic2&quot;, None, true)?;
+    let publisher1 = node.create_publisher::&lt;std_msgs::msg::String&gt;(&quot;topic1&quot;, None)?;
+    let publisher2 = node.create_publisher::&lt;std_msgs::msg::String&gt;(&quot;topic2&quot;, None)?;
 
     // Create a task which sends &quot;Hello, World!&quot;.
     let task1 = async_std::task::spawn(async move {
@@ -966,8 +973,8 @@ async fn main() -&gt; Result&lt;(), DynError&gt; {
     let node = ctx.create_node(&quot;subscribers&quot;, None, Default::default())?;
 
     // Create subscribers.
-    let subscriber1 = node.create_subscriber::&lt;std_msgs::msg::String&gt;(&quot;topic1&quot;, None, true)?;
-    let subscriber2 = node.create_subscriber::&lt;std_msgs::msg::String&gt;(&quot;topic2&quot;, None, true)?;
+    let subscriber1 = node.create_subscriber::&lt;std_msgs::msg::String&gt;(&quot;topic1&quot;, None)?;
+    let subscriber2 = node.create_subscriber::&lt;std_msgs::msg::String&gt;(&quot;topic2&quot;, None)?;
 
     // Receive messages.
     let task1 = async_std::task::spawn(receiver(subscriber1));
@@ -1253,7 +1260,7 @@ fn main() -&gt; Result&lt;(), DynError&gt; {
     let node = ctx.create_node(&quot;talker&quot;, None, Default::default())?;
 
     // Create a publisher.
-    let publisher = node.create_publisher::&lt;my_interfaces::msg::MyMsgs&gt;(&quot;my_topic&quot;, None, true)?;
+    let publisher = node.create_publisher::&lt;my_interfaces::msg::MyMsgs&gt;(&quot;my_topic&quot;, None)?;
 
     // Create a logger.
     let logger = Logger::new(&quot;talker&quot;);
@@ -1378,7 +1385,7 @@ fn main() -&gt; Result&lt;(), DynError&gt; {
     let node = ctx.create_node(&quot;listener&quot;, None, Default::default())?;
 
     // Create a subscriber.
-    let subscriber = node.create_subscriber::&lt;my_interfaces::msg::MyMsgs&gt;(&quot;my_topic&quot;, None, true)?;
+    let subscriber = node.create_subscriber::&lt;my_interfaces::msg::MyMsgs&gt;(&quot;my_topic&quot;, None)?;
 
     // Create a logger.
     let logger = Logger::new(&quot;listener&quot;);
@@ -2242,8 +2249,8 @@ fn main() -&gt; Result&lt;(), Box&lt;dyn Error + Sync + Send + 'static&gt;&gt; {
     std::thread::sleep(Duration::from_millis(500));
 
     // create a publisher and a subscriber
-    let subscriber = node_sub.create_subscriber::&lt;std_msgs::msg::Bool&gt;(TOPIC_NAME, None, false)?;
-    let publisher = node_pub.create_publisher::&lt;std_msgs::msg::Bool&gt;(TOPIC_NAME, None, false)?;
+    let subscriber = node_sub.create_subscriber::&lt;std_msgs::msg::Bool&gt;(TOPIC_NAME, None)?;
+    let publisher = node_pub.create_publisher::&lt;std_msgs::msg::Bool&gt;(TOPIC_NAME, None)?;
 
     let mut loaned = publisher.borrow_loaned_message()?;
     *loaned = std_msgs::msg::Bool::new().ok_or(&quot;failed to new Bool&quot;)?;
@@ -2276,8 +2283,6 @@ publisher.send_loaned(loaned)?; // send message
 <code>send_loaned()</code> sends a message in the borrowed region.
 <code>safe_drive</code> automatically check whether zero copy is available or not,
 and it uses conventional copied APIs if zero copy is not available.</p>
-<p>To enable zero copy, pass <code>false</code> as the 3rd argument to <code>create_subscriber()</code> and <code>create_publisher()</code>,
-which indicates <code>disable_loaned_message</code>.</p>
 <h2 id="setting-up-zero-copy"><a class="header" href="#setting-up-zero-copy">Setting-up Zero Copy</a></h2>
 <p>To enable zero copy, please prepare cyclonedds.xml, which is a configuration file of CycloneDDS, as follows.
 You can use arbitrary name for it.</p>
@@ -2348,8 +2353,8 @@ fn main() -&gt; Result&lt;(), DynError&gt; {
     let selector_client = ctx.create_selector()?;
 
     // Create a subscriber, a client, and a logger.
-    let subscriber = node.create_subscriber::&lt;std_msgs::msg::Empty&gt;(&quot;pubsubsrv_topic&quot;, None, true)?;
-    let client = node.create_client::&lt;std_srvs::srv::Empty&gt;(&quot;pubsubsrv_service&quot;, None, true)?;
+    let subscriber = node.create_subscriber::&lt;std_msgs::msg::Empty&gt;(&quot;pubsubsrv_topic&quot;, None)?;
+    let client = node.create_client::&lt;std_srvs::srv::Empty&gt;(&quot;pubsubsrv_service&quot;, None)?;
 
     worker(selector, selector_client, subscriber, client)?;
 

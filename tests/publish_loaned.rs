@@ -13,11 +13,7 @@ fn test_publish_loaned() -> Result<(), Box<dyn Error + Sync + Send + 'static>> {
         .create_node("test_publish_node", None, Default::default())
         .unwrap();
 
-    #[cfg(any(feature = "humble", feature = "galactic"))]
     let publisher = node.create_publisher::<Num>(TOPIC_NAME, Default::default())?;
-
-    #[cfg(not(any(feature = "humble", feature = "galactic")))]
-    let publisher = node.create_publisher::<Num>(TOPIC_NAME, Default::default(), false)?;
 
     let mut loaned = publisher.borrow_loaned_message()?;
     *loaned = Num { num: 100 };

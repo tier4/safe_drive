@@ -21,8 +21,6 @@
 //! // Create a subscriber.
 //! let subscriber = node_sub
 //!     .create_subscriber::<std_msgs::msg::String>("selector_topic", None,
-//!     #[cfg(not(any(feature = "humble", feature = "galactic")))]
-//!     true
 //! ).unwrap();
 //!
 //! // Create a selector, which is for IO multiplexing.
@@ -324,8 +322,6 @@ impl Selector {
     /// fn add_new_subscriber(selector: &mut Selector, node: Arc<Node>) {
     ///     // Create a subscriber.
     ///     let subscriber = node.create_subscriber("node_name", None,
-    ///         #[cfg(not(any(feature = "humble", feature = "galactic")))]
-    ///         true
     ///     ).unwrap();
     ///
     ///     // Add the subscriber with a callback function.
@@ -581,7 +577,7 @@ impl Selector {
     /// # // Ignoring this code block since common module is not available in doc tests.
     /// # use safe_drive::{selector::Selector, action::server::Server, msg::ActionMsg};
     /// # use common::msgs::example_msg::action::*;
-    ///  
+    ///
     /// fn add_action_server(selector: &mut Selector, server: Server<MyAction>) {
     ///     selector.add_action_server(server,
     ///         // handler for goal requests
