@@ -84,10 +84,7 @@ fn test_action() -> Result<(), DynError> {
 
     // You don't have to set handlers for incoming result requests since they are processed
     // automatically.
-    selector.add_action_server(server, goal_handler, move |goal| {
-        println!("Cancel request received for goal {:?}", goal);
-        true
-    });
+    selector.add_action_server(server.clone(), goal_handler, move |_goal| true);
     selector.wait()?;
 
     let client = loop {
@@ -100,22 +97,20 @@ fn test_action() -> Result<(), DynError> {
                 break client;
             }
             RecvResult::RetryLater(receiver) => {
+                println!("did not receive goal response, retrying");
                 recv = receiver;
             }
             RecvResult::Err(e) => panic!("{}", e),
         }
     };
 
-    // get feedback (wait for five feedback messages)
+    // wait for five feedback messages
     let mut received = 0;
-    loop {
+    while received <= 5 {
         match client.recv_feedback_timeout(Duration::from_secs(3), &mut selector) {
             RecvResult::Ok(feedback) => {
                 println!("received feedback: {:?}", feedback);
                 received += 1;
-                if received > 5 {
-                    break;
-                }
             }
             RecvResult::RetryLater(()) => {}
             RecvResult::Err(e) => panic!("{}", e),

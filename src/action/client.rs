@@ -1,4 +1,5 @@
 use pin_project::{pin_project, pinned_drop};
+use std::f32::consts::E;
 use std::future::Future;
 use std::pin::Pin;
 use std::{
@@ -208,13 +209,8 @@ where
 
     /// Takes a feedback for the goal.
     pub fn try_recv_feedback(&self) -> RecvResult<<T as ActionMsg>::Feedback, ()> {
-        let guard = rcl::MT_UNSAFE_FN.lock();
-
-        let mut feedback: <T as ActionMsg>::Feedback =
-            unsafe { MaybeUninit::zeroed().assume_init() };
-        match guard.rcl_action_take_feedback(&self.data.client, &mut feedback as *const _ as *mut _)
-        {
-            Ok(()) => RecvResult::Ok(feedback),
+        match rcl_action_take_feedback::<T>(&self.data.client) {
+            Ok(feedback) => RecvResult::Ok(feedback),
             Err(RCLActionError::ClientTakeFailed) => RecvResult::RetryLater(()),
             Err(e) => RecvResult::Err(e.into()),
         }
@@ -232,6 +228,16 @@ where
             Ok(false) => RecvResult::RetryLater(()),
             Err(e) => RecvResult::Err(e),
         }
+    }
+
+    // Asynchronously receive a feedback message.
+    pub async fn recv_feedback(self) -> Result<(Self, <T as ActionMsg>::Feedback), DynError> {
+        AsyncFeedbackReceiver {
+            data: self.data.clone(),
+            is_waiting: false,
+            _phantom: Default::default(),
+        }
+        .await
     }
 
     // Takes a status message for all the ongoing goals.
@@ -695,6 +701,85 @@ impl<T: ActionMsg> Future for AsyncResultReceiver<T> {
     }
 }
 
+#[pin_project(PinnedDrop)]
+pub struct AsyncFeedbackReceiver<T: ActionMsg> {
+    data: Arc<ClientData>,
+    is_waiting: bool,
+    _phantom: PhantomData<T>,
+}
+
+impl<T: ActionMsg> AsyncFeedbackReceiver<T> {
+    pub fn give_up(self) -> Client<T> {
+        Client {
+            data: self.data.clone(),
+            _phantom: Default::default(),
+        }
+    }
+}
+
+#[pinned_drop]
+impl<T: ActionMsg> PinnedDrop for AsyncFeedbackReceiver<T> {
+    fn drop(self: Pin<&mut Self>) {
+        if self.is_waiting {
+            let mut guard = SELECTOR.lock();
+            let _ = guard.send_command(
+                &self.data.node.context,
+                async_selector::Command::RemoveActionClient(self.data.clone()),
+            );
+        }
+    }
+}
+
+impl<T: ActionMsg> Future for AsyncFeedbackReceiver<T> {
+    type Output = Result<(Client<T>, <T as ActionMsg>::Feedback), DynError>;
+
+    fn poll(self: std::pin::Pin<&mut Self>, cx: &mut std::task::Context<'_>) -> Poll<Self::Output> {
+        if is_halt() {
+            return Poll::Ready(Err(Signaled.into()));
+        }
+
+        let this = self.project();
+        *this.is_waiting = false;
+
+        match rcl_action_take_feedback::<T>(&this.data.client) {
+            Ok(feedback) => {
+                let client = Client {
+                    data: this.data.clone(),
+                    _phantom: Default::default(),
+                };
+                return Poll::Ready(Ok((client, feedback)));
+            }
+            Err(RCLActionError::ClientTakeFailed) => {}
+            Err(e) => return Poll::Ready(Err(e.into())),
+        }
+
+        let mut waker = Some(cx.waker().clone());
+        let mut guard = SELECTOR.lock();
+
+        match guard.send_command(
+            &this.data.node.context,
+            async_selector::Command::ActionClient {
+                data: this.data.clone(),
+                feedback: Box::new(move || {
+                    let w = waker.take().unwrap();
+                    w.wake();
+                    CallbackResult::Remove
+                }),
+                status: Box::new(|| CallbackResult::Ok),
+                goal: Box::new(|| CallbackResult::Ok),
+                cancel: Box::new(|| CallbackResult::Ok),
+                result: Box::new(|| CallbackResult::Ok),
+            },
+        ) {
+            Ok(_) => {
+                *this.is_waiting = true;
+                Poll::Pending
+            }
+            Err(e) => Poll::Ready(Err(e)),
+        }
+    }
+}
+
 fn rcl_action_take_goal_response<T>(
     client: &rcl::rcl_action_client_t,
 ) -> RCLActionResult<(SendGoalServiceResponse<T>, rcl::rmw_request_id_t)>
@@ -747,4 +832,16 @@ where
     )?;
 
     Ok((response, header))
+}
+
+fn rcl_action_take_feedback<T>(client: &rcl::rcl_action_client_t) -> RCLActionResult<T::Feedback>
+where
+    T: ActionMsg,
+{
+    let guard = rcl::MT_UNSAFE_FN.lock();
+
+    let mut feedback: <T as ActionMsg>::Feedback = unsafe { MaybeUninit::zeroed().assume_init() };
+    guard.rcl_action_take_feedback(client, &mut feedback as *const _ as *mut _)?;
+
+    Ok(feedback)
 }

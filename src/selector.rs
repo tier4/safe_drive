@@ -57,24 +57,15 @@
 
 use self::guard_condition::{GuardCondition, RCLGuardCondition};
 use crate::{
-    action::{self, handle::GoalHandle, update_goal_status, GoalStatus, SendGoalServiceRequest},
+    action::{self, handle::GoalHandle, GoalStatus, SendGoalServiceRequest},
     context::Context,
     delta_list::DeltaList,
     error::{DynError, RCLActionResult, RCLError, RCLResult},
     get_allocator,
     logger::{pr_error_in, pr_fatal_in, Logger},
-    msg::{
-        interfaces::action_msgs::{
-            msg::{GoalInfo, GoalInfoSeq},
-            srv::{ERROR_NONE, ERROR_REJECTED},
-        },
-        ActionMsg, GetUUID, ServiceMsg, TypeSupport,
-    },
+    msg::{interfaces::action_msgs::msg::GoalInfo, ActionMsg, GetUUID, ServiceMsg, TypeSupport},
     parameter::{ParameterServer, Parameters},
-    rcl::{
-        self, action_msgs__msg__GoalInfo, action_msgs__msg__GoalInfo__Sequence,
-        rcl_action_client_t, rcl_action_server_t,
-    },
+    rcl::{self, rcl_action_client_t, rcl_action_server_t},
     service::{
         client::{ClientData, ClientRecv},
         server::{Server, ServerData},
@@ -621,15 +612,18 @@ impl Selector {
 
                 loop {
                     match server.try_recv_goal_request() {
-                        RecvResult::Ok((header, request)) => {
-                            let uuid = *request.get_uuid();
-                            let handle = server.create_goal_handle(uuid);
-                            let accepted = goal_handler(handle, request);
+                        RecvResult::Ok((sender, request)) => {
+                            let accepted = goal_handler(sender.handle(), request);
 
-                            if let Err(e) = server.handle_goal(accepted, header, uuid) {
-                                let logger = Logger::new("safe_drive");
-                                pr_error_in!(logger, "Failed to accept new goal: {}", e);
-                                return CallbackResult::Remove;
+                            match sender.send(accepted) {
+                                Ok(s) => {
+                                    *server = s;
+                                }
+                                Err((_sender, e)) => {
+                                    let logger = Logger::new("safe_drive");
+                                    pr_error_in!(logger, "Failed to send goal response: {}", e);
+                                    return CallbackResult::Remove;
+                                }
                             }
 
                             return CallbackResult::Ok;
@@ -666,88 +660,21 @@ impl Selector {
 
                 loop {
                     match server.try_recv_cancel_request() {
-                        RecvResult::Ok((mut header, request)) => {
-                            let mut process_response =
-                                rcl::MTSafeFn::rcl_action_get_zero_initialized_cancel_response();
-                            {
-                                let guard = rcl::MT_UNSAFE_FN.lock();
-
-                                // compute which exact goals are requested to be cancelled
-                                // TODO: handle ERROR_UNKNOWN_GOAL_ID etc.
-                                if let Err(e) = guard.rcl_action_process_cancel_request(
-                                    unsafe { server.data.as_ptr_mut() },
-                                    &request,
-                                    &mut process_response as *const _ as *mut _,
-                                ) {
-                                    let logger = Logger::new("safe_drive");
-                                    pr_error_in!(
-                                        logger,
-                                        "failed to send cancel responses from action server: {}",
-                                        e
-                                    );
-                                    return CallbackResult::Remove;
-                                }
-
-                                ()
-                            }
-
-                            let goal_seq_ptr = &process_response.msg.goals_canceling as *const _
-                                as *const GoalInfoSeq<0>;
-                            let candidates = unsafe { &(*goal_seq_ptr) };
-
-                            let mut accepted_goals: Vec<_> = candidates
-                                .iter()
+                        RecvResult::Ok((sender, _req, goals)) => {
+                            let accepted_goals: Vec<_> = goals
+                                .into_iter()
                                 .filter(|goal| cancel_goal_handler(goal))
                                 .collect();
 
-                            let accepted_uuids: Vec<[u8; 16]> = accepted_goals
-                                .iter()
-                                .cloned()
-                                .map(|goal| goal.goal_id.uuid)
-                                .collect();
-                            let server_ptr = unsafe { server.data.as_ptr_mut() };
-                            update_goal_status(server_ptr, &accepted_uuids, GoalStatus::Canceling)
-                                .unwrap_or_else(|err| {
+                            match sender.send(accepted_goals) {
+                                Ok(_) => return CallbackResult::Ok,
+                                Err((_sender, e)) => {
                                     let logger = Logger::new("safe_drive");
-                                    pr_error_in!(logger, "failed to update goal status: {}", err);
-                                });
-
-                            let mut cancel_response =
-                                rcl::MTSafeFn::rcl_action_get_zero_initialized_cancel_response();
-
-                            cancel_response.msg.return_code = if accepted_goals.is_empty() {
-                                ERROR_REJECTED
-                            } else {
-                                ERROR_NONE
-                            };
-                            cancel_response.msg.goals_canceling =
-                                action_msgs__msg__GoalInfo__Sequence {
-                                    data: accepted_goals.as_mut_ptr() as *mut _
-                                        as *mut action_msgs__msg__GoalInfo,
-                                    size: accepted_goals.len() as rcl::size_t,
-                                    capacity: accepted_goals.capacity() as rcl::size_t,
-                                };
-
-                            {
-                                let guard = rcl::MT_UNSAFE_FN.lock();
-                                let server_ptr = unsafe { server.data.as_ptr_mut() };
-                                match guard.rcl_action_send_cancel_response(
-                                    server_ptr,
-                                    &mut header,
-                                    &mut cancel_response.msg as *const _ as *mut _,
-                                ) {
-                                    Ok(()) => {
-                                        return CallbackResult::Ok;
-                                    }
-                                    Err(e) => {
-                                        let logger = Logger::new("safe_drive");
-                                        pr_error_in!(
+                                    pr_error_in!(
                                         logger,
-                                        "failed to send cancel responses from action server: {}",
-                                        e
+                                        "failed to send cancel responses from action server: {e}",
                                     );
-                                        return CallbackResult::Remove;
-                                    }
+                                    return CallbackResult::Remove;
                                 }
                             }
                         }
@@ -783,39 +710,14 @@ impl Selector {
 
                 loop {
                     match server.try_recv_result_request() {
-                        RecvResult::Ok((mut header, request)) => {
-                            let removed = {
-                                let mut results = server.results.lock();
-                                results.remove(request.get_uuid())
-                            };
-                            match removed {
-                                Some(result) => {
-                                    let mut response =
-                                        T::new_result_response(GoalStatus::Succeeded as u8, result);
-                                    let guard = rcl::MT_UNSAFE_FN.lock();
-                                    match guard.rcl_action_send_result_response(
-                                        unsafe { server.data.as_ptr_mut() },
-                                        &mut header,
-                                        &mut response as *const _ as *mut _,
-                                    ) {
-                                        Ok(()) => return CallbackResult::Ok,
-                                        Err(e) => {
-                                            let logger = Logger::new("safe_drive");
-                                            pr_error_in!(
-                                        logger,
-                                        "failed to send cancel responses from action server: {}",
-                                        e
-                                    );
-                                            return CallbackResult::Remove;
-                                        }
-                                    }
-                                }
-                                None => {
+                        RecvResult::Ok((sender, request)) => {
+                            match sender.send(request.get_uuid()) {
+                                Ok(_) => return CallbackResult::Ok,
+                                Err((_sender, e)) => {
                                     let logger = Logger::new("safe_drive");
                                     pr_error_in!(
                                         logger,
-                                        "The result for the goal (uuid: {:?}) is not available yet",
-                                        request.get_uuid()
+                                        "failed to send cancel responses from action server: {e}",
                                     );
                                     return CallbackResult::Remove;
                                 }
@@ -857,6 +759,7 @@ impl Selector {
             false
         }
     }
+
     pub(crate) fn add_action_server_data(
         &mut self,
         server: Arc<action::server::ServerData>,
