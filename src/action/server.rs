@@ -365,6 +365,22 @@ pub struct ServerGoalSend<T: ActionMsg> {
 }
 
 impl<T: ActionMsg> ServerGoalSend<T> {
+    /// Accept the goal request.
+    pub fn accept<F>(self, handler: F) -> Result<Server<T>, (Self, DynError)>
+    where
+        F: FnOnce(GoalHandle<T>),
+    {
+        let h = self.handle();
+        let ret = self.send(true)?;
+        handler(h);
+
+        Ok(ret)
+    }
+
+    pub fn reject(self) -> Result<Server<T>, (Self, DynError)> {
+        self.send(false)
+    }
+
     /// Send a response for SendGoal service, and accept the goal if `accepted` is true.
     pub fn send(mut self, accepted: bool) -> Result<Server<T>, (Self, DynError)> {
         let timestamp = {
