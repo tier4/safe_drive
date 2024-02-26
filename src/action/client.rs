@@ -1,5 +1,4 @@
 use pin_project::{pin_project, pinned_drop};
-use std::f32::consts::E;
 use std::future::Future;
 use std::pin::Pin;
 use std::{
