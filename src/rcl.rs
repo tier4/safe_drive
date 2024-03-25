@@ -19,6 +19,8 @@
 #[cfg(feature = "galactic")]
 mod galactic;
 
+use std::ffi::CStr;
+
 #[cfg(feature = "galactic")]
 pub(crate) use galactic::*;
 #[cfg(feature = "galactic")]
@@ -53,7 +55,7 @@ pub use iron::{
 #[cfg(feature = "iron")]
 pub type size_t = usize;
 
-use crate::error::{action_ret_val_to_err, ret_val_to_err, RCLActionResult, RCLResult};
+use crate::error::{action_ret_val_to_err, ret_val_to_err, RCLActionResult, RCLError, RCLResult};
 use once_cell::sync::Lazy;
 use parking_lot::Mutex;
 
@@ -748,6 +750,40 @@ impl MTUnsafeFn {
 
     pub fn rcl_logging_fini(&self) -> RCLResult<()> {
         ret_val_to_err(unsafe { self::rcl_logging_fini() })
+    }
+
+    pub fn rcl_node_get_name(&self, node: *const rcl_node_t) -> RCLResult<String> {
+        let name_c = unsafe { self::rcl_node_get_name(node) };
+        if name_c.is_null() {
+            return Err(RCLError::NodeInvalid);
+        }
+        let name_c = unsafe { CStr::from_ptr(name_c) };
+        Ok(name_c
+            .to_str()
+            .map_err(|_| RCLError::NodeInvalidName)?
+            .to_owned())
+    }
+    pub fn rcl_node_get_fully_qualified_name(&self, node: *const rcl_node_t) -> RCLResult<String> {
+        let name_c = unsafe { self::rcl_node_get_fully_qualified_name(node) };
+        if name_c.is_null() {
+            return Err(RCLError::NodeInvalid);
+        }
+        let name_c = unsafe { CStr::from_ptr(name_c) };
+        Ok(name_c
+            .to_str()
+            .map_err(|_| RCLError::NodeInvalidName)?
+            .to_owned())
+    }
+    pub fn rcl_node_get_namespace(&self, node: *const rcl_node_t) -> RCLResult<String> {
+        let name_c = unsafe { self::rcl_node_get_namespace(node) };
+        if name_c.is_null() {
+            return Err(RCLError::NodeInvalid);
+        }
+        let name_c = unsafe { CStr::from_ptr(name_c) };
+        Ok(name_c
+            .to_str()
+            .map_err(|_| RCLError::NodeInvalidName)?
+            .to_owned())
     }
 }
 
