@@ -83,18 +83,15 @@ impl Node {
     }
 
     pub fn get_name(&self) -> RCLResult<String> {
-        let guard = rcl::MT_UNSAFE_FN.lock();
-        guard.rcl_node_get_name(&self.node)
+        rcl::MTSafeFn::rcl_node_get_name(&self.node)
     }
 
     pub fn get_fully_qualified_name(&self) -> RCLResult<String> {
-        let guard = rcl::MT_UNSAFE_FN.lock();
-        guard.rcl_node_get_fully_qualified_name(&self.node)
+        rcl::MTSafeFn::rcl_node_get_fully_qualified_name(&self.node)
     }
 
     pub fn get_namespace(&self) -> RCLResult<String> {
-        let guard = rcl::MT_UNSAFE_FN.lock();
-        guard.rcl_node_get_namespace(&self.node)
+        rcl::MTSafeFn::rcl_node_get_namespace(&self.node)
     }
 
     pub fn create_parameter_server(self: &Arc<Self>) -> Result<ParameterServer, DynError> {

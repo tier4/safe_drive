@@ -1305,7 +1305,7 @@ impl Selector {
                     let head = dlist.front_mut().unwrap();
                     self.base_time += *head.0;
 
-                    let handler = head.1.0.handler.take();
+                    let handler = head.1 .0.handler.take();
                     if let Some(mut handler) = handler {
                         #[cfg(feature = "statistics")]
                         let start = std::time::SystemTime::now();

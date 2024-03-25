@@ -789,7 +789,17 @@ impl From<&rcl_variant_t> for Value {
 
 impl ParameterServer {
     pub(crate) fn new(node: Arc<Node>) -> Result<Self, DynError> {
-        let params = Arc::new(RwLock::new(Parameters::new()));
+        let params_value = {
+            let mut guard = crate::rcl::MT_UNSAFE_FN.lock();
+            let fqn = node.get_fully_qualified_name()?;
+            let arguments = unsafe { &mut (*node.context.as_ptr_mut()).global_arguments };
+            guard.parameter_map(fqn.as_str(), arguments)?
+        };
+        let mut params = Parameters::new();
+        for (k, v) in params_value.into_iter() {
+            let _ = params.set_parameter(k, v, false, None);
+        }
+        let params = Arc::new(RwLock::new(params));
         let ps = params.clone();
         let n = node.clone();
 
@@ -1078,7 +1088,7 @@ fn add_srv_describe(
             let mut response = DescribeParametersResponse::new().unwrap();
             if let Some(mut seq) = ParameterDescriptorSeq::new(results.len()) {
                 seq.iter_mut()
-                    .zip(results.into_iter())
+                    .zip(results)
                     .for_each(|(dst, src)| *dst = src);
                 response.descriptors = seq;
             };
@@ -1289,7 +1299,6 @@ impl<'a> Drop for AsyncWait<'a> {
                 Command::RemoveConditionVar(self.param_server.cond_callback.clone()),
             )
             .is_err()
-        {
-        }
+        {}
     }
 }
