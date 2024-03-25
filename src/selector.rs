@@ -85,7 +85,6 @@ use crate::{
 use std::{
     cell::{Cell, RefCell},
     collections::{BTreeMap, BTreeSet},
-    mem::replace,
     ptr::null_mut,
     rc::Rc,
     sync::Arc,
@@ -685,8 +684,6 @@ impl Selector {
                                     );
                                     return CallbackResult::Remove;
                                 }
-
-                                ()
                             }
 
                             let goal_seq_ptr = &process_response.msg.goals_canceling as *const _
@@ -1308,7 +1305,7 @@ impl Selector {
                     let head = dlist.front_mut().unwrap();
                     self.base_time += *head.0;
 
-                    let handler = replace(&mut head.1 .0.handler, None);
+                    let handler = head.1.0.handler.take();
                     if let Some(mut handler) = handler {
                         #[cfg(feature = "statistics")]
                         let start = std::time::SystemTime::now();

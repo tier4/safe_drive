@@ -55,7 +55,7 @@ impl Error for Signaled {}
 pub(crate) fn init() {
     INITIALIZER.init(
         || {
-            let signals = Signals::new(&[SIGHUP, SIGTERM, SIGINT, SIGQUIT]).unwrap();
+            let signals = Signals::new([SIGHUP, SIGTERM, SIGINT, SIGQUIT]).unwrap();
             let handle = signals.handle();
 
             let mut guard = SIGHDL.lock();
@@ -100,7 +100,7 @@ pub fn is_halt() -> bool {
 #[cfg(not(target_os = "windows"))]
 pub(crate) fn halt() {
     let mut sig = SIGHDL.lock();
-    let sig = if let Some(sig) = std::mem::replace(&mut *sig, None) {
+    let sig = if let Some(sig) = sig.take() {
         sig
     } else {
         return;
@@ -108,7 +108,7 @@ pub(crate) fn halt() {
     sig.close();
 
     let mut th = THREAD.lock();
-    let th = if let Some(th) = std::mem::replace(&mut *th, None) {
+    let th = if let Some(th) = th.take() {
         th
     } else {
         return;
@@ -125,7 +125,7 @@ fn get_guard_condition() -> MutexGuard<'static, RawMutex, ConditionSet> {
 
 #[cfg(not(target_os = "windows"))]
 fn handler(mut signals: SignalsInfo) {
-    for signal in signals.forever() {
+    if let Some(signal) = signals.forever().next() {
         match signal {
             SIGTERM | SIGINT | SIGQUIT | SIGHUP => {
                 IS_HALT.store(true, Ordering::SeqCst);
@@ -138,7 +138,6 @@ fn handler(mut signals: SignalsInfo) {
 
                 let logger = Logger::new("safe_drive");
                 pr_info_in!(logger, "Received signal: {signal}");
-                break;
             }
             _ => unreachable!(),
         }

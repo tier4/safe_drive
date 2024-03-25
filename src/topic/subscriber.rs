@@ -443,7 +443,7 @@ impl<'a, T> Future for AsyncReceiver<'a, T> {
 }
 
 #[pinned_drop]
-impl<'a, T> PinnedDrop for AsyncReceiver<'a, T> {
+impl<T> PinnedDrop for AsyncReceiver<'_, T> {
     fn drop(self: Pin<&mut Self>) {
         if self.is_waiting {
             let mut guard = SELECTOR.lock();
