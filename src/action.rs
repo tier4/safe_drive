@@ -59,9 +59,9 @@ pub(crate) fn update_goal_status(
     let status_seq = unsafe { &mut (*status_seq_ptr) };
 
     for status in status_seq.iter_mut() {
-        if let Some(_) = goal_ids
+        if goal_ids
             .iter()
-            .find(|id| **id == status.goal_info.goal_id.uuid)
+            .any(|id| status.goal_info.goal_id.uuid.eq(id))
         {
             status.status = new_status as i8;
         }

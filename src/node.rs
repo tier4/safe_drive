@@ -35,8 +35,6 @@ static SET_ATEXIT: InitOnce = InitOnce::new();
 /// Node of ROS2.
 pub struct Node {
     node: rcl::rcl_node_t,
-    name: String,
-    namespace: Option<String>,
     init_param_server: InitOnce,
     pub(crate) context: Arc<Context>,
 }
@@ -71,8 +69,6 @@ impl Node {
 
         Ok(Arc::new(Node {
             node,
-            name: name.to_string(),
-            namespace: namespace.map_or_else(|| None, |v| Some(v.to_string())),
             init_param_server: InitOnce::new(),
             context,
         }))
@@ -86,12 +82,16 @@ impl Node {
         &self.node as *const _ as *mut _
     }
 
-    pub fn get_name(&self) -> &str {
-        &self.name
+    pub fn get_name(&self) -> RCLResult<String> {
+        rcl::MTSafeFn::rcl_node_get_name(&self.node)
     }
 
-    pub fn get_namespace(&self) -> &Option<String> {
-        &self.namespace
+    pub fn get_fully_qualified_name(&self) -> RCLResult<String> {
+        rcl::MTSafeFn::rcl_node_get_fully_qualified_name(&self.node)
+    }
+
+    pub fn get_namespace(&self) -> RCLResult<String> {
+        rcl::MTSafeFn::rcl_node_get_namespace(&self.node)
     }
 
     pub fn create_parameter_server(self: &Arc<Self>) -> Result<ParameterServer, DynError> {

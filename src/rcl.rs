@@ -16,8 +16,12 @@
 #![allow(clippy::upper_case_acronyms)]
 #![allow(clippy::too_many_arguments)]
 
+use num_traits::FromPrimitive;
+use regex::Regex;
 #[cfg(feature = "galactic")]
 mod galactic;
+
+use std::{collections::BTreeMap, ffi::CStr};
 
 #[cfg(feature = "galactic")]
 pub(crate) use galactic::*;
@@ -27,6 +31,7 @@ pub use galactic::{
 };
 
 #[cfg(feature = "humble")]
+#[allow(unused_imports)]
 mod humble;
 
 #[cfg(feature = "humble")]
@@ -53,7 +58,10 @@ pub use iron::{
 #[cfg(feature = "iron")]
 pub type size_t = usize;
 
-use crate::error::{action_ret_val_to_err, ret_val_to_err, RCLActionResult, RCLResult};
+use crate::{
+    error::{action_ret_val_to_err, ret_val_to_err, RCLActionResult, RCLError, RCLResult},
+    parameter::Value,
+};
 use once_cell::sync::Lazy;
 use parking_lot::Mutex;
 
@@ -65,6 +73,14 @@ pub(crate) static MT_UNSAFE_LOG_FN: Lazy<Mutex<MTUnsafeLogFn>> =
 
 pub(crate) struct MTUnsafeFn;
 pub(crate) struct MTUnsafeLogFn;
+
+// copied from https://github.com/ros2/rclcpp/blob/rolling/rclcpp/src/rclcpp/parameter_map.cpp
+fn is_node_name_matched(node_name: &str, node_fqn: &str) -> bool {
+    let regex = node_name.replace("/*", "(/\\w+)");
+    Regex::new(&regex)
+        .map(|re| re.is_match(node_fqn))
+        .unwrap_or(false)
+}
 
 impl MTUnsafeFn {
     fn new() -> Self {
@@ -749,6 +765,66 @@ impl MTUnsafeFn {
     pub fn rcl_logging_fini(&self) -> RCLResult<()> {
         ret_val_to_err(unsafe { self::rcl_logging_fini() })
     }
+
+    /// This implementation is based on [rclcpp rclcpp::parameter_map_from](https://github.com/ros2/rclcpp/blob/rolling/rclcpp/src/rclcpp/parameter_map.cpp)
+    pub fn parameter_map(
+        &mut self,
+        node_fqn: &str,
+        arguments: *const rcl_arguments_t,
+    ) -> RCLResult<BTreeMap<String, Value>> {
+        let mut params_map = BTreeMap::new();
+        let mut params: Box<*mut rcl_params_t> = Box::new(std::ptr::null_mut());
+        let ret =
+            unsafe { self::rcl_arguments_get_param_overrides(arguments, params.as_mut()) } as u32;
+        if ret != self::RCL_RET_OK {
+            return Err(FromPrimitive::from_u32(ret).unwrap_or(RCLError::InvalidRetVal));
+        }
+        if params.is_null() {
+            return Ok(params_map);
+        }
+
+        let node_names = unsafe {
+            std::slice::from_raw_parts(
+                (*(*params.as_ref())).node_names,
+                (*(*params.as_ref())).num_nodes,
+            )
+        };
+
+        let node_params = unsafe {
+            std::slice::from_raw_parts(
+                (*(*params.as_ref())).params,
+                (*(*params.as_ref())).num_nodes,
+            )
+        };
+
+        for (nn, np) in node_names.iter().zip(node_params) {
+            let c_node_name = unsafe { CStr::from_ptr(*nn) };
+            let Ok(node_name) = c_node_name.to_str() else {
+                continue;
+            };
+            let fqn = if node_name.chars().next().unwrap_or('/').eq(&'/') {
+                node_name.to_owned()
+            } else {
+                format!("/{}", node_name)
+            };
+            if !is_node_name_matched(&fqn, node_fqn) {
+                continue;
+            }
+            let (param_names, param_values) = unsafe {
+                (
+                    std::slice::from_raw_parts(np.parameter_names, np.num_params),
+                    std::slice::from_raw_parts(np.parameter_values, np.num_params),
+                )
+            };
+            for (s, v) in param_names.iter().zip(param_values) {
+                let s = unsafe { CStr::from_ptr(*s) };
+                if let Ok(key) = s.to_str() {
+                    params_map.insert(key.to_owned(), v.into());
+                }
+            }
+        }
+        Ok(params_map)
+    }
 }
 
 impl MTUnsafeLogFn {
@@ -985,5 +1061,39 @@ impl MTSafeFn {
 
     pub fn rcl_action_get_zero_initialized_cancel_response() -> rcl_action_cancel_response_t {
         unsafe { self::rcl_action_get_zero_initialized_cancel_response() }
+    }
+
+    pub fn rcl_node_get_name(node: *const rcl_node_t) -> RCLResult<String> {
+        let name_c = unsafe { self::rcl_node_get_name(node) };
+        if name_c.is_null() {
+            return Err(RCLError::NodeInvalid);
+        }
+        let name_c = unsafe { CStr::from_ptr(name_c) };
+        Ok(name_c
+            .to_str()
+            .map_err(|_| RCLError::NodeInvalidName)?
+            .to_owned())
+    }
+    pub fn rcl_node_get_fully_qualified_name(node: *const rcl_node_t) -> RCLResult<String> {
+        let name_c = unsafe { self::rcl_node_get_fully_qualified_name(node) };
+        if name_c.is_null() {
+            return Err(RCLError::NodeInvalid);
+        }
+        let name_c = unsafe { CStr::from_ptr(name_c) };
+        Ok(name_c
+            .to_str()
+            .map_err(|_| RCLError::NodeInvalidName)?
+            .to_owned())
+    }
+    pub fn rcl_node_get_namespace(node: *const rcl_node_t) -> RCLResult<String> {
+        let name_c = unsafe { self::rcl_node_get_namespace(node) };
+        if name_c.is_null() {
+            return Err(RCLError::NodeInvalid);
+        }
+        let name_c = unsafe { CStr::from_ptr(name_c) };
+        Ok(name_c
+            .to_str()
+            .map_err(|_| RCLError::NodeInvalidName)?
+            .to_owned())
     }
 }

@@ -308,6 +308,7 @@ impl From<crate::rcl::builtin_interfaces__msg__Time> for crate::msg::builtin_int
     }
 }
 
+#[allow(clippy::result_large_err)]
 fn rcl_action_accept_new_goal(
     server: *mut rcl_action_server_t,
     goal_info: &action_msgs__msg__GoalInfo,

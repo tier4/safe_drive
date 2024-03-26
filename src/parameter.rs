@@ -759,23 +759,23 @@ impl From<&rcl_variant_t> for Value {
             Value::String(s.to_str().unwrap_or("").into())
         } else if !var.bool_array_value.is_null() {
             let v = &unsafe { *var.bool_array_value };
-            let s = unsafe { from_raw_parts(v.values, v.size as usize) };
+            let s = unsafe { from_raw_parts(v.values, v.size) };
             Value::VecBool(s.into())
         } else if !var.integer_array_value.is_null() {
             let v = &unsafe { *var.integer_array_value };
-            let s = unsafe { from_raw_parts(v.values, v.size as usize) };
+            let s = unsafe { from_raw_parts(v.values, v.size) };
             Value::VecI64(s.into())
         } else if !var.byte_array_value.is_null() {
             let v = &unsafe { *var.byte_array_value };
-            let s = unsafe { from_raw_parts(v.values, v.size as usize) };
+            let s = unsafe { from_raw_parts(v.values, v.size) };
             Value::VecU8(s.into())
         } else if !var.double_array_value.is_null() {
             let v = &unsafe { *var.double_array_value };
-            let s = unsafe { from_raw_parts(v.values, v.size as usize) };
+            let s = unsafe { from_raw_parts(v.values, v.size) };
             Value::VecF64(s.into())
         } else if !var.string_array_value.is_null() {
             let v = &unsafe { *var.string_array_value };
-            let s = unsafe { from_raw_parts(v.data, v.size as usize) };
+            let s = unsafe { from_raw_parts(v.data, v.size) };
             let s = s
                 .iter()
                 .map(|p| unsafe { CStr::from_ptr(*p).to_str().unwrap_or("").into() })
@@ -789,7 +789,17 @@ impl From<&rcl_variant_t> for Value {
 
 impl ParameterServer {
     pub(crate) fn new(node: Arc<Node>) -> Result<Self, DynError> {
-        let params = Arc::new(RwLock::new(Parameters::new()));
+        let params_value = {
+            let mut guard = crate::rcl::MT_UNSAFE_FN.lock();
+            let fqn = node.get_fully_qualified_name()?;
+            let arguments = unsafe { &mut (*node.context.as_ptr_mut()).global_arguments };
+            guard.parameter_map(fqn.as_str(), arguments)?
+        };
+        let mut params = Parameters::new();
+        for (k, v) in params_value.into_iter() {
+            let _ = params.set_parameter(k, v, false, None);
+        }
+        let params = Arc::new(RwLock::new(params));
         let ps = params.clone();
         let n = node.clone();
 
@@ -885,7 +895,7 @@ fn add_srv_set(
     service_name: &str,
     cond_callback: GuardCondition,
 ) -> RCLResult<()> {
-    let name = node.get_name();
+    let name = node.get_name()?;
     let srv_set = node.create_server::<SetParameters>(
         &format!("{name}/{service_name}"),
         Some(Profile::default()),
@@ -971,7 +981,7 @@ fn add_srv_get(
     selector: &mut Selector,
     params: Arc<RwLock<Parameters>>,
 ) -> RCLResult<()> {
-    let name = node.get_name();
+    let name = node.get_name()?;
     let srv_get = node.create_server::<GetParameters>(
         &format!("{name}/get_parameters"),
         Some(Profile::default()),
@@ -1020,7 +1030,7 @@ fn add_srv_describe(
     selector: &mut Selector,
     params: Arc<RwLock<Parameters>>,
 ) -> RCLResult<()> {
-    let name = node.get_name();
+    let name = node.get_name()?;
     let srv_describe = node.create_server::<DescribeParameters>(
         &format!("{name}/describe_parameters"),
         Some(Profile::default()),
@@ -1078,7 +1088,7 @@ fn add_srv_describe(
             let mut response = DescribeParametersResponse::new().unwrap();
             if let Some(mut seq) = ParameterDescriptorSeq::new(results.len()) {
                 seq.iter_mut()
-                    .zip(results.into_iter())
+                    .zip(results)
                     .for_each(|(dst, src)| *dst = src);
                 response.descriptors = seq;
             };
@@ -1095,7 +1105,7 @@ fn add_srv_get_types(
     selector: &mut Selector,
     params: Arc<RwLock<Parameters>>,
 ) -> RCLResult<()> {
-    let name = node.get_name();
+    let name = node.get_name()?;
     let srv_get_types = node.create_server::<GetParameterTypes>(
         &format!("{name}/get_parameter_types"),
         Some(Profile::default()),
@@ -1136,7 +1146,7 @@ fn add_srv_list(
     selector: &mut Selector,
     params: Arc<RwLock<Parameters>>,
 ) -> RCLResult<()> {
-    let name = node.get_name();
+    let name = node.get_name()?;
     let srv_list = node.create_server::<ListParameters>(
         &format!("{name}/list_parameters"),
         Some(Profile::default()),
@@ -1289,8 +1299,6 @@ impl<'a> Drop for AsyncWait<'a> {
                 Command::RemoveConditionVar(self.param_server.cond_callback.clone()),
             )
             .is_err()
-        {
-            return;
-        }
+        {}
     }
 }
