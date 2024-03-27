@@ -170,6 +170,23 @@ fn main() -> Result<(), DynError> {
             false,                              // read only?
             Some("my dynamic type flag's description".to_string()), // description
         )?;
+
+        // Add Directly from Parameter struct
+        let parameter_to_set = Parameter {
+            Descriptor {
+                Some("my parameter description".to_string()),               // parameter description
+                Some("my parameter addutional_constraints".to_string()),    // parameter additional constraints
+                false,                                                      // read only ?
+                false,                                                      // static or Dynamic
+                None,                                                       // floating point range 
+                None,                                                       // integer point range 
+            },
+            Value::Bool(false),                                             // value
+        }
+        params.add_parameter(
+            ("my parameter").to_string(),       // name
+            parameter_to_set,                   // parameter
+        )?;
     }
 
     // Create a logger and a selector.
@@ -230,6 +247,23 @@ for mutual exclusion by `write()` method.
         false,                              // read only?
         Some("my dynamic type flag's description".to_string()), // description
     )?;
+
+    // Add Directly from Parameter struct
+    let parameter_to_set = Parameter {
+        Descriptor {
+            Some("my parameter description".to_string()),               // parameter description
+            Some("my parameter addutional_constraints".to_string()),    // parameter additional constraints
+            false,                                                      // read only ?
+            false,                                                      // static or Dynamic
+            None,                                                       // floating point range 
+            None,                                                       // integer point range 
+        },
+        Value::Bool(false),                                             // value
+    }
+    params.add_parameter(
+        ("my parameter").to_string(),       // name
+        parameter_to_set,                   // parameter
+    )?;
 }
 ```
 
@@ -239,6 +273,9 @@ by a value whose type is different from original type.
 
 To set a dynamically typed parameters, use `set_dynamically_typed_parameter()`.
 A dynamically typed parameter can be updated by an arbitrary type.
+
+To set directly from the Parameter struct, use `add_parameter()`.
+A Parameter struct can contain additional_constraints.
 
 Finally, register a callback function to wait updating
 parameters as follows.
@@ -346,6 +383,23 @@ async fn main() -> Result<(), DynError> {
             Value::Bool(false),                 // value
             false,                              // read only?
             Some("my dynamic type flag's description".to_string()), // description
+        )?;
+
+        // Add Directly from Parameter struct
+        let parameter_to_set = Parameter {
+            Descriptor {
+                Some("my parameter description".to_string()),               // parameter description
+                Some("my parameter addutional_constraints".to_string()),    // parameter additional constraints
+                false,                                                      // read only ?
+                false,                                                      // static or Dynamic
+                None,                                                       // floating point range 
+                None,                                                       // integer point range 
+            },
+            Value::Bool(false),                                             // value
+        }
+        params.add_parameter(
+            ("my parameter").to_string(),       // name
+            parameter_to_set,                   // parameter
         )?;
     }
 

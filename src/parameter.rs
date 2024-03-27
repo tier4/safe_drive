@@ -37,6 +37,23 @@
 //!         false,                              // read only?
 //!         Some("my dynamic type flag's description".to_string()), // description
 //!     ).unwrap();
+//!
+//!     // Add Directly from Parameter struct
+//!     let parameter_to_set = Parameter {
+//!         Descriptor {
+//!             Some("my parameter description".to_string()),                 // parameter description
+//!             Some("my parameter addutional_constraints".to_string()),      // parameter additional constraints
+//!             false,                                                                  // read only ?
+//!             false,                                                                  // static or Dynamic
+//!             None,                                                                   // floating point range
+//!             None,                                                                   // integer point range
+//!         },
+//!         Value::Bool(false),                                                         // value
+//!     }
+//!     params.add_parameter(
+//!         ("my parameter").to_string(),                                     // name
+//!         parameter_to_set,                                                           // parameter
+//!     )?;
 //! }
 //!
 //! // Create a logger and a selector.
@@ -99,6 +116,24 @@
 //!         false,                              // read only?
 //!         Some("my dynamic type flag's description".to_string()), // description
 //!     ).unwrap();
+//! }
+//!
+//!     // Add Directly from Parameter struct
+//!     let parameter_to_set = Parameter {
+//!         Descriptor {
+//!             Some(&quot;my parameter description&quot;.to_string()),                 // parameter description
+//!             Some(&quot;my parameter addutional_constraints&quot;.to_string()),      // parameter additional constraints
+//!             false,                                                                  // read only ?
+//!             false,                                                                  // static or Dynamic
+//!             None,                                                                   // floating point range
+//!             None,                                                                   // integer point range
+//!         },
+//!         Value::Bool(false),                                                         // value
+//!     }
+//!     params.add_parameter(
+//!         (&quot;my parameter&quot;).to_string(),                                     // name
+//!         parameter_to_set,                                                           // parameter
+//!     )?;
 //! }
 //!
 //! async fn run_wait(mut param_server: ParameterServer) {
@@ -203,6 +238,23 @@ use std::{
 ///         false,                              // read only?
 ///         Some("my dynamic type flag's description".to_string()), // description
 ///     ).unwrap();
+/// }
+///     // Add Directly from Parameter struct
+///     let parameter_to_set = Parameter {
+///         Descriptor {
+///             Some(&quot;my parameter description&quot;.to_string()),                 // parameter description
+///             Some(&quot;my parameter addutional_constraints&quot;.to_string()),      // parameter additional constraints
+///             false,                                                                  // read only ?
+///             false,                                                                  // static or Dynamic
+///             None,                                                                   // floating point range
+///             None,                                                                   // integer point range
+///         },
+///         Value::Bool(false),                                                         // value
+///     }
+///     params.add_parameter(
+///         (&quot;my parameter&quot;).to_string(),                                     // name
+///         parameter_to_set,                                                           // parameter
+///     )?;
 /// }
 /// ```
 pub struct ParameterServer {
@@ -348,6 +400,21 @@ impl Parameters {
 
     pub fn get_parameter(&self, name: &str) -> Option<&Parameter> {
         self.params.get(name)
+    }
+
+    pub fn add_parameter(&mut self, name: String, parameter: Parameter) -> Result<(), DynError> {
+        if let Some(_) = self.params.get_mut(&name) {
+            let msg: String = format!("{} is already declared", name);
+            Err(msg.into())
+        } else {
+            if parameter.check_range(&parameter.value) {
+                self.params.insert(name, parameter);
+                Ok(())
+            } else {
+                let msg = format!("{} is exceeding the range", name);
+                return Err(msg.into());
+            }
+        }
     }
 
     pub fn set_parameter(
