@@ -33,7 +33,6 @@ We specified and tested as follows.
 
 ## Supporting ROS2
 
-- [x] Iron
 - [x] Humble
 - [ ] Galactic (EOL)
 
