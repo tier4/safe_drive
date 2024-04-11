@@ -2025,6 +2025,23 @@ fn main() -&gt; Result&lt;(), DynError&gt; {
             false,                              // read only?
             Some(&quot;my dynamic type flag's description&quot;.to_string()), // description
         )?;
+
+        // Add Directly from Parameter struct
+        let parameter_to_set = Parameter {
+            Descriptor {
+                Some(&quot;my parameter description&quot;.to_string()),                 // parameter description
+                Some(&quot;my parameter addutional_constraints&quot;.to_string()),      // parameter additional constraints
+                false,                                                                  // read only ?
+                false,                                                                  // static or Dynamic
+                None,                                                                   // floating point range 
+                None,                                                                   // integer point range 
+            },
+            Value::Bool(false),                                                         // value
+        }
+        params.add_parameter(
+            (&quot;my parameter&quot;).to_string(),                                     // name
+            parameter_to_set,                                                           // parameter
+        )?;
     }
 
     // Create a logger and a selector.
@@ -2081,6 +2098,23 @@ for mutual exclusion by <code>write()</code> method.</p>
         false,                              // read only?
         Some(&quot;my dynamic type flag's description&quot;.to_string()), // description
     )?;
+
+    // Add Directly from Parameter struct
+        let parameter_to_set = Parameter {
+            Descriptor {
+                Some(&quot;my parameter description&quot;.to_string()),                 // parameter description
+                Some(&quot;my parameter addutional_constraints&quot;.to_string()),      // parameter additional constraints
+                false,                                                                  // read only ?
+                false,                                                                  // static or Dynamic
+                None,                                                                   // floating point range 
+                None,                                                                   // integer point range 
+            },
+            Value::Bool(false),                                                         // value
+        }
+        params.add_parameter(
+            (&quot;my parameter&quot;).to_string(),                                     // name
+            parameter_to_set,                                                           // parameter
+        )?;
 }
 <span class="boring">}</span></code></pre></pre>
 <p>To set a statically typed parameters, use <code>set_parameter()</code>.
@@ -2088,6 +2122,8 @@ A statically typed parameter cannot be updated
 by a value whose type is different from original type.</p>
 <p>To set a dynamically typed parameters, use <code>set_dynamically_typed_parameter()</code>.
 A dynamically typed parameter can be updated by an arbitrary type.</p>
+<p>To set directly from the Parameter struct, use <code>add_parameter()</code>.
+A Parameter struct can contain additional_constraints.</p>
 <p>Finally, register a callback function to wait updating
 parameters as follows.</p>
 <pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
@@ -2174,6 +2210,23 @@ async fn main() -&gt; Result&lt;(), DynError&gt; {
             Value::Bool(false),                 // value
             false,                              // read only?
             Some(&quot;my dynamic type flag's description&quot;.to_string()), // description
+        )?;
+
+        // Add Directly from Parameter struct
+        let parameter_to_set = Parameter {
+            Descriptor {
+                Some(&quot;my parameter description&quot;.to_string()),                 // parameter description
+                Some(&quot;my parameter addutional_constraints&quot;.to_string()),      // parameter additional constraints
+                false,                                                                  // read only ?
+                false,                                                                  // static or Dynamic
+                None,                                                                   // floating point range 
+                None,                                                                   // integer point range 
+            },
+            Value::Bool(false),                                                         // value
+        }
+        params.add_parameter(
+            (&quot;my parameter&quot;).to_string(),                                     // name
+            parameter_to_set,                                                           // parameter
         )?;
     }
 
