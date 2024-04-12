@@ -125,6 +125,32 @@ impl Node {
         Publisher::new(self.clone(), topic_name, qos)
     }
 
+    /// Create a publisher.
+    /// If `qos` is specified `None`,
+    /// the default profile is used.
+    ///
+    /// `T` is the type of messages the created publisher send.
+    ///
+    /// This function is the same as `create_publisher` but it disables loaned message.
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// use safe_drive::{msg::common_interfaces::std_msgs, node::Node, topic::publisher::Publisher};
+    /// use std::sync::Arc;
+    ///
+    /// fn create_publisher_disable_loaned_message(node: Arc<Node>) -> Publisher<std_msgs::msg::Bool> {
+    ///     node.create_publisher_disable_loaned_message("topic_name", None).unwrap()
+    /// }
+    /// ```
+    pub fn create_publisher_disable_loaned_message<T: TypeSupport>(
+        self: &Arc<Self>,
+        topic_name: &str,
+        qos: Option<qos::Profile>,
+    ) -> RCLResult<Publisher<T>> {
+        Publisher::new_disable_loaned_message(self.clone(), topic_name, qos)
+    }
+
     /// Create a subscriber.
     /// If `qos` is specified `None`,
     /// the default profile is used.
@@ -147,6 +173,30 @@ impl Node {
         qos: Option<qos::Profile>,
     ) -> RCLResult<Subscriber<T>> {
         Subscriber::new(self.clone(), topic_name, qos)
+    }
+
+    /// Create a subscriber.
+    /// If `qos` is specified `None`,
+    /// the default profile is used.
+    ///
+    /// `T` is the type of messages the created subscriber receive.
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// use safe_drive::{msg::common_interfaces::std_msgs, node::Node, topic::subscriber::Subscriber};
+    /// use std::sync::Arc;
+    ///
+    /// fn create_subscriber_disable_loaned_message(node: Arc<Node>) -> Subscriber<std_msgs::msg::Bool> {
+    ///     node.create_subscriber_disable_loaned_message("topic_name", None).unwrap()
+    /// }
+    /// ```
+    pub fn create_subscriber_disable_loaned_message<T: TypeSupport>(
+        self: &Arc<Self>,
+        topic_name: &str,
+        qos: Option<qos::Profile>,
+    ) -> RCLResult<Subscriber<T>> {
+        Subscriber::new_disable_loaned_message(self.clone(), topic_name, qos)
     }
 
     /// Create a server.

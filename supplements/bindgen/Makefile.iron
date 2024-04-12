@@ -19,7 +19,8 @@ all: msg.rs rcl.rs
 	-I/opt/ros/$(ROS_DISTRO)/include/unique_identifier_msgs \
 	-I/opt/ros/$(ROS_DISTRO)/include/builtin_interfaces \
 	-I/opt/ros/$(ROS_DISTRO)/include/rosidl_dynamic_typesupport \
-	-I/opt/ros/$(ROS_DISTRO)/include/service_msgs
+	-I/opt/ros/$(ROS_DISTRO)/include/service_msgs \
+	-I/opt/ros/$(ROS_DISTRO)/include/type_description_interfaces
 	sed -i -e 's/"\* */"\* /'  $@
 
 msg.rs: msg.c

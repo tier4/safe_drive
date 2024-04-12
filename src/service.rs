@@ -25,7 +25,13 @@ impl Header {
         self.header.request_id.sequence_number
     }
 
+    #[cfg(not(feature = "iron"))]
     pub fn get_writer_guid(self) -> [i8; 16] {
+        self.header.request_id.writer_guid
+    }
+
+    #[cfg(feature = "iron")]
+    pub fn get_writer_guid(self) -> [u8; 16] {
         self.header.request_id.writer_guid
     }
 }

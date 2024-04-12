@@ -132,6 +132,41 @@ impl<T: TypeSupport> Publisher<T> {
         })
     }
 
+    pub(crate) fn new_disable_loaned_message(
+        node: Arc<Node>,
+        topic_name: &str,
+        qos: Option<qos::Profile>,
+    ) -> RCLResult<Self> {
+        let mut publisher = rcl::MTSafeFn::rcl_get_zero_initialized_publisher();
+
+        let topic_name_c = CString::new(topic_name).unwrap_or_default();
+
+        let mut options = Options::new(&qos.unwrap_or_default());
+        options.disable_loaned_message();
+
+        {
+            let guard = rcl::MT_UNSAFE_FN.lock();
+            guard.rcl_publisher_init(
+                &mut publisher,
+                node.as_ptr(),
+                T::type_support(),
+                topic_name_c.as_ptr(),
+                options.as_ptr(),
+            )?;
+        }
+
+        Ok(Publisher {
+            publisher: Arc::new(publisher),
+            node,
+            topic_name: topic_name.to_string(),
+
+            #[cfg(feature = "rcl_stat")]
+            latency_publish: Mutex::new(TimeStatistics::new()),
+
+            _phantom: Default::default(),
+        })
+    }
+
     pub fn get_topic_name(&self) -> &str {
         &self.topic_name
     }
@@ -248,8 +283,18 @@ impl Options {
             qos: qos.into(),
             allocator: get_allocator(),
             rmw_publisher_options: rcl::MTSafeFn::rmw_get_default_publisher_options(),
+
+            #[cfg(feature = "iron")]
+            disable_loaned_message: false,
         };
         Options { options }
+    }
+
+    fn disable_loaned_message(&mut self) {
+        #[cfg(feature = "iron")]
+        {
+            self.options.disable_loaned_message = true;
+        }
     }
 
     pub(crate) fn as_ptr(&self) -> *const rcl::rcl_publisher_options_t {
