@@ -6,7 +6,7 @@ use crate::{
     signal_handler,
     topic::subscriber::RCLSubscription,
 };
-use crossbeam_channel::{self, Receiver, Sender};
+use crossbeam_channel::{Receiver, Sender};
 use once_cell::sync::Lazy;
 use parking_lot::Mutex;
 use std::{

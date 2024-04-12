@@ -8,7 +8,7 @@
 //! use safe_drive::{
 //!     context::Context,
 //!     logger::Logger,
-//!     parameter::{ParameterServer, Value},
+//!     parameter::{ParameterServer, Value, Parameter, Descriptor},
 //!     pr_info,
 //! };
 //!
@@ -40,20 +40,21 @@
 //!
 //!     // Add Directly from Parameter struct
 //!     let parameter_to_set = Parameter {
-//!         Descriptor {
-//!             Some("my parameter description".to_string()),                 // parameter description
-//!             Some("my parameter addutional_constraints".to_string()),      // parameter additional constraints
-//!             false,                                                                  // read only ?
-//!             false,                                                                  // static or Dynamic
-//!             None,                                                                   // floating point range
-//!             None,                                                                   // integer point range
+//!         descriptor: Descriptor {
+//!             description: "my parameter description".to_string(),                       // parameter description
+//!             additional_constraints: "my parameter addutional_constraints".to_string(), // parameter additional constraints
+//!             read_only: false,                                                          // read only ?
+//!             dynamic_typing: false,                                                     // static or Dynamic
+//!             floating_point_range: None,                                                // floating point range
+//!             integer_range: None,                                                       // integer point range
 //!         },
-//!         Value::Bool(false),                                                         // value
-//!     }
-//!     params.add_parameter(
-//!         ("my parameter").to_string(),                                     // name
-//!         parameter_to_set,                                                           // parameter
-//!     )?;
+//!         value: Value::Bool(false),                                                     // value
+//!     };
+//!
+//!     let _= params.add_parameter(
+//!         ("my parameter").to_string(), // name
+//!         parameter_to_set,             // parameter
+//!     );
 //! }
 //!
 //! // Create a logger and a selector.
@@ -87,7 +88,7 @@
 //!     context::Context,
 //!     error::DynError,
 //!     logger::Logger,
-//!     parameter::{ParameterServer, Value},
+//!     parameter::{ParameterServer, Value, Parameter, Descriptor},
 //!     pr_info,
 //! };
 //!
@@ -116,24 +117,24 @@
 //!         false,                              // read only?
 //!         Some("my dynamic type flag's description".to_string()), // description
 //!     ).unwrap();
-//! }
 //!
 //!     // Add Directly from Parameter struct
 //!     let parameter_to_set = Parameter {
-//!         Descriptor {
-//!             Some(&quot;my parameter description&quot;.to_string()),                 // parameter description
-//!             Some(&quot;my parameter addutional_constraints&quot;.to_string()),      // parameter additional constraints
-//!             false,                                                                  // read only ?
-//!             false,                                                                  // static or Dynamic
-//!             None,                                                                   // floating point range
-//!             None,                                                                   // integer point range
+//!         descriptor: Descriptor {
+//!             description: "my parameter description".to_string(),                       // parameter description
+//!             additional_constraints: "my parameter addutional_constraints".to_string(), // parameter additional constraints
+//!             read_only: false,                                                          // read only ?
+//!             dynamic_typing: false,                                                     // static or Dynamic
+//!             floating_point_range: None,                                                // floating point range
+//!             integer_range: None,                                                       // integer point range
 //!         },
-//!         Value::Bool(false),                                                         // value
-//!     }
-//!     params.add_parameter(
-//!         (&quot;my parameter&quot;).to_string(),                                     // name
-//!         parameter_to_set,                                                           // parameter
-//!     )?;
+//!         value: Value::Bool(false),                                                     // value
+//!     };
+//!
+//!     let _ = params.add_parameter(
+//!         ("my parameter").to_string(), // name
+//!         parameter_to_set,             // parameter
+//!     );
 //! }
 //!
 //! async fn run_wait(mut param_server: ParameterServer) {
@@ -210,7 +211,7 @@ use std::{
 /// ```
 /// use safe_drive::{
 ///     context::Context,
-///     parameter::{ParameterServer, Value},
+///     parameter::{ParameterServer, Value, Parameter, Descriptor},
 /// };
 ///
 /// // Create a context and a node.
@@ -238,23 +239,24 @@ use std::{
 ///         false,                              // read only?
 ///         Some("my dynamic type flag's description".to_string()), // description
 ///     ).unwrap();
-/// }
+///
 ///     // Add Directly from Parameter struct
 ///     let parameter_to_set = Parameter {
-///         Descriptor {
-///             Some(&quot;my parameter description&quot;.to_string()),                 // parameter description
-///             Some(&quot;my parameter addutional_constraints&quot;.to_string()),      // parameter additional constraints
-///             false,                                                                  // read only ?
-///             false,                                                                  // static or Dynamic
-///             None,                                                                   // floating point range
-///             None,                                                                   // integer point range
+///         descriptor: Descriptor {
+///             description: "my parameter description".to_string(),                       // parameter description
+///             additional_constraints: "my parameter addutional_constraints".to_string(), // parameter additional constraints
+///             read_only: false,                                                          // read only ?
+///             dynamic_typing: false,                                                     // static or Dynamic
+///             floating_point_range: None,                                                // floating point range
+///             integer_range: None,                                                       // integer point range
 ///         },
-///         Value::Bool(false),                                                         // value
-///     }
-///     params.add_parameter(
-///         (&quot;my parameter&quot;).to_string(),                                     // name
-///         parameter_to_set,                                                           // parameter
-///     )?;
+///         value: Value::Bool(false),                                                     // value
+///     };
+///
+///     let _ = params.add_parameter(
+///         ("my parameter").to_string(), // name
+///         parameter_to_set,             // parameter
+///     );
 /// }
 /// ```
 pub struct ParameterServer {

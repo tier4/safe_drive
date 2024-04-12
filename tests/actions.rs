@@ -2,7 +2,6 @@ pub mod common;
 
 use common::action_msg::action::my_action::*;
 use safe_drive::{
-    self,
     action::{
         client::Client,
         handle::GoalHandle,

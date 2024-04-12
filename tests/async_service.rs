@@ -4,7 +4,6 @@ pub mod common;
 use async_std::{future, prelude::*};
 use common::msgs::example_msg::srv::{AddThreeInts, AddThreeIntsRequest, AddThreeIntsResponse};
 use safe_drive::{
-    self,
     context::Context,
     error::DynError,
     logger::Logger,

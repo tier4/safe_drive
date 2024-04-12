@@ -4,7 +4,6 @@ pub mod common;
 use async_std::{future, prelude::*};
 use common::msgs::example_msg::msg::Num;
 use safe_drive::{
-    self,
     context::Context,
     topic::{
         publisher::Publisher,
