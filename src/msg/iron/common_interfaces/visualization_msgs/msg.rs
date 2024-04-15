@@ -1,15 +1,15 @@
-pub mod image_marker;
-pub mod interactive_marker;
-pub mod interactive_marker_control;
-pub mod interactive_marker_feedback;
-pub mod interactive_marker_init;
-pub mod interactive_marker_pose;
-pub mod interactive_marker_update;
-pub mod marker;
-pub mod marker_array;
-pub mod menu_entry;
-pub mod mesh_file;
-pub mod uv_coordinate;
+mod image_marker;
+mod interactive_marker;
+mod interactive_marker_control;
+mod interactive_marker_feedback;
+mod interactive_marker_init;
+mod interactive_marker_pose;
+mod interactive_marker_update;
+mod marker;
+mod marker_array;
+mod menu_entry;
+mod mesh_file;
+mod uv_coordinate;
 
 pub use image_marker::*;
 pub use interactive_marker::*;

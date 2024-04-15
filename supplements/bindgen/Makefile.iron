@@ -7,7 +7,7 @@ all: msg.rs rcl.rs
 	cp rcl.rs ../../src/rcl/$(ROS_DISTRO).rs
 
 .c.rs:
-	bindgen --blocklist-function atexit $< -o $@ -- \
+	bindgen --no-doc-comments --blocklist-function atexit $< -o $@ -- \
 	-I/opt/ros/$(ROS_DISTRO)/include/rcl \
 	-I/opt/ros/$(ROS_DISTRO)/include/rcutils \
 	-I/opt/ros/$(ROS_DISTRO)/include/rmw \
@@ -24,7 +24,7 @@ all: msg.rs rcl.rs
 	sed -i -e 's/"\* */"\* /'  $@
 
 msg.rs: msg.c
-	bindgen --blocklist-function atexit $< -o $@ -- \
+	bindgen --no-doc-comments --blocklist-function atexit $< -o $@ -- \
 	-I/opt/ros/$(ROS_DISTRO)/include/rosidl_runtime_c \
 	-I/opt/ros/$(ROS_DISTRO)/include/builtin_interfaces \
 	-I/opt/ros/$(ROS_DISTRO)/include/rcl \

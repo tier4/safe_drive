@@ -15,7 +15,7 @@ $(SUBDIRS): FORCE
 FORCE:
 
 test:
-	# cargo test test_client_wait -- --nocapture --exact
+	# cargo test test_action -- --nocapture --exact
 	cargo test -- --nocapture
 
 check:

@@ -85,7 +85,7 @@ impl<const N: usize> SetParametersRequestSeq<N> {
     /// `N` represents the maximum number of elements.
     /// If `N` is `0`, the sequence is unlimited.
     pub fn new(size: usize) -> Option<Self> {
-        if N != 0 && size >= N {
+        if N != 0 && size > N {
             // the size exceeds in the maximum number
             return None;
         }
@@ -203,7 +203,7 @@ impl<const N: usize> SetParametersResponseSeq<N> {
     /// `N` represents the maximum number of elements.
     /// If `N` is `0`, the sequence is unlimited.
     pub fn new(size: usize) -> Option<Self> {
-        if N != 0 && size >= N {
+        if N != 0 && size > N {
             // the size exceeds in the maximum number
             return None;
         }

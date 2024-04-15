@@ -345,13 +345,10 @@ pub type uint_fast32_t = ::std::os::raw::c_ulong;
 pub type uint_fast64_t = ::std::os::raw::c_ulong;
 pub type intmax_t = __intmax_t;
 pub type uintmax_t = __uintmax_t;
-#[doc = " Struct defined in msg/Time in the package builtin_interfaces.\n**\n* This message communicates ROS Time defined here:\n* https://design.ros2.org/articles/clock_and_time.html\n*/"]
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
 pub struct builtin_interfaces__msg__Time {
-    #[doc = " The seconds component, valid over all int32 values."]
     pub sec: i32,
-    #[doc = " The nanoseconds component, valid in the range [0, 1e9)."]
     pub nanosec: u32,
 }
 #[test]
@@ -394,9 +391,7 @@ fn bindgen_test_layout_builtin_interfaces__msg__Time() {
 #[derive(Debug, Copy, Clone)]
 pub struct builtin_interfaces__msg__Time__Sequence {
     pub data: *mut builtin_interfaces__msg__Time,
-    #[doc = " The number of valid items in data"]
     pub size: usize,
-    #[doc = " The number of allocated items in data"]
     pub capacity: usize,
 }
 #[test]
@@ -3240,15 +3235,11 @@ pub type rosidl_runtime_c__bool__Sequence = rosidl_runtime_c__boolean__Sequence;
 pub type rosidl_runtime_c__byte__Sequence = rosidl_runtime_c__octet__Sequence;
 pub type rosidl_runtime_c__float32__Sequence = rosidl_runtime_c__float__Sequence;
 pub type rosidl_runtime_c__float64__Sequence = rosidl_runtime_c__double__Sequence;
-#[doc = " An array of 8-bit characters terminated by a null byte."]
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
 pub struct rosidl_runtime_c__String {
-    #[doc = " The pointer to the first character, the sequence ends with a null byte."]
     pub data: *mut ::std::os::raw::c_char,
-    #[doc = " The length of the string (excluding the null byte)."]
     pub size: usize,
-    #[doc = " The capacity represents the number of allocated bytes (including the null byte)."]
     pub capacity: usize,
 }
 #[test]
@@ -3354,344 +3345,250 @@ fn bindgen_test_layout_rosidl_runtime_c__String__Sequence() {
     );
 }
 pub const rosidl_runtime_c__type_description__FieldType__FIELD_TYPE_NOT_SET: _bindgen_ty_1 = 0;
-#[doc = " Constant 'FIELD_TYPE_NOT_SET'.\n**\n* A constant for each type supported according to:\n*   http://design.ros2.org/articles/legacy_interface_definition.html\n* and:\n*   http://design.ros2.org/articles/idl_interface_definition.html\n* Order is loosely coupled to the order of appearance in the IDL 4.2 spec:\n*  https://www.omg.org/spec/IDL/4.2\n* Layout of constants across the 0-255 decimal values in the uint8:\n*\n* - 000    : Reserved for \"not set\"\n* - 001-048: Primitive types, strings, and reserved space for future primitive types\n* - 049-096: Fixed sized array of primitive and string types\n* - 097-144: Bounded Sequences of primitive and string types\n* - 145-192: Unbounded Sequences of primitive and string types\n* - 193-255: Reserved space for future array/sequence-like types\n*/"]
 pub type _bindgen_ty_1 = ::std::os::raw::c_uint;
 pub const rosidl_runtime_c__type_description__FieldType__FIELD_TYPE_NESTED_TYPE: _bindgen_ty_2 = 1;
-#[doc = " Constant 'FIELD_TYPE_NESTED_TYPE'.\n**\n* Nested type defined in other .msg/.idl files.\n*/"]
 pub type _bindgen_ty_2 = ::std::os::raw::c_uint;
 pub const rosidl_runtime_c__type_description__FieldType__FIELD_TYPE_INT8: _bindgen_ty_3 = 2;
-#[doc = " Constant 'FIELD_TYPE_INT8'.\n**\n* Integer Types\n*/"]
 pub type _bindgen_ty_3 = ::std::os::raw::c_uint;
 pub const rosidl_runtime_c__type_description__FieldType__FIELD_TYPE_UINT8: _bindgen_ty_4 = 3;
-#[doc = " Constant 'FIELD_TYPE_UINT8'."]
 pub type _bindgen_ty_4 = ::std::os::raw::c_uint;
 pub const rosidl_runtime_c__type_description__FieldType__FIELD_TYPE_INT16: _bindgen_ty_5 = 4;
-#[doc = " Constant 'FIELD_TYPE_INT16'."]
 pub type _bindgen_ty_5 = ::std::os::raw::c_uint;
 pub const rosidl_runtime_c__type_description__FieldType__FIELD_TYPE_UINT16: _bindgen_ty_6 = 5;
-#[doc = " Constant 'FIELD_TYPE_UINT16'."]
 pub type _bindgen_ty_6 = ::std::os::raw::c_uint;
 pub const rosidl_runtime_c__type_description__FieldType__FIELD_TYPE_INT32: _bindgen_ty_7 = 6;
-#[doc = " Constant 'FIELD_TYPE_INT32'."]
 pub type _bindgen_ty_7 = ::std::os::raw::c_uint;
 pub const rosidl_runtime_c__type_description__FieldType__FIELD_TYPE_UINT32: _bindgen_ty_8 = 7;
-#[doc = " Constant 'FIELD_TYPE_UINT32'."]
 pub type _bindgen_ty_8 = ::std::os::raw::c_uint;
 pub const rosidl_runtime_c__type_description__FieldType__FIELD_TYPE_INT64: _bindgen_ty_9 = 8;
-#[doc = " Constant 'FIELD_TYPE_INT64'."]
 pub type _bindgen_ty_9 = ::std::os::raw::c_uint;
 pub const rosidl_runtime_c__type_description__FieldType__FIELD_TYPE_UINT64: _bindgen_ty_10 = 9;
-#[doc = " Constant 'FIELD_TYPE_UINT64'."]
 pub type _bindgen_ty_10 = ::std::os::raw::c_uint;
 pub const rosidl_runtime_c__type_description__FieldType__FIELD_TYPE_FLOAT: _bindgen_ty_11 = 10;
-#[doc = " Constant 'FIELD_TYPE_FLOAT'.\n**\n* Floating-Point Types\n*/"]
 pub type _bindgen_ty_11 = ::std::os::raw::c_uint;
 pub const rosidl_runtime_c__type_description__FieldType__FIELD_TYPE_DOUBLE: _bindgen_ty_12 = 11;
-#[doc = " Constant 'FIELD_TYPE_DOUBLE'."]
 pub type _bindgen_ty_12 = ::std::os::raw::c_uint;
 pub const rosidl_runtime_c__type_description__FieldType__FIELD_TYPE_LONG_DOUBLE: _bindgen_ty_13 =
     12;
-#[doc = " Constant 'FIELD_TYPE_LONG_DOUBLE'."]
 pub type _bindgen_ty_13 = ::std::os::raw::c_uint;
 pub const rosidl_runtime_c__type_description__FieldType__FIELD_TYPE_CHAR: _bindgen_ty_14 = 13;
-#[doc = " Constant 'FIELD_TYPE_CHAR'.\n**\n* Char and WChar Types\n*/"]
 pub type _bindgen_ty_14 = ::std::os::raw::c_uint;
 pub const rosidl_runtime_c__type_description__FieldType__FIELD_TYPE_WCHAR: _bindgen_ty_15 = 14;
-#[doc = " Constant 'FIELD_TYPE_WCHAR'."]
 pub type _bindgen_ty_15 = ::std::os::raw::c_uint;
 pub const rosidl_runtime_c__type_description__FieldType__FIELD_TYPE_BOOLEAN: _bindgen_ty_16 = 15;
-#[doc = " Constant 'FIELD_TYPE_BOOLEAN'.\n**\n* Boolean Type\n*/"]
 pub type _bindgen_ty_16 = ::std::os::raw::c_uint;
 pub const rosidl_runtime_c__type_description__FieldType__FIELD_TYPE_BYTE: _bindgen_ty_17 = 16;
-#[doc = " Constant 'FIELD_TYPE_BYTE'.\n**\n* Byte/Octet Type\n*/"]
 pub type _bindgen_ty_17 = ::std::os::raw::c_uint;
 pub const rosidl_runtime_c__type_description__FieldType__FIELD_TYPE_STRING: _bindgen_ty_18 = 17;
-#[doc = " Constant 'FIELD_TYPE_STRING'.\n**\n* String Types\n*/"]
 pub type _bindgen_ty_18 = ::std::os::raw::c_uint;
 pub const rosidl_runtime_c__type_description__FieldType__FIELD_TYPE_WSTRING: _bindgen_ty_19 = 18;
-#[doc = " Constant 'FIELD_TYPE_WSTRING'."]
 pub type _bindgen_ty_19 = ::std::os::raw::c_uint;
 pub const rosidl_runtime_c__type_description__FieldType__FIELD_TYPE_FIXED_STRING: _bindgen_ty_20 =
     19;
-#[doc = " Constant 'FIELD_TYPE_FIXED_STRING'.\n**\n* Fixed String Types\n*/"]
 pub type _bindgen_ty_20 = ::std::os::raw::c_uint;
 pub const rosidl_runtime_c__type_description__FieldType__FIELD_TYPE_FIXED_WSTRING: _bindgen_ty_21 =
     20;
-#[doc = " Constant 'FIELD_TYPE_FIXED_WSTRING'."]
 pub type _bindgen_ty_21 = ::std::os::raw::c_uint;
 pub const rosidl_runtime_c__type_description__FieldType__FIELD_TYPE_BOUNDED_STRING: _bindgen_ty_22 =
     21;
-#[doc = " Constant 'FIELD_TYPE_BOUNDED_STRING'.\n**\n* Bounded String Types\n*/"]
 pub type _bindgen_ty_22 = ::std::os::raw::c_uint;
 pub const rosidl_runtime_c__type_description__FieldType__FIELD_TYPE_BOUNDED_WSTRING:
     _bindgen_ty_23 = 22;
-#[doc = " Constant 'FIELD_TYPE_BOUNDED_WSTRING'."]
 pub type _bindgen_ty_23 = ::std::os::raw::c_uint;
 pub const rosidl_runtime_c__type_description__FieldType__FIELD_TYPE_NESTED_TYPE_ARRAY:
     _bindgen_ty_24 = 49;
-#[doc = " Constant 'FIELD_TYPE_NESTED_TYPE_ARRAY'.\n**\n* Fixed Sized Array Types\n*/"]
 pub type _bindgen_ty_24 = ::std::os::raw::c_uint;
 pub const rosidl_runtime_c__type_description__FieldType__FIELD_TYPE_INT8_ARRAY: _bindgen_ty_25 = 50;
-#[doc = " Constant 'FIELD_TYPE_INT8_ARRAY'."]
 pub type _bindgen_ty_25 = ::std::os::raw::c_uint;
 pub const rosidl_runtime_c__type_description__FieldType__FIELD_TYPE_UINT8_ARRAY: _bindgen_ty_26 =
     51;
-#[doc = " Constant 'FIELD_TYPE_UINT8_ARRAY'."]
 pub type _bindgen_ty_26 = ::std::os::raw::c_uint;
 pub const rosidl_runtime_c__type_description__FieldType__FIELD_TYPE_INT16_ARRAY: _bindgen_ty_27 =
     52;
-#[doc = " Constant 'FIELD_TYPE_INT16_ARRAY'."]
 pub type _bindgen_ty_27 = ::std::os::raw::c_uint;
 pub const rosidl_runtime_c__type_description__FieldType__FIELD_TYPE_UINT16_ARRAY: _bindgen_ty_28 =
     53;
-#[doc = " Constant 'FIELD_TYPE_UINT16_ARRAY'."]
 pub type _bindgen_ty_28 = ::std::os::raw::c_uint;
 pub const rosidl_runtime_c__type_description__FieldType__FIELD_TYPE_INT32_ARRAY: _bindgen_ty_29 =
     54;
-#[doc = " Constant 'FIELD_TYPE_INT32_ARRAY'."]
 pub type _bindgen_ty_29 = ::std::os::raw::c_uint;
 pub const rosidl_runtime_c__type_description__FieldType__FIELD_TYPE_UINT32_ARRAY: _bindgen_ty_30 =
     55;
-#[doc = " Constant 'FIELD_TYPE_UINT32_ARRAY'."]
 pub type _bindgen_ty_30 = ::std::os::raw::c_uint;
 pub const rosidl_runtime_c__type_description__FieldType__FIELD_TYPE_INT64_ARRAY: _bindgen_ty_31 =
     56;
-#[doc = " Constant 'FIELD_TYPE_INT64_ARRAY'."]
 pub type _bindgen_ty_31 = ::std::os::raw::c_uint;
 pub const rosidl_runtime_c__type_description__FieldType__FIELD_TYPE_UINT64_ARRAY: _bindgen_ty_32 =
     57;
-#[doc = " Constant 'FIELD_TYPE_UINT64_ARRAY'."]
 pub type _bindgen_ty_32 = ::std::os::raw::c_uint;
 pub const rosidl_runtime_c__type_description__FieldType__FIELD_TYPE_FLOAT_ARRAY: _bindgen_ty_33 =
     58;
-#[doc = " Constant 'FIELD_TYPE_FLOAT_ARRAY'."]
 pub type _bindgen_ty_33 = ::std::os::raw::c_uint;
 pub const rosidl_runtime_c__type_description__FieldType__FIELD_TYPE_DOUBLE_ARRAY: _bindgen_ty_34 =
     59;
-#[doc = " Constant 'FIELD_TYPE_DOUBLE_ARRAY'."]
 pub type _bindgen_ty_34 = ::std::os::raw::c_uint;
 pub const rosidl_runtime_c__type_description__FieldType__FIELD_TYPE_LONG_DOUBLE_ARRAY:
     _bindgen_ty_35 = 60;
-#[doc = " Constant 'FIELD_TYPE_LONG_DOUBLE_ARRAY'."]
 pub type _bindgen_ty_35 = ::std::os::raw::c_uint;
 pub const rosidl_runtime_c__type_description__FieldType__FIELD_TYPE_CHAR_ARRAY: _bindgen_ty_36 = 61;
-#[doc = " Constant 'FIELD_TYPE_CHAR_ARRAY'."]
 pub type _bindgen_ty_36 = ::std::os::raw::c_uint;
 pub const rosidl_runtime_c__type_description__FieldType__FIELD_TYPE_WCHAR_ARRAY: _bindgen_ty_37 =
     62;
-#[doc = " Constant 'FIELD_TYPE_WCHAR_ARRAY'."]
 pub type _bindgen_ty_37 = ::std::os::raw::c_uint;
 pub const rosidl_runtime_c__type_description__FieldType__FIELD_TYPE_BOOLEAN_ARRAY: _bindgen_ty_38 =
     63;
-#[doc = " Constant 'FIELD_TYPE_BOOLEAN_ARRAY'."]
 pub type _bindgen_ty_38 = ::std::os::raw::c_uint;
 pub const rosidl_runtime_c__type_description__FieldType__FIELD_TYPE_BYTE_ARRAY: _bindgen_ty_39 = 64;
-#[doc = " Constant 'FIELD_TYPE_BYTE_ARRAY'."]
 pub type _bindgen_ty_39 = ::std::os::raw::c_uint;
 pub const rosidl_runtime_c__type_description__FieldType__FIELD_TYPE_STRING_ARRAY: _bindgen_ty_40 =
     65;
-#[doc = " Constant 'FIELD_TYPE_STRING_ARRAY'."]
 pub type _bindgen_ty_40 = ::std::os::raw::c_uint;
 pub const rosidl_runtime_c__type_description__FieldType__FIELD_TYPE_WSTRING_ARRAY: _bindgen_ty_41 =
     66;
-#[doc = " Constant 'FIELD_TYPE_WSTRING_ARRAY'."]
 pub type _bindgen_ty_41 = ::std::os::raw::c_uint;
 pub const rosidl_runtime_c__type_description__FieldType__FIELD_TYPE_FIXED_STRING_ARRAY:
     _bindgen_ty_42 = 67;
-#[doc = " Constant 'FIELD_TYPE_FIXED_STRING_ARRAY'."]
 pub type _bindgen_ty_42 = ::std::os::raw::c_uint;
 pub const rosidl_runtime_c__type_description__FieldType__FIELD_TYPE_FIXED_WSTRING_ARRAY:
     _bindgen_ty_43 = 68;
-#[doc = " Constant 'FIELD_TYPE_FIXED_WSTRING_ARRAY'."]
 pub type _bindgen_ty_43 = ::std::os::raw::c_uint;
 pub const rosidl_runtime_c__type_description__FieldType__FIELD_TYPE_BOUNDED_STRING_ARRAY:
     _bindgen_ty_44 = 69;
-#[doc = " Constant 'FIELD_TYPE_BOUNDED_STRING_ARRAY'."]
 pub type _bindgen_ty_44 = ::std::os::raw::c_uint;
 pub const rosidl_runtime_c__type_description__FieldType__FIELD_TYPE_BOUNDED_WSTRING_ARRAY:
     _bindgen_ty_45 = 70;
-#[doc = " Constant 'FIELD_TYPE_BOUNDED_WSTRING_ARRAY'."]
 pub type _bindgen_ty_45 = ::std::os::raw::c_uint;
 pub const rosidl_runtime_c__type_description__FieldType__FIELD_TYPE_NESTED_TYPE_BOUNDED_SEQUENCE:
     _bindgen_ty_46 = 97;
-#[doc = " Constant 'FIELD_TYPE_NESTED_TYPE_BOUNDED_SEQUENCE'.\n**\n* Bounded Sequence Types\n*/"]
 pub type _bindgen_ty_46 = ::std::os::raw::c_uint;
 pub const rosidl_runtime_c__type_description__FieldType__FIELD_TYPE_INT8_BOUNDED_SEQUENCE:
     _bindgen_ty_47 = 98;
-#[doc = " Constant 'FIELD_TYPE_INT8_BOUNDED_SEQUENCE'."]
 pub type _bindgen_ty_47 = ::std::os::raw::c_uint;
 pub const rosidl_runtime_c__type_description__FieldType__FIELD_TYPE_UINT8_BOUNDED_SEQUENCE:
     _bindgen_ty_48 = 99;
-#[doc = " Constant 'FIELD_TYPE_UINT8_BOUNDED_SEQUENCE'."]
 pub type _bindgen_ty_48 = ::std::os::raw::c_uint;
 pub const rosidl_runtime_c__type_description__FieldType__FIELD_TYPE_INT16_BOUNDED_SEQUENCE:
     _bindgen_ty_49 = 100;
-#[doc = " Constant 'FIELD_TYPE_INT16_BOUNDED_SEQUENCE'."]
 pub type _bindgen_ty_49 = ::std::os::raw::c_uint;
 pub const rosidl_runtime_c__type_description__FieldType__FIELD_TYPE_UINT16_BOUNDED_SEQUENCE:
     _bindgen_ty_50 = 101;
-#[doc = " Constant 'FIELD_TYPE_UINT16_BOUNDED_SEQUENCE'."]
 pub type _bindgen_ty_50 = ::std::os::raw::c_uint;
 pub const rosidl_runtime_c__type_description__FieldType__FIELD_TYPE_INT32_BOUNDED_SEQUENCE:
     _bindgen_ty_51 = 102;
-#[doc = " Constant 'FIELD_TYPE_INT32_BOUNDED_SEQUENCE'."]
 pub type _bindgen_ty_51 = ::std::os::raw::c_uint;
 pub const rosidl_runtime_c__type_description__FieldType__FIELD_TYPE_UINT32_BOUNDED_SEQUENCE:
     _bindgen_ty_52 = 103;
-#[doc = " Constant 'FIELD_TYPE_UINT32_BOUNDED_SEQUENCE'."]
 pub type _bindgen_ty_52 = ::std::os::raw::c_uint;
 pub const rosidl_runtime_c__type_description__FieldType__FIELD_TYPE_INT64_BOUNDED_SEQUENCE:
     _bindgen_ty_53 = 104;
-#[doc = " Constant 'FIELD_TYPE_INT64_BOUNDED_SEQUENCE'."]
 pub type _bindgen_ty_53 = ::std::os::raw::c_uint;
 pub const rosidl_runtime_c__type_description__FieldType__FIELD_TYPE_UINT64_BOUNDED_SEQUENCE:
     _bindgen_ty_54 = 105;
-#[doc = " Constant 'FIELD_TYPE_UINT64_BOUNDED_SEQUENCE'."]
 pub type _bindgen_ty_54 = ::std::os::raw::c_uint;
 pub const rosidl_runtime_c__type_description__FieldType__FIELD_TYPE_FLOAT_BOUNDED_SEQUENCE:
     _bindgen_ty_55 = 106;
-#[doc = " Constant 'FIELD_TYPE_FLOAT_BOUNDED_SEQUENCE'."]
 pub type _bindgen_ty_55 = ::std::os::raw::c_uint;
 pub const rosidl_runtime_c__type_description__FieldType__FIELD_TYPE_DOUBLE_BOUNDED_SEQUENCE:
     _bindgen_ty_56 = 107;
-#[doc = " Constant 'FIELD_TYPE_DOUBLE_BOUNDED_SEQUENCE'."]
 pub type _bindgen_ty_56 = ::std::os::raw::c_uint;
 pub const rosidl_runtime_c__type_description__FieldType__FIELD_TYPE_LONG_DOUBLE_BOUNDED_SEQUENCE:
     _bindgen_ty_57 = 108;
-#[doc = " Constant 'FIELD_TYPE_LONG_DOUBLE_BOUNDED_SEQUENCE'."]
 pub type _bindgen_ty_57 = ::std::os::raw::c_uint;
 pub const rosidl_runtime_c__type_description__FieldType__FIELD_TYPE_CHAR_BOUNDED_SEQUENCE:
     _bindgen_ty_58 = 109;
-#[doc = " Constant 'FIELD_TYPE_CHAR_BOUNDED_SEQUENCE'."]
 pub type _bindgen_ty_58 = ::std::os::raw::c_uint;
 pub const rosidl_runtime_c__type_description__FieldType__FIELD_TYPE_WCHAR_BOUNDED_SEQUENCE:
     _bindgen_ty_59 = 110;
-#[doc = " Constant 'FIELD_TYPE_WCHAR_BOUNDED_SEQUENCE'."]
 pub type _bindgen_ty_59 = ::std::os::raw::c_uint;
 pub const rosidl_runtime_c__type_description__FieldType__FIELD_TYPE_BOOLEAN_BOUNDED_SEQUENCE:
     _bindgen_ty_60 = 111;
-#[doc = " Constant 'FIELD_TYPE_BOOLEAN_BOUNDED_SEQUENCE'."]
 pub type _bindgen_ty_60 = ::std::os::raw::c_uint;
 pub const rosidl_runtime_c__type_description__FieldType__FIELD_TYPE_BYTE_BOUNDED_SEQUENCE:
     _bindgen_ty_61 = 112;
-#[doc = " Constant 'FIELD_TYPE_BYTE_BOUNDED_SEQUENCE'."]
 pub type _bindgen_ty_61 = ::std::os::raw::c_uint;
 pub const rosidl_runtime_c__type_description__FieldType__FIELD_TYPE_STRING_BOUNDED_SEQUENCE:
     _bindgen_ty_62 = 113;
-#[doc = " Constant 'FIELD_TYPE_STRING_BOUNDED_SEQUENCE'."]
 pub type _bindgen_ty_62 = ::std::os::raw::c_uint;
 pub const rosidl_runtime_c__type_description__FieldType__FIELD_TYPE_WSTRING_BOUNDED_SEQUENCE:
     _bindgen_ty_63 = 114;
-#[doc = " Constant 'FIELD_TYPE_WSTRING_BOUNDED_SEQUENCE'."]
 pub type _bindgen_ty_63 = ::std::os::raw::c_uint;
 pub const rosidl_runtime_c__type_description__FieldType__FIELD_TYPE_FIXED_STRING_BOUNDED_SEQUENCE : _bindgen_ty_64 = 115 ;
-#[doc = " Constant 'FIELD_TYPE_FIXED_STRING_BOUNDED_SEQUENCE'."]
 pub type _bindgen_ty_64 = ::std::os::raw::c_uint;
 pub const rosidl_runtime_c__type_description__FieldType__FIELD_TYPE_FIXED_WSTRING_BOUNDED_SEQUENCE : _bindgen_ty_65 = 116 ;
-#[doc = " Constant 'FIELD_TYPE_FIXED_WSTRING_BOUNDED_SEQUENCE'."]
 pub type _bindgen_ty_65 = ::std::os::raw::c_uint;
 pub const rosidl_runtime_c__type_description__FieldType__FIELD_TYPE_BOUNDED_STRING_BOUNDED_SEQUENCE : _bindgen_ty_66 = 117 ;
-#[doc = " Constant 'FIELD_TYPE_BOUNDED_STRING_BOUNDED_SEQUENCE'."]
 pub type _bindgen_ty_66 = ::std::os::raw::c_uint;
 pub const rosidl_runtime_c__type_description__FieldType__FIELD_TYPE_BOUNDED_WSTRING_BOUNDED_SEQUENCE : _bindgen_ty_67 = 118 ;
-#[doc = " Constant 'FIELD_TYPE_BOUNDED_WSTRING_BOUNDED_SEQUENCE'."]
 pub type _bindgen_ty_67 = ::std::os::raw::c_uint;
 pub const rosidl_runtime_c__type_description__FieldType__FIELD_TYPE_NESTED_TYPE_UNBOUNDED_SEQUENCE : _bindgen_ty_68 = 145 ;
-#[doc = " Constant 'FIELD_TYPE_NESTED_TYPE_UNBOUNDED_SEQUENCE'.\n**\n* Unbounded Sequence Types\n*/"]
 pub type _bindgen_ty_68 = ::std::os::raw::c_uint;
 pub const rosidl_runtime_c__type_description__FieldType__FIELD_TYPE_INT8_UNBOUNDED_SEQUENCE:
     _bindgen_ty_69 = 146;
-#[doc = " Constant 'FIELD_TYPE_INT8_UNBOUNDED_SEQUENCE'."]
 pub type _bindgen_ty_69 = ::std::os::raw::c_uint;
 pub const rosidl_runtime_c__type_description__FieldType__FIELD_TYPE_UINT8_UNBOUNDED_SEQUENCE:
     _bindgen_ty_70 = 147;
-#[doc = " Constant 'FIELD_TYPE_UINT8_UNBOUNDED_SEQUENCE'."]
 pub type _bindgen_ty_70 = ::std::os::raw::c_uint;
 pub const rosidl_runtime_c__type_description__FieldType__FIELD_TYPE_INT16_UNBOUNDED_SEQUENCE:
     _bindgen_ty_71 = 148;
-#[doc = " Constant 'FIELD_TYPE_INT16_UNBOUNDED_SEQUENCE'."]
 pub type _bindgen_ty_71 = ::std::os::raw::c_uint;
 pub const rosidl_runtime_c__type_description__FieldType__FIELD_TYPE_UINT16_UNBOUNDED_SEQUENCE:
     _bindgen_ty_72 = 149;
-#[doc = " Constant 'FIELD_TYPE_UINT16_UNBOUNDED_SEQUENCE'."]
 pub type _bindgen_ty_72 = ::std::os::raw::c_uint;
 pub const rosidl_runtime_c__type_description__FieldType__FIELD_TYPE_INT32_UNBOUNDED_SEQUENCE:
     _bindgen_ty_73 = 150;
-#[doc = " Constant 'FIELD_TYPE_INT32_UNBOUNDED_SEQUENCE'."]
 pub type _bindgen_ty_73 = ::std::os::raw::c_uint;
 pub const rosidl_runtime_c__type_description__FieldType__FIELD_TYPE_UINT32_UNBOUNDED_SEQUENCE:
     _bindgen_ty_74 = 151;
-#[doc = " Constant 'FIELD_TYPE_UINT32_UNBOUNDED_SEQUENCE'."]
 pub type _bindgen_ty_74 = ::std::os::raw::c_uint;
 pub const rosidl_runtime_c__type_description__FieldType__FIELD_TYPE_INT64_UNBOUNDED_SEQUENCE:
     _bindgen_ty_75 = 152;
-#[doc = " Constant 'FIELD_TYPE_INT64_UNBOUNDED_SEQUENCE'."]
 pub type _bindgen_ty_75 = ::std::os::raw::c_uint;
 pub const rosidl_runtime_c__type_description__FieldType__FIELD_TYPE_UINT64_UNBOUNDED_SEQUENCE:
     _bindgen_ty_76 = 153;
-#[doc = " Constant 'FIELD_TYPE_UINT64_UNBOUNDED_SEQUENCE'."]
 pub type _bindgen_ty_76 = ::std::os::raw::c_uint;
 pub const rosidl_runtime_c__type_description__FieldType__FIELD_TYPE_FLOAT_UNBOUNDED_SEQUENCE:
     _bindgen_ty_77 = 154;
-#[doc = " Constant 'FIELD_TYPE_FLOAT_UNBOUNDED_SEQUENCE'."]
 pub type _bindgen_ty_77 = ::std::os::raw::c_uint;
 pub const rosidl_runtime_c__type_description__FieldType__FIELD_TYPE_DOUBLE_UNBOUNDED_SEQUENCE:
     _bindgen_ty_78 = 155;
-#[doc = " Constant 'FIELD_TYPE_DOUBLE_UNBOUNDED_SEQUENCE'."]
 pub type _bindgen_ty_78 = ::std::os::raw::c_uint;
 pub const rosidl_runtime_c__type_description__FieldType__FIELD_TYPE_LONG_DOUBLE_UNBOUNDED_SEQUENCE : _bindgen_ty_79 = 156 ;
-#[doc = " Constant 'FIELD_TYPE_LONG_DOUBLE_UNBOUNDED_SEQUENCE'."]
 pub type _bindgen_ty_79 = ::std::os::raw::c_uint;
 pub const rosidl_runtime_c__type_description__FieldType__FIELD_TYPE_CHAR_UNBOUNDED_SEQUENCE:
     _bindgen_ty_80 = 157;
-#[doc = " Constant 'FIELD_TYPE_CHAR_UNBOUNDED_SEQUENCE'."]
 pub type _bindgen_ty_80 = ::std::os::raw::c_uint;
 pub const rosidl_runtime_c__type_description__FieldType__FIELD_TYPE_WCHAR_UNBOUNDED_SEQUENCE:
     _bindgen_ty_81 = 158;
-#[doc = " Constant 'FIELD_TYPE_WCHAR_UNBOUNDED_SEQUENCE'."]
 pub type _bindgen_ty_81 = ::std::os::raw::c_uint;
 pub const rosidl_runtime_c__type_description__FieldType__FIELD_TYPE_BOOLEAN_UNBOUNDED_SEQUENCE:
     _bindgen_ty_82 = 159;
-#[doc = " Constant 'FIELD_TYPE_BOOLEAN_UNBOUNDED_SEQUENCE'."]
 pub type _bindgen_ty_82 = ::std::os::raw::c_uint;
 pub const rosidl_runtime_c__type_description__FieldType__FIELD_TYPE_BYTE_UNBOUNDED_SEQUENCE:
     _bindgen_ty_83 = 160;
-#[doc = " Constant 'FIELD_TYPE_BYTE_UNBOUNDED_SEQUENCE'."]
 pub type _bindgen_ty_83 = ::std::os::raw::c_uint;
 pub const rosidl_runtime_c__type_description__FieldType__FIELD_TYPE_STRING_UNBOUNDED_SEQUENCE:
     _bindgen_ty_84 = 161;
-#[doc = " Constant 'FIELD_TYPE_STRING_UNBOUNDED_SEQUENCE'."]
 pub type _bindgen_ty_84 = ::std::os::raw::c_uint;
 pub const rosidl_runtime_c__type_description__FieldType__FIELD_TYPE_WSTRING_UNBOUNDED_SEQUENCE:
     _bindgen_ty_85 = 162;
-#[doc = " Constant 'FIELD_TYPE_WSTRING_UNBOUNDED_SEQUENCE'."]
 pub type _bindgen_ty_85 = ::std::os::raw::c_uint;
 pub const rosidl_runtime_c__type_description__FieldType__FIELD_TYPE_FIXED_STRING_UNBOUNDED_SEQUENCE : _bindgen_ty_86 = 163 ;
-#[doc = " Constant 'FIELD_TYPE_FIXED_STRING_UNBOUNDED_SEQUENCE'."]
 pub type _bindgen_ty_86 = ::std::os::raw::c_uint;
 pub const rosidl_runtime_c__type_description__FieldType__FIELD_TYPE_FIXED_WSTRING_UNBOUNDED_SEQUENCE : _bindgen_ty_87 = 164 ;
-#[doc = " Constant 'FIELD_TYPE_FIXED_WSTRING_UNBOUNDED_SEQUENCE'."]
 pub type _bindgen_ty_87 = ::std::os::raw::c_uint;
 pub const rosidl_runtime_c__type_description__FieldType__FIELD_TYPE_BOUNDED_STRING_UNBOUNDED_SEQUENCE : _bindgen_ty_88 = 165 ;
-#[doc = " Constant 'FIELD_TYPE_BOUNDED_STRING_UNBOUNDED_SEQUENCE'."]
 pub type _bindgen_ty_88 = ::std::os::raw::c_uint;
 pub const rosidl_runtime_c__type_description__FieldType__FIELD_TYPE_BOUNDED_WSTRING_UNBOUNDED_SEQUENCE : _bindgen_ty_89 = 166 ;
-#[doc = " Constant 'FIELD_TYPE_BOUNDED_WSTRING_UNBOUNDED_SEQUENCE'."]
 pub type _bindgen_ty_89 = ::std::os::raw::c_uint;
 pub const rosidl_runtime_c__type_description__FieldType__nested_type_name__MAX_STRING_SIZE:
     _bindgen_ty_90 = 255;
 pub type _bindgen_ty_90 = ::std::os::raw::c_uint;
-#[doc = " Struct defined in msg/FieldType in the package type_description_interfaces.\n**\n* Represents the type of a field and related meta-data.\n*/"]
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
 pub struct rosidl_runtime_c__type_description__FieldType {
-    #[doc = " Identifying number for the type of the field, using one of the above constants."]
     pub type_id: u8,
-    #[doc = " Only used when the type is an array or a bounded sequence.\n In the case of an array, this is the fixed capacity of the array.\n In the case of a bounded sequence, this is the maximum capacity of the sequence.\n In all other cases this field is unused."]
     pub capacity: u64,
-    #[doc = " Only used when the type is a fixed or bounded string/wstring, or a array/sequence of those.\n In the case of a fixed string/wstring, it is the fixed length of the string.\n In the case of a bounded string/wstring, it is the maximum capacity of the string.\n In the case of an array/sequence of fixed string/wstring, it is the fixed length of the strings.\n In the case of an array/sequence of bounded string/wstring, it is the maximum capacity of the strings.\n It is not currently possible to have different string capacities per element in the array/sequence."]
     pub string_capacity: u64,
-    #[doc = " Only used when the type is a nested type or array/sequence of nested types.\n This is limited to 255 characters.\n TODO(wjwwood): this 255 character limit was chosen due to this being the limit\n   for DDSI-RTPS based middlewares, which is the most commonly used right now.\n   We lack a ROS 2 specific limit in our design documents, but we should update\n   this and/or link to the design doc when that is available."]
     pub nested_type_name: rosidl_runtime_c__String,
 }
 #[test]
@@ -3760,9 +3657,7 @@ fn bindgen_test_layout_rosidl_runtime_c__type_description__FieldType() {
 #[derive(Debug, Copy, Clone)]
 pub struct rosidl_runtime_c__type_description__FieldType__Sequence {
     pub data: *mut rosidl_runtime_c__type_description__FieldType,
-    #[doc = " The number of valid items in data"]
     pub size: usize,
-    #[doc = " The number of allocated items in data"]
     pub capacity: usize,
 }
 #[test]
@@ -3817,15 +3712,11 @@ fn bindgen_test_layout_rosidl_runtime_c__type_description__FieldType__Sequence()
         )
     );
 }
-#[doc = " Struct defined in msg/Field in the package type_description_interfaces.\n**\n* Represents a single field in a type.\n*/"]
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
 pub struct rosidl_runtime_c__type_description__Field {
-    #[doc = " Name of the field."]
     pub name: rosidl_runtime_c__String,
-    #[doc = " Type of the field, including details about the type like length, nested name, etc."]
     pub type_: rosidl_runtime_c__type_description__FieldType,
-    #[doc = " Literal default value of the field as a string, as it appeared in the original\n message description file, whether that be .msg/.srv/.action or .idl."]
     pub default_value: rosidl_runtime_c__String,
 }
 #[test]
@@ -3884,9 +3775,7 @@ fn bindgen_test_layout_rosidl_runtime_c__type_description__Field() {
 #[derive(Debug, Copy, Clone)]
 pub struct rosidl_runtime_c__type_description__Field__Sequence {
     pub data: *mut rosidl_runtime_c__type_description__Field,
-    #[doc = " The number of valid items in data"]
     pub size: usize,
-    #[doc = " The number of allocated items in data"]
     pub capacity: usize,
 }
 #[test]
@@ -3943,13 +3832,10 @@ fn bindgen_test_layout_rosidl_runtime_c__type_description__Field__Sequence() {
 }
 pub const rosidl_runtime_c__type_description__IndividualTypeDescription__type_name__MAX_STRING_SIZE : _bindgen_ty_91 = 255 ;
 pub type _bindgen_ty_91 = ::std::os::raw::c_uint;
-#[doc = " Struct defined in msg/IndividualTypeDescription in the package type_description_interfaces.\n**\n* Represents a single type, without the types it references, if any.\n*/"]
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
 pub struct rosidl_runtime_c__type_description__IndividualTypeDescription {
-    #[doc = " Name of the type.\n This is limited to 255 characters.\n TODO(wjwwood): this 255 character limit was chosen due to this being the limit\n   for DDSI-RTPS based middlewares, which is the most commonly used right now.\n   We lack a ROS 2 specific limit in our design documents, but we should update\n   this and/or link to the design doc when that is available."]
     pub type_name: rosidl_runtime_c__String,
-    #[doc = " Fields of the type."]
     pub fields: rosidl_runtime_c__type_description__Field__Sequence,
 }
 #[test]
@@ -3999,9 +3885,7 @@ fn bindgen_test_layout_rosidl_runtime_c__type_description__IndividualTypeDescrip
 #[derive(Debug, Copy, Clone)]
 pub struct rosidl_runtime_c__type_description__IndividualTypeDescription__Sequence {
     pub data: *mut rosidl_runtime_c__type_description__IndividualTypeDescription,
-    #[doc = " The number of valid items in data"]
     pub size: usize,
-    #[doc = " The number of allocated items in data"]
     pub capacity: usize,
 }
 #[test]
@@ -4061,13 +3945,10 @@ fn bindgen_test_layout_rosidl_runtime_c__type_description__IndividualTypeDescrip
         )
     );
 }
-#[doc = " Struct defined in msg/TypeDescription in the package type_description_interfaces.\n**\n* Represents a complete type description, including the type itself as well as the types it references.\n*/"]
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
 pub struct rosidl_runtime_c__type_description__TypeDescription {
-    #[doc = " Description of the type."]
     pub type_description: rosidl_runtime_c__type_description__IndividualTypeDescription,
-    #[doc = " Descriptions of all referenced types, recursively."]
     pub referenced_type_descriptions:
         rosidl_runtime_c__type_description__IndividualTypeDescription__Sequence,
 }
@@ -4119,9 +4000,7 @@ fn bindgen_test_layout_rosidl_runtime_c__type_description__TypeDescription() {
 #[derive(Debug, Copy, Clone)]
 pub struct rosidl_runtime_c__type_description__TypeDescription__Sequence {
     pub data: *mut rosidl_runtime_c__type_description__TypeDescription,
-    #[doc = " The number of valid items in data"]
     pub size: usize,
-    #[doc = " The number of allocated items in data"]
     pub capacity: usize,
 }
 #[test]
@@ -4177,15 +4056,11 @@ fn bindgen_test_layout_rosidl_runtime_c__type_description__TypeDescription__Sequ
         )
     );
 }
-#[doc = " Struct defined in msg/TypeSource in the package type_description_interfaces.\n**\n* Represents the original source of a ROS 2 interface definition.\n*/"]
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
 pub struct rosidl_runtime_c__type_description__TypeSource {
-    #[doc = " ROS interface type name, in PACKAGE/NAMESPACE/TYPENAME format."]
     pub type_name: rosidl_runtime_c__String,
-    #[doc = " The type of the original source file, typically matching the file extension.\n Well-known encodings: \"idl\", \"msg\", \"srv\", \"action\", \"dynamic\", \"implicit\".\n \"dynamic\" specifies a type created programmatically by a user, thus having no source.\n \"implicit\" specifies a type created automatically as a subtype of a\n complex type (service or action) - such as the request message for a service.\n Implicit types will have no contents, the full source will be available on the parent srv/action."]
     pub encoding: rosidl_runtime_c__String,
-    #[doc = " Dumped contents of the interface definition source file.\n If `encoding` is \"dynamic\" or \"implicit\", this field will be empty."]
     pub raw_file_contents: rosidl_runtime_c__String,
 }
 #[test]
@@ -4244,9 +4119,7 @@ fn bindgen_test_layout_rosidl_runtime_c__type_description__TypeSource() {
 #[derive(Debug, Copy, Clone)]
 pub struct rosidl_runtime_c__type_description__TypeSource__Sequence {
     pub data: *mut rosidl_runtime_c__type_description__TypeSource,
-    #[doc = " The number of valid items in data"]
     pub size: usize,
-    #[doc = " The number of allocated items in data"]
     pub capacity: usize,
 }
 #[test]
@@ -4302,27 +4175,22 @@ fn bindgen_test_layout_rosidl_runtime_c__type_description__TypeSource__Sequence(
         )
     );
 }
-#[doc = " The type that holds a return value for an rcutils operation."]
 pub type rcutils_ret_t = ::std::os::raw::c_int;
-#[doc = " Encapsulation of an allocator.\n**\n* The default allocator uses malloc(), free(), calloc(), and realloc().\n* It can be obtained using rcutils_get_default_allocator().\n*\n* The allocator should be trivially copyable.\n* Meaning that the struct should continue to work after being assignment\n* copied into a new struct.\n* Specifically the object pointed to by the state pointer should remain valid\n* until all uses of the allocator have been made.\n* Particular care should be taken when giving an allocator to functions like\n* rcutils_*_init() where it is stored within another object and used later.\n* Developers should note that, while the fields of a const-qualified allocator\n* struct cannot be modified, the state of the allocator can be modified.\n*/"]
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
 pub struct rcutils_allocator_s {
-    #[doc = " Allocate memory, given a size and the `state` pointer.\n** An error should be indicated by returning `NULL`. */"]
     pub allocate: ::std::option::Option<
         unsafe extern "C" fn(
             size: usize,
             state: *mut ::std::os::raw::c_void,
         ) -> *mut ::std::os::raw::c_void,
     >,
-    #[doc = " Deallocate previously allocated memory, mimicking free().\n** Also takes the `state` pointer. */"]
     pub deallocate: ::std::option::Option<
         unsafe extern "C" fn(
             pointer: *mut ::std::os::raw::c_void,
             state: *mut ::std::os::raw::c_void,
         ),
     >,
-    #[doc = " Reallocate if possible, otherwise it deallocates and allocates.\n**\n* Also takes the `state` pointer.\n*\n* If unsupported then do deallocate and then allocate.\n* This should behave as realloc() does, as opposed to posix's\n* [reallocf](https://linux.die.net/man/3/reallocf), i.e. the memory given\n* by pointer will not be free'd automatically if realloc() fails.\n* For reallocf-like behavior use rcutils_reallocf().\n* This function must be able to take an input pointer of `NULL` and succeed.\n*/"]
     pub reallocate: ::std::option::Option<
         unsafe extern "C" fn(
             pointer: *mut ::std::os::raw::c_void,
@@ -4330,7 +4198,6 @@ pub struct rcutils_allocator_s {
             state: *mut ::std::os::raw::c_void,
         ) -> *mut ::std::os::raw::c_void,
     >,
-    #[doc = " Allocate memory with all elements set to zero, given a number of elements and their size.\n** An error should be indicated by returning `NULL`. */"]
     pub zero_allocate: ::std::option::Option<
         unsafe extern "C" fn(
             number_of_elements: usize,
@@ -4338,7 +4205,6 @@ pub struct rcutils_allocator_s {
             state: *mut ::std::os::raw::c_void,
         ) -> *mut ::std::os::raw::c_void,
     >,
-    #[doc = " Implementation defined state storage.\n**\n* This is passed as the final parameter to other allocator functions.\n* Note that the contents of the state can be modified even in const-qualified\n* allocator objects.\n*/"]
     pub state: *mut ::std::os::raw::c_void,
 }
 #[test]
@@ -4406,22 +4272,17 @@ fn bindgen_test_layout_rcutils_allocator_s() {
         )
     );
 }
-#[doc = " Encapsulation of an allocator.\n**\n* The default allocator uses malloc(), free(), calloc(), and realloc().\n* It can be obtained using rcutils_get_default_allocator().\n*\n* The allocator should be trivially copyable.\n* Meaning that the struct should continue to work after being assignment\n* copied into a new struct.\n* Specifically the object pointed to by the state pointer should remain valid\n* until all uses of the allocator have been made.\n* Particular care should be taken when giving an allocator to functions like\n* rcutils_*_init() where it is stored within another object and used later.\n* Developers should note that, while the fields of a const-qualified allocator\n* struct cannot be modified, the state of the allocator can be modified.\n*/"]
 pub type rcutils_allocator_t = rcutils_allocator_s;
 extern "C" {
-    #[doc = " Return a zero initialized allocator.\n**\n* Note that this is an invalid allocator and should only be used as a placeholder.\n*/"]
     pub fn rcutils_get_zero_initialized_allocator() -> rcutils_allocator_t;
 }
 extern "C" {
-    #[doc = " Return a properly initialized rcutils_allocator_t with default values.\n**\n* This defaults to:\n*\n* - allocate = wraps malloc()\n* - deallocate = wraps free()\n* - reallocate = wraps realloc()\n* - zero_allocate = wraps calloc()\n* - state = `NULL`\n*\n* <hr>\n* Attribute          | Adherence\n* ------------------ | -------------\n* Allocates Memory   | No\n* Thread-Safe        | Yes\n* Uses Atomics       | No\n* Lock-Free          | Yes\n*/"]
     pub fn rcutils_get_default_allocator() -> rcutils_allocator_t;
 }
 extern "C" {
-    #[doc = " Return true if the given allocator has non-null function pointers.\n**\n* \\param[in] allocator to be checked by the function\n* \\return `true` if the allocator is valid, `false` otherwise.\n*/"]
     pub fn rcutils_allocator_is_valid(allocator: *const rcutils_allocator_t) -> bool;
 }
 extern "C" {
-    #[doc = " Emulate the behavior of [reallocf](https://linux.die.net/man/3/reallocf).\n**\n* This function will return `NULL` if the allocator is `NULL` or has `NULL` for\n* function pointer fields.\n* \\param[inout] pointer to the memory which will be reallocated\n* \\param[in] size in bytes\n* \\param[in] allocator to be used to allocate and deallocate memory\n*/"]
     pub fn rcutils_reallocf(
         pointer: *mut ::std::os::raw::c_void,
         size: usize,
@@ -4493,17 +4354,14 @@ fn bindgen_test_layout_rcutils_sha256_ctx_s() {
 }
 pub type rcutils_sha256_ctx_t = rcutils_sha256_ctx_s;
 extern "C" {
-    #[doc = " Initialize the sha256 algorithm context with starting state.\n**\n* Call this on any new context before starting to input data.\n*\n* \\param[inout] ctx\n* \\return void\n*/"]
     pub fn rcutils_sha256_init(ctx: *mut rcutils_sha256_ctx_t);
 }
 extern "C" {
-    #[doc = " Add data to the sha256 algorithm\n**\n* This may be called repeatedly on an initialized context.\n*\n* \\param[inout] ctx Initialized sha256 context struct\n* \\param[in] data Data to add to the total message being hashed\n* \\param[in] data_len Size of the input data.\n* \\return void\n*/"]
     pub fn rcutils_sha256_update(ctx: *mut rcutils_sha256_ctx_t, data: *const u8, data_len: usize);
 }
 extern "C" {
     pub fn rcutils_sha256_final(ctx: *mut rcutils_sha256_ctx_t, output_hash: *mut u8);
 }
-#[doc = " A ROS 2 interface type hash per REP-2011 RIHS standard."]
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
 pub struct rosidl_type_hash_s {
@@ -4545,14 +4403,11 @@ fn bindgen_test_layout_rosidl_type_hash_s() {
         )
     );
 }
-#[doc = " A ROS 2 interface type hash per REP-2011 RIHS standard."]
 pub type rosidl_type_hash_t = rosidl_type_hash_s;
 extern "C" {
-    #[doc = " Get a new zero-initialized type hash structure.\n**\n* Note that the version equals ROSIDL_TYPE_HASH_VERSION_UNSET.\n*/"]
     pub fn rosidl_get_zero_initialized_type_hash() -> rosidl_type_hash_t;
 }
 extern "C" {
-    #[doc = " Convert type hash to a standardized string representation.\n**\n* Follows format RIHS{version}_{value}.\n*\n* \\param[in] type_hash Type hash to convert to string\n* \\param[in] allocator Allocator to use for allocating string space\n* \\param[out] output_string Handle to a pointer that will be set\n*   to the newly allocated null-terminated string representation.\n* \\return RCUTILS_RET_INVALID_ARGUMENT if any pointer arguments are null or allocator invalid\n* \\return RCUTILS_RET_BAD_ALLOC if space could not be allocated for resulting string\n* \\return RCUTILS_RET_OK otherwise\n*/"]
     pub fn rosidl_stringify_type_hash(
         type_hash: *const rosidl_type_hash_t,
         allocator: rcutils_allocator_t,
@@ -4560,7 +4415,6 @@ extern "C" {
     ) -> rcutils_ret_t;
 }
 extern "C" {
-    #[doc = " Parse a stringified type hash to a struct.\n**\n* \\param[in] type_hash_string Null-terminated string with the hash representation\n* \\param[out] hash_out Preallocated structure to be filled with parsed hash information.\n*   hash_out->version will be 0 if no version could be parsed,\n*   but if a version could be determined this field will be set even if an error is returned\n* \\return RCTUILS_RET_INVALID_ARGUMENT on any null pointer argumunts, or malformed hash string.\n* \\return RCUTILS_RET_OK otherwise\n*/"]
     pub fn rosidl_parse_type_hash_string(
         type_hash_string: *const ::std::os::raw::c_char,
         hash_out: *mut rosidl_type_hash_t,
@@ -4585,21 +4439,14 @@ pub type rosidl_message_get_type_description_sources_function = ::std::option::O
         arg1: *const rosidl_message_type_support_t,
     ) -> *const rosidl_runtime_c__type_description__TypeSource__Sequence,
 >;
-#[doc = " Contains rosidl message type support data"]
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
 struct rosidl_message_type_support_t_ {
-    #[doc = " String identifier for the type_support."]
     pub typesupport_identifier: *const ::std::os::raw::c_char,
-    #[doc = " Pointer to the message type support library"]
     pub data: *const ::std::os::raw::c_void,
-    #[doc = " Pointer to the message type support handler function"]
     pub func: rosidl_message_typesupport_handle_function,
-    #[doc = " Pointer to function to get the hash of the message's description"]
     pub get_type_hash_func: rosidl_message_get_type_hash_function,
-    #[doc = " Pointer to function to get the description of the type"]
     pub get_type_description_func: rosidl_message_get_type_description_function,
-    #[doc = " Pointer to function to get the text of the sources that defined the description of the type"]
     pub get_type_description_sources_func: rosidl_message_get_type_description_sources_function,
 }
 #[test]
@@ -4681,18 +4528,15 @@ fn bindgen_test_layout_rosidl_message_type_support_t() {
     );
 }
 extern "C" {
-    #[doc = " Return a rosidl_message_type_support_t struct with members set to `NULL`."]
     pub fn rosidl_get_zero_initialized_message_type_support_handle() -> rosidl_message_type_support_t;
 }
 extern "C" {
-    #[doc = " Get the message type support handle specific to this identifier.\n**\n* The handle's message typesupport identifier function is returned or if the parameters are NULL\n* then an assert will happen.\n*\n* \\param handle Handle to message type support\n* \\param identifier The typesupport identifier to get the handle function for\n* \\return The associated message typesupport handle function.\n*/"]
     pub fn get_message_typesupport_handle(
         handle: *const rosidl_message_type_support_t,
         identifier: *const ::std::os::raw::c_char,
     ) -> *const rosidl_message_type_support_t;
 }
 extern "C" {
-    #[doc = " If the identifier is the same as this handle's typesupport_identifier the handle is simply\n returned or if the parameters are NULL then an assert will happen.\n\n \\param handle Handle to message type support\n \\param identifier The typesupport identifier to get the handle function for\n \\return if the identifier match's the handle's identifier then the handle's function\n   is returned."]
     pub fn get_message_typesupport_handle_function(
         handle: *const rosidl_message_type_support_t,
         identifier: *const ::std::os::raw::c_char,
@@ -4783,7 +4627,6 @@ fn bindgen_test_layout_rosidl_service_introspection_info_s() {
     );
 }
 pub type rosidl_service_introspection_info_t = rosidl_service_introspection_info_s;
-#[doc = " Creates a ServiceEvent message for the service.\n**\n* Instantiates a ServiceEvent message with the given info and request/response message.\n* The message is allocated using the given allocator and must be deallocated using\n* the rosidl_service_introspection_destroy_handle\n*\n* \\param[in] info POD fields of service_msgs/msg/ServiceEventInfo to be passed from rcl\n* \\param[in] allocator The allocator to use for allocating the ServiceEvent message\n* \\param[in] request_message type-erased handle to request message from rcl. Can be NULL.\n* \\param[in] response_message type-erased handle to request message from rcl. Can be NULL.\n* \\return The built ServiceEvent message. Will return NULL if the message could not be built.\n**/"]
 pub type rosidl_event_message_create_handle_function_function = ::std::option::Option<
     unsafe extern "C" fn(
         info: *const rosidl_service_introspection_info_t,
@@ -4792,7 +4635,6 @@ pub type rosidl_event_message_create_handle_function_function = ::std::option::O
         response_message: *const ::std::os::raw::c_void,
     ) -> *mut ::std::os::raw::c_void,
 >;
-#[doc = " Destroys a ServiceEvent message\n**\n* Destroys a ServiceEvent message returned by a rosidl_service_introspection_message_create_handle\n* by calling the corresponding __fini function then deallocating\n*\n* \\param[in] event_message The message to destroy.\n* \\param[in] allocator The allocator to use for deallocating the message.\n*/"]
 pub type rosidl_event_message_destroy_handle_function_function = ::std::option::Option<
     unsafe extern "C" fn(
         event_message: *mut ::std::os::raw::c_void,
@@ -4812,32 +4654,20 @@ pub type rosidl_service_get_type_description_sources_function = ::std::option::O
         arg1: *const rosidl_service_type_support_t,
     ) -> *const rosidl_runtime_c__type_description__TypeSource__Sequence,
 >;
-#[doc = " Contains rosidl service type support data"]
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
 struct rosidl_service_type_support_t_ {
-    #[doc = " String identifier for the type_support."]
     pub typesupport_identifier: *const ::std::os::raw::c_char,
-    #[doc = " Pointer to the service type support library"]
     pub data: *const ::std::os::raw::c_void,
-    #[doc = " Pointer to the service type support handler function"]
     pub func: rosidl_service_typesupport_handle_function,
-    #[doc = " Service request message typesupport"]
     pub request_typesupport: *const rosidl_message_type_support_t,
-    #[doc = " Service response message typesupport"]
     pub response_typesupport: *const rosidl_message_type_support_t,
-    #[doc = " Service event message typesupport"]
     pub event_typesupport: *const rosidl_message_type_support_t,
-    #[doc = " Pointer to function to create the introspection message"]
     pub event_message_create_handle_function: rosidl_event_message_create_handle_function_function,
-    #[doc = " Pointer to function to finalize the introspection message"]
     pub event_message_destroy_handle_function:
         rosidl_event_message_destroy_handle_function_function,
-    #[doc = " Pointer to function to get the hash of the message's description"]
     pub get_type_hash_func: rosidl_service_get_type_hash_function,
-    #[doc = " Pointer to function to get the description of the type"]
     pub get_type_description_func: rosidl_service_get_type_description_function,
-    #[doc = " Pointer to function to get the text of the sources that defined the description of the type"]
     pub get_type_description_sources_func: rosidl_service_get_type_description_sources_function,
 }
 #[test]
@@ -4975,14 +4805,12 @@ fn bindgen_test_layout_rosidl_service_type_support_t() {
     );
 }
 extern "C" {
-    #[doc = " Get the service type support handle specific to this identifier.\n**\n* The handle's message typesupport identifier function is returned or if the parameters are NULL\n* then an assert will happen.\n*\n* \\param handle Handle to service type support\n* \\param identifier The typesupport identifier to get the handle function for\n* \\return The associated service typesupport handle function.\n*/"]
     pub fn get_service_typesupport_handle(
         handle: *const rosidl_service_type_support_t,
         identifier: *const ::std::os::raw::c_char,
     ) -> *const rosidl_service_type_support_t;
 }
 extern "C" {
-    #[doc = " Get the service type support handle function specific to this identifier.\n**\n* If the identifier is the same as this handle's typesupport_identifier the handle is simply\n* returned or if the parameters are NULL then an assert will happen.\n*\n* \\param handle Handle to service type support\n* \\param identifier The typesupport identifier to get the handle function for\n* \\return if the identifier match's the handle's identifier then the handle's function\n*   is returned.\n*/"]
     pub fn get_service_typesupport_handle_function(
         handle: *const rosidl_service_type_support_t,
         identifier: *const ::std::os::raw::c_char,
@@ -5001,7 +4829,6 @@ pub type rosidl_action_get_type_description_sources_function = ::std::option::Op
         arg1: *const rosidl_action_type_support_t,
     ) -> *const rosidl_runtime_c__type_description__TypeSource__Sequence,
 >;
-#[doc = " Contains rosidl action type support data."]
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
 pub struct rosidl_action_type_support_t {
@@ -5010,11 +4837,8 @@ pub struct rosidl_action_type_support_t {
     pub cancel_service_type_support: *const rosidl_service_type_support_t,
     pub feedback_message_type_support: *const rosidl_message_type_support_t,
     pub status_message_type_support: *const rosidl_message_type_support_t,
-    #[doc = " Pointer to function to get the hash of the action's description"]
     pub get_type_hash_func: rosidl_action_get_type_hash_function,
-    #[doc = " Pointer to function to get the description of the type"]
     pub get_type_description_func: rosidl_action_get_type_description_function,
-    #[doc = " Pointer to function to get the text of the sources that defined the description of the type"]
     pub get_type_description_sources_func: rosidl_action_get_type_description_sources_function,
 }
 #[test]
@@ -5118,93 +4942,77 @@ fn bindgen_test_layout_rosidl_action_type_support_t() {
     );
 }
 extern "C" {
-    #[doc = " Initialize msg/Time message.\n**\n* If the init function is called twice for the same message without\n* calling fini inbetween previously allocated memory will be leaked.\n* \\param[in,out] msg The previously allocated message pointer.\n* Fields without a default value will not be initialized by this function.\n* You might want to call memset(msg, 0, sizeof(\n* builtin_interfaces__msg__Time\n* )) before or use\n* builtin_interfaces__msg__Time__create()\n* to allocate and initialize the message.\n* \\return true if initialization was successful, otherwise false\n*/"]
     pub fn builtin_interfaces__msg__Time__init(msg: *mut builtin_interfaces__msg__Time) -> bool;
 }
 extern "C" {
-    #[doc = " Finalize msg/Time message.\n**\n* \\param[in,out] msg The allocated message pointer.\n*/"]
     pub fn builtin_interfaces__msg__Time__fini(msg: *mut builtin_interfaces__msg__Time);
 }
 extern "C" {
-    #[doc = " Create msg/Time message.\n**\n* It allocates the memory for the message, sets the memory to zero, and\n* calls\n* builtin_interfaces__msg__Time__init().\n* \\return The pointer to the initialized message if successful,\n* otherwise NULL\n*/"]
     pub fn builtin_interfaces__msg__Time__create() -> *mut builtin_interfaces__msg__Time;
 }
 extern "C" {
-    #[doc = " Destroy msg/Time message.\n**\n* It calls\n* builtin_interfaces__msg__Time__fini()\n* and frees the memory of the message.\n* \\param[in,out] msg The allocated message pointer.\n*/"]
     pub fn builtin_interfaces__msg__Time__destroy(msg: *mut builtin_interfaces__msg__Time);
 }
 extern "C" {
-    #[doc = " Check for msg/Time message equality.\n**\n* \\param[in] lhs The message on the left hand size of the equality operator.\n* \\param[in] rhs The message on the right hand size of the equality operator.\n* \\return true if messages are equal, otherwise false.\n*/"]
     pub fn builtin_interfaces__msg__Time__are_equal(
         lhs: *const builtin_interfaces__msg__Time,
         rhs: *const builtin_interfaces__msg__Time,
     ) -> bool;
 }
 extern "C" {
-    #[doc = " Copy a msg/Time message.\n**\n* This functions performs a deep copy, as opposed to the shallow copy that\n* plain assignment yields.\n*\n* \\param[in] input The source message pointer.\n* \\param[out] output The target message pointer, which must\n*   have been initialized before calling this function.\n* \\return true if successful, or false if either pointer is null\n*   or memory allocation fails.\n*/"]
     pub fn builtin_interfaces__msg__Time__copy(
         input: *const builtin_interfaces__msg__Time,
         output: *mut builtin_interfaces__msg__Time,
     ) -> bool;
 }
 extern "C" {
-    #[doc = " Retrieve pointer to the hash of the description of this type."]
     pub fn builtin_interfaces__msg__Time__get_type_hash(
         type_support: *const rosidl_message_type_support_t,
     ) -> *const rosidl_type_hash_t;
 }
 extern "C" {
-    #[doc = " Retrieve pointer to the description of this type."]
     pub fn builtin_interfaces__msg__Time__get_type_description(
         type_support: *const rosidl_message_type_support_t,
     ) -> *const rosidl_runtime_c__type_description__TypeDescription;
 }
 extern "C" {
-    #[doc = " Retrieve pointer to the single raw source text that defined this type."]
     pub fn builtin_interfaces__msg__Time__get_individual_type_description_source(
         type_support: *const rosidl_message_type_support_t,
     ) -> *const rosidl_runtime_c__type_description__TypeSource;
 }
 extern "C" {
-    #[doc = " Retrieve pointer to the recursive raw sources that defined the description of this type."]
     pub fn builtin_interfaces__msg__Time__get_type_description_sources(
         type_support: *const rosidl_message_type_support_t,
     ) -> *const rosidl_runtime_c__type_description__TypeSource__Sequence;
 }
 extern "C" {
-    #[doc = " Initialize array of msg/Time messages.\n**\n* It allocates the memory for the number of elements and calls\n* builtin_interfaces__msg__Time__init()\n* for each element of the array.\n* \\param[in,out] array The allocated array pointer.\n* \\param[in] size The size / capacity of the array.\n* \\return true if initialization was successful, otherwise false\n* If the array pointer is valid and the size is zero it is guaranteed\n# to return true.\n*/"]
     pub fn builtin_interfaces__msg__Time__Sequence__init(
         array: *mut builtin_interfaces__msg__Time__Sequence,
         size: usize,
     ) -> bool;
 }
 extern "C" {
-    #[doc = " Finalize array of msg/Time messages.\n**\n* It calls\n* builtin_interfaces__msg__Time__fini()\n* for each element of the array and frees the memory for the number of\n* elements.\n* \\param[in,out] array The initialized array pointer.\n*/"]
     pub fn builtin_interfaces__msg__Time__Sequence__fini(
         array: *mut builtin_interfaces__msg__Time__Sequence,
     );
 }
 extern "C" {
-    #[doc = " Create array of msg/Time messages.\n**\n* It allocates the memory for the array and calls\n* builtin_interfaces__msg__Time__Sequence__init().\n* \\param[in] size The size / capacity of the array.\n* \\return The pointer to the initialized array if successful, otherwise NULL\n*/"]
     pub fn builtin_interfaces__msg__Time__Sequence__create(
         size: usize,
     ) -> *mut builtin_interfaces__msg__Time__Sequence;
 }
 extern "C" {
-    #[doc = " Destroy array of msg/Time messages.\n**\n* It calls\n* builtin_interfaces__msg__Time__Sequence__fini()\n* on the array,\n* and frees the memory of the array.\n* \\param[in,out] array The initialized array pointer.\n*/"]
     pub fn builtin_interfaces__msg__Time__Sequence__destroy(
         array: *mut builtin_interfaces__msg__Time__Sequence,
     );
 }
 extern "C" {
-    #[doc = " Check for msg/Time message array equality.\n**\n* \\param[in] lhs The message array on the left hand size of the equality operator.\n* \\param[in] rhs The message array on the right hand size of the equality operator.\n* \\return true if message arrays are equal in size and content, otherwise false.\n*/"]
     pub fn builtin_interfaces__msg__Time__Sequence__are_equal(
         lhs: *const builtin_interfaces__msg__Time__Sequence,
         rhs: *const builtin_interfaces__msg__Time__Sequence,
     ) -> bool;
 }
 extern "C" {
-    #[doc = " Copy an array of msg/Time messages.\n**\n* This functions performs a deep copy, as opposed to the shallow copy that\n* plain assignment yields.\n*\n* \\param[in] input The source array pointer.\n* \\param[out] output The target array pointer, which must\n*   have been initialized before calling this function.\n* \\return true if successful, or false if either pointer\n*   is null or memory allocation fails.\n*/"]
     pub fn builtin_interfaces__msg__Time__Sequence__copy(
         input: *const builtin_interfaces__msg__Time__Sequence,
         output: *mut builtin_interfaces__msg__Time__Sequence,
@@ -5214,13 +5022,10 @@ extern "C" {
     pub fn rosidl_typesupport_c__get_message_type_support_handle__builtin_interfaces__msg__Time(
     ) -> *const rosidl_message_type_support_t;
 }
-#[doc = " Struct defined in msg/Duration in the package builtin_interfaces.\n**\n* Duration defines a period between two time points.\n* Messages of this datatype are of ROS Time following this design:\n* https://design.ros2.org/articles/clock_and_time.html\n*/"]
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
 pub struct builtin_interfaces__msg__Duration {
-    #[doc = " Seconds component, range is valid over any possible int32 value."]
     pub sec: i32,
-    #[doc = " Nanoseconds component in the range of [0, 1e9)."]
     pub nanosec: u32,
 }
 #[test]
@@ -5266,9 +5071,7 @@ fn bindgen_test_layout_builtin_interfaces__msg__Duration() {
 #[derive(Debug, Copy, Clone)]
 pub struct builtin_interfaces__msg__Duration__Sequence {
     pub data: *mut builtin_interfaces__msg__Duration,
-    #[doc = " The number of valid items in data"]
     pub size: usize,
-    #[doc = " The number of allocated items in data"]
     pub capacity: usize,
 }
 #[test]
@@ -5324,95 +5127,79 @@ fn bindgen_test_layout_builtin_interfaces__msg__Duration__Sequence() {
     );
 }
 extern "C" {
-    #[doc = " Initialize msg/Duration message.\n**\n* If the init function is called twice for the same message without\n* calling fini inbetween previously allocated memory will be leaked.\n* \\param[in,out] msg The previously allocated message pointer.\n* Fields without a default value will not be initialized by this function.\n* You might want to call memset(msg, 0, sizeof(\n* builtin_interfaces__msg__Duration\n* )) before or use\n* builtin_interfaces__msg__Duration__create()\n* to allocate and initialize the message.\n* \\return true if initialization was successful, otherwise false\n*/"]
     pub fn builtin_interfaces__msg__Duration__init(
         msg: *mut builtin_interfaces__msg__Duration,
     ) -> bool;
 }
 extern "C" {
-    #[doc = " Finalize msg/Duration message.\n**\n* \\param[in,out] msg The allocated message pointer.\n*/"]
     pub fn builtin_interfaces__msg__Duration__fini(msg: *mut builtin_interfaces__msg__Duration);
 }
 extern "C" {
-    #[doc = " Create msg/Duration message.\n**\n* It allocates the memory for the message, sets the memory to zero, and\n* calls\n* builtin_interfaces__msg__Duration__init().\n* \\return The pointer to the initialized message if successful,\n* otherwise NULL\n*/"]
     pub fn builtin_interfaces__msg__Duration__create() -> *mut builtin_interfaces__msg__Duration;
 }
 extern "C" {
-    #[doc = " Destroy msg/Duration message.\n**\n* It calls\n* builtin_interfaces__msg__Duration__fini()\n* and frees the memory of the message.\n* \\param[in,out] msg The allocated message pointer.\n*/"]
     pub fn builtin_interfaces__msg__Duration__destroy(msg: *mut builtin_interfaces__msg__Duration);
 }
 extern "C" {
-    #[doc = " Check for msg/Duration message equality.\n**\n* \\param[in] lhs The message on the left hand size of the equality operator.\n* \\param[in] rhs The message on the right hand size of the equality operator.\n* \\return true if messages are equal, otherwise false.\n*/"]
     pub fn builtin_interfaces__msg__Duration__are_equal(
         lhs: *const builtin_interfaces__msg__Duration,
         rhs: *const builtin_interfaces__msg__Duration,
     ) -> bool;
 }
 extern "C" {
-    #[doc = " Copy a msg/Duration message.\n**\n* This functions performs a deep copy, as opposed to the shallow copy that\n* plain assignment yields.\n*\n* \\param[in] input The source message pointer.\n* \\param[out] output The target message pointer, which must\n*   have been initialized before calling this function.\n* \\return true if successful, or false if either pointer is null\n*   or memory allocation fails.\n*/"]
     pub fn builtin_interfaces__msg__Duration__copy(
         input: *const builtin_interfaces__msg__Duration,
         output: *mut builtin_interfaces__msg__Duration,
     ) -> bool;
 }
 extern "C" {
-    #[doc = " Retrieve pointer to the hash of the description of this type."]
     pub fn builtin_interfaces__msg__Duration__get_type_hash(
         type_support: *const rosidl_message_type_support_t,
     ) -> *const rosidl_type_hash_t;
 }
 extern "C" {
-    #[doc = " Retrieve pointer to the description of this type."]
     pub fn builtin_interfaces__msg__Duration__get_type_description(
         type_support: *const rosidl_message_type_support_t,
     ) -> *const rosidl_runtime_c__type_description__TypeDescription;
 }
 extern "C" {
-    #[doc = " Retrieve pointer to the single raw source text that defined this type."]
     pub fn builtin_interfaces__msg__Duration__get_individual_type_description_source(
         type_support: *const rosidl_message_type_support_t,
     ) -> *const rosidl_runtime_c__type_description__TypeSource;
 }
 extern "C" {
-    #[doc = " Retrieve pointer to the recursive raw sources that defined the description of this type."]
     pub fn builtin_interfaces__msg__Duration__get_type_description_sources(
         type_support: *const rosidl_message_type_support_t,
     ) -> *const rosidl_runtime_c__type_description__TypeSource__Sequence;
 }
 extern "C" {
-    #[doc = " Initialize array of msg/Duration messages.\n**\n* It allocates the memory for the number of elements and calls\n* builtin_interfaces__msg__Duration__init()\n* for each element of the array.\n* \\param[in,out] array The allocated array pointer.\n* \\param[in] size The size / capacity of the array.\n* \\return true if initialization was successful, otherwise false\n* If the array pointer is valid and the size is zero it is guaranteed\n# to return true.\n*/"]
     pub fn builtin_interfaces__msg__Duration__Sequence__init(
         array: *mut builtin_interfaces__msg__Duration__Sequence,
         size: usize,
     ) -> bool;
 }
 extern "C" {
-    #[doc = " Finalize array of msg/Duration messages.\n**\n* It calls\n* builtin_interfaces__msg__Duration__fini()\n* for each element of the array and frees the memory for the number of\n* elements.\n* \\param[in,out] array The initialized array pointer.\n*/"]
     pub fn builtin_interfaces__msg__Duration__Sequence__fini(
         array: *mut builtin_interfaces__msg__Duration__Sequence,
     );
 }
 extern "C" {
-    #[doc = " Create array of msg/Duration messages.\n**\n* It allocates the memory for the array and calls\n* builtin_interfaces__msg__Duration__Sequence__init().\n* \\param[in] size The size / capacity of the array.\n* \\return The pointer to the initialized array if successful, otherwise NULL\n*/"]
     pub fn builtin_interfaces__msg__Duration__Sequence__create(
         size: usize,
     ) -> *mut builtin_interfaces__msg__Duration__Sequence;
 }
 extern "C" {
-    #[doc = " Destroy array of msg/Duration messages.\n**\n* It calls\n* builtin_interfaces__msg__Duration__Sequence__fini()\n* on the array,\n* and frees the memory of the array.\n* \\param[in,out] array The initialized array pointer.\n*/"]
     pub fn builtin_interfaces__msg__Duration__Sequence__destroy(
         array: *mut builtin_interfaces__msg__Duration__Sequence,
     );
 }
 extern "C" {
-    #[doc = " Check for msg/Duration message array equality.\n**\n* \\param[in] lhs The message array on the left hand size of the equality operator.\n* \\param[in] rhs The message array on the right hand size of the equality operator.\n* \\return true if message arrays are equal in size and content, otherwise false.\n*/"]
     pub fn builtin_interfaces__msg__Duration__Sequence__are_equal(
         lhs: *const builtin_interfaces__msg__Duration__Sequence,
         rhs: *const builtin_interfaces__msg__Duration__Sequence,
     ) -> bool;
 }
 extern "C" {
-    #[doc = " Copy an array of msg/Duration messages.\n**\n* This functions performs a deep copy, as opposed to the shallow copy that\n* plain assignment yields.\n*\n* \\param[in] input The source array pointer.\n* \\param[out] output The target array pointer, which must\n*   have been initialized before calling this function.\n* \\return true if successful, or false if either pointer\n*   is null or memory allocation fails.\n*/"]
     pub fn builtin_interfaces__msg__Duration__Sequence__copy(
         input: *const builtin_interfaces__msg__Duration__Sequence,
         output: *mut builtin_interfaces__msg__Duration__Sequence,
@@ -5764,116 +5551,98 @@ extern "C" {
     ) -> bool;
 }
 extern "C" {
-    #[doc = " \\defgroup primitives_sequence_functions__legacy Sequence functions for legacy types for backward compatibility.\n/\n/**@{*/\n/** See #ROSIDL_RUNTIME_C__DECLARE_PRIMITIVE_SEQUENCE_INIT(bool)"]
     pub fn rosidl_runtime_c__bool__Sequence__init(
         sequence: *mut rosidl_runtime_c__boolean__Sequence,
         size: usize,
     ) -> bool;
 }
 extern "C" {
-    #[doc = " See #ROSIDL_RUNTIME_C__DECLARE_PRIMITIVE_SEQUENCE_FINI(bool)"]
     pub fn rosidl_runtime_c__bool__Sequence__fini(
         sequence: *mut rosidl_runtime_c__boolean__Sequence,
     );
 }
 extern "C" {
-    #[doc = " See #ROSIDL_RUNTIME_C__DECLARE_PRIMITIVE_SEQUENCE_EQ(bool)"]
     pub fn rosidl_runtime_c__bool__Sequence__are_equal(
         lhs: *const rosidl_runtime_c__boolean__Sequence,
         rhs: *const rosidl_runtime_c__boolean__Sequence,
     ) -> bool;
 }
 extern "C" {
-    #[doc = " See #ROSIDL_RUNTIME_C__DECLARE_PRIMITIVE_SEQUENCE_COPY(bool)"]
     pub fn rosidl_runtime_c__bool__Sequence__copy(
         input: *const rosidl_runtime_c__boolean__Sequence,
         output: *mut rosidl_runtime_c__boolean__Sequence,
     ) -> bool;
 }
 extern "C" {
-    #[doc = " See #ROSIDL_RUNTIME_C__DECLARE_PRIMITIVE_SEQUENCE_INIT(byte)"]
     pub fn rosidl_runtime_c__byte__Sequence__init(
         sequence: *mut rosidl_runtime_c__octet__Sequence,
         size: usize,
     ) -> bool;
 }
 extern "C" {
-    #[doc = " See #ROSIDL_RUNTIME_C__DECLARE_PRIMITIVE_SEQUENCE_FINI(byte)"]
     pub fn rosidl_runtime_c__byte__Sequence__fini(sequence: *mut rosidl_runtime_c__octet__Sequence);
 }
 extern "C" {
-    #[doc = " See #ROSIDL_RUNTIME_C__DECLARE_PRIMITIVE_SEQUENCE_EQ(byte)"]
     pub fn rosidl_runtime_c__byte__Sequence__are_equal(
         lhs: *const rosidl_runtime_c__octet__Sequence,
         rhs: *const rosidl_runtime_c__octet__Sequence,
     ) -> bool;
 }
 extern "C" {
-    #[doc = " See #ROSIDL_RUNTIME_C__DECLARE_PRIMITIVE_SEQUENCE_COPY(byte)"]
     pub fn rosidl_runtime_c__byte__Sequence__copy(
         input: *const rosidl_runtime_c__octet__Sequence,
         output: *mut rosidl_runtime_c__octet__Sequence,
     ) -> bool;
 }
 extern "C" {
-    #[doc = " See #ROSIDL_RUNTIME_C__DECLARE_PRIMITIVE_SEQUENCE_INIT(float32)"]
     pub fn rosidl_runtime_c__float32__Sequence__init(
         sequence: *mut rosidl_runtime_c__float__Sequence,
         size: usize,
     ) -> bool;
 }
 extern "C" {
-    #[doc = " See #ROSIDL_RUNTIME_C__DECLARE_PRIMITIVE_SEQUENCE_FINI(float32)"]
     pub fn rosidl_runtime_c__float32__Sequence__fini(
         sequence: *mut rosidl_runtime_c__float__Sequence,
     );
 }
 extern "C" {
-    #[doc = " See #ROSIDL_RUNTIME_C__DECLARE_PRIMITIVE_SEQUENCE_EQ(float32)"]
     pub fn rosidl_runtime_c__float32__Sequence__are_equal(
         lhs: *const rosidl_runtime_c__float__Sequence,
         rhs: *const rosidl_runtime_c__float__Sequence,
     ) -> bool;
 }
 extern "C" {
-    #[doc = " See #ROSIDL_RUNTIME_C__DECLARE_PRIMITIVE_SEQUENCE_COPY(float32)"]
     pub fn rosidl_runtime_c__float32__Sequence__copy(
         input: *const rosidl_runtime_c__float__Sequence,
         output: *mut rosidl_runtime_c__float__Sequence,
     ) -> bool;
 }
 extern "C" {
-    #[doc = " See #ROSIDL_RUNTIME_C__DECLARE_PRIMITIVE_SEQUENCE_INIT(float64)"]
     pub fn rosidl_runtime_c__float64__Sequence__init(
         sequence: *mut rosidl_runtime_c__double__Sequence,
         size: usize,
     ) -> bool;
 }
 extern "C" {
-    #[doc = " See #ROSIDL_RUNTIME_C__DECLARE_PRIMITIVE_SEQUENCE_FINI(float64)"]
     pub fn rosidl_runtime_c__float64__Sequence__fini(
         sequence: *mut rosidl_runtime_c__double__Sequence,
     );
 }
 extern "C" {
-    #[doc = " See #ROSIDL_RUNTIME_C__DECLARE_PRIMITIVE_SEQUENCE_EQ(float64)"]
     pub fn rosidl_runtime_c__float64__Sequence__are_equal(
         lhs: *const rosidl_runtime_c__double__Sequence,
         rhs: *const rosidl_runtime_c__double__Sequence,
     ) -> bool;
 }
 extern "C" {
-    #[doc = " See #ROSIDL_RUNTIME_C__DECLARE_PRIMITIVE_SEQUENCE_COPY(float64)"]
     pub fn rosidl_runtime_c__float64__Sequence__copy(
         input: *const rosidl_runtime_c__double__Sequence,
         output: *mut rosidl_runtime_c__double__Sequence,
     ) -> bool;
 }
-#[doc = " Upper boundary for #rosidl_runtime_c__String or #rosidl_runtime_c__U16String."]
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
 pub struct rosidl_runtime_c__String__bound {
-    #[doc = " The number of characters in the string (excluding the null character)."]
     pub bound: usize,
 }
 #[test]
@@ -5903,29 +5672,24 @@ fn bindgen_test_layout_rosidl_runtime_c__String__bound() {
     );
 }
 extern "C" {
-    #[doc = " Initialize a rosidl_runtime_c__String structure."]
     pub fn rosidl_runtime_c__String__init(str_: *mut rosidl_runtime_c__String) -> bool;
 }
 extern "C" {
-    #[doc = " Deallocate the memory of the rosidl_runtime_c__String structure."]
     pub fn rosidl_runtime_c__String__fini(str_: *mut rosidl_runtime_c__String);
 }
 extern "C" {
-    #[doc = " Copy rosidl_runtime_c__String structure content.\n**\n* This functions performs a deep copy, as opposed to the shallow copy that\n* plain assignment yields.\n*\n* \\param[in] input a pointer to a rosidl_runtime_c__String structure\n*   to copy from.\n* \\param[out] output a pointer to an initialized rosidl_runtime_c__String\n*   structure to copy into.\n* \\return true if successful, false if either pointer is null or memory\n*   allocation fails.\n*/"]
     pub fn rosidl_runtime_c__String__copy(
         input: *const rosidl_runtime_c__String,
         output: *mut rosidl_runtime_c__String,
     ) -> bool;
 }
 extern "C" {
-    #[doc = " Check for rosidl_runtime_c__String structure equality.\n**\n* \\param[in] lhs a pointer to the left hand side of the equality operator.\n* \\param[in] lhs a pointer to the right hand side of the equality operator.\n* \\return true if rosidl_runtime_c__String structures are equal in size and content,\n*   otherwise false.\n*/"]
     pub fn rosidl_runtime_c__String__are_equal(
         lhs: *const rosidl_runtime_c__String,
         rhs: *const rosidl_runtime_c__String,
     ) -> bool;
 }
 extern "C" {
-    #[doc = " Assign the c string pointer of n characters to the rosidl_runtime_c__String structure."]
     pub fn rosidl_runtime_c__String__assignn(
         str_: *mut rosidl_runtime_c__String,
         value: *const ::std::os::raw::c_char,
@@ -5933,47 +5697,40 @@ extern "C" {
     ) -> bool;
 }
 extern "C" {
-    #[doc = " Assign the c string pointer to the rosidl_runtime_c__String structure."]
     pub fn rosidl_runtime_c__String__assign(
         str_: *mut rosidl_runtime_c__String,
         value: *const ::std::os::raw::c_char,
     ) -> bool;
 }
 extern "C" {
-    #[doc = " Initialize a rosidl_runtime_c__String__Sequence__init structure."]
     pub fn rosidl_runtime_c__String__Sequence__init(
         sequence: *mut rosidl_runtime_c__String__Sequence,
         size: usize,
     ) -> bool;
 }
 extern "C" {
-    #[doc = " Deallocate the memory of the string sequence structure."]
     pub fn rosidl_runtime_c__String__Sequence__fini(
         sequence: *mut rosidl_runtime_c__String__Sequence,
     );
 }
 extern "C" {
-    #[doc = " Check for rosidl_runtime_c__String__Sequence structure equality.\n**\n* \\param[in] lhs a pointer to the left hand side of the equality operator.\n* \\param[in] lhs a pointer to the right hand side of the equality operator.\n* \\return true if rosidl_runtime_c__String__Sequence structures are equal\n*   in size and content, otherwise false.\n*/"]
     pub fn rosidl_runtime_c__String__Sequence__are_equal(
         lhs: *const rosidl_runtime_c__String__Sequence,
         rhs: *const rosidl_runtime_c__String__Sequence,
     ) -> bool;
 }
 extern "C" {
-    #[doc = " Copy rosidl_runtime_c__String__Sequence structure content.\n**\n* This functions performs a deep copy, as opposed to the shallow copy\n* that plain assignment yields.\n*\n* \\param[in] input a pointer to a rosidl_runtime_c__String__Sequence\n*   structure to copy from.\n* \\param[out] output a pointer to an initialized rosidl_runtime_c__String__Sequence\n*   structure to copy into.\n* \\return true if successful, false if either pointer is null or memory\n*   allocation fails.\n*/"]
     pub fn rosidl_runtime_c__String__Sequence__copy(
         input: *const rosidl_runtime_c__String__Sequence,
         output: *mut rosidl_runtime_c__String__Sequence,
     ) -> bool;
 }
 extern "C" {
-    #[doc = " Create a rosidl_runtime_c__String__Sequence structure with a specific size."]
     pub fn rosidl_runtime_c__String__Sequence__create(
         size: usize,
     ) -> *mut rosidl_runtime_c__String__Sequence;
 }
 extern "C" {
-    #[doc = " Destroy a rosidl_runtime_c__String__Sequence structure."]
     pub fn rosidl_runtime_c__String__Sequence__destroy(
         sequence: *mut rosidl_runtime_c__String__Sequence,
     );
