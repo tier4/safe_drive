@@ -42,7 +42,7 @@ pub use humble::{
 };
 
 #[cfg(feature = "humble")]
-pub type size_t = usize;
+pub type size_t = u64;
 
 #[cfg(feature = "iron")]
 #[allow(unused_imports)]
@@ -786,14 +786,14 @@ impl MTUnsafeFn {
         let node_names = unsafe {
             std::slice::from_raw_parts(
                 (*(*params.as_ref())).node_names,
-                (*(*params.as_ref())).num_nodes,
+                (*(*params.as_ref())).num_nodes.try_into().unwrap(),
             )
         };
 
         let node_params = unsafe {
             std::slice::from_raw_parts(
                 (*(*params.as_ref())).params,
-                (*(*params.as_ref())).num_nodes,
+                (*(*params.as_ref())).num_nodes.try_into().unwrap(),
             )
         };
 
@@ -812,8 +812,14 @@ impl MTUnsafeFn {
             }
             let (param_names, param_values) = unsafe {
                 (
-                    std::slice::from_raw_parts(np.parameter_names, np.num_params),
-                    std::slice::from_raw_parts(np.parameter_values, np.num_params),
+                    std::slice::from_raw_parts(
+                        np.parameter_names,
+                        np.num_params.try_into().unwrap(),
+                    ),
+                    std::slice::from_raw_parts(
+                        np.parameter_values,
+                        np.num_params.try_into().unwrap(),
+                    ),
                 )
             };
             for (s, v) in param_names.iter().zip(param_values) {

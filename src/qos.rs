@@ -166,7 +166,7 @@ impl From<&rcl::rmw_qos_profile_t> for Profile {
     fn from(qos: &rcl::rmw_qos_profile_t) -> Self {
         Self {
             history: FromPrimitive::from_u32(qos.history).unwrap_or(HistoryPolicy::Unknown),
-            depth: qos.depth,
+            depth: qos.depth.try_into().unwrap(),
             reliability: FromPrimitive::from_u32(qos.reliability)
                 .unwrap_or(ReliabilityPolicy::Unknown),
             durability: FromPrimitive::from_u32(qos.durability)

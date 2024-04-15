@@ -828,23 +828,23 @@ impl From<&rcl_variant_t> for Value {
             Value::String(s.to_str().unwrap_or("").into())
         } else if !var.bool_array_value.is_null() {
             let v = &unsafe { *var.bool_array_value };
-            let s = unsafe { from_raw_parts(v.values, v.size) };
+            let s = unsafe { from_raw_parts(v.values, v.size.try_into().unwrap()) };
             Value::VecBool(s.into())
         } else if !var.integer_array_value.is_null() {
             let v = &unsafe { *var.integer_array_value };
-            let s = unsafe { from_raw_parts(v.values, v.size) };
+            let s = unsafe { from_raw_parts(v.values, v.size.try_into().unwrap()) };
             Value::VecI64(s.into())
         } else if !var.byte_array_value.is_null() {
             let v = &unsafe { *var.byte_array_value };
-            let s = unsafe { from_raw_parts(v.values, v.size) };
+            let s = unsafe { from_raw_parts(v.values, v.size.try_into().unwrap()) };
             Value::VecU8(s.into())
         } else if !var.double_array_value.is_null() {
             let v = &unsafe { *var.double_array_value };
-            let s = unsafe { from_raw_parts(v.values, v.size) };
+            let s = unsafe { from_raw_parts(v.values, v.size.try_into().unwrap()) };
             Value::VecF64(s.into())
         } else if !var.string_array_value.is_null() {
             let v = &unsafe { *var.string_array_value };
-            let s = unsafe { from_raw_parts(v.data, v.size) };
+            let s = unsafe { from_raw_parts(v.data, v.size.try_into().unwrap()) };
             let s = s
                 .iter()
                 .map(|p| unsafe { CStr::from_ptr(*p).to_str().unwrap_or("").into() })
