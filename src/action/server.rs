@@ -48,6 +48,7 @@ use super::{
     handle::GoalHandle, update_goal_status, GetResultServiceRequest, GoalStatus,
     SendGoalServiceRequest,
 };
+use super::{update_goal_state, GoalEvent};
 
 pub struct ServerQosOption {
     pub goal_service: Profile,
@@ -189,7 +190,6 @@ where
             Ok(()) => {
                 let sender = ServerGoalSend {
                     data: self.data.clone(),
-                    // clock: self.data.
                     results: self.results.clone(),
 
                     goal_id: *request.get_uuid(),
@@ -355,7 +355,6 @@ where
 
 pub struct ServerGoalSend<T: ActionMsg> {
     data: Arc<ServerData>,
-    // clock: Arc<Mutex<Clock>>,
     results: Arc<Mutex<BTreeMap<[u8; 16], T::ResultContent>>>,
 
     request_id: rmw_request_id_t,
@@ -366,33 +365,40 @@ pub struct ServerGoalSend<T: ActionMsg> {
 
 impl<T: ActionMsg> ServerGoalSend<T> {
     /// Accept the goal request.
-    pub fn accept<F>(self, handler: F) -> Result<Server<T>, (Self, DynError)>
+    pub fn accept<F>(mut self, handler: F) -> Result<Server<T>, (Self, DynError)>
     where
         F: FnOnce(GoalHandle<T>),
     {
-        let h = self.handle();
-        let ret = self.send(true)?;
-        handler(h);
+        let timestamp = {
+            let mut clock = self.data.clock.lock();
+            get_timestamp(&mut clock)
+        };
+        match self.accept_goal(timestamp) {
+            Ok(handle) => {
+                handler(handle);
+            }
+            Err(e) => return Err((self, e)),
+        }
+
+        let ret = self.send(true, timestamp)?;
 
         Ok(ret)
     }
 
     pub fn reject(self) -> Result<Server<T>, (Self, DynError)> {
-        self.send(false)
-    }
-
-    /// Send a response for SendGoal service, and accept the goal if `accepted` is true.
-    pub fn send(mut self, accepted: bool) -> Result<Server<T>, (Self, DynError)> {
         let timestamp = {
             let mut clock = self.data.clock.lock();
             get_timestamp(&mut clock)
         };
-        if accepted {
-            if let Err(e) = self.accept_goal(timestamp) {
-                return Err((self, e));
-            }
-        }
+        self.send(false, timestamp)
+    }
 
+    /// Send a response for SendGoal service, and accept the goal if `accepted` is true.
+    fn send(
+        mut self,
+        accepted: bool,
+        timestamp: UnsafeTime,
+    ) -> Result<Server<T>, (Self, DynError)> {
         // TODO: Make SendgoalServiceResponse independent of T (edit safe-drive-msg)
         type GoalResponse<T> = <<T as ActionMsg>::Goal as ActionGoal>::Response;
         let mut response = GoalResponse::<T>::new(accepted, timestamp);
@@ -409,16 +415,20 @@ impl<T: ActionMsg> ServerGoalSend<T> {
 
         Ok(Server {
             data: self.data,
-            // clock: self.clock,
             results: self.results,
         })
     }
 
-    pub fn handle(&self) -> GoalHandle<T> {
-        GoalHandle::new(self.goal_id, self.data.clone(), self.results.clone())
-    }
+    // pub fn handle(&self) -> GoalHandle<T> {
+    //     GoalHandle::new(
+    //         self.goal_id,
+    //         self.goal_handle,
+    //         self.data.clone(),
+    //         self.results.clone(),
+    //     )
+    // }
 
-    fn accept_goal(&mut self, timestamp: UnsafeTime) -> Result<(), DynError> {
+    fn accept_goal(&mut self, timestamp: UnsafeTime) -> Result<GoalHandle<T>, DynError> {
         // see rcl_interfaces/action_msgs/msg/GoalInfo.msg for definition
         let mut goal_info = rcl::MTSafeFn::rcl_action_get_zero_initialized_goal_info();
 
@@ -427,10 +437,19 @@ impl<T: ActionMsg> ServerGoalSend<T> {
         goal_info.stamp.nanosec = timestamp.nanosec;
 
         let server_ptr = unsafe { self.data.as_ptr_mut() };
-        rcl_action_accept_new_goal(server_ptr, &goal_info)?;
-        update_goal_status(server_ptr, &[self.goal_id], GoalStatus::Accepted)?;
+        // TODO: wrap in a Box?
+        let handle_t = rcl_action_accept_new_goal(server_ptr, &goal_info)?;
 
-        Ok(())
+        update_goal_state(handle_t, GoalEvent::Execute).unwrap();
+
+        let handle = GoalHandle::new(
+            self.goal_id,
+            handle_t,
+            self.data.clone(),
+            self.results.clone(),
+        );
+
+        Ok(handle)
     }
 }
 
@@ -508,11 +527,8 @@ pub struct ServerCancelSend<T: ActionMsg> {
 }
 
 impl<T: ActionMsg> ServerCancelSend<T> {
-    /// Send a response for CancelGoal service.
-    pub fn send(
-        mut self,
-        mut accepted_goals: Vec<GoalInfo>,
-    ) -> Result<Server<T>, (Self, DynError)> {
+    /// Accept the cancel requests for accepted_goals and set them to CANCELING state. The shutdown operation should be performed after calling accept(), and you should call send() when it's done.
+    pub fn accept(&self, accepted_goals: &Vec<GoalInfo>) -> Result<(), DynError> {
         let server = unsafe { self.data.as_ptr_mut() };
 
         let accepted_uuids: Vec<[u8; 16]> = accepted_goals
@@ -521,11 +537,17 @@ impl<T: ActionMsg> ServerCancelSend<T> {
             .collect();
 
         // TODO: the argument should be (original goal ids) - accepted_uuids?
-        update_goal_status(server, &accepted_uuids, GoalStatus::Canceling).unwrap_or_else(|err| {
-            let logger = Logger::new("safe_drive");
-            pr_error_in!(logger, "failed to update goal status: {}", err);
-        });
+        // update_goal_status(server, &accepted_uuids, GoalStatus::Canceling)?;
+        update_goal_state(handle, GoalEvent::CancelGoal)?;
 
+        Ok(())
+    }
+
+    /// Send a response for CancelGoal service.
+    pub fn send(
+        mut self,
+        mut accepted_goals: Vec<GoalInfo>,
+    ) -> Result<Server<T>, (Self, DynError)> {
         let mut response = rcl::MTSafeFn::rcl_action_get_zero_initialized_cancel_response();
 
         response.msg.return_code = if accepted_goals.is_empty() {
@@ -539,9 +561,9 @@ impl<T: ActionMsg> ServerCancelSend<T> {
             capacity: accepted_goals.capacity() as rcl::size_t,
         };
 
-        let guard = rcl::MT_UNSAFE_FN.lock();
         let server = unsafe { self.data.as_ptr_mut() };
 
+        let guard = rcl::MT_UNSAFE_FN.lock();
         match guard.rcl_action_send_cancel_response(
             server,
             &mut self.request_id,

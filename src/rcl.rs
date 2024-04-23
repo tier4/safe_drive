@@ -452,6 +452,31 @@ impl MTUnsafeFn {
         })
     }
 
+    pub fn rcl_action_goal_handle_get_status(
+        &self,
+        goal_handle: *const rcl_action_goal_handle_t,
+        status: *mut rcl_action_goal_state_t,
+    ) -> RCLActionResult<()> {
+        action_ret_val_to_err(unsafe {
+            self::rcl_action_goal_handle_get_status(goal_handle, status)
+        })
+    }
+
+    pub fn rcl_action_update_goal_state(
+        &self,
+        goal_handle: *mut rcl_action_goal_handle_t,
+        new_state: rcl_action_goal_event_t,
+    ) -> RCLActionResult<()> {
+        action_ret_val_to_err(unsafe { self::rcl_action_update_goal_state(goal_handle, new_state) })
+    }
+
+    pub fn rcl_action_goal_handle_fini(
+        &self,
+        goal_handle: *mut rcl_action_goal_handle_t,
+    ) -> RCLActionResult<()> {
+        action_ret_val_to_err(unsafe { self::rcl_action_goal_handle_fini(goal_handle) })
+    }
+
     pub fn rcl_action_take_feedback(
         &self,
         action_client: *const rcl_action_client_t,

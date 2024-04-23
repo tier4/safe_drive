@@ -573,8 +573,13 @@ impl Selector {
     ///  
     /// fn add_action_server(selector: &mut Selector, server: Server<MyAction>) {
     ///     selector.add_action_server(server,
-    ///         // handler for goal requests
-    ///         |handle, req| {
+    ///         // return true to accept the goal
+    ///         |req| {
+    ///             // do some validation here...
+    ///             true
+    ///         }
+    ///         // executed if accepted
+    ///         |handle| {
     ///             // spawn a worker thread
     ///             std::thread::spawn(move || {
     ///                 // send a feedback
@@ -592,14 +597,16 @@ impl Selector {
     ///     );
     /// }
     /// ```
-    pub fn add_action_server<T: ActionMsg + 'static, GR, CR>(
+    pub fn add_action_server<T: ActionMsg + 'static, GR, A, CR>(
         &mut self,
         server: action::server::Server<T>,
         goal_handler: GR,
+        accept_handler: A,
         cancel_goal_handler: CR,
     ) -> bool
     where
-        GR: Fn(GoalHandle<T>, SendGoalServiceRequest<T>) -> bool + 'static,
+        GR: Fn(SendGoalServiceRequest<T>) -> bool + 'static,
+        A: Fn(GoalHandle<T>) + 'static,
         CR: Fn(&GoalInfo) -> bool + 'static,
     {
         let server = Arc::new(Mutex::new(server));
@@ -613,12 +620,16 @@ impl Selector {
                 loop {
                     match server.try_recv_goal_request() {
                         RecvResult::Ok((sender, request)) => {
-                            let accepted = goal_handler(sender.handle(), request);
+                            let accepted = goal_handler(request);
 
-                            match sender.send(accepted) {
-                                Ok(s) => {
-                                    *server = s;
-                                }
+                            let s = if accepted {
+                                sender.accept(&accept_handler)
+                            } else {
+                                sender.reject()
+                            };
+
+                            match s {
+                                Ok(s) => *server = s,
                                 Err((_sender, e)) => {
                                     let logger = Logger::new("safe_drive");
                                     pr_error_in!(logger, "Failed to send goal response: {}", e);
@@ -1122,14 +1133,8 @@ impl Selector {
             }
 
             // set action servers
-            for (_, v) in self.action_servers.iter() {
-                for h in v {
-                    guard.rcl_action_wait_set_add_action_server(
-                        &mut self.wait_set,
-                        h.server,
-                        null_mut(),
-                    )?;
-                }
+            for (s, v) in self.action_servers.iter() {
+                guard.rcl_action_wait_set_add_action_server(&mut self.wait_set, *s, null_mut())?;
             }
         }
 
@@ -1443,8 +1448,6 @@ fn notify_action_server(
         // TODO: handle expired goals
         let mut is_goal_expired = false;
 
-        let plen = handlers.len();
-
         {
             let guard = rcl::MT_UNSAFE_FN.lock();
             if let Err(e) = guard.rcl_action_server_wait_set_get_entities_ready(
@@ -1479,10 +1482,6 @@ fn notify_action_server(
 
             !(goal_remove || cancel_remove || result_remove)
         });
-
-        if plen != handlers.len() {
-            println!("[D] action server removed: {plen}=>{}", handlers.len());
-        }
 
         !handlers.is_empty()
     });

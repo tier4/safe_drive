@@ -40,9 +40,7 @@ fn create_client(
     Client::new(node_client, action, None).map_err(|e| e.into())
 }
 
-fn goal_handler(handle: GoalHandle<MyAction>, req: MyAction_SendGoal_Request) -> bool {
-    println!("Goal request received: {:?}", req);
-
+fn accept_handler(handle: GoalHandle<MyAction>) {
     std::thread::Builder::new()
         .name("worker".into())
         .spawn(move || {
@@ -61,8 +59,6 @@ fn goal_handler(handle: GoalHandle<MyAction>, req: MyAction_SendGoal_Request) ->
             }
         })
         .unwrap();
-
-    true
 }
 
 #[test]
@@ -84,7 +80,12 @@ fn test_action() -> Result<(), DynError> {
 
     // You don't have to set handlers for incoming result requests since they are processed
     // automatically.
-    selector.add_action_server(server.clone(), goal_handler, move |_goal| true);
+    selector.add_action_server(
+        server.clone(),
+        move |_| true,
+        accept_handler,
+        move |_goal| true,
+    );
     selector.wait()?;
 
     let client = loop {
@@ -164,10 +165,15 @@ fn test_action_cancel() -> Result<(), DynError> {
 
     thread::sleep(Duration::from_millis(100));
 
-    selector.add_action_server(server, goal_handler, move |goal| {
-        println!("Cancel request received for goal {:?}", goal);
-        true
-    });
+    selector.add_action_server(
+        server,
+        |_| true,
+        accept_handler,
+        move |goal| {
+            println!("Cancel request received for goal {:?}", goal);
+            true
+        },
+    );
     selector.wait()?;
 
     let client = loop {
@@ -235,7 +241,7 @@ fn test_action_status() -> Result<(), DynError> {
 
     thread::sleep(Duration::from_millis(100));
 
-    selector.add_action_server(server, goal_handler, move |_goal| true);
+    selector.add_action_server(server, |_| true, accept_handler, move |_goal| true);
     selector.wait()?;
 
     let client = loop {

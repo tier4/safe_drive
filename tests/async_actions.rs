@@ -39,11 +39,17 @@ fn create_client(
     Client::new(node_client, action, None).map_err(|e| e.into())
 }
 
-fn spawn_worker(handle: GoalHandle<MyAction>, req: MyAction_SendGoal_Request) {
+fn spawn_worker(handle: GoalHandle<MyAction>) {
     std::thread::Builder::new()
         .name("worker".into())
         .spawn(move || {
             for c in 0..=5 {
+                if handle.is_canceling().unwrap() {
+                    println!("server worker: canceling the goal");
+                    handle.canceled(MyAction_Result { b: 1000 }).unwrap();
+                    break;
+                }
+
                 println!("server worker: sending feedback {c}");
                 let feedback = MyAction_Feedback { c };
                 handle.feedback(feedback).unwrap();
@@ -61,95 +67,90 @@ fn spawn_worker(handle: GoalHandle<MyAction>, req: MyAction_SendGoal_Request) {
 }
 
 async fn run_server(server: Server<MyAction>) -> Result<(), DynError> {
-    let goal = async_std::task::Builder::new()
-        .name("task_goal".into())
-        .spawn({
-            let mut server_ = server.clone();
-            async move {
-                loop {
-                    println!(
-                        "listening... on {}",
-                        async_std::task::current().name().unwrap_or("unknown")
-                    );
-                    let result = server_.recv_goal_request().await;
-                    match result {
-                        Ok((sender, req)) => {
-                            println!("server: goal received: {:?}", req);
+    let goal = async_std::task::spawn({
+        let mut server_ = server.clone();
+        async move {
+            loop {
+                let result = server_.recv_goal_request().await;
+                match result {
+                    Ok((sender, req)) => {
+                        println!("server: goal received: {:?}", req);
 
-                            let s = sender
-                                .accept(|handle| spawn_worker(handle, req))
-                                .map_err(|(_sender, err)| err)
-                                .expect("could not accept");
-                            // let s = sender.reject().map_err(|(_sender, err)| err)?;
+                        let s = sender
+                            .accept(|handle| spawn_worker(handle))
+                            .map_err(|(_sender, err)| err)
+                            .expect("could not accept");
+                        // let s = sender.reject().map_err(|(_sender, err)| err)?;
 
-                            println!("server: goal response sent");
+                        println!("server: goal response sent");
 
-                            server_ = s;
-                        }
-                        Err(e) => panic!("{e:?}"),
+                        server_ = s;
                     }
+                    Err(e) => panic!("{e:?}"),
                 }
             }
-        })?;
+        }
+    });
 
-    // let cancel = async_std::task::spawn({
-    //     let mut server_ = server.clone();
-    //     async move {
-    //         loop {
-    //             let result = server_.recv_cancel_request().await;
-    //             match result {
-    //                 Ok((sender, candidates)) => {
-    //                     println!("server: received cancel request for: {:?}", candidates);
+    let cancel = async_std::task::spawn({
+        let mut server_ = server.clone();
+        async move {
+            loop {
+                let result = server_.recv_cancel_request().await;
+                match result {
+                    Ok((sender, candidates)) => {
+                        println!("server: received cancel request for: {:?}", candidates);
 
-    //                     // do real cancel work
+                        let accepted = candidates; // filter requests if needed
 
-    //                     // return cancel response
-    //                     let s = sender
-    //                         .send(candidates)
-    //                         .map_err(|(_s, err)| err)
-    //                         .expect("could not send");
-    //                     println!("server: cancel response sent");
+                        sender
+                            .accept(&accepted)
+                            .expect("could not set status to CANCELING");
 
-    //                     server_ = s;
-    //                 }
-    //                 Err(e) => panic!("{e:?}"),
-    //             }
-    //         }
-    //     }
-    // });
+                        // perform shutdown operations for the goals here if needed
+                        thread::sleep(Duration::from_secs(2));
 
-    let result = async_std::task::Builder::new()
-        .name("task_result".into())
-        .spawn({
-            let mut server_ = server.clone();
-            async move {
-                loop {
-                    println!(
-                        "listening... on {}",
-                        async_std::task::current().name().unwrap_or("unknown")
-                    );
-                    let result = server_.recv_result_request().await;
-                    match result {
-                        Ok((sender, req)) => {
-                            println!("server: received result request for: {:?}", req);
+                        // return cancel response
+                        let s = sender
+                            .send(accepted)
+                            .map_err(|(_s, err)| err)
+                            .expect("could not send cancel response");
+                        println!("server: cancel response sent");
 
-                            // return result response
-                            let s = sender
-                                .send(req.get_uuid())
-                                .map_err(|(_s, err)| err)
-                                .expect("could not send");
-                            println!("server: result response sent");
-
-                            server_ = s;
-                        }
-                        Err(e) => panic!("{e:?}"),
+                        server_ = s;
                     }
+                    Err(e) => panic!("{e:?}"),
                 }
             }
-        })?;
+        }
+    });
+
+    let result = async_std::task::spawn({
+        let mut server_ = server.clone();
+        async move {
+            loop {
+                let result = server_.recv_result_request().await;
+                match result {
+                    Ok((sender, req)) => {
+                        println!("server: received result request for: {:?}", req);
+
+                        // return result response
+                        let s = sender
+                            .send(req.get_uuid())
+                            .map_err(|(_s, err)| err)
+                            .expect("could not send");
+                        println!("server: result response sent");
+
+                        server_ = s;
+                    }
+                    Err(e) => panic!("{e:?}"),
+                }
+            }
+        }
+    });
 
     let _ = goal.await;
-    // let _ = cancel.await;
+    let _ = cancel.await;
     let _ = result.await;
 
     Ok(())
@@ -220,33 +221,15 @@ async fn run_client_cancel(mut client: Client<MyAction>) -> Result<(), DynError>
 
     // receive a goal response
     let recv = receiver.recv();
-    let client = match async_std::future::timeout(Duration::from_secs(3), recv).await {
-        Ok(Ok((c, response, header))) => {
+    // let client = match async_std::future::timeout(Duration::from_secs(3), recv).await {
+    let client = match async_std::future::timeout(Duration::from_secs(3600), recv).await {
+        Ok(Ok((c, response, _header))) => {
             println!("client: goal response received: {:?}", response);
             c
         }
         Ok(Err(e)) => panic!("{e:?}"),
         Err(_) => panic!("timed out"),
     };
-
-    // *** send another goal request
-    // println!("sending another goal request...");
-    // let uuid: [u8; 16] = rand::random();
-    // let goal = MyAction_Goal { a: 20 };
-    // let receiver = client.send_goal_with_uuid(goal, uuid)?;
-
-    // // receive a goal response
-    // let recv = receiver.recv();
-    // let client = match async_std::future::timeout(Duration::from_secs(30), recv).await {
-    //     Ok(Ok((c, response, header))) => {
-    //         println!("client: goal response received: {:?}", response);
-    //         c
-    //     }
-    //     Ok(Err(e)) => panic!("{e:?}"),
-    //     Err(_) => panic!("timed out"),
-    // };
-    // return Ok(());
-    // ***
 
     thread::sleep(Duration::from_secs(1));
 
@@ -260,7 +243,7 @@ async fn run_client_cancel(mut client: Client<MyAction>) -> Result<(), DynError>
     println!("client: cancel request sent");
 
     match receiver.recv().await {
-        Ok((c, resp, header)) => {
+        Ok((_c, resp, _header)) => {
             println!("client: cancel response received: {:?}", resp);
         }
         Err(e) => panic!("client: could not cancel the goal: {e:?}"),
