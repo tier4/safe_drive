@@ -7,7 +7,7 @@ use crate::{error::DynError, msg::ActionMsg, rcl};
 /// GoalHandle contains information about an action goal and is used by server worker threads to send feedback and results.
 pub struct GoalHandle<T: ActionMsg> {
     pub goal_id: [u8; 16],
-    handle: *mut rcl::rcl_action_goal_handle_t,
+    pub(crate) handle: *mut rcl::rcl_action_goal_handle_t,
     data: Arc<ServerData>,
     pub results: Arc<Mutex<BTreeMap<[u8; 16], T::ResultContent>>>,
 }
@@ -70,7 +70,7 @@ where
 
         // let server = unsafe { self.data.as_ptr_mut() };
         // update_goal_status(server, &[self.goal_id], GoalStatus::Succeeded)?;
-        update_goal_state(self.handle, GoalEvent::Canceled)?;
+        update_goal_state(self.handle, GoalEvent::Succeed)?;
 
         Ok(())
     }

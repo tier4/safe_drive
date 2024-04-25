@@ -127,7 +127,12 @@ pub struct Server<T: ActionMsg> {
     pub(crate) data: Arc<ServerData>,
     /// Once the server has completed the result for a goal, it is kept here and the result requests are responsed with the result value in this map.
     pub(crate) results: Arc<Mutex<BTreeMap<[u8; 16], T::ResultContent>>>,
+    pub(crate) handles: Arc<Mutex<BTreeMap<[u8; 16], *mut rcl_action_goal_handle_t>>>,
 }
+
+// FIXME: 誰がhandleのポインタを管理する？
+unsafe impl<T> Send for Server<T> where T: ActionMsg {}
+unsafe impl<T> Sync for Server<T> where T: ActionMsg {}
 
 impl<T> Server<T>
 where
@@ -165,8 +170,8 @@ where
                 node,
                 clock: Mutex::new(clock),
             }),
-            // clock: Arc::new(Mutex::new(clock)),
             results: Arc::new(Mutex::new(BTreeMap::new())),
+            handles: Arc::new(Mutex::new(BTreeMap::new())),
         };
 
         Ok(server)
@@ -191,6 +196,7 @@ where
                 let sender = ServerGoalSend {
                     data: self.data.clone(),
                     results: self.results.clone(),
+                    handles: self.handles.clone(),
 
                     goal_id: *request.get_uuid(),
                     request_id: header,
@@ -263,6 +269,7 @@ where
                 let sender = ServerCancelSend {
                     data: self.data.clone(),
                     results: self.results.clone(),
+                    handles: self.handles.clone(),
                     request_id: header,
                     _unsync: Default::default(),
                 };
@@ -356,6 +363,7 @@ where
 pub struct ServerGoalSend<T: ActionMsg> {
     data: Arc<ServerData>,
     results: Arc<Mutex<BTreeMap<[u8; 16], T::ResultContent>>>,
+    handles: Arc<Mutex<BTreeMap<[u8; 16], *mut rcl_action_goal_handle_t>>>,
 
     request_id: rmw_request_id_t,
     goal_id: [u8; 16],
@@ -375,6 +383,8 @@ impl<T: ActionMsg> ServerGoalSend<T> {
         };
         match self.accept_goal(timestamp) {
             Ok(handle) => {
+                let mut handles = self.handles.lock();
+                handles.insert(self.goal_id, handle.handle);
                 handler(handle);
             }
             Err(e) => return Err((self, e)),
@@ -416,6 +426,7 @@ impl<T: ActionMsg> ServerGoalSend<T> {
         Ok(Server {
             data: self.data,
             results: self.results,
+            handles: self.handles,
         })
     }
 
@@ -521,6 +532,7 @@ impl<T: ActionMsg> PinnedDrop for AsyncGoalReceiver<T> {
 pub struct ServerCancelSend<T: ActionMsg> {
     data: Arc<ServerData>,
     results: Arc<Mutex<BTreeMap<[u8; 16], T::ResultContent>>>,
+    handles: Arc<Mutex<BTreeMap<[u8; 16], *mut rcl_action_goal_handle_t>>>,
 
     request_id: rmw_request_id_t,
     _unsync: PhantomUnsync,
@@ -536,9 +548,11 @@ impl<T: ActionMsg> ServerCancelSend<T> {
             .map(|goal| goal.goal_id.uuid)
             .collect();
 
-        // TODO: the argument should be (original goal ids) - accepted_uuids?
-        // update_goal_status(server, &accepted_uuids, GoalStatus::Canceling)?;
-        update_goal_state(handle, GoalEvent::CancelGoal)?;
+        let handles = self.handles.lock();
+        for uuid in accepted_uuids {
+            let handle = handles.get(&uuid).unwrap();
+            update_goal_state(*handle, GoalEvent::CancelGoal)?;
+        }
 
         Ok(())
     }
@@ -572,6 +586,7 @@ impl<T: ActionMsg> ServerCancelSend<T> {
             Ok(()) => Ok(Server {
                 data: self.data,
                 results: self.results,
+                handles: self.handles,
             }),
             Err(e) => Err((self, e.into())),
         }
@@ -670,7 +685,9 @@ impl<T: ActionMsg> ServerResultSend<T> {
                         return Ok(Server {
                             data: self.data,
                             results: self.results,
-                        })
+                            // TODO: we don't need handles anymore
+                            handles: Arc::new(Mutex::new(BTreeMap::new())),
+                        });
                     }
                     Err(e) => {
                         let logger = Logger::new("safe_drive");
@@ -771,6 +788,7 @@ impl<T: ActionMsg> Clone for Server<T> {
         Self {
             data: self.data.clone(),
             results: self.results.clone(),
+            handles: self.handles.clone(),
         }
     }
 }

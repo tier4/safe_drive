@@ -47,7 +47,7 @@ fn spawn_worker(handle: GoalHandle<MyAction>) {
                 if handle.is_canceling().unwrap() {
                     println!("server worker: canceling the goal");
                     handle.canceled(MyAction_Result { b: 1000 }).unwrap();
-                    break;
+                    return;
                 }
 
                 println!("server worker: sending feedback {c}");
