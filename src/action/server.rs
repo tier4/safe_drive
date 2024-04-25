@@ -427,15 +427,6 @@ impl<T: ActionMsg> ServerGoalSend<T> {
         })
     }
 
-    // pub fn handle(&self) -> GoalHandle<T> {
-    //     GoalHandle::new(
-    //         self.goal_id,
-    //         self.goal_handle,
-    //         self.data.clone(),
-    //         self.results.clone(),
-    //     )
-    // }
-
     fn accept_goal(&mut self, timestamp: UnsafeTime) -> Result<GoalHandle<T>, DynError> {
         // see rcl_interfaces/action_msgs/msg/GoalInfo.msg for definition
         let mut goal_info = rcl::MTSafeFn::rcl_action_get_zero_initialized_goal_info();

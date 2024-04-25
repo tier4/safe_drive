@@ -1,8 +1,12 @@
 use parking_lot::Mutex;
 use std::{collections::BTreeMap, sync::Arc};
 
-use super::{server::ServerData, update_goal_state, update_goal_status, GoalEvent, GoalStatus};
-use crate::{error::DynError, msg::ActionMsg, rcl};
+use super::{server::ServerData, update_goal_state, GoalEvent, GoalStatus};
+use crate::{
+    error::{DynError, RCLActionError},
+    msg::ActionMsg,
+    rcl,
+};
 
 /// GoalHandle contains information about an action goal and is used by server worker threads to send feedback and results.
 pub struct GoalHandle<T: ActionMsg> {
@@ -72,19 +76,17 @@ where
     }
 
     pub fn is_canceling(&self) -> Result<bool, DynError> {
-        let mut s: rcl::rcl_action_goal_state_t = 0; // default to UNKNOWN
+        let mut s: rcl::rcl_action_goal_state_t = GoalStatus::Unknown as i8;
         let guard = rcl::MT_UNSAFE_FN.lock();
         guard
             .rcl_action_goal_handle_get_status(self.handle, &mut s)
             .unwrap();
 
-        println!("status: {:?}", GoalStatus::from(s));
-
         Ok(GoalStatus::Canceling == GoalStatus::from(s))
     }
 
-    pub fn abort() {
-        todo!()
+    pub fn abort(&self) -> Result<(), RCLActionError> {
+        update_goal_state(self.handle, GoalEvent::Abort)
     }
 }
 
