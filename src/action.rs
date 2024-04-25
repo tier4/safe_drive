@@ -4,8 +4,7 @@ use crate::{
     error::RCLActionResult,
     msg::{interfaces::action_msgs::msg::GoalStatusSeq, ActionGoal, ActionMsg, ActionResult},
     rcl::{
-        self, action_msgs__srv__CancelGoal_Request, rcl_action_goal_handle_t,
-        rcl_action_goal_status_array_t, rcl_action_server_t,
+        self, action_msgs__srv__CancelGoal_Request, rcl_action_goal_handle_t, rcl_action_server_t,
     },
 };
 
@@ -95,24 +94,14 @@ pub(crate) fn update_goal_status(
     let status_seq_ptr = &mut statuses.msg.status_list as *mut _ as *mut GoalStatusSeq<0>;
     let status_seq = unsafe { &mut (*status_seq_ptr) };
 
-    println!("status_seq GOT: {:?}", status_seq.as_slice());
-
     for status in status_seq.iter_mut() {
         if goal_ids
             .iter()
-            .find(|id| **id == status.goal_info.goal_id.uuid)
-            .is_some()
+            .any(|id| *id == status.goal_info.goal_id.uuid)
         {
             status.status = new_status as i8;
         }
     }
-    println!("status_seq NEW: {:?}", status_seq.as_slice());
-
-    println!(
-        "statuses.msg.status_list: {:?}",
-        std::ptr::addr_of!(statuses.msg.status_list)
-    );
-    println!("status_seq: {:?}", std::ptr::addr_of!(*status_seq));
 
     guard
         .rcl_action_publish_status(server, &statuses as *const _ as *const _)

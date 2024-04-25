@@ -165,7 +165,7 @@ async fn run_client(mut client: Client<MyAction>) -> Result<(), DynError> {
     // receive a goal response
     let recv = receiver.recv();
     let client = match async_std::future::timeout(Duration::from_secs(3), recv).await {
-        Ok(Ok((c, response, header))) => {
+        Ok(Ok((c, response, _header))) => {
             println!("client: goal response received: {:?}", response);
             c
         }
@@ -261,17 +261,19 @@ fn test_async_action() -> Result<(), Box<dyn std::error::Error + Sync + Send + '
     let server = create_server(&ctx, "test_async_action_server", "test_action", None)?;
 
     async_std::task::block_on(async {
+        let (tx, rx) = crossbeam_channel::unbounded();
+
         async_std::task::spawn({
             let server = server.clone();
             run_server(server)
         });
+        async_std::task::spawn(async move {
+            let ret = run_client(client).await;
+            let _ = tx.send(());
+            ret
+        });
 
-        let task_client = async_std::task::spawn(run_client(client));
-        if let Err(e) = task_client.await {
-            println!("error occurred in client: {e}");
-        }
-
-        // drop server when client is finished
+        let _ = rx.recv();
     });
 
     Ok(())
@@ -293,18 +295,19 @@ fn test_async_cancel() -> Result<(), DynError> {
     )?;
 
     async_std::task::block_on(async {
-        let task_server = async_std::task::spawn({
+        let (tx, rx) = crossbeam_channel::unbounded();
+
+        async_std::task::spawn({
             let server = server.clone();
             run_server(server)
         });
-        let task_client = async_std::task::spawn(run_client_cancel(client));
+        async_std::task::spawn(async move {
+            let ret = run_client_cancel(client).await;
+            let _ = tx.send(());
+            ret
+        });
 
-        if let Err(e) = task_server.await {
-            println!("error occurred in server: {e}");
-        };
-        if let Err(e) = task_client.await {
-            println!("error occurred in client: {e}");
-        }
+        let _ = rx.recv();
     });
 
     Ok(())

@@ -51,8 +51,6 @@ where
             .into());
         }
 
-        // let server = unsafe { self.data.as_ptr_mut() };
-        // update_goal_status(server, &[self.goal_id], GoalStatus::Canceled)?;
         update_goal_state(self.handle, GoalEvent::Canceled)?;
 
         Ok(())
@@ -68,8 +66,6 @@ where
             .into());
         }
 
-        // let server = unsafe { self.data.as_ptr_mut() };
-        // update_goal_status(server, &[self.goal_id], GoalStatus::Succeeded)?;
         update_goal_state(self.handle, GoalEvent::Succeed)?;
 
         Ok(())
@@ -89,8 +85,6 @@ where
 
     pub fn abort() {
         todo!()
-        // let server = unsafe { self.data.as_ptr_mut() };
-        // let _ = update_goal_status(server, &[self.goal_id], GoalStatus::Aborted);
     }
 }
 

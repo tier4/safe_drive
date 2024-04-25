@@ -44,10 +44,7 @@ use crate::qos::humble::*;
 #[cfg(feature = "iron")]
 use crate::qos::iron::*;
 
-use super::{
-    handle::GoalHandle, update_goal_status, GetResultServiceRequest, GoalStatus,
-    SendGoalServiceRequest,
-};
+use super::{handle::GoalHandle, GetResultServiceRequest, GoalStatus, SendGoalServiceRequest};
 use super::{update_goal_state, GoalEvent};
 
 pub struct ServerQosOption {
@@ -540,9 +537,7 @@ pub struct ServerCancelSend<T: ActionMsg> {
 
 impl<T: ActionMsg> ServerCancelSend<T> {
     /// Accept the cancel requests for accepted_goals and set them to CANCELING state. The shutdown operation should be performed after calling accept(), and you should call send() when it's done.
-    pub fn accept(&self, accepted_goals: &Vec<GoalInfo>) -> Result<(), DynError> {
-        let server = unsafe { self.data.as_ptr_mut() };
-
+    pub fn accept(&self, accepted_goals: &[GoalInfo]) -> Result<(), DynError> {
         let accepted_uuids: Vec<[u8; 16]> = accepted_goals
             .iter()
             .map(|goal| goal.goal_id.uuid)
@@ -682,12 +677,12 @@ impl<T: ActionMsg> ServerResultSend<T> {
                     &mut response as *const _ as *mut _,
                 ) {
                     Ok(()) => {
-                        return Ok(Server {
+                        Ok(Server {
                             data: self.data,
                             results: self.results,
                             // TODO: we don't need handles anymore
                             handles: Arc::new(Mutex::new(BTreeMap::new())),
-                        });
+                        })
                     }
                     Err(e) => {
                         let logger = Logger::new("safe_drive");
@@ -696,7 +691,7 @@ impl<T: ActionMsg> ServerResultSend<T> {
                             "failed to send result response from action server: {}",
                             e
                         );
-                        return Err((self, e.into()));
+                        Err((self, e.into()))
                     }
                 }
             }
@@ -712,7 +707,7 @@ impl<T: ActionMsg> ServerResultSend<T> {
                     uuid
                 );
 
-                return Err((self, e.into()));
+                Err((self, e.into()))
             }
         }
     }

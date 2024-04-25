@@ -57,7 +57,7 @@
 
 use self::guard_condition::{GuardCondition, RCLGuardCondition};
 use crate::{
-    action::{self, handle::GoalHandle, GoalStatus, SendGoalServiceRequest},
+    action::{self, handle::GoalHandle, SendGoalServiceRequest},
     context::Context,
     delta_list::DeltaList,
     error::{DynError, RCLActionResult, RCLError, RCLResult},
@@ -123,7 +123,6 @@ struct ActionClientConditionHandler {
 }
 
 struct ActionServerConditionHandler {
-    server: *const rcl_action_server_t,
     goal_handler: Option<ActionHandler>,
     cancel_goal_handler: Option<ActionHandler>,
     result_handler: Option<ActionHandler>,
@@ -782,7 +781,6 @@ impl Selector {
         if self.action_servers.contains_key(&s) {
             let handlers = self.action_servers.get_mut(&s).unwrap();
             handlers.push(ActionServerConditionHandler {
-                server: &server.server,
                 goal_handler,
                 cancel_goal_handler,
                 result_handler,
@@ -791,7 +789,6 @@ impl Selector {
             self.action_servers.insert(
                 &server.server,
                 vec![ActionServerConditionHandler {
-                    server: &server.server,
                     goal_handler,
                     cancel_goal_handler,
                     result_handler,
@@ -1133,7 +1130,7 @@ impl Selector {
             }
 
             // set action servers
-            for (s, v) in self.action_servers.iter() {
+            for (s, _v) in self.action_servers.iter() {
                 guard.rcl_action_wait_set_add_action_server(&mut self.wait_set, *s, null_mut())?;
             }
         }
