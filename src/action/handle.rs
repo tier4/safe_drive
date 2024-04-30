@@ -1,7 +1,7 @@
 use parking_lot::Mutex;
 use std::{collections::BTreeMap, sync::Arc};
 
-use super::{server::ServerData, update_goal_state, GoalEvent, GoalStatus};
+use super::{server::ServerData, GoalEvent, GoalStatus};
 use crate::{
     error::{DynError, RCLActionError},
     msg::ActionMsg,
@@ -11,9 +11,23 @@ use crate::{
 /// GoalHandle contains information about an action goal and is used by server worker threads to send feedback and results.
 pub struct GoalHandle<T: ActionMsg> {
     pub goal_id: [u8; 16],
-    pub(crate) handle: *mut rcl::rcl_action_goal_handle_t,
+    pub(crate) handle: Arc<GoalHandleData>,
     data: Arc<ServerData>,
     pub results: Arc<Mutex<BTreeMap<[u8; 16], T::ResultContent>>>,
+}
+
+impl<T> Clone for GoalHandle<T>
+where
+    T: ActionMsg,
+{
+    fn clone(&self) -> Self {
+        Self {
+            goal_id: self.goal_id.clone(),
+            handle: self.handle.clone(),
+            data: self.data.clone(),
+            results: self.results.clone(),
+        }
+    }
 }
 
 impl<T> GoalHandle<T>
@@ -28,7 +42,7 @@ where
     ) -> Self {
         Self {
             goal_id,
-            handle: goal_handle,
+            handle: Arc::new(GoalHandleData(goal_handle)),
             data,
             results,
         }
@@ -55,7 +69,7 @@ where
             .into());
         }
 
-        update_goal_state(self.handle, GoalEvent::Canceled)?;
+        self.update(GoalEvent::Canceled)?;
 
         Ok(())
     }
@@ -70,7 +84,7 @@ where
             .into());
         }
 
-        update_goal_state(self.handle, GoalEvent::Succeed)?;
+        self.update(GoalEvent::Succeed)?;
 
         Ok(())
     }
@@ -79,26 +93,42 @@ where
         let mut s: rcl::rcl_action_goal_state_t = GoalStatus::Unknown as i8;
         let guard = rcl::MT_UNSAFE_FN.lock();
         guard
-            .rcl_action_goal_handle_get_status(self.handle, &mut s)
+            .rcl_action_goal_handle_get_status(self.handle.0, &mut s)
             .unwrap();
 
         Ok(GoalStatus::Canceling == GoalStatus::from(s))
     }
 
     pub fn abort(&self) -> Result<(), RCLActionError> {
-        update_goal_state(self.handle, GoalEvent::Abort)
+        self.update(GoalEvent::Abort)
     }
-}
 
-impl<T> Drop for GoalHandle<T>
-where
-    T: ActionMsg,
-{
-    fn drop(&mut self) {
-        let guard = rcl::MT_UNSAFE_FN.lock();
-        let _ = guard.rcl_action_goal_handle_fini(self.handle);
+    // TODO: move update_goal_state here?
+    pub(crate) fn update(&self, event: GoalEvent) -> Result<(), RCLActionError> {
+        self.handle.update_goal_state(event)
     }
 }
 
 unsafe impl<T> Send for GoalHandle<T> where T: ActionMsg {}
 unsafe impl<T> Sync for GoalHandle<T> where T: ActionMsg {}
+
+pub(crate) struct GoalHandleData(pub *mut rcl::rcl_action_goal_handle_t);
+
+impl GoalHandleData {
+    pub(crate) fn update_goal_state(&self, event: GoalEvent) -> Result<(), RCLActionError> {
+        let guard = rcl::MT_UNSAFE_FN.lock();
+
+        guard
+            .rcl_action_update_goal_state(self.0, event as u32)
+            .unwrap();
+
+        Ok(())
+    }
+}
+
+impl Drop for GoalHandleData {
+    fn drop(&mut self) {
+        let guard = rcl::MT_UNSAFE_FN.lock();
+        let _ = guard.rcl_action_goal_handle_fini(self.0);
+    }
+}

@@ -1,7 +1,6 @@
 use parking_lot::Mutex;
 use pin_project::{pin_project, pinned_drop};
 use std::future::Future;
-use std::marker::PhantomData;
 use std::{
     collections::BTreeMap, ffi::CString, mem::MaybeUninit, pin::Pin, sync::Arc, task::Poll,
     time::Duration,
@@ -44,8 +43,8 @@ use crate::qos::humble::*;
 #[cfg(feature = "iron")]
 use crate::qos::iron::*;
 
+use super::GoalEvent;
 use super::{handle::GoalHandle, GetResultServiceRequest, GoalStatus, SendGoalServiceRequest};
-use super::{update_goal_state, GoalEvent};
 
 pub struct ServerQosOption {
     pub goal_service: Profile,
@@ -124,7 +123,7 @@ pub struct Server<T: ActionMsg> {
     pub(crate) data: Arc<ServerData>,
     /// Once the server has completed the result for a goal, it is kept here and the result requests are responsed with the result value in this map.
     pub(crate) results: Arc<Mutex<BTreeMap<[u8; 16], T::ResultContent>>>,
-    pub(crate) handles: Arc<Mutex<BTreeMap<[u8; 16], *mut rcl_action_goal_handle_t>>>,
+    pub(crate) handles: Arc<Mutex<BTreeMap<[u8; 16], GoalHandle<T>>>>,
 }
 
 // FIXME: 誰がhandleのポインタを管理する？
@@ -197,7 +196,6 @@ where
 
                     goal_id: *request.get_uuid(),
                     request_id: header,
-                    _phantom: Default::default(),
                     _unsync: Default::default(),
                 };
                 RecvResult::Ok((sender, request))
@@ -360,11 +358,10 @@ where
 pub struct ServerGoalSend<T: ActionMsg> {
     data: Arc<ServerData>,
     results: Arc<Mutex<BTreeMap<[u8; 16], T::ResultContent>>>,
-    handles: Arc<Mutex<BTreeMap<[u8; 16], *mut rcl_action_goal_handle_t>>>,
+    handles: Arc<Mutex<BTreeMap<[u8; 16], GoalHandle<T>>>>,
 
     request_id: rmw_request_id_t,
     goal_id: [u8; 16],
-    _phantom: PhantomData<T>,
     _unsync: PhantomUnsync,
 }
 
@@ -381,8 +378,8 @@ impl<T: ActionMsg> ServerGoalSend<T> {
         match self.accept_goal(timestamp) {
             Ok(handle) => {
                 let mut handles = self.handles.lock();
-                handles.insert(self.goal_id, handle.handle);
-                handler(handle);
+                handler(handle.clone());
+                handles.insert(self.goal_id, handle);
             }
             Err(e) => return Err((self, e)),
         }
@@ -439,14 +436,14 @@ impl<T: ActionMsg> ServerGoalSend<T> {
         // TODO: wrap in a Box?
         let handle_t = rcl_action_accept_new_goal(server_ptr, &goal_info)?;
 
-        update_goal_state(handle_t, GoalEvent::Execute).unwrap();
-
         let handle = GoalHandle::new(
             self.goal_id,
             handle_t,
             self.data.clone(),
             self.results.clone(),
         );
+
+        handle.update(GoalEvent::Execute)?;
 
         Ok(handle)
     }
@@ -520,7 +517,7 @@ impl<T: ActionMsg> PinnedDrop for AsyncGoalReceiver<T> {
 pub struct ServerCancelSend<T: ActionMsg> {
     data: Arc<ServerData>,
     results: Arc<Mutex<BTreeMap<[u8; 16], T::ResultContent>>>,
-    handles: Arc<Mutex<BTreeMap<[u8; 16], *mut rcl_action_goal_handle_t>>>,
+    handles: Arc<Mutex<BTreeMap<[u8; 16], GoalHandle<T>>>>,
 
     request_id: rmw_request_id_t,
     _unsync: PhantomUnsync,
@@ -537,7 +534,7 @@ impl<T: ActionMsg> ServerCancelSend<T> {
         let handles = self.handles.lock();
         for uuid in accepted_uuids {
             let handle = handles.get(&uuid).unwrap();
-            update_goal_state(*handle, GoalEvent::CancelGoal)?;
+            handle.update(GoalEvent::CancelGoal)?;
         }
 
         Ok(())
