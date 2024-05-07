@@ -45,8 +45,8 @@ impl Drop for Int8 {
 #[derive(Debug)]
 struct Int8SeqRaw {
     data: *mut Int8,
-    size: usize,
-    capacity: usize,
+    size: size_t,
+    capacity: size_t,
 }
 
 /// Sequence of Int8.
@@ -56,8 +56,8 @@ struct Int8SeqRaw {
 #[derive(Debug)]
 pub struct Int8Seq<const N: usize> {
     data: *mut Int8,
-    size: usize,
-    capacity: usize,
+    size: size_t,
+    capacity: size_t,
 }
 
 impl<const N: usize> Int8Seq<N> {
@@ -95,7 +95,7 @@ impl<const N: usize> Int8Seq<N> {
         if self.data.is_null() {
             &[]
         } else {
-            let s = unsafe { std::slice::from_raw_parts(self.data, self.size) };
+            let s = unsafe { std::slice::from_raw_parts(self.data, self.size as _) };
             s
         }
     }
@@ -104,7 +104,7 @@ impl<const N: usize> Int8Seq<N> {
         if self.data.is_null() {
             &mut []
         } else {
-            let s = unsafe { std::slice::from_raw_parts_mut(self.data, self.size) };
+            let s = unsafe { std::slice::from_raw_parts_mut(self.data, self.size as _) };
             s
         }
     }

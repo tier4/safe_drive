@@ -63,8 +63,8 @@ impl Drop for SelfTestRequest {
 #[derive(Debug)]
 struct SelfTestRequestSeqRaw {
     data: *mut SelfTestRequest,
-    size: usize,
-    capacity: usize,
+    size: size_t,
+    capacity: size_t,
 }
 
 /// Sequence of SelfTestRequest.
@@ -74,8 +74,8 @@ struct SelfTestRequestSeqRaw {
 #[derive(Debug)]
 pub struct SelfTestRequestSeq<const N: usize> {
     data: *mut SelfTestRequest,
-    size: usize,
-    capacity: usize,
+    size: size_t,
+    capacity: size_t,
 }
 
 impl<const N: usize> SelfTestRequestSeq<N> {
@@ -114,7 +114,7 @@ impl<const N: usize> SelfTestRequestSeq<N> {
         if self.data.is_null() {
             &[]
         } else {
-            let s = unsafe { std::slice::from_raw_parts(self.data, self.size) };
+            let s = unsafe { std::slice::from_raw_parts(self.data, self.size as _) };
             s
         }
     }
@@ -123,7 +123,7 @@ impl<const N: usize> SelfTestRequestSeq<N> {
         if self.data.is_null() {
             &mut []
         } else {
-            let s = unsafe { std::slice::from_raw_parts_mut(self.data, self.size) };
+            let s = unsafe { std::slice::from_raw_parts_mut(self.data, self.size as _) };
             s
         }
     }
@@ -180,8 +180,8 @@ impl Drop for SelfTestResponse {
 #[derive(Debug)]
 struct SelfTestResponseSeqRaw {
     data: *mut SelfTestResponse,
-    size: usize,
-    capacity: usize,
+    size: size_t,
+    capacity: size_t,
 }
 
 /// Sequence of SelfTestResponse.
@@ -191,8 +191,8 @@ struct SelfTestResponseSeqRaw {
 #[derive(Debug)]
 pub struct SelfTestResponseSeq<const N: usize> {
     data: *mut SelfTestResponse,
-    size: usize,
-    capacity: usize,
+    size: size_t,
+    capacity: size_t,
 }
 
 impl<const N: usize> SelfTestResponseSeq<N> {
@@ -231,7 +231,7 @@ impl<const N: usize> SelfTestResponseSeq<N> {
         if self.data.is_null() {
             &[]
         } else {
-            let s = unsafe { std::slice::from_raw_parts(self.data, self.size) };
+            let s = unsafe { std::slice::from_raw_parts(self.data, self.size as _) };
             s
         }
     }
@@ -240,7 +240,7 @@ impl<const N: usize> SelfTestResponseSeq<N> {
         if self.data.is_null() {
             &mut []
         } else {
-            let s = unsafe { std::slice::from_raw_parts_mut(self.data, self.size) };
+            let s = unsafe { std::slice::from_raw_parts_mut(self.data, self.size as _) };
             s
         }
     }

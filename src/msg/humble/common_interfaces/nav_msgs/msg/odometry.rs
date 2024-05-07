@@ -48,8 +48,8 @@ impl Drop for Odometry {
 #[derive(Debug)]
 struct OdometrySeqRaw {
     data: *mut Odometry,
-    size: usize,
-    capacity: usize,
+    size: size_t,
+    capacity: size_t,
 }
 
 /// Sequence of Odometry.
@@ -59,8 +59,8 @@ struct OdometrySeqRaw {
 #[derive(Debug)]
 pub struct OdometrySeq<const N: usize> {
     data: *mut Odometry,
-    size: usize,
-    capacity: usize,
+    size: size_t,
+    capacity: size_t,
 }
 
 impl<const N: usize> OdometrySeq<N> {
@@ -98,7 +98,7 @@ impl<const N: usize> OdometrySeq<N> {
         if self.data.is_null() {
             &[]
         } else {
-            let s = unsafe { std::slice::from_raw_parts(self.data, self.size) };
+            let s = unsafe { std::slice::from_raw_parts(self.data, self.size as _) };
             s
         }
     }
@@ -107,7 +107,7 @@ impl<const N: usize> OdometrySeq<N> {
         if self.data.is_null() {
             &mut []
         } else {
-            let s = unsafe { std::slice::from_raw_parts_mut(self.data, self.size) };
+            let s = unsafe { std::slice::from_raw_parts_mut(self.data, self.size as _) };
             s
         }
     }

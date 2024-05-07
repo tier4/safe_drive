@@ -45,8 +45,8 @@ impl Drop for Plane {
 #[derive(Debug)]
 struct PlaneSeqRaw {
     data: *mut Plane,
-    size: usize,
-    capacity: usize,
+    size: size_t,
+    capacity: size_t,
 }
 
 /// Sequence of Plane.
@@ -56,8 +56,8 @@ struct PlaneSeqRaw {
 #[derive(Debug)]
 pub struct PlaneSeq<const N: usize> {
     data: *mut Plane,
-    size: usize,
-    capacity: usize,
+    size: size_t,
+    capacity: size_t,
 }
 
 impl<const N: usize> PlaneSeq<N> {
@@ -95,7 +95,7 @@ impl<const N: usize> PlaneSeq<N> {
         if self.data.is_null() {
             &[]
         } else {
-            let s = unsafe { std::slice::from_raw_parts(self.data, self.size) };
+            let s = unsafe { std::slice::from_raw_parts(self.data, self.size as _) };
             s
         }
     }
@@ -104,7 +104,7 @@ impl<const N: usize> PlaneSeq<N> {
         if self.data.is_null() {
             &mut []
         } else {
-            let s = unsafe { std::slice::from_raw_parts_mut(self.data, self.size) };
+            let s = unsafe { std::slice::from_raw_parts_mut(self.data, self.size as _) };
             s
         }
     }

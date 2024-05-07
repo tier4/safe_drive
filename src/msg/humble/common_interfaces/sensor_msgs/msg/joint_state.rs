@@ -55,8 +55,8 @@ impl Drop for JointState {
 #[derive(Debug)]
 struct JointStateSeqRaw {
     data: *mut JointState,
-    size: usize,
-    capacity: usize,
+    size: size_t,
+    capacity: size_t,
 }
 
 /// Sequence of JointState.
@@ -66,8 +66,8 @@ struct JointStateSeqRaw {
 #[derive(Debug)]
 pub struct JointStateSeq<const N: usize> {
     data: *mut JointState,
-    size: usize,
-    capacity: usize,
+    size: size_t,
+    capacity: size_t,
 }
 
 impl<const N: usize> JointStateSeq<N> {
@@ -105,7 +105,7 @@ impl<const N: usize> JointStateSeq<N> {
         if self.data.is_null() {
             &[]
         } else {
-            let s = unsafe { std::slice::from_raw_parts(self.data, self.size) };
+            let s = unsafe { std::slice::from_raw_parts(self.data, self.size as _) };
             s
         }
     }
@@ -114,7 +114,7 @@ impl<const N: usize> JointStateSeq<N> {
         if self.data.is_null() {
             &mut []
         } else {
-            let s = unsafe { std::slice::from_raw_parts_mut(self.data, self.size) };
+            let s = unsafe { std::slice::from_raw_parts_mut(self.data, self.size as _) };
             s
         }
     }

@@ -53,8 +53,8 @@ impl Drop for IntegerRange {
 #[derive(Debug)]
 struct IntegerRangeSeqRaw {
     data: *mut IntegerRange,
-    size: usize,
-    capacity: usize,
+    size: size_t,
+    capacity: size_t,
 }
 
 /// Sequence of IntegerRange.
@@ -64,8 +64,8 @@ struct IntegerRangeSeqRaw {
 #[derive(Debug)]
 pub struct IntegerRangeSeq<const N: usize> {
     data: *mut IntegerRange,
-    size: usize,
-    capacity: usize,
+    size: size_t,
+    capacity: size_t,
 }
 
 impl<const N: usize> IntegerRangeSeq<N> {
@@ -103,7 +103,7 @@ impl<const N: usize> IntegerRangeSeq<N> {
         if self.data.is_null() {
             &[]
         } else {
-            let s = unsafe { std::slice::from_raw_parts(self.data, self.size) };
+            let s = unsafe { std::slice::from_raw_parts(self.data, self.size as _) };
             s
         }
     }
@@ -112,7 +112,7 @@ impl<const N: usize> IntegerRangeSeq<N> {
         if self.data.is_null() {
             &mut []
         } else {
-            let s = unsafe { std::slice::from_raw_parts_mut(self.data, self.size) };
+            let s = unsafe { std::slice::from_raw_parts_mut(self.data, self.size as _) };
             s
         }
     }

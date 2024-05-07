@@ -80,8 +80,8 @@ impl Drop for Marker {
 #[derive(Debug)]
 struct MarkerSeqRaw {
     data: *mut Marker,
-    size: usize,
-    capacity: usize,
+    size: size_t,
+    capacity: size_t,
 }
 
 /// Sequence of Marker.
@@ -91,8 +91,8 @@ struct MarkerSeqRaw {
 #[derive(Debug)]
 pub struct MarkerSeq<const N: usize> {
     data: *mut Marker,
-    size: usize,
-    capacity: usize,
+    size: size_t,
+    capacity: size_t,
 }
 
 impl<const N: usize> MarkerSeq<N> {
@@ -130,7 +130,7 @@ impl<const N: usize> MarkerSeq<N> {
         if self.data.is_null() {
             &[]
         } else {
-            let s = unsafe { std::slice::from_raw_parts(self.data, self.size) };
+            let s = unsafe { std::slice::from_raw_parts(self.data, self.size as _) };
             s
         }
     }
@@ -139,7 +139,7 @@ impl<const N: usize> MarkerSeq<N> {
         if self.data.is_null() {
             &mut []
         } else {
-            let s = unsafe { std::slice::from_raw_parts_mut(self.data, self.size) };
+            let s = unsafe { std::slice::from_raw_parts_mut(self.data, self.size as _) };
             s
         }
     }

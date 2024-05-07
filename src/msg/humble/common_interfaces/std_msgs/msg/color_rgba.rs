@@ -48,8 +48,8 @@ impl Drop for ColorRGBA {
 #[derive(Debug)]
 struct ColorRGBASeqRaw {
     data: *mut ColorRGBA,
-    size: usize,
-    capacity: usize,
+    size: size_t,
+    capacity: size_t,
 }
 
 /// Sequence of ColorRGBA.
@@ -59,8 +59,8 @@ struct ColorRGBASeqRaw {
 #[derive(Debug)]
 pub struct ColorRGBASeq<const N: usize> {
     data: *mut ColorRGBA,
-    size: usize,
-    capacity: usize,
+    size: size_t,
+    capacity: size_t,
 }
 
 impl<const N: usize> ColorRGBASeq<N> {
@@ -98,7 +98,7 @@ impl<const N: usize> ColorRGBASeq<N> {
         if self.data.is_null() {
             &[]
         } else {
-            let s = unsafe { std::slice::from_raw_parts(self.data, self.size) };
+            let s = unsafe { std::slice::from_raw_parts(self.data, self.size as _) };
             s
         }
     }
@@ -107,7 +107,7 @@ impl<const N: usize> ColorRGBASeq<N> {
         if self.data.is_null() {
             &mut []
         } else {
-            let s = unsafe { std::slice::from_raw_parts_mut(self.data, self.size) };
+            let s = unsafe { std::slice::from_raw_parts_mut(self.data, self.size as _) };
             s
         }
     }

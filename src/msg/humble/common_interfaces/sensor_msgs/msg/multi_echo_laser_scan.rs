@@ -60,8 +60,8 @@ impl Drop for MultiEchoLaserScan {
 #[derive(Debug)]
 struct MultiEchoLaserScanSeqRaw {
     data: *mut MultiEchoLaserScan,
-    size: usize,
-    capacity: usize,
+    size: size_t,
+    capacity: size_t,
 }
 
 /// Sequence of MultiEchoLaserScan.
@@ -71,8 +71,8 @@ struct MultiEchoLaserScanSeqRaw {
 #[derive(Debug)]
 pub struct MultiEchoLaserScanSeq<const N: usize> {
     data: *mut MultiEchoLaserScan,
-    size: usize,
-    capacity: usize,
+    size: size_t,
+    capacity: size_t,
 }
 
 impl<const N: usize> MultiEchoLaserScanSeq<N> {
@@ -112,7 +112,7 @@ impl<const N: usize> MultiEchoLaserScanSeq<N> {
         if self.data.is_null() {
             &[]
         } else {
-            let s = unsafe { std::slice::from_raw_parts(self.data, self.size) };
+            let s = unsafe { std::slice::from_raw_parts(self.data, self.size as _) };
             s
         }
     }
@@ -121,7 +121,7 @@ impl<const N: usize> MultiEchoLaserScanSeq<N> {
         if self.data.is_null() {
             &mut []
         } else {
-            let s = unsafe { std::slice::from_raw_parts_mut(self.data, self.size) };
+            let s = unsafe { std::slice::from_raw_parts_mut(self.data, self.size as _) };
             s
         }
     }

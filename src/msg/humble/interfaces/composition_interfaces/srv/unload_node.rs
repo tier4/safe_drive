@@ -67,8 +67,8 @@ impl Drop for UnloadNodeRequest {
 #[derive(Debug)]
 struct UnloadNodeRequestSeqRaw {
     data: *mut UnloadNodeRequest,
-    size: usize,
-    capacity: usize,
+    size: size_t,
+    capacity: size_t,
 }
 
 /// Sequence of UnloadNodeRequest.
@@ -78,8 +78,8 @@ struct UnloadNodeRequestSeqRaw {
 #[derive(Debug)]
 pub struct UnloadNodeRequestSeq<const N: usize> {
     data: *mut UnloadNodeRequest,
-    size: usize,
-    capacity: usize,
+    size: size_t,
+    capacity: size_t,
 }
 
 impl<const N: usize> UnloadNodeRequestSeq<N> {
@@ -120,7 +120,7 @@ impl<const N: usize> UnloadNodeRequestSeq<N> {
         if self.data.is_null() {
             &[]
         } else {
-            let s = unsafe { std::slice::from_raw_parts(self.data, self.size) };
+            let s = unsafe { std::slice::from_raw_parts(self.data, self.size as _) };
             s
         }
     }
@@ -129,7 +129,7 @@ impl<const N: usize> UnloadNodeRequestSeq<N> {
         if self.data.is_null() {
             &mut []
         } else {
-            let s = unsafe { std::slice::from_raw_parts_mut(self.data, self.size) };
+            let s = unsafe { std::slice::from_raw_parts_mut(self.data, self.size as _) };
             s
         }
     }
@@ -186,8 +186,8 @@ impl Drop for UnloadNodeResponse {
 #[derive(Debug)]
 struct UnloadNodeResponseSeqRaw {
     data: *mut UnloadNodeResponse,
-    size: usize,
-    capacity: usize,
+    size: size_t,
+    capacity: size_t,
 }
 
 /// Sequence of UnloadNodeResponse.
@@ -197,8 +197,8 @@ struct UnloadNodeResponseSeqRaw {
 #[derive(Debug)]
 pub struct UnloadNodeResponseSeq<const N: usize> {
     data: *mut UnloadNodeResponse,
-    size: usize,
-    capacity: usize,
+    size: size_t,
+    capacity: size_t,
 }
 
 impl<const N: usize> UnloadNodeResponseSeq<N> {
@@ -240,7 +240,7 @@ impl<const N: usize> UnloadNodeResponseSeq<N> {
         if self.data.is_null() {
             &[]
         } else {
-            let s = unsafe { std::slice::from_raw_parts(self.data, self.size) };
+            let s = unsafe { std::slice::from_raw_parts(self.data, self.size as _) };
             s
         }
     }
@@ -249,7 +249,7 @@ impl<const N: usize> UnloadNodeResponseSeq<N> {
         if self.data.is_null() {
             &mut []
         } else {
-            let s = unsafe { std::slice::from_raw_parts_mut(self.data, self.size) };
+            let s = unsafe { std::slice::from_raw_parts_mut(self.data, self.size as _) };
             s
         }
     }

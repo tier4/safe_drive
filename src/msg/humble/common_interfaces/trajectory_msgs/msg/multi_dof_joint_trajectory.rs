@@ -57,8 +57,8 @@ impl Drop for MultiDOFJointTrajectory {
 #[derive(Debug)]
 struct MultiDOFJointTrajectorySeqRaw {
     data: *mut MultiDOFJointTrajectory,
-    size: usize,
-    capacity: usize,
+    size: size_t,
+    capacity: size_t,
 }
 
 /// Sequence of MultiDOFJointTrajectory.
@@ -68,8 +68,8 @@ struct MultiDOFJointTrajectorySeqRaw {
 #[derive(Debug)]
 pub struct MultiDOFJointTrajectorySeq<const N: usize> {
     data: *mut MultiDOFJointTrajectory,
-    size: usize,
-    capacity: usize,
+    size: size_t,
+    capacity: size_t,
 }
 
 impl<const N: usize> MultiDOFJointTrajectorySeq<N> {
@@ -110,7 +110,7 @@ impl<const N: usize> MultiDOFJointTrajectorySeq<N> {
         if self.data.is_null() {
             &[]
         } else {
-            let s = unsafe { std::slice::from_raw_parts(self.data, self.size) };
+            let s = unsafe { std::slice::from_raw_parts(self.data, self.size as _) };
             s
         }
     }
@@ -119,7 +119,7 @@ impl<const N: usize> MultiDOFJointTrajectorySeq<N> {
         if self.data.is_null() {
             &mut []
         } else {
-            let s = unsafe { std::slice::from_raw_parts_mut(self.data, self.size) };
+            let s = unsafe { std::slice::from_raw_parts_mut(self.data, self.size as _) };
             s
         }
     }

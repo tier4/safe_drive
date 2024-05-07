@@ -55,8 +55,8 @@ impl Drop for TransitionDescription {
 #[derive(Debug)]
 struct TransitionDescriptionSeqRaw {
     data: *mut TransitionDescription,
-    size: usize,
-    capacity: usize,
+    size: size_t,
+    capacity: size_t,
 }
 
 /// Sequence of TransitionDescription.
@@ -66,8 +66,8 @@ struct TransitionDescriptionSeqRaw {
 #[derive(Debug)]
 pub struct TransitionDescriptionSeq<const N: usize> {
     data: *mut TransitionDescription,
-    size: usize,
-    capacity: usize,
+    size: size_t,
+    capacity: size_t,
 }
 
 impl<const N: usize> TransitionDescriptionSeq<N> {
@@ -107,7 +107,7 @@ impl<const N: usize> TransitionDescriptionSeq<N> {
         if self.data.is_null() {
             &[]
         } else {
-            let s = unsafe { std::slice::from_raw_parts(self.data, self.size) };
+            let s = unsafe { std::slice::from_raw_parts(self.data, self.size as _) };
             s
         }
     }
@@ -116,7 +116,7 @@ impl<const N: usize> TransitionDescriptionSeq<N> {
         if self.data.is_null() {
             &mut []
         } else {
-            let s = unsafe { std::slice::from_raw_parts_mut(self.data, self.size) };
+            let s = unsafe { std::slice::from_raw_parts_mut(self.data, self.size as _) };
             s
         }
     }

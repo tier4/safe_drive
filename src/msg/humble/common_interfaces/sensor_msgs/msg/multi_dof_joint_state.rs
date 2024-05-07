@@ -55,8 +55,8 @@ impl Drop for MultiDOFJointState {
 #[derive(Debug)]
 struct MultiDOFJointStateSeqRaw {
     data: *mut MultiDOFJointState,
-    size: usize,
-    capacity: usize,
+    size: size_t,
+    capacity: size_t,
 }
 
 /// Sequence of MultiDOFJointState.
@@ -66,8 +66,8 @@ struct MultiDOFJointStateSeqRaw {
 #[derive(Debug)]
 pub struct MultiDOFJointStateSeq<const N: usize> {
     data: *mut MultiDOFJointState,
-    size: usize,
-    capacity: usize,
+    size: size_t,
+    capacity: size_t,
 }
 
 impl<const N: usize> MultiDOFJointStateSeq<N> {
@@ -107,7 +107,7 @@ impl<const N: usize> MultiDOFJointStateSeq<N> {
         if self.data.is_null() {
             &[]
         } else {
-            let s = unsafe { std::slice::from_raw_parts(self.data, self.size) };
+            let s = unsafe { std::slice::from_raw_parts(self.data, self.size as _) };
             s
         }
     }
@@ -116,7 +116,7 @@ impl<const N: usize> MultiDOFJointStateSeq<N> {
         if self.data.is_null() {
             &mut []
         } else {
-            let s = unsafe { std::slice::from_raw_parts_mut(self.data, self.size) };
+            let s = unsafe { std::slice::from_raw_parts_mut(self.data, self.size as _) };
             s
         }
     }

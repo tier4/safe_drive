@@ -73,8 +73,8 @@ impl Drop for SetParametersAtomicallyRequest {
 #[derive(Debug)]
 struct SetParametersAtomicallyRequestSeqRaw {
     data: *mut SetParametersAtomicallyRequest,
-    size: usize,
-    capacity: usize,
+    size: size_t,
+    capacity: size_t,
 }
 
 /// Sequence of SetParametersAtomicallyRequest.
@@ -84,8 +84,8 @@ struct SetParametersAtomicallyRequestSeqRaw {
 #[derive(Debug)]
 pub struct SetParametersAtomicallyRequestSeq<const N: usize> {
     data: *mut SetParametersAtomicallyRequest,
-    size: usize,
-    capacity: usize,
+    size: size_t,
+    capacity: size_t,
 }
 
 impl<const N: usize> SetParametersAtomicallyRequestSeq<N> {
@@ -127,7 +127,7 @@ impl<const N: usize> SetParametersAtomicallyRequestSeq<N> {
         if self.data.is_null() {
             &[]
         } else {
-            let s = unsafe { std::slice::from_raw_parts(self.data, self.size) };
+            let s = unsafe { std::slice::from_raw_parts(self.data, self.size as _) };
             s
         }
     }
@@ -136,7 +136,7 @@ impl<const N: usize> SetParametersAtomicallyRequestSeq<N> {
         if self.data.is_null() {
             &mut []
         } else {
-            let s = unsafe { std::slice::from_raw_parts_mut(self.data, self.size) };
+            let s = unsafe { std::slice::from_raw_parts_mut(self.data, self.size as _) };
             s
         }
     }
@@ -193,8 +193,8 @@ impl Drop for SetParametersAtomicallyResponse {
 #[derive(Debug)]
 struct SetParametersAtomicallyResponseSeqRaw {
     data: *mut SetParametersAtomicallyResponse,
-    size: usize,
-    capacity: usize,
+    size: size_t,
+    capacity: size_t,
 }
 
 /// Sequence of SetParametersAtomicallyResponse.
@@ -204,8 +204,8 @@ struct SetParametersAtomicallyResponseSeqRaw {
 #[derive(Debug)]
 pub struct SetParametersAtomicallyResponseSeq<const N: usize> {
     data: *mut SetParametersAtomicallyResponse,
-    size: usize,
-    capacity: usize,
+    size: size_t,
+    capacity: size_t,
 }
 
 impl<const N: usize> SetParametersAtomicallyResponseSeq<N> {
@@ -247,7 +247,7 @@ impl<const N: usize> SetParametersAtomicallyResponseSeq<N> {
         if self.data.is_null() {
             &[]
         } else {
-            let s = unsafe { std::slice::from_raw_parts(self.data, self.size) };
+            let s = unsafe { std::slice::from_raw_parts(self.data, self.size as _) };
             s
         }
     }
@@ -256,7 +256,7 @@ impl<const N: usize> SetParametersAtomicallyResponseSeq<N> {
         if self.data.is_null() {
             &mut []
         } else {
-            let s = unsafe { std::slice::from_raw_parts_mut(self.data, self.size) };
+            let s = unsafe { std::slice::from_raw_parts_mut(self.data, self.size as _) };
             s
         }
     }

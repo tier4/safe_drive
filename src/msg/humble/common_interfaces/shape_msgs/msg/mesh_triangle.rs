@@ -51,8 +51,8 @@ impl Drop for MeshTriangle {
 #[derive(Debug)]
 struct MeshTriangleSeqRaw {
     data: *mut MeshTriangle,
-    size: usize,
-    capacity: usize,
+    size: size_t,
+    capacity: size_t,
 }
 
 /// Sequence of MeshTriangle.
@@ -62,8 +62,8 @@ struct MeshTriangleSeqRaw {
 #[derive(Debug)]
 pub struct MeshTriangleSeq<const N: usize> {
     data: *mut MeshTriangle,
-    size: usize,
-    capacity: usize,
+    size: size_t,
+    capacity: size_t,
 }
 
 impl<const N: usize> MeshTriangleSeq<N> {
@@ -101,7 +101,7 @@ impl<const N: usize> MeshTriangleSeq<N> {
         if self.data.is_null() {
             &[]
         } else {
-            let s = unsafe { std::slice::from_raw_parts(self.data, self.size) };
+            let s = unsafe { std::slice::from_raw_parts(self.data, self.size as _) };
             s
         }
     }
@@ -110,7 +110,7 @@ impl<const N: usize> MeshTriangleSeq<N> {
         if self.data.is_null() {
             &mut []
         } else {
-            let s = unsafe { std::slice::from_raw_parts_mut(self.data, self.size) };
+            let s = unsafe { std::slice::from_raw_parts_mut(self.data, self.size as _) };
             s
         }
     }

@@ -61,8 +61,8 @@ impl Drop for EmptyRequest {
 #[derive(Debug)]
 struct EmptyRequestSeqRaw {
     data: *mut EmptyRequest,
-    size: usize,
-    capacity: usize,
+    size: size_t,
+    capacity: size_t,
 }
 
 /// Sequence of EmptyRequest.
@@ -72,8 +72,8 @@ struct EmptyRequestSeqRaw {
 #[derive(Debug)]
 pub struct EmptyRequestSeq<const N: usize> {
     data: *mut EmptyRequest,
-    size: usize,
-    capacity: usize,
+    size: size_t,
+    capacity: size_t,
 }
 
 impl<const N: usize> EmptyRequestSeq<N> {
@@ -111,7 +111,7 @@ impl<const N: usize> EmptyRequestSeq<N> {
         if self.data.is_null() {
             &[]
         } else {
-            let s = unsafe { std::slice::from_raw_parts(self.data, self.size) };
+            let s = unsafe { std::slice::from_raw_parts(self.data, self.size as _) };
             s
         }
     }
@@ -120,7 +120,7 @@ impl<const N: usize> EmptyRequestSeq<N> {
         if self.data.is_null() {
             &mut []
         } else {
-            let s = unsafe { std::slice::from_raw_parts_mut(self.data, self.size) };
+            let s = unsafe { std::slice::from_raw_parts_mut(self.data, self.size as _) };
             s
         }
     }
@@ -177,8 +177,8 @@ impl Drop for EmptyResponse {
 #[derive(Debug)]
 struct EmptyResponseSeqRaw {
     data: *mut EmptyResponse,
-    size: usize,
-    capacity: usize,
+    size: size_t,
+    capacity: size_t,
 }
 
 /// Sequence of EmptyResponse.
@@ -188,8 +188,8 @@ struct EmptyResponseSeqRaw {
 #[derive(Debug)]
 pub struct EmptyResponseSeq<const N: usize> {
     data: *mut EmptyResponse,
-    size: usize,
-    capacity: usize,
+    size: size_t,
+    capacity: size_t,
 }
 
 impl<const N: usize> EmptyResponseSeq<N> {
@@ -227,7 +227,7 @@ impl<const N: usize> EmptyResponseSeq<N> {
         if self.data.is_null() {
             &[]
         } else {
-            let s = unsafe { std::slice::from_raw_parts(self.data, self.size) };
+            let s = unsafe { std::slice::from_raw_parts(self.data, self.size as _) };
             s
         }
     }
@@ -236,7 +236,7 @@ impl<const N: usize> EmptyResponseSeq<N> {
         if self.data.is_null() {
             &mut []
         } else {
-            let s = unsafe { std::slice::from_raw_parts_mut(self.data, self.size) };
+            let s = unsafe { std::slice::from_raw_parts_mut(self.data, self.size as _) };
             s
         }
     }

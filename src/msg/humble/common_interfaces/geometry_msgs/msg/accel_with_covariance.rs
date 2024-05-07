@@ -52,8 +52,8 @@ impl Drop for AccelWithCovariance {
 #[derive(Debug)]
 struct AccelWithCovarianceSeqRaw {
     data: *mut AccelWithCovariance,
-    size: usize,
-    capacity: usize,
+    size: size_t,
+    capacity: size_t,
 }
 
 /// Sequence of AccelWithCovariance.
@@ -63,8 +63,8 @@ struct AccelWithCovarianceSeqRaw {
 #[derive(Debug)]
 pub struct AccelWithCovarianceSeq<const N: usize> {
     data: *mut AccelWithCovariance,
-    size: usize,
-    capacity: usize,
+    size: size_t,
+    capacity: size_t,
 }
 
 impl<const N: usize> AccelWithCovarianceSeq<N> {
@@ -104,7 +104,7 @@ impl<const N: usize> AccelWithCovarianceSeq<N> {
         if self.data.is_null() {
             &[]
         } else {
-            let s = unsafe { std::slice::from_raw_parts(self.data, self.size) };
+            let s = unsafe { std::slice::from_raw_parts(self.data, self.size as _) };
             s
         }
     }
@@ -113,7 +113,7 @@ impl<const N: usize> AccelWithCovarianceSeq<N> {
         if self.data.is_null() {
             &mut []
         } else {
-            let s = unsafe { std::slice::from_raw_parts_mut(self.data, self.size) };
+            let s = unsafe { std::slice::from_raw_parts_mut(self.data, self.size as _) };
             s
         }
     }

@@ -45,8 +45,8 @@ impl Drop for Float32 {
 #[derive(Debug)]
 struct Float32SeqRaw {
     data: *mut Float32,
-    size: usize,
-    capacity: usize,
+    size: size_t,
+    capacity: size_t,
 }
 
 /// Sequence of Float32.
@@ -56,8 +56,8 @@ struct Float32SeqRaw {
 #[derive(Debug)]
 pub struct Float32Seq<const N: usize> {
     data: *mut Float32,
-    size: usize,
-    capacity: usize,
+    size: size_t,
+    capacity: size_t,
 }
 
 impl<const N: usize> Float32Seq<N> {
@@ -95,7 +95,7 @@ impl<const N: usize> Float32Seq<N> {
         if self.data.is_null() {
             &[]
         } else {
-            let s = unsafe { std::slice::from_raw_parts(self.data, self.size) };
+            let s = unsafe { std::slice::from_raw_parts(self.data, self.size as _) };
             s
         }
     }
@@ -104,7 +104,7 @@ impl<const N: usize> Float32Seq<N> {
         if self.data.is_null() {
             &mut []
         } else {
-            let s = unsafe { std::slice::from_raw_parts_mut(self.data, self.size) };
+            let s = unsafe { std::slice::from_raw_parts_mut(self.data, self.size as _) };
             s
         }
     }

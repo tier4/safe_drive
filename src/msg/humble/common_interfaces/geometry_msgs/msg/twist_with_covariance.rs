@@ -52,8 +52,8 @@ impl Drop for TwistWithCovariance {
 #[derive(Debug)]
 struct TwistWithCovarianceSeqRaw {
     data: *mut TwistWithCovariance,
-    size: usize,
-    capacity: usize,
+    size: size_t,
+    capacity: size_t,
 }
 
 /// Sequence of TwistWithCovariance.
@@ -63,8 +63,8 @@ struct TwistWithCovarianceSeqRaw {
 #[derive(Debug)]
 pub struct TwistWithCovarianceSeq<const N: usize> {
     data: *mut TwistWithCovariance,
-    size: usize,
-    capacity: usize,
+    size: size_t,
+    capacity: size_t,
 }
 
 impl<const N: usize> TwistWithCovarianceSeq<N> {
@@ -104,7 +104,7 @@ impl<const N: usize> TwistWithCovarianceSeq<N> {
         if self.data.is_null() {
             &[]
         } else {
-            let s = unsafe { std::slice::from_raw_parts(self.data, self.size) };
+            let s = unsafe { std::slice::from_raw_parts(self.data, self.size as _) };
             s
         }
     }
@@ -113,7 +113,7 @@ impl<const N: usize> TwistWithCovarianceSeq<N> {
         if self.data.is_null() {
             &mut []
         } else {
-            let s = unsafe { std::slice::from_raw_parts_mut(self.data, self.size) };
+            let s = unsafe { std::slice::from_raw_parts_mut(self.data, self.size as _) };
             s
         }
     }

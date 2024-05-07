@@ -53,8 +53,8 @@ impl Drop for RelativeHumidity {
 #[derive(Debug)]
 struct RelativeHumiditySeqRaw {
     data: *mut RelativeHumidity,
-    size: usize,
-    capacity: usize,
+    size: size_t,
+    capacity: size_t,
 }
 
 /// Sequence of RelativeHumidity.
@@ -64,8 +64,8 @@ struct RelativeHumiditySeqRaw {
 #[derive(Debug)]
 pub struct RelativeHumiditySeq<const N: usize> {
     data: *mut RelativeHumidity,
-    size: usize,
-    capacity: usize,
+    size: size_t,
+    capacity: size_t,
 }
 
 impl<const N: usize> RelativeHumiditySeq<N> {
@@ -104,7 +104,7 @@ impl<const N: usize> RelativeHumiditySeq<N> {
         if self.data.is_null() {
             &[]
         } else {
-            let s = unsafe { std::slice::from_raw_parts(self.data, self.size) };
+            let s = unsafe { std::slice::from_raw_parts(self.data, self.size as _) };
             s
         }
     }
@@ -113,7 +113,7 @@ impl<const N: usize> RelativeHumiditySeq<N> {
         if self.data.is_null() {
             &mut []
         } else {
-            let s = unsafe { std::slice::from_raw_parts_mut(self.data, self.size) };
+            let s = unsafe { std::slice::from_raw_parts_mut(self.data, self.size as _) };
             s
         }
     }

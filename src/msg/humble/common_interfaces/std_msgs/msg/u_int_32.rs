@@ -45,8 +45,8 @@ impl Drop for UInt32 {
 #[derive(Debug)]
 struct UInt32SeqRaw {
     data: *mut UInt32,
-    size: usize,
-    capacity: usize,
+    size: size_t,
+    capacity: size_t,
 }
 
 /// Sequence of UInt32.
@@ -56,8 +56,8 @@ struct UInt32SeqRaw {
 #[derive(Debug)]
 pub struct UInt32Seq<const N: usize> {
     data: *mut UInt32,
-    size: usize,
-    capacity: usize,
+    size: size_t,
+    capacity: size_t,
 }
 
 impl<const N: usize> UInt32Seq<N> {
@@ -95,7 +95,7 @@ impl<const N: usize> UInt32Seq<N> {
         if self.data.is_null() {
             &[]
         } else {
-            let s = unsafe { std::slice::from_raw_parts(self.data, self.size) };
+            let s = unsafe { std::slice::from_raw_parts(self.data, self.size as _) };
             s
         }
     }
@@ -104,7 +104,7 @@ impl<const N: usize> UInt32Seq<N> {
         if self.data.is_null() {
             &mut []
         } else {
-            let s = unsafe { std::slice::from_raw_parts_mut(self.data, self.size) };
+            let s = unsafe { std::slice::from_raw_parts_mut(self.data, self.size as _) };
             s
         }
     }

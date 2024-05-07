@@ -57,8 +57,8 @@ impl Drop for InteractiveMarkerInit {
 #[derive(Debug)]
 struct InteractiveMarkerInitSeqRaw {
     data: *mut InteractiveMarkerInit,
-    size: usize,
-    capacity: usize,
+    size: size_t,
+    capacity: size_t,
 }
 
 /// Sequence of InteractiveMarkerInit.
@@ -68,8 +68,8 @@ struct InteractiveMarkerInitSeqRaw {
 #[derive(Debug)]
 pub struct InteractiveMarkerInitSeq<const N: usize> {
     data: *mut InteractiveMarkerInit,
-    size: usize,
-    capacity: usize,
+    size: size_t,
+    capacity: size_t,
 }
 
 impl<const N: usize> InteractiveMarkerInitSeq<N> {
@@ -110,7 +110,7 @@ impl<const N: usize> InteractiveMarkerInitSeq<N> {
         if self.data.is_null() {
             &[]
         } else {
-            let s = unsafe { std::slice::from_raw_parts(self.data, self.size) };
+            let s = unsafe { std::slice::from_raw_parts(self.data, self.size as _) };
             s
         }
     }
@@ -119,7 +119,7 @@ impl<const N: usize> InteractiveMarkerInitSeq<N> {
         if self.data.is_null() {
             &mut []
         } else {
-            let s = unsafe { std::slice::from_raw_parts_mut(self.data, self.size) };
+            let s = unsafe { std::slice::from_raw_parts_mut(self.data, self.size as _) };
             s
         }
     }

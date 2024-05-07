@@ -66,8 +66,8 @@ impl Drop for ListNodesRequest {
 #[derive(Debug)]
 struct ListNodesRequestSeqRaw {
     data: *mut ListNodesRequest,
-    size: usize,
-    capacity: usize,
+    size: size_t,
+    capacity: size_t,
 }
 
 /// Sequence of ListNodesRequest.
@@ -77,8 +77,8 @@ struct ListNodesRequestSeqRaw {
 #[derive(Debug)]
 pub struct ListNodesRequestSeq<const N: usize> {
     data: *mut ListNodesRequest,
-    size: usize,
-    capacity: usize,
+    size: size_t,
+    capacity: size_t,
 }
 
 impl<const N: usize> ListNodesRequestSeq<N> {
@@ -118,7 +118,7 @@ impl<const N: usize> ListNodesRequestSeq<N> {
         if self.data.is_null() {
             &[]
         } else {
-            let s = unsafe { std::slice::from_raw_parts(self.data, self.size) };
+            let s = unsafe { std::slice::from_raw_parts(self.data, self.size as _) };
             s
         }
     }
@@ -127,7 +127,7 @@ impl<const N: usize> ListNodesRequestSeq<N> {
         if self.data.is_null() {
             &mut []
         } else {
-            let s = unsafe { std::slice::from_raw_parts_mut(self.data, self.size) };
+            let s = unsafe { std::slice::from_raw_parts_mut(self.data, self.size as _) };
             s
         }
     }
@@ -184,8 +184,8 @@ impl Drop for ListNodesResponse {
 #[derive(Debug)]
 struct ListNodesResponseSeqRaw {
     data: *mut ListNodesResponse,
-    size: usize,
-    capacity: usize,
+    size: size_t,
+    capacity: size_t,
 }
 
 /// Sequence of ListNodesResponse.
@@ -195,8 +195,8 @@ struct ListNodesResponseSeqRaw {
 #[derive(Debug)]
 pub struct ListNodesResponseSeq<const N: usize> {
     data: *mut ListNodesResponse,
-    size: usize,
-    capacity: usize,
+    size: size_t,
+    capacity: size_t,
 }
 
 impl<const N: usize> ListNodesResponseSeq<N> {
@@ -237,7 +237,7 @@ impl<const N: usize> ListNodesResponseSeq<N> {
         if self.data.is_null() {
             &[]
         } else {
-            let s = unsafe { std::slice::from_raw_parts(self.data, self.size) };
+            let s = unsafe { std::slice::from_raw_parts(self.data, self.size as _) };
             s
         }
     }
@@ -246,7 +246,7 @@ impl<const N: usize> ListNodesResponseSeq<N> {
         if self.data.is_null() {
             &mut []
         } else {
-            let s = unsafe { std::slice::from_raw_parts_mut(self.data, self.size) };
+            let s = unsafe { std::slice::from_raw_parts_mut(self.data, self.size as _) };
             s
         }
     }

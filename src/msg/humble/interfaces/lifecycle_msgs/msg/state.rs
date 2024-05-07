@@ -57,8 +57,8 @@ impl Drop for State {
 #[derive(Debug)]
 struct StateSeqRaw {
     data: *mut State,
-    size: usize,
-    capacity: usize,
+    size: size_t,
+    capacity: size_t,
 }
 
 /// Sequence of State.
@@ -68,8 +68,8 @@ struct StateSeqRaw {
 #[derive(Debug)]
 pub struct StateSeq<const N: usize> {
     data: *mut State,
-    size: usize,
-    capacity: usize,
+    size: size_t,
+    capacity: size_t,
 }
 
 impl<const N: usize> StateSeq<N> {
@@ -107,7 +107,7 @@ impl<const N: usize> StateSeq<N> {
         if self.data.is_null() {
             &[]
         } else {
-            let s = unsafe { std::slice::from_raw_parts(self.data, self.size) };
+            let s = unsafe { std::slice::from_raw_parts(self.data, self.size as _) };
             s
         }
     }
@@ -116,7 +116,7 @@ impl<const N: usize> StateSeq<N> {
         if self.data.is_null() {
             &mut []
         } else {
-            let s = unsafe { std::slice::from_raw_parts_mut(self.data, self.size) };
+            let s = unsafe { std::slice::from_raw_parts_mut(self.data, self.size as _) };
             s
         }
     }

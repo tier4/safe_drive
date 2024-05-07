@@ -66,8 +66,8 @@ impl Drop for CancelGoalRequest {
 #[derive(Debug)]
 struct CancelGoalRequestSeqRaw {
     data: *mut CancelGoalRequest,
-    size: usize,
-    capacity: usize,
+    size: size_t,
+    capacity: size_t,
 }
 
 /// Sequence of CancelGoalRequest.
@@ -77,8 +77,8 @@ struct CancelGoalRequestSeqRaw {
 #[derive(Debug)]
 pub struct CancelGoalRequestSeq<const N: usize> {
     data: *mut CancelGoalRequest,
-    size: usize,
-    capacity: usize,
+    size: size_t,
+    capacity: size_t,
 }
 
 impl<const N: usize> CancelGoalRequestSeq<N> {
@@ -117,7 +117,7 @@ impl<const N: usize> CancelGoalRequestSeq<N> {
         if self.data.is_null() {
             &[]
         } else {
-            let s = unsafe { std::slice::from_raw_parts(self.data, self.size) };
+            let s = unsafe { std::slice::from_raw_parts(self.data, self.size as _) };
             s
         }
     }
@@ -126,7 +126,7 @@ impl<const N: usize> CancelGoalRequestSeq<N> {
         if self.data.is_null() {
             &mut []
         } else {
-            let s = unsafe { std::slice::from_raw_parts_mut(self.data, self.size) };
+            let s = unsafe { std::slice::from_raw_parts_mut(self.data, self.size as _) };
             s
         }
     }
@@ -183,8 +183,8 @@ impl Drop for CancelGoalResponse {
 #[derive(Debug)]
 struct CancelGoalResponseSeqRaw {
     data: *mut CancelGoalResponse,
-    size: usize,
-    capacity: usize,
+    size: size_t,
+    capacity: size_t,
 }
 
 /// Sequence of CancelGoalResponse.
@@ -194,8 +194,8 @@ struct CancelGoalResponseSeqRaw {
 #[derive(Debug)]
 pub struct CancelGoalResponseSeq<const N: usize> {
     data: *mut CancelGoalResponse,
-    size: usize,
-    capacity: usize,
+    size: size_t,
+    capacity: size_t,
 }
 
 impl<const N: usize> CancelGoalResponseSeq<N> {
@@ -235,7 +235,7 @@ impl<const N: usize> CancelGoalResponseSeq<N> {
         if self.data.is_null() {
             &[]
         } else {
-            let s = unsafe { std::slice::from_raw_parts(self.data, self.size) };
+            let s = unsafe { std::slice::from_raw_parts(self.data, self.size as _) };
             s
         }
     }
@@ -244,7 +244,7 @@ impl<const N: usize> CancelGoalResponseSeq<N> {
         if self.data.is_null() {
             &mut []
         } else {
-            let s = unsafe { std::slice::from_raw_parts_mut(self.data, self.size) };
+            let s = unsafe { std::slice::from_raw_parts_mut(self.data, self.size as _) };
             s
         }
     }

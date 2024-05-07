@@ -68,8 +68,8 @@ impl Drop for AddDiagnosticsRequest {
 #[derive(Debug)]
 struct AddDiagnosticsRequestSeqRaw {
     data: *mut AddDiagnosticsRequest,
-    size: usize,
-    capacity: usize,
+    size: size_t,
+    capacity: size_t,
 }
 
 /// Sequence of AddDiagnosticsRequest.
@@ -79,8 +79,8 @@ struct AddDiagnosticsRequestSeqRaw {
 #[derive(Debug)]
 pub struct AddDiagnosticsRequestSeq<const N: usize> {
     data: *mut AddDiagnosticsRequest,
-    size: usize,
-    capacity: usize,
+    size: size_t,
+    capacity: size_t,
 }
 
 impl<const N: usize> AddDiagnosticsRequestSeq<N> {
@@ -120,7 +120,7 @@ impl<const N: usize> AddDiagnosticsRequestSeq<N> {
         if self.data.is_null() {
             &[]
         } else {
-            let s = unsafe { std::slice::from_raw_parts(self.data, self.size) };
+            let s = unsafe { std::slice::from_raw_parts(self.data, self.size as _) };
             s
         }
     }
@@ -129,7 +129,7 @@ impl<const N: usize> AddDiagnosticsRequestSeq<N> {
         if self.data.is_null() {
             &mut []
         } else {
-            let s = unsafe { std::slice::from_raw_parts_mut(self.data, self.size) };
+            let s = unsafe { std::slice::from_raw_parts_mut(self.data, self.size as _) };
             s
         }
     }
@@ -186,8 +186,8 @@ impl Drop for AddDiagnosticsResponse {
 #[derive(Debug)]
 struct AddDiagnosticsResponseSeqRaw {
     data: *mut AddDiagnosticsResponse,
-    size: usize,
-    capacity: usize,
+    size: size_t,
+    capacity: size_t,
 }
 
 /// Sequence of AddDiagnosticsResponse.
@@ -197,8 +197,8 @@ struct AddDiagnosticsResponseSeqRaw {
 #[derive(Debug)]
 pub struct AddDiagnosticsResponseSeq<const N: usize> {
     data: *mut AddDiagnosticsResponse,
-    size: usize,
-    capacity: usize,
+    size: size_t,
+    capacity: size_t,
 }
 
 impl<const N: usize> AddDiagnosticsResponseSeq<N> {
@@ -239,7 +239,7 @@ impl<const N: usize> AddDiagnosticsResponseSeq<N> {
         if self.data.is_null() {
             &[]
         } else {
-            let s = unsafe { std::slice::from_raw_parts(self.data, self.size) };
+            let s = unsafe { std::slice::from_raw_parts(self.data, self.size as _) };
             s
         }
     }
@@ -248,7 +248,7 @@ impl<const N: usize> AddDiagnosticsResponseSeq<N> {
         if self.data.is_null() {
             &mut []
         } else {
-            let s = unsafe { std::slice::from_raw_parts_mut(self.data, self.size) };
+            let s = unsafe { std::slice::from_raw_parts_mut(self.data, self.size as _) };
             s
         }
     }

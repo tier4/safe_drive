@@ -62,8 +62,8 @@ impl Drop for SetMapRequest {
 #[derive(Debug)]
 struct SetMapRequestSeqRaw {
     data: *mut SetMapRequest,
-    size: usize,
-    capacity: usize,
+    size: size_t,
+    capacity: size_t,
 }
 
 /// Sequence of SetMapRequest.
@@ -73,8 +73,8 @@ struct SetMapRequestSeqRaw {
 #[derive(Debug)]
 pub struct SetMapRequestSeq<const N: usize> {
     data: *mut SetMapRequest,
-    size: usize,
-    capacity: usize,
+    size: size_t,
+    capacity: size_t,
 }
 
 impl<const N: usize> SetMapRequestSeq<N> {
@@ -112,7 +112,7 @@ impl<const N: usize> SetMapRequestSeq<N> {
         if self.data.is_null() {
             &[]
         } else {
-            let s = unsafe { std::slice::from_raw_parts(self.data, self.size) };
+            let s = unsafe { std::slice::from_raw_parts(self.data, self.size as _) };
             s
         }
     }
@@ -121,7 +121,7 @@ impl<const N: usize> SetMapRequestSeq<N> {
         if self.data.is_null() {
             &mut []
         } else {
-            let s = unsafe { std::slice::from_raw_parts_mut(self.data, self.size) };
+            let s = unsafe { std::slice::from_raw_parts_mut(self.data, self.size as _) };
             s
         }
     }
@@ -178,8 +178,8 @@ impl Drop for SetMapResponse {
 #[derive(Debug)]
 struct SetMapResponseSeqRaw {
     data: *mut SetMapResponse,
-    size: usize,
-    capacity: usize,
+    size: size_t,
+    capacity: size_t,
 }
 
 /// Sequence of SetMapResponse.
@@ -189,8 +189,8 @@ struct SetMapResponseSeqRaw {
 #[derive(Debug)]
 pub struct SetMapResponseSeq<const N: usize> {
     data: *mut SetMapResponse,
-    size: usize,
-    capacity: usize,
+    size: size_t,
+    capacity: size_t,
 }
 
 impl<const N: usize> SetMapResponseSeq<N> {
@@ -229,7 +229,7 @@ impl<const N: usize> SetMapResponseSeq<N> {
         if self.data.is_null() {
             &[]
         } else {
-            let s = unsafe { std::slice::from_raw_parts(self.data, self.size) };
+            let s = unsafe { std::slice::from_raw_parts(self.data, self.size as _) };
             s
         }
     }
@@ -238,7 +238,7 @@ impl<const N: usize> SetMapResponseSeq<N> {
         if self.data.is_null() {
             &mut []
         } else {
-            let s = unsafe { std::slice::from_raw_parts_mut(self.data, self.size) };
+            let s = unsafe { std::slice::from_raw_parts_mut(self.data, self.size as _) };
             s
         }
     }

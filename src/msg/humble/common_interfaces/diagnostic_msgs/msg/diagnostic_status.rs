@@ -59,8 +59,8 @@ impl Drop for DiagnosticStatus {
 #[derive(Debug)]
 struct DiagnosticStatusSeqRaw {
     data: *mut DiagnosticStatus,
-    size: usize,
-    capacity: usize,
+    size: size_t,
+    capacity: size_t,
 }
 
 /// Sequence of DiagnosticStatus.
@@ -70,8 +70,8 @@ struct DiagnosticStatusSeqRaw {
 #[derive(Debug)]
 pub struct DiagnosticStatusSeq<const N: usize> {
     data: *mut DiagnosticStatus,
-    size: usize,
-    capacity: usize,
+    size: size_t,
+    capacity: size_t,
 }
 
 impl<const N: usize> DiagnosticStatusSeq<N> {
@@ -110,7 +110,7 @@ impl<const N: usize> DiagnosticStatusSeq<N> {
         if self.data.is_null() {
             &[]
         } else {
-            let s = unsafe { std::slice::from_raw_parts(self.data, self.size) };
+            let s = unsafe { std::slice::from_raw_parts(self.data, self.size as _) };
             s
         }
     }
@@ -119,7 +119,7 @@ impl<const N: usize> DiagnosticStatusSeq<N> {
         if self.data.is_null() {
             &mut []
         } else {
-            let s = unsafe { std::slice::from_raw_parts_mut(self.data, self.size) };
+            let s = unsafe { std::slice::from_raw_parts_mut(self.data, self.size as _) };
             s
         }
     }

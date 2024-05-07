@@ -45,8 +45,8 @@ impl Drop for UInt16 {
 #[derive(Debug)]
 struct UInt16SeqRaw {
     data: *mut UInt16,
-    size: usize,
-    capacity: usize,
+    size: size_t,
+    capacity: size_t,
 }
 
 /// Sequence of UInt16.
@@ -56,8 +56,8 @@ struct UInt16SeqRaw {
 #[derive(Debug)]
 pub struct UInt16Seq<const N: usize> {
     data: *mut UInt16,
-    size: usize,
-    capacity: usize,
+    size: size_t,
+    capacity: size_t,
 }
 
 impl<const N: usize> UInt16Seq<N> {
@@ -95,7 +95,7 @@ impl<const N: usize> UInt16Seq<N> {
         if self.data.is_null() {
             &[]
         } else {
-            let s = unsafe { std::slice::from_raw_parts(self.data, self.size) };
+            let s = unsafe { std::slice::from_raw_parts(self.data, self.size as _) };
             s
         }
     }
@@ -104,7 +104,7 @@ impl<const N: usize> UInt16Seq<N> {
         if self.data.is_null() {
             &mut []
         } else {
-            let s = unsafe { std::slice::from_raw_parts_mut(self.data, self.size) };
+            let s = unsafe { std::slice::from_raw_parts_mut(self.data, self.size as _) };
             s
         }
     }

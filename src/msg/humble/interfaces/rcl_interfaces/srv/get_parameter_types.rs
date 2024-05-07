@@ -69,8 +69,8 @@ impl Drop for GetParameterTypesRequest {
 #[derive(Debug)]
 struct GetParameterTypesRequestSeqRaw {
     data: *mut GetParameterTypesRequest,
-    size: usize,
-    capacity: usize,
+    size: size_t,
+    capacity: size_t,
 }
 
 /// Sequence of GetParameterTypesRequest.
@@ -80,8 +80,8 @@ struct GetParameterTypesRequestSeqRaw {
 #[derive(Debug)]
 pub struct GetParameterTypesRequestSeq<const N: usize> {
     data: *mut GetParameterTypesRequest,
-    size: usize,
-    capacity: usize,
+    size: size_t,
+    capacity: size_t,
 }
 
 impl<const N: usize> GetParameterTypesRequestSeq<N> {
@@ -122,7 +122,7 @@ impl<const N: usize> GetParameterTypesRequestSeq<N> {
         if self.data.is_null() {
             &[]
         } else {
-            let s = unsafe { std::slice::from_raw_parts(self.data, self.size) };
+            let s = unsafe { std::slice::from_raw_parts(self.data, self.size as _) };
             s
         }
     }
@@ -131,7 +131,7 @@ impl<const N: usize> GetParameterTypesRequestSeq<N> {
         if self.data.is_null() {
             &mut []
         } else {
-            let s = unsafe { std::slice::from_raw_parts_mut(self.data, self.size) };
+            let s = unsafe { std::slice::from_raw_parts_mut(self.data, self.size as _) };
             s
         }
     }
@@ -188,8 +188,8 @@ impl Drop for GetParameterTypesResponse {
 #[derive(Debug)]
 struct GetParameterTypesResponseSeqRaw {
     data: *mut GetParameterTypesResponse,
-    size: usize,
-    capacity: usize,
+    size: size_t,
+    capacity: size_t,
 }
 
 /// Sequence of GetParameterTypesResponse.
@@ -199,8 +199,8 @@ struct GetParameterTypesResponseSeqRaw {
 #[derive(Debug)]
 pub struct GetParameterTypesResponseSeq<const N: usize> {
     data: *mut GetParameterTypesResponse,
-    size: usize,
-    capacity: usize,
+    size: size_t,
+    capacity: size_t,
 }
 
 impl<const N: usize> GetParameterTypesResponseSeq<N> {
@@ -242,7 +242,7 @@ impl<const N: usize> GetParameterTypesResponseSeq<N> {
         if self.data.is_null() {
             &[]
         } else {
-            let s = unsafe { std::slice::from_raw_parts(self.data, self.size) };
+            let s = unsafe { std::slice::from_raw_parts(self.data, self.size as _) };
             s
         }
     }
@@ -251,7 +251,7 @@ impl<const N: usize> GetParameterTypesResponseSeq<N> {
         if self.data.is_null() {
             &mut []
         } else {
-            let s = unsafe { std::slice::from_raw_parts_mut(self.data, self.size) };
+            let s = unsafe { std::slice::from_raw_parts_mut(self.data, self.size as _) };
             s
         }
     }

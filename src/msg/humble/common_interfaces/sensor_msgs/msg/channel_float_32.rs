@@ -52,8 +52,8 @@ impl Drop for ChannelFloat32 {
 #[derive(Debug)]
 struct ChannelFloat32SeqRaw {
     data: *mut ChannelFloat32,
-    size: usize,
-    capacity: usize,
+    size: size_t,
+    capacity: size_t,
 }
 
 /// Sequence of ChannelFloat32.
@@ -63,8 +63,8 @@ struct ChannelFloat32SeqRaw {
 #[derive(Debug)]
 pub struct ChannelFloat32Seq<const N: usize> {
     data: *mut ChannelFloat32,
-    size: usize,
-    capacity: usize,
+    size: size_t,
+    capacity: size_t,
 }
 
 impl<const N: usize> ChannelFloat32Seq<N> {
@@ -103,7 +103,7 @@ impl<const N: usize> ChannelFloat32Seq<N> {
         if self.data.is_null() {
             &[]
         } else {
-            let s = unsafe { std::slice::from_raw_parts(self.data, self.size) };
+            let s = unsafe { std::slice::from_raw_parts(self.data, self.size as _) };
             s
         }
     }
@@ -112,7 +112,7 @@ impl<const N: usize> ChannelFloat32Seq<N> {
         if self.data.is_null() {
             &mut []
         } else {
-            let s = unsafe { std::slice::from_raw_parts_mut(self.data, self.size) };
+            let s = unsafe { std::slice::from_raw_parts_mut(self.data, self.size as _) };
             s
         }
     }

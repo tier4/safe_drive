@@ -52,8 +52,8 @@ impl Drop for Int8MultiArray {
 #[derive(Debug)]
 struct Int8MultiArraySeqRaw {
     data: *mut Int8MultiArray,
-    size: usize,
-    capacity: usize,
+    size: size_t,
+    capacity: size_t,
 }
 
 /// Sequence of Int8MultiArray.
@@ -63,8 +63,8 @@ struct Int8MultiArraySeqRaw {
 #[derive(Debug)]
 pub struct Int8MultiArraySeq<const N: usize> {
     data: *mut Int8MultiArray,
-    size: usize,
-    capacity: usize,
+    size: size_t,
+    capacity: size_t,
 }
 
 impl<const N: usize> Int8MultiArraySeq<N> {
@@ -103,7 +103,7 @@ impl<const N: usize> Int8MultiArraySeq<N> {
         if self.data.is_null() {
             &[]
         } else {
-            let s = unsafe { std::slice::from_raw_parts(self.data, self.size) };
+            let s = unsafe { std::slice::from_raw_parts(self.data, self.size as _) };
             s
         }
     }
@@ -112,7 +112,7 @@ impl<const N: usize> Int8MultiArraySeq<N> {
         if self.data.is_null() {
             &mut []
         } else {
-            let s = unsafe { std::slice::from_raw_parts_mut(self.data, self.size) };
+            let s = unsafe { std::slice::from_raw_parts_mut(self.data, self.size as _) };
             s
         }
     }

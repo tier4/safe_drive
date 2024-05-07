@@ -74,8 +74,8 @@ impl Drop for GetInteractiveMarkersRequest {
 #[derive(Debug)]
 struct GetInteractiveMarkersRequestSeqRaw {
     data: *mut GetInteractiveMarkersRequest,
-    size: usize,
-    capacity: usize,
+    size: size_t,
+    capacity: size_t,
 }
 
 /// Sequence of GetInteractiveMarkersRequest.
@@ -85,8 +85,8 @@ struct GetInteractiveMarkersRequestSeqRaw {
 #[derive(Debug)]
 pub struct GetInteractiveMarkersRequestSeq<const N: usize> {
     data: *mut GetInteractiveMarkersRequest,
-    size: usize,
-    capacity: usize,
+    size: size_t,
+    capacity: size_t,
 }
 
 impl<const N: usize> GetInteractiveMarkersRequestSeq<N> {
@@ -128,7 +128,7 @@ impl<const N: usize> GetInteractiveMarkersRequestSeq<N> {
         if self.data.is_null() {
             &[]
         } else {
-            let s = unsafe { std::slice::from_raw_parts(self.data, self.size) };
+            let s = unsafe { std::slice::from_raw_parts(self.data, self.size as _) };
             s
         }
     }
@@ -137,7 +137,7 @@ impl<const N: usize> GetInteractiveMarkersRequestSeq<N> {
         if self.data.is_null() {
             &mut []
         } else {
-            let s = unsafe { std::slice::from_raw_parts_mut(self.data, self.size) };
+            let s = unsafe { std::slice::from_raw_parts_mut(self.data, self.size as _) };
             s
         }
     }
@@ -194,8 +194,8 @@ impl Drop for GetInteractiveMarkersResponse {
 #[derive(Debug)]
 struct GetInteractiveMarkersResponseSeqRaw {
     data: *mut GetInteractiveMarkersResponse,
-    size: usize,
-    capacity: usize,
+    size: size_t,
+    capacity: size_t,
 }
 
 /// Sequence of GetInteractiveMarkersResponse.
@@ -205,8 +205,8 @@ struct GetInteractiveMarkersResponseSeqRaw {
 #[derive(Debug)]
 pub struct GetInteractiveMarkersResponseSeq<const N: usize> {
     data: *mut GetInteractiveMarkersResponse,
-    size: usize,
-    capacity: usize,
+    size: size_t,
+    capacity: size_t,
 }
 
 impl<const N: usize> GetInteractiveMarkersResponseSeq<N> {
@@ -248,7 +248,7 @@ impl<const N: usize> GetInteractiveMarkersResponseSeq<N> {
         if self.data.is_null() {
             &[]
         } else {
-            let s = unsafe { std::slice::from_raw_parts(self.data, self.size) };
+            let s = unsafe { std::slice::from_raw_parts(self.data, self.size as _) };
             s
         }
     }
@@ -257,7 +257,7 @@ impl<const N: usize> GetInteractiveMarkersResponseSeq<N> {
         if self.data.is_null() {
             &mut []
         } else {
-            let s = unsafe { std::slice::from_raw_parts_mut(self.data, self.size) };
+            let s = unsafe { std::slice::from_raw_parts_mut(self.data, self.size as _) };
             s
         }
     }

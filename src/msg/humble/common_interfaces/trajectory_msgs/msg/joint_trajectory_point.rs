@@ -57,8 +57,8 @@ impl Drop for JointTrajectoryPoint {
 #[derive(Debug)]
 struct JointTrajectoryPointSeqRaw {
     data: *mut JointTrajectoryPoint,
-    size: usize,
-    capacity: usize,
+    size: size_t,
+    capacity: size_t,
 }
 
 /// Sequence of JointTrajectoryPoint.
@@ -68,8 +68,8 @@ struct JointTrajectoryPointSeqRaw {
 #[derive(Debug)]
 pub struct JointTrajectoryPointSeq<const N: usize> {
     data: *mut JointTrajectoryPoint,
-    size: usize,
-    capacity: usize,
+    size: size_t,
+    capacity: size_t,
 }
 
 impl<const N: usize> JointTrajectoryPointSeq<N> {
@@ -109,7 +109,7 @@ impl<const N: usize> JointTrajectoryPointSeq<N> {
         if self.data.is_null() {
             &[]
         } else {
-            let s = unsafe { std::slice::from_raw_parts(self.data, self.size) };
+            let s = unsafe { std::slice::from_raw_parts(self.data, self.size as _) };
             s
         }
     }
@@ -118,7 +118,7 @@ impl<const N: usize> JointTrajectoryPointSeq<N> {
         if self.data.is_null() {
             &mut []
         } else {
-            let s = unsafe { std::slice::from_raw_parts_mut(self.data, self.size) };
+            let s = unsafe { std::slice::from_raw_parts_mut(self.data, self.size as _) };
             s
         }
     }

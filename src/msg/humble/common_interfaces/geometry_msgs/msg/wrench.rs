@@ -46,8 +46,8 @@ impl Drop for Wrench {
 #[derive(Debug)]
 struct WrenchSeqRaw {
     data: *mut Wrench,
-    size: usize,
-    capacity: usize,
+    size: size_t,
+    capacity: size_t,
 }
 
 /// Sequence of Wrench.
@@ -57,8 +57,8 @@ struct WrenchSeqRaw {
 #[derive(Debug)]
 pub struct WrenchSeq<const N: usize> {
     data: *mut Wrench,
-    size: usize,
-    capacity: usize,
+    size: size_t,
+    capacity: size_t,
 }
 
 impl<const N: usize> WrenchSeq<N> {
@@ -96,7 +96,7 @@ impl<const N: usize> WrenchSeq<N> {
         if self.data.is_null() {
             &[]
         } else {
-            let s = unsafe { std::slice::from_raw_parts(self.data, self.size) };
+            let s = unsafe { std::slice::from_raw_parts(self.data, self.size as _) };
             s
         }
     }
@@ -105,7 +105,7 @@ impl<const N: usize> WrenchSeq<N> {
         if self.data.is_null() {
             &mut []
         } else {
-            let s = unsafe { std::slice::from_raw_parts_mut(self.data, self.size) };
+            let s = unsafe { std::slice::from_raw_parts_mut(self.data, self.size as _) };
             s
         }
     }

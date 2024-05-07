@@ -54,8 +54,8 @@ impl Drop for Quaternion {
 #[derive(Debug)]
 struct QuaternionSeqRaw {
     data: *mut Quaternion,
-    size: usize,
-    capacity: usize,
+    size: size_t,
+    capacity: size_t,
 }
 
 /// Sequence of Quaternion.
@@ -65,8 +65,8 @@ struct QuaternionSeqRaw {
 #[derive(Debug)]
 pub struct QuaternionSeq<const N: usize> {
     data: *mut Quaternion,
-    size: usize,
-    capacity: usize,
+    size: size_t,
+    capacity: size_t,
 }
 
 impl<const N: usize> QuaternionSeq<N> {
@@ -104,7 +104,7 @@ impl<const N: usize> QuaternionSeq<N> {
         if self.data.is_null() {
             &[]
         } else {
-            let s = unsafe { std::slice::from_raw_parts(self.data, self.size) };
+            let s = unsafe { std::slice::from_raw_parts(self.data, self.size as _) };
             s
         }
     }
@@ -113,7 +113,7 @@ impl<const N: usize> QuaternionSeq<N> {
         if self.data.is_null() {
             &mut []
         } else {
-            let s = unsafe { std::slice::from_raw_parts_mut(self.data, self.size) };
+            let s = unsafe { std::slice::from_raw_parts_mut(self.data, self.size as _) };
             s
         }
     }

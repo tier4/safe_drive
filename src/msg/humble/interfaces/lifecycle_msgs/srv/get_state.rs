@@ -61,8 +61,8 @@ impl Drop for GetStateRequest {
 #[derive(Debug)]
 struct GetStateRequestSeqRaw {
     data: *mut GetStateRequest,
-    size: usize,
-    capacity: usize,
+    size: size_t,
+    capacity: size_t,
 }
 
 /// Sequence of GetStateRequest.
@@ -72,8 +72,8 @@ struct GetStateRequestSeqRaw {
 #[derive(Debug)]
 pub struct GetStateRequestSeq<const N: usize> {
     data: *mut GetStateRequest,
-    size: usize,
-    capacity: usize,
+    size: size_t,
+    capacity: size_t,
 }
 
 impl<const N: usize> GetStateRequestSeq<N> {
@@ -112,7 +112,7 @@ impl<const N: usize> GetStateRequestSeq<N> {
         if self.data.is_null() {
             &[]
         } else {
-            let s = unsafe { std::slice::from_raw_parts(self.data, self.size) };
+            let s = unsafe { std::slice::from_raw_parts(self.data, self.size as _) };
             s
         }
     }
@@ -121,7 +121,7 @@ impl<const N: usize> GetStateRequestSeq<N> {
         if self.data.is_null() {
             &mut []
         } else {
-            let s = unsafe { std::slice::from_raw_parts_mut(self.data, self.size) };
+            let s = unsafe { std::slice::from_raw_parts_mut(self.data, self.size as _) };
             s
         }
     }
@@ -178,8 +178,8 @@ impl Drop for GetStateResponse {
 #[derive(Debug)]
 struct GetStateResponseSeqRaw {
     data: *mut GetStateResponse,
-    size: usize,
-    capacity: usize,
+    size: size_t,
+    capacity: size_t,
 }
 
 /// Sequence of GetStateResponse.
@@ -189,8 +189,8 @@ struct GetStateResponseSeqRaw {
 #[derive(Debug)]
 pub struct GetStateResponseSeq<const N: usize> {
     data: *mut GetStateResponse,
-    size: usize,
-    capacity: usize,
+    size: size_t,
+    capacity: size_t,
 }
 
 impl<const N: usize> GetStateResponseSeq<N> {
@@ -229,7 +229,7 @@ impl<const N: usize> GetStateResponseSeq<N> {
         if self.data.is_null() {
             &[]
         } else {
-            let s = unsafe { std::slice::from_raw_parts(self.data, self.size) };
+            let s = unsafe { std::slice::from_raw_parts(self.data, self.size as _) };
             s
         }
     }
@@ -238,7 +238,7 @@ impl<const N: usize> GetStateResponseSeq<N> {
         if self.data.is_null() {
             &mut []
         } else {
-            let s = unsafe { std::slice::from_raw_parts_mut(self.data, self.size) };
+            let s = unsafe { std::slice::from_raw_parts_mut(self.data, self.size as _) };
             s
         }
     }

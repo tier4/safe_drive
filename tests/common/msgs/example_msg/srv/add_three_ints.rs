@@ -56,8 +56,8 @@ impl Drop for AddThreeIntsRequest {
 #[derive(Debug)]
 struct AddThreeIntsRequestSeqRaw {
     data: *mut AddThreeIntsRequest,
-    size: usize,
-    capacity: usize,
+    size: size_t,
+    capacity: size_t,
 }
 
 /// Sequence of AddThreeIntsRequest.
@@ -67,8 +67,8 @@ struct AddThreeIntsRequestSeqRaw {
 #[derive(Debug)]
 pub struct AddThreeIntsRequestSeq<const N: usize> {
     data: *mut AddThreeIntsRequest,
-    size: usize,
-    capacity: usize,
+    size: size_t,
+    capacity: size_t,
 }
 
 impl<const N: usize> AddThreeIntsRequestSeq<N> {
@@ -98,7 +98,7 @@ impl<const N: usize> AddThreeIntsRequestSeq<N> {
         if self.data.is_null() {
             &[]
         } else {
-            let s = unsafe { std::slice::from_raw_parts(self.data, self.size) };
+            let s = unsafe { std::slice::from_raw_parts(self.data, self.size as _) };
             s
         }
     }
@@ -107,7 +107,7 @@ impl<const N: usize> AddThreeIntsRequestSeq<N> {
         if self.data.is_null() {
             &mut []
         } else {
-            let s = unsafe { std::slice::from_raw_parts_mut(self.data, self.size) };
+            let s = unsafe { std::slice::from_raw_parts_mut(self.data, self.size as _) };
             s
         }
     }
@@ -161,8 +161,8 @@ impl Drop for AddThreeIntsResponse {
 #[derive(Debug)]
 struct AddThreeIntsResponseSeqRaw {
     data: *mut AddThreeIntsResponse,
-    size: usize,
-    capacity: usize,
+    size: size_t,
+    capacity: size_t,
 }
 
 /// Sequence of AddThreeIntsResponse.
@@ -172,8 +172,8 @@ struct AddThreeIntsResponseSeqRaw {
 #[derive(Debug)]
 pub struct AddThreeIntsResponseSeq<const N: usize> {
     data: *mut AddThreeIntsResponse,
-    size: usize,
-    capacity: usize,
+    size: size_t,
+    capacity: size_t,
 }
 
 impl<const N: usize> AddThreeIntsResponseSeq<N> {
@@ -203,7 +203,7 @@ impl<const N: usize> AddThreeIntsResponseSeq<N> {
         if self.data.is_null() {
             &[]
         } else {
-            let s = unsafe { std::slice::from_raw_parts(self.data, self.size) };
+            let s = unsafe { std::slice::from_raw_parts(self.data, self.size as _) };
             s
         }
     }
@@ -212,7 +212,7 @@ impl<const N: usize> AddThreeIntsResponseSeq<N> {
         if self.data.is_null() {
             &mut []
         } else {
-            let s = unsafe { std::slice::from_raw_parts_mut(self.data, self.size) };
+            let s = unsafe { std::slice::from_raw_parts_mut(self.data, self.size as _) };
             s
         }
     }

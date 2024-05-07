@@ -52,8 +52,8 @@ impl Drop for Float64MultiArray {
 #[derive(Debug)]
 struct Float64MultiArraySeqRaw {
     data: *mut Float64MultiArray,
-    size: usize,
-    capacity: usize,
+    size: size_t,
+    capacity: size_t,
 }
 
 /// Sequence of Float64MultiArray.
@@ -63,8 +63,8 @@ struct Float64MultiArraySeqRaw {
 #[derive(Debug)]
 pub struct Float64MultiArraySeq<const N: usize> {
     data: *mut Float64MultiArray,
-    size: usize,
-    capacity: usize,
+    size: size_t,
+    capacity: size_t,
 }
 
 impl<const N: usize> Float64MultiArraySeq<N> {
@@ -103,7 +103,7 @@ impl<const N: usize> Float64MultiArraySeq<N> {
         if self.data.is_null() {
             &[]
         } else {
-            let s = unsafe { std::slice::from_raw_parts(self.data, self.size) };
+            let s = unsafe { std::slice::from_raw_parts(self.data, self.size as _) };
             s
         }
     }
@@ -112,7 +112,7 @@ impl<const N: usize> Float64MultiArraySeq<N> {
         if self.data.is_null() {
             &mut []
         } else {
-            let s = unsafe { std::slice::from_raw_parts_mut(self.data, self.size) };
+            let s = unsafe { std::slice::from_raw_parts_mut(self.data, self.size as _) };
             s
         }
     }

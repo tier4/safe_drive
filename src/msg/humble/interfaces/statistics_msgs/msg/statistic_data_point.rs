@@ -52,8 +52,8 @@ impl Drop for StatisticDataPoint {
 #[derive(Debug)]
 struct StatisticDataPointSeqRaw {
     data: *mut StatisticDataPoint,
-    size: usize,
-    capacity: usize,
+    size: size_t,
+    capacity: size_t,
 }
 
 /// Sequence of StatisticDataPoint.
@@ -63,8 +63,8 @@ struct StatisticDataPointSeqRaw {
 #[derive(Debug)]
 pub struct StatisticDataPointSeq<const N: usize> {
     data: *mut StatisticDataPoint,
-    size: usize,
-    capacity: usize,
+    size: size_t,
+    capacity: size_t,
 }
 
 impl<const N: usize> StatisticDataPointSeq<N> {
@@ -104,7 +104,7 @@ impl<const N: usize> StatisticDataPointSeq<N> {
         if self.data.is_null() {
             &[]
         } else {
-            let s = unsafe { std::slice::from_raw_parts(self.data, self.size) };
+            let s = unsafe { std::slice::from_raw_parts(self.data, self.size as _) };
             s
         }
     }
@@ -113,7 +113,7 @@ impl<const N: usize> StatisticDataPointSeq<N> {
         if self.data.is_null() {
             &mut []
         } else {
-            let s = unsafe { std::slice::from_raw_parts_mut(self.data, self.size) };
+            let s = unsafe { std::slice::from_raw_parts_mut(self.data, self.size as _) };
             s
         }
     }

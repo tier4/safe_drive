@@ -63,8 +63,8 @@ impl Drop for GetPlanRequest {
 #[derive(Debug)]
 struct GetPlanRequestSeqRaw {
     data: *mut GetPlanRequest,
-    size: usize,
-    capacity: usize,
+    size: size_t,
+    capacity: size_t,
 }
 
 /// Sequence of GetPlanRequest.
@@ -74,8 +74,8 @@ struct GetPlanRequestSeqRaw {
 #[derive(Debug)]
 pub struct GetPlanRequestSeq<const N: usize> {
     data: *mut GetPlanRequest,
-    size: usize,
-    capacity: usize,
+    size: size_t,
+    capacity: size_t,
 }
 
 impl<const N: usize> GetPlanRequestSeq<N> {
@@ -114,7 +114,7 @@ impl<const N: usize> GetPlanRequestSeq<N> {
         if self.data.is_null() {
             &[]
         } else {
-            let s = unsafe { std::slice::from_raw_parts(self.data, self.size) };
+            let s = unsafe { std::slice::from_raw_parts(self.data, self.size as _) };
             s
         }
     }
@@ -123,7 +123,7 @@ impl<const N: usize> GetPlanRequestSeq<N> {
         if self.data.is_null() {
             &mut []
         } else {
-            let s = unsafe { std::slice::from_raw_parts_mut(self.data, self.size) };
+            let s = unsafe { std::slice::from_raw_parts_mut(self.data, self.size as _) };
             s
         }
     }
@@ -180,8 +180,8 @@ impl Drop for GetPlanResponse {
 #[derive(Debug)]
 struct GetPlanResponseSeqRaw {
     data: *mut GetPlanResponse,
-    size: usize,
-    capacity: usize,
+    size: size_t,
+    capacity: size_t,
 }
 
 /// Sequence of GetPlanResponse.
@@ -191,8 +191,8 @@ struct GetPlanResponseSeqRaw {
 #[derive(Debug)]
 pub struct GetPlanResponseSeq<const N: usize> {
     data: *mut GetPlanResponse,
-    size: usize,
-    capacity: usize,
+    size: size_t,
+    capacity: size_t,
 }
 
 impl<const N: usize> GetPlanResponseSeq<N> {
@@ -231,7 +231,7 @@ impl<const N: usize> GetPlanResponseSeq<N> {
         if self.data.is_null() {
             &[]
         } else {
-            let s = unsafe { std::slice::from_raw_parts(self.data, self.size) };
+            let s = unsafe { std::slice::from_raw_parts(self.data, self.size as _) };
             s
         }
     }
@@ -240,7 +240,7 @@ impl<const N: usize> GetPlanResponseSeq<N> {
         if self.data.is_null() {
             &mut []
         } else {
-            let s = unsafe { std::slice::from_raw_parts_mut(self.data, self.size) };
+            let s = unsafe { std::slice::from_raw_parts_mut(self.data, self.size as _) };
             s
         }
     }
