@@ -10410,13 +10410,13 @@ fn bindgen_test_layout_type_description_interfaces__srv__GetTypeDescription_Resp
         )
     );
 }
-pub const service_msgs__msg__ServiceEventInfo__REQUEST_SENT: _bindgen_ty_93 = 0;
+pub const bindgen_service_msgs__msg__ServiceEventInfo__REQUEST_SENT: _bindgen_ty_93 = 0;
 pub type _bindgen_ty_93 = ::std::os::raw::c_uint;
-pub const service_msgs__msg__ServiceEventInfo__REQUEST_RECEIVED: _bindgen_ty_94 = 1;
+pub const bindgen_service_msgs__msg__ServiceEventInfo__REQUEST_RECEIVED: _bindgen_ty_94 = 1;
 pub type _bindgen_ty_94 = ::std::os::raw::c_uint;
-pub const service_msgs__msg__ServiceEventInfo__RESPONSE_SENT: _bindgen_ty_95 = 2;
+pub const bindgen_service_msgs__msg__ServiceEventInfo__RESPONSE_SENT: _bindgen_ty_95 = 2;
 pub type _bindgen_ty_95 = ::std::os::raw::c_uint;
-pub const service_msgs__msg__ServiceEventInfo__RESPONSE_RECEIVED: _bindgen_ty_96 = 3;
+pub const bindgen_service_msgs__msg__ServiceEventInfo__RESPONSE_RECEIVED: _bindgen_ty_96 = 3;
 pub type _bindgen_ty_96 = ::std::os::raw::c_uint;
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
@@ -10521,28 +10521,31 @@ fn bindgen_test_layout_builtin_interfaces__msg__Time__Sequence() {
 }
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
-pub struct service_msgs__msg__ServiceEventInfo {
+pub struct bindgen_service_msgs__msg__ServiceEventInfo {
     pub event_type: u8,
     pub stamp: builtin_interfaces__msg__Time,
     pub client_gid: [u8; 16usize],
     pub sequence_number: i64,
 }
 #[test]
-fn bindgen_test_layout_service_msgs__msg__ServiceEventInfo() {
-    const UNINIT: ::std::mem::MaybeUninit<service_msgs__msg__ServiceEventInfo> =
+fn bindgen_test_layout_bindgen_service_msgs__msg__ServiceEventInfo() {
+    const UNINIT: ::std::mem::MaybeUninit<bindgen_service_msgs__msg__ServiceEventInfo> =
         ::std::mem::MaybeUninit::uninit();
     let ptr = UNINIT.as_ptr();
     assert_eq!(
-        ::std::mem::size_of::<service_msgs__msg__ServiceEventInfo>(),
+        ::std::mem::size_of::<bindgen_service_msgs__msg__ServiceEventInfo>(),
         40usize,
-        concat!("Size of: ", stringify!(service_msgs__msg__ServiceEventInfo))
+        concat!(
+            "Size of: ",
+            stringify!(bindgen_service_msgs__msg__ServiceEventInfo)
+        )
     );
     assert_eq!(
-        ::std::mem::align_of::<service_msgs__msg__ServiceEventInfo>(),
+        ::std::mem::align_of::<bindgen_service_msgs__msg__ServiceEventInfo>(),
         8usize,
         concat!(
             "Alignment of ",
-            stringify!(service_msgs__msg__ServiceEventInfo)
+            stringify!(bindgen_service_msgs__msg__ServiceEventInfo)
         )
     );
     assert_eq!(
@@ -10550,7 +10553,7 @@ fn bindgen_test_layout_service_msgs__msg__ServiceEventInfo() {
         0usize,
         concat!(
             "Offset of field: ",
-            stringify!(service_msgs__msg__ServiceEventInfo),
+            stringify!(bindgen_service_msgs__msg__ServiceEventInfo),
             "::",
             stringify!(event_type)
         )
@@ -10560,7 +10563,7 @@ fn bindgen_test_layout_service_msgs__msg__ServiceEventInfo() {
         4usize,
         concat!(
             "Offset of field: ",
-            stringify!(service_msgs__msg__ServiceEventInfo),
+            stringify!(bindgen_service_msgs__msg__ServiceEventInfo),
             "::",
             stringify!(stamp)
         )
@@ -10570,7 +10573,7 @@ fn bindgen_test_layout_service_msgs__msg__ServiceEventInfo() {
         12usize,
         concat!(
             "Offset of field: ",
-            stringify!(service_msgs__msg__ServiceEventInfo),
+            stringify!(bindgen_service_msgs__msg__ServiceEventInfo),
             "::",
             stringify!(client_gid)
         )
@@ -10580,7 +10583,7 @@ fn bindgen_test_layout_service_msgs__msg__ServiceEventInfo() {
         32usize,
         concat!(
             "Offset of field: ",
-            stringify!(service_msgs__msg__ServiceEventInfo),
+            stringify!(bindgen_service_msgs__msg__ServiceEventInfo),
             "::",
             stringify!(sequence_number)
         )
@@ -10588,30 +10591,30 @@ fn bindgen_test_layout_service_msgs__msg__ServiceEventInfo() {
 }
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
-pub struct service_msgs__msg__ServiceEventInfo__Sequence {
-    pub data: *mut service_msgs__msg__ServiceEventInfo,
+pub struct bindgen_service_msgs__msg__ServiceEventInfo__Sequence {
+    pub data: *mut bindgen_service_msgs__msg__ServiceEventInfo,
     pub size: usize,
     pub capacity: usize,
 }
 #[test]
-fn bindgen_test_layout_service_msgs__msg__ServiceEventInfo__Sequence() {
-    const UNINIT: ::std::mem::MaybeUninit<service_msgs__msg__ServiceEventInfo__Sequence> =
+fn bindgen_test_layout_bindgen_service_msgs__msg__ServiceEventInfo__Sequence() {
+    const UNINIT: ::std::mem::MaybeUninit<bindgen_service_msgs__msg__ServiceEventInfo__Sequence> =
         ::std::mem::MaybeUninit::uninit();
     let ptr = UNINIT.as_ptr();
     assert_eq!(
-        ::std::mem::size_of::<service_msgs__msg__ServiceEventInfo__Sequence>(),
+        ::std::mem::size_of::<bindgen_service_msgs__msg__ServiceEventInfo__Sequence>(),
         24usize,
         concat!(
             "Size of: ",
-            stringify!(service_msgs__msg__ServiceEventInfo__Sequence)
+            stringify!(bindgen_service_msgs__msg__ServiceEventInfo__Sequence)
         )
     );
     assert_eq!(
-        ::std::mem::align_of::<service_msgs__msg__ServiceEventInfo__Sequence>(),
+        ::std::mem::align_of::<bindgen_service_msgs__msg__ServiceEventInfo__Sequence>(),
         8usize,
         concat!(
             "Alignment of ",
-            stringify!(service_msgs__msg__ServiceEventInfo__Sequence)
+            stringify!(bindgen_service_msgs__msg__ServiceEventInfo__Sequence)
         )
     );
     assert_eq!(
@@ -10619,7 +10622,7 @@ fn bindgen_test_layout_service_msgs__msg__ServiceEventInfo__Sequence() {
         0usize,
         concat!(
             "Offset of field: ",
-            stringify!(service_msgs__msg__ServiceEventInfo__Sequence),
+            stringify!(bindgen_service_msgs__msg__ServiceEventInfo__Sequence),
             "::",
             stringify!(data)
         )
@@ -10629,7 +10632,7 @@ fn bindgen_test_layout_service_msgs__msg__ServiceEventInfo__Sequence() {
         8usize,
         concat!(
             "Offset of field: ",
-            stringify!(service_msgs__msg__ServiceEventInfo__Sequence),
+            stringify!(bindgen_service_msgs__msg__ServiceEventInfo__Sequence),
             "::",
             stringify!(size)
         )
@@ -10639,7 +10642,7 @@ fn bindgen_test_layout_service_msgs__msg__ServiceEventInfo__Sequence() {
         16usize,
         concat!(
             "Offset of field: ",
-            stringify!(service_msgs__msg__ServiceEventInfo__Sequence),
+            stringify!(bindgen_service_msgs__msg__ServiceEventInfo__Sequence),
             "::",
             stringify!(capacity)
         )
@@ -10654,7 +10657,7 @@ pub type _bindgen_ty_98 = ::std::os::raw::c_uint;
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
 pub struct type_description_interfaces__srv__GetTypeDescription_Event {
-    pub info: service_msgs__msg__ServiceEventInfo,
+    pub info: bindgen_service_msgs__msg__ServiceEventInfo,
     pub request: type_description_interfaces__srv__GetTypeDescription_Request__Sequence,
     pub response: type_description_interfaces__srv__GetTypeDescription_Response__Sequence,
 }
@@ -22262,31 +22265,34 @@ fn bindgen_test_layout_unique_identifier_msgs__msg__UUID__Sequence() {
 }
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
-pub struct action_msgs__msg__GoalInfo {
+pub struct bindgen_action_msgs__msg__GoalInfo {
     pub goal_id: unique_identifier_msgs__msg__UUID,
     pub stamp: builtin_interfaces__msg__Time,
 }
 #[test]
-fn bindgen_test_layout_action_msgs__msg__GoalInfo() {
-    const UNINIT: ::std::mem::MaybeUninit<action_msgs__msg__GoalInfo> =
+fn bindgen_test_layout_bindgen_action_msgs__msg__GoalInfo() {
+    const UNINIT: ::std::mem::MaybeUninit<bindgen_action_msgs__msg__GoalInfo> =
         ::std::mem::MaybeUninit::uninit();
     let ptr = UNINIT.as_ptr();
     assert_eq!(
-        ::std::mem::size_of::<action_msgs__msg__GoalInfo>(),
+        ::std::mem::size_of::<bindgen_action_msgs__msg__GoalInfo>(),
         24usize,
-        concat!("Size of: ", stringify!(action_msgs__msg__GoalInfo))
+        concat!("Size of: ", stringify!(bindgen_action_msgs__msg__GoalInfo))
     );
     assert_eq!(
-        ::std::mem::align_of::<action_msgs__msg__GoalInfo>(),
+        ::std::mem::align_of::<bindgen_action_msgs__msg__GoalInfo>(),
         4usize,
-        concat!("Alignment of ", stringify!(action_msgs__msg__GoalInfo))
+        concat!(
+            "Alignment of ",
+            stringify!(bindgen_action_msgs__msg__GoalInfo)
+        )
     );
     assert_eq!(
         unsafe { ::std::ptr::addr_of!((*ptr).goal_id) as usize - ptr as usize },
         0usize,
         concat!(
             "Offset of field: ",
-            stringify!(action_msgs__msg__GoalInfo),
+            stringify!(bindgen_action_msgs__msg__GoalInfo),
             "::",
             stringify!(goal_id)
         )
@@ -22296,7 +22302,7 @@ fn bindgen_test_layout_action_msgs__msg__GoalInfo() {
         16usize,
         concat!(
             "Offset of field: ",
-            stringify!(action_msgs__msg__GoalInfo),
+            stringify!(bindgen_action_msgs__msg__GoalInfo),
             "::",
             stringify!(stamp)
         )
@@ -22304,30 +22310,30 @@ fn bindgen_test_layout_action_msgs__msg__GoalInfo() {
 }
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
-pub struct action_msgs__msg__GoalInfo__Sequence {
-    pub data: *mut action_msgs__msg__GoalInfo,
+pub struct bindgen_action_msgs__msg__GoalInfo__Sequence {
+    pub data: *mut bindgen_action_msgs__msg__GoalInfo,
     pub size: usize,
     pub capacity: usize,
 }
 #[test]
-fn bindgen_test_layout_action_msgs__msg__GoalInfo__Sequence() {
-    const UNINIT: ::std::mem::MaybeUninit<action_msgs__msg__GoalInfo__Sequence> =
+fn bindgen_test_layout_bindgen_action_msgs__msg__GoalInfo__Sequence() {
+    const UNINIT: ::std::mem::MaybeUninit<bindgen_action_msgs__msg__GoalInfo__Sequence> =
         ::std::mem::MaybeUninit::uninit();
     let ptr = UNINIT.as_ptr();
     assert_eq!(
-        ::std::mem::size_of::<action_msgs__msg__GoalInfo__Sequence>(),
+        ::std::mem::size_of::<bindgen_action_msgs__msg__GoalInfo__Sequence>(),
         24usize,
         concat!(
             "Size of: ",
-            stringify!(action_msgs__msg__GoalInfo__Sequence)
+            stringify!(bindgen_action_msgs__msg__GoalInfo__Sequence)
         )
     );
     assert_eq!(
-        ::std::mem::align_of::<action_msgs__msg__GoalInfo__Sequence>(),
+        ::std::mem::align_of::<bindgen_action_msgs__msg__GoalInfo__Sequence>(),
         8usize,
         concat!(
             "Alignment of ",
-            stringify!(action_msgs__msg__GoalInfo__Sequence)
+            stringify!(bindgen_action_msgs__msg__GoalInfo__Sequence)
         )
     );
     assert_eq!(
@@ -22335,7 +22341,7 @@ fn bindgen_test_layout_action_msgs__msg__GoalInfo__Sequence() {
         0usize,
         concat!(
             "Offset of field: ",
-            stringify!(action_msgs__msg__GoalInfo__Sequence),
+            stringify!(bindgen_action_msgs__msg__GoalInfo__Sequence),
             "::",
             stringify!(data)
         )
@@ -22345,7 +22351,7 @@ fn bindgen_test_layout_action_msgs__msg__GoalInfo__Sequence() {
         8usize,
         concat!(
             "Offset of field: ",
-            stringify!(action_msgs__msg__GoalInfo__Sequence),
+            stringify!(bindgen_action_msgs__msg__GoalInfo__Sequence),
             "::",
             stringify!(size)
         )
@@ -22355,134 +22361,59 @@ fn bindgen_test_layout_action_msgs__msg__GoalInfo__Sequence() {
         16usize,
         concat!(
             "Offset of field: ",
-            stringify!(action_msgs__msg__GoalInfo__Sequence),
+            stringify!(bindgen_action_msgs__msg__GoalInfo__Sequence),
             "::",
             stringify!(capacity)
         )
     );
 }
-extern "C" {
-    pub fn action_msgs__msg__GoalInfo__init(msg: *mut action_msgs__msg__GoalInfo) -> bool;
-}
-extern "C" {
-    pub fn action_msgs__msg__GoalInfo__fini(msg: *mut action_msgs__msg__GoalInfo);
-}
-extern "C" {
-    pub fn action_msgs__msg__GoalInfo__create() -> *mut action_msgs__msg__GoalInfo;
-}
-extern "C" {
-    pub fn action_msgs__msg__GoalInfo__destroy(msg: *mut action_msgs__msg__GoalInfo);
-}
-extern "C" {
-    pub fn action_msgs__msg__GoalInfo__are_equal(
-        lhs: *const action_msgs__msg__GoalInfo,
-        rhs: *const action_msgs__msg__GoalInfo,
-    ) -> bool;
-}
-extern "C" {
-    pub fn action_msgs__msg__GoalInfo__copy(
-        input: *const action_msgs__msg__GoalInfo,
-        output: *mut action_msgs__msg__GoalInfo,
-    ) -> bool;
-}
-extern "C" {
-    pub fn action_msgs__msg__GoalInfo__get_type_hash(
-        type_support: *const rosidl_message_type_support_t,
-    ) -> *const rosidl_type_hash_t;
-}
-extern "C" {
-    pub fn action_msgs__msg__GoalInfo__get_type_description(
-        type_support: *const rosidl_message_type_support_t,
-    ) -> *const rosidl_runtime_c__type_description__TypeDescription;
-}
-extern "C" {
-    pub fn action_msgs__msg__GoalInfo__get_individual_type_description_source(
-        type_support: *const rosidl_message_type_support_t,
-    ) -> *const rosidl_runtime_c__type_description__TypeSource;
-}
-extern "C" {
-    pub fn action_msgs__msg__GoalInfo__get_type_description_sources(
-        type_support: *const rosidl_message_type_support_t,
-    ) -> *const rosidl_runtime_c__type_description__TypeSource__Sequence;
-}
-extern "C" {
-    pub fn action_msgs__msg__GoalInfo__Sequence__init(
-        array: *mut action_msgs__msg__GoalInfo__Sequence,
-        size: usize,
-    ) -> bool;
-}
-extern "C" {
-    pub fn action_msgs__msg__GoalInfo__Sequence__fini(
-        array: *mut action_msgs__msg__GoalInfo__Sequence,
-    );
-}
-extern "C" {
-    pub fn action_msgs__msg__GoalInfo__Sequence__create(
-        size: usize,
-    ) -> *mut action_msgs__msg__GoalInfo__Sequence;
-}
-extern "C" {
-    pub fn action_msgs__msg__GoalInfo__Sequence__destroy(
-        array: *mut action_msgs__msg__GoalInfo__Sequence,
-    );
-}
-extern "C" {
-    pub fn action_msgs__msg__GoalInfo__Sequence__are_equal(
-        lhs: *const action_msgs__msg__GoalInfo__Sequence,
-        rhs: *const action_msgs__msg__GoalInfo__Sequence,
-    ) -> bool;
-}
-extern "C" {
-    pub fn action_msgs__msg__GoalInfo__Sequence__copy(
-        input: *const action_msgs__msg__GoalInfo__Sequence,
-        output: *mut action_msgs__msg__GoalInfo__Sequence,
-    ) -> bool;
-}
-extern "C" {
-    pub fn rosidl_typesupport_c__get_message_type_support_handle__action_msgs__msg__GoalInfo(
-    ) -> *const rosidl_message_type_support_t;
-}
-pub const action_msgs__msg__GoalStatus__STATUS_UNKNOWN: _bindgen_ty_190 = 0;
+pub const bindgen_action_msgs__msg__GoalStatus__STATUS_UNKNOWN: _bindgen_ty_190 = 0;
 pub type _bindgen_ty_190 = ::std::os::raw::c_uint;
-pub const action_msgs__msg__GoalStatus__STATUS_ACCEPTED: _bindgen_ty_191 = 1;
+pub const bindgen_action_msgs__msg__GoalStatus__STATUS_ACCEPTED: _bindgen_ty_191 = 1;
 pub type _bindgen_ty_191 = ::std::os::raw::c_uint;
-pub const action_msgs__msg__GoalStatus__STATUS_EXECUTING: _bindgen_ty_192 = 2;
+pub const bindgen_action_msgs__msg__GoalStatus__STATUS_EXECUTING: _bindgen_ty_192 = 2;
 pub type _bindgen_ty_192 = ::std::os::raw::c_uint;
-pub const action_msgs__msg__GoalStatus__STATUS_CANCELING: _bindgen_ty_193 = 3;
+pub const bindgen_action_msgs__msg__GoalStatus__STATUS_CANCELING: _bindgen_ty_193 = 3;
 pub type _bindgen_ty_193 = ::std::os::raw::c_uint;
-pub const action_msgs__msg__GoalStatus__STATUS_SUCCEEDED: _bindgen_ty_194 = 4;
+pub const bindgen_action_msgs__msg__GoalStatus__STATUS_SUCCEEDED: _bindgen_ty_194 = 4;
 pub type _bindgen_ty_194 = ::std::os::raw::c_uint;
-pub const action_msgs__msg__GoalStatus__STATUS_CANCELED: _bindgen_ty_195 = 5;
+pub const bindgen_action_msgs__msg__GoalStatus__STATUS_CANCELED: _bindgen_ty_195 = 5;
 pub type _bindgen_ty_195 = ::std::os::raw::c_uint;
-pub const action_msgs__msg__GoalStatus__STATUS_ABORTED: _bindgen_ty_196 = 6;
+pub const bindgen_action_msgs__msg__GoalStatus__STATUS_ABORTED: _bindgen_ty_196 = 6;
 pub type _bindgen_ty_196 = ::std::os::raw::c_uint;
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
-pub struct action_msgs__msg__GoalStatus {
-    pub goal_info: action_msgs__msg__GoalInfo,
+pub struct bindgen_action_msgs__msg__GoalStatus {
+    pub goal_info: bindgen_action_msgs__msg__GoalInfo,
     pub status: i8,
 }
 #[test]
-fn bindgen_test_layout_action_msgs__msg__GoalStatus() {
-    const UNINIT: ::std::mem::MaybeUninit<action_msgs__msg__GoalStatus> =
+fn bindgen_test_layout_bindgen_action_msgs__msg__GoalStatus() {
+    const UNINIT: ::std::mem::MaybeUninit<bindgen_action_msgs__msg__GoalStatus> =
         ::std::mem::MaybeUninit::uninit();
     let ptr = UNINIT.as_ptr();
     assert_eq!(
-        ::std::mem::size_of::<action_msgs__msg__GoalStatus>(),
+        ::std::mem::size_of::<bindgen_action_msgs__msg__GoalStatus>(),
         28usize,
-        concat!("Size of: ", stringify!(action_msgs__msg__GoalStatus))
+        concat!(
+            "Size of: ",
+            stringify!(bindgen_action_msgs__msg__GoalStatus)
+        )
     );
     assert_eq!(
-        ::std::mem::align_of::<action_msgs__msg__GoalStatus>(),
+        ::std::mem::align_of::<bindgen_action_msgs__msg__GoalStatus>(),
         4usize,
-        concat!("Alignment of ", stringify!(action_msgs__msg__GoalStatus))
+        concat!(
+            "Alignment of ",
+            stringify!(bindgen_action_msgs__msg__GoalStatus)
+        )
     );
     assert_eq!(
         unsafe { ::std::ptr::addr_of!((*ptr).goal_info) as usize - ptr as usize },
         0usize,
         concat!(
             "Offset of field: ",
-            stringify!(action_msgs__msg__GoalStatus),
+            stringify!(bindgen_action_msgs__msg__GoalStatus),
             "::",
             stringify!(goal_info)
         )
@@ -22492,7 +22423,7 @@ fn bindgen_test_layout_action_msgs__msg__GoalStatus() {
         24usize,
         concat!(
             "Offset of field: ",
-            stringify!(action_msgs__msg__GoalStatus),
+            stringify!(bindgen_action_msgs__msg__GoalStatus),
             "::",
             stringify!(status)
         )
@@ -22500,30 +22431,30 @@ fn bindgen_test_layout_action_msgs__msg__GoalStatus() {
 }
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
-pub struct action_msgs__msg__GoalStatus__Sequence {
-    pub data: *mut action_msgs__msg__GoalStatus,
+pub struct bindgen_action_msgs__msg__GoalStatus__Sequence {
+    pub data: *mut bindgen_action_msgs__msg__GoalStatus,
     pub size: usize,
     pub capacity: usize,
 }
 #[test]
-fn bindgen_test_layout_action_msgs__msg__GoalStatus__Sequence() {
-    const UNINIT: ::std::mem::MaybeUninit<action_msgs__msg__GoalStatus__Sequence> =
+fn bindgen_test_layout_bindgen_action_msgs__msg__GoalStatus__Sequence() {
+    const UNINIT: ::std::mem::MaybeUninit<bindgen_action_msgs__msg__GoalStatus__Sequence> =
         ::std::mem::MaybeUninit::uninit();
     let ptr = UNINIT.as_ptr();
     assert_eq!(
-        ::std::mem::size_of::<action_msgs__msg__GoalStatus__Sequence>(),
+        ::std::mem::size_of::<bindgen_action_msgs__msg__GoalStatus__Sequence>(),
         24usize,
         concat!(
             "Size of: ",
-            stringify!(action_msgs__msg__GoalStatus__Sequence)
+            stringify!(bindgen_action_msgs__msg__GoalStatus__Sequence)
         )
     );
     assert_eq!(
-        ::std::mem::align_of::<action_msgs__msg__GoalStatus__Sequence>(),
+        ::std::mem::align_of::<bindgen_action_msgs__msg__GoalStatus__Sequence>(),
         8usize,
         concat!(
             "Alignment of ",
-            stringify!(action_msgs__msg__GoalStatus__Sequence)
+            stringify!(bindgen_action_msgs__msg__GoalStatus__Sequence)
         )
     );
     assert_eq!(
@@ -22531,7 +22462,7 @@ fn bindgen_test_layout_action_msgs__msg__GoalStatus__Sequence() {
         0usize,
         concat!(
             "Offset of field: ",
-            stringify!(action_msgs__msg__GoalStatus__Sequence),
+            stringify!(bindgen_action_msgs__msg__GoalStatus__Sequence),
             "::",
             stringify!(data)
         )
@@ -22541,7 +22472,7 @@ fn bindgen_test_layout_action_msgs__msg__GoalStatus__Sequence() {
         8usize,
         concat!(
             "Offset of field: ",
-            stringify!(action_msgs__msg__GoalStatus__Sequence),
+            stringify!(bindgen_action_msgs__msg__GoalStatus__Sequence),
             "::",
             stringify!(size)
         )
@@ -22551,114 +22482,36 @@ fn bindgen_test_layout_action_msgs__msg__GoalStatus__Sequence() {
         16usize,
         concat!(
             "Offset of field: ",
-            stringify!(action_msgs__msg__GoalStatus__Sequence),
+            stringify!(bindgen_action_msgs__msg__GoalStatus__Sequence),
             "::",
             stringify!(capacity)
         )
     );
 }
-extern "C" {
-    pub fn action_msgs__msg__GoalStatus__init(msg: *mut action_msgs__msg__GoalStatus) -> bool;
-}
-extern "C" {
-    pub fn action_msgs__msg__GoalStatus__fini(msg: *mut action_msgs__msg__GoalStatus);
-}
-extern "C" {
-    pub fn action_msgs__msg__GoalStatus__create() -> *mut action_msgs__msg__GoalStatus;
-}
-extern "C" {
-    pub fn action_msgs__msg__GoalStatus__destroy(msg: *mut action_msgs__msg__GoalStatus);
-}
-extern "C" {
-    pub fn action_msgs__msg__GoalStatus__are_equal(
-        lhs: *const action_msgs__msg__GoalStatus,
-        rhs: *const action_msgs__msg__GoalStatus,
-    ) -> bool;
-}
-extern "C" {
-    pub fn action_msgs__msg__GoalStatus__copy(
-        input: *const action_msgs__msg__GoalStatus,
-        output: *mut action_msgs__msg__GoalStatus,
-    ) -> bool;
-}
-extern "C" {
-    pub fn action_msgs__msg__GoalStatus__get_type_hash(
-        type_support: *const rosidl_message_type_support_t,
-    ) -> *const rosidl_type_hash_t;
-}
-extern "C" {
-    pub fn action_msgs__msg__GoalStatus__get_type_description(
-        type_support: *const rosidl_message_type_support_t,
-    ) -> *const rosidl_runtime_c__type_description__TypeDescription;
-}
-extern "C" {
-    pub fn action_msgs__msg__GoalStatus__get_individual_type_description_source(
-        type_support: *const rosidl_message_type_support_t,
-    ) -> *const rosidl_runtime_c__type_description__TypeSource;
-}
-extern "C" {
-    pub fn action_msgs__msg__GoalStatus__get_type_description_sources(
-        type_support: *const rosidl_message_type_support_t,
-    ) -> *const rosidl_runtime_c__type_description__TypeSource__Sequence;
-}
-extern "C" {
-    pub fn action_msgs__msg__GoalStatus__Sequence__init(
-        array: *mut action_msgs__msg__GoalStatus__Sequence,
-        size: usize,
-    ) -> bool;
-}
-extern "C" {
-    pub fn action_msgs__msg__GoalStatus__Sequence__fini(
-        array: *mut action_msgs__msg__GoalStatus__Sequence,
-    );
-}
-extern "C" {
-    pub fn action_msgs__msg__GoalStatus__Sequence__create(
-        size: usize,
-    ) -> *mut action_msgs__msg__GoalStatus__Sequence;
-}
-extern "C" {
-    pub fn action_msgs__msg__GoalStatus__Sequence__destroy(
-        array: *mut action_msgs__msg__GoalStatus__Sequence,
-    );
-}
-extern "C" {
-    pub fn action_msgs__msg__GoalStatus__Sequence__are_equal(
-        lhs: *const action_msgs__msg__GoalStatus__Sequence,
-        rhs: *const action_msgs__msg__GoalStatus__Sequence,
-    ) -> bool;
-}
-extern "C" {
-    pub fn action_msgs__msg__GoalStatus__Sequence__copy(
-        input: *const action_msgs__msg__GoalStatus__Sequence,
-        output: *mut action_msgs__msg__GoalStatus__Sequence,
-    ) -> bool;
-}
-extern "C" {
-    pub fn rosidl_typesupport_c__get_message_type_support_handle__action_msgs__msg__GoalStatus(
-    ) -> *const rosidl_message_type_support_t;
-}
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
-pub struct action_msgs__msg__GoalStatusArray {
-    pub status_list: action_msgs__msg__GoalStatus__Sequence,
+pub struct bindgen_action_msgs__msg__GoalStatusArray {
+    pub status_list: bindgen_action_msgs__msg__GoalStatus__Sequence,
 }
 #[test]
-fn bindgen_test_layout_action_msgs__msg__GoalStatusArray() {
-    const UNINIT: ::std::mem::MaybeUninit<action_msgs__msg__GoalStatusArray> =
+fn bindgen_test_layout_bindgen_action_msgs__msg__GoalStatusArray() {
+    const UNINIT: ::std::mem::MaybeUninit<bindgen_action_msgs__msg__GoalStatusArray> =
         ::std::mem::MaybeUninit::uninit();
     let ptr = UNINIT.as_ptr();
     assert_eq!(
-        ::std::mem::size_of::<action_msgs__msg__GoalStatusArray>(),
+        ::std::mem::size_of::<bindgen_action_msgs__msg__GoalStatusArray>(),
         24usize,
-        concat!("Size of: ", stringify!(action_msgs__msg__GoalStatusArray))
+        concat!(
+            "Size of: ",
+            stringify!(bindgen_action_msgs__msg__GoalStatusArray)
+        )
     );
     assert_eq!(
-        ::std::mem::align_of::<action_msgs__msg__GoalStatusArray>(),
+        ::std::mem::align_of::<bindgen_action_msgs__msg__GoalStatusArray>(),
         8usize,
         concat!(
             "Alignment of ",
-            stringify!(action_msgs__msg__GoalStatusArray)
+            stringify!(bindgen_action_msgs__msg__GoalStatusArray)
         )
     );
     assert_eq!(
@@ -22666,7 +22519,7 @@ fn bindgen_test_layout_action_msgs__msg__GoalStatusArray() {
         0usize,
         concat!(
             "Offset of field: ",
-            stringify!(action_msgs__msg__GoalStatusArray),
+            stringify!(bindgen_action_msgs__msg__GoalStatusArray),
             "::",
             stringify!(status_list)
         )
@@ -22674,30 +22527,30 @@ fn bindgen_test_layout_action_msgs__msg__GoalStatusArray() {
 }
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
-pub struct action_msgs__msg__GoalStatusArray__Sequence {
-    pub data: *mut action_msgs__msg__GoalStatusArray,
+pub struct bindgen_action_msgs__msg__GoalStatusArray__Sequence {
+    pub data: *mut bindgen_action_msgs__msg__GoalStatusArray,
     pub size: usize,
     pub capacity: usize,
 }
 #[test]
-fn bindgen_test_layout_action_msgs__msg__GoalStatusArray__Sequence() {
-    const UNINIT: ::std::mem::MaybeUninit<action_msgs__msg__GoalStatusArray__Sequence> =
+fn bindgen_test_layout_bindgen_action_msgs__msg__GoalStatusArray__Sequence() {
+    const UNINIT: ::std::mem::MaybeUninit<bindgen_action_msgs__msg__GoalStatusArray__Sequence> =
         ::std::mem::MaybeUninit::uninit();
     let ptr = UNINIT.as_ptr();
     assert_eq!(
-        ::std::mem::size_of::<action_msgs__msg__GoalStatusArray__Sequence>(),
+        ::std::mem::size_of::<bindgen_action_msgs__msg__GoalStatusArray__Sequence>(),
         24usize,
         concat!(
             "Size of: ",
-            stringify!(action_msgs__msg__GoalStatusArray__Sequence)
+            stringify!(bindgen_action_msgs__msg__GoalStatusArray__Sequence)
         )
     );
     assert_eq!(
-        ::std::mem::align_of::<action_msgs__msg__GoalStatusArray__Sequence>(),
+        ::std::mem::align_of::<bindgen_action_msgs__msg__GoalStatusArray__Sequence>(),
         8usize,
         concat!(
             "Alignment of ",
-            stringify!(action_msgs__msg__GoalStatusArray__Sequence)
+            stringify!(bindgen_action_msgs__msg__GoalStatusArray__Sequence)
         )
     );
     assert_eq!(
@@ -22705,7 +22558,7 @@ fn bindgen_test_layout_action_msgs__msg__GoalStatusArray__Sequence() {
         0usize,
         concat!(
             "Offset of field: ",
-            stringify!(action_msgs__msg__GoalStatusArray__Sequence),
+            stringify!(bindgen_action_msgs__msg__GoalStatusArray__Sequence),
             "::",
             stringify!(data)
         )
@@ -22715,7 +22568,7 @@ fn bindgen_test_layout_action_msgs__msg__GoalStatusArray__Sequence() {
         8usize,
         concat!(
             "Offset of field: ",
-            stringify!(action_msgs__msg__GoalStatusArray__Sequence),
+            stringify!(bindgen_action_msgs__msg__GoalStatusArray__Sequence),
             "::",
             stringify!(size)
         )
@@ -22725,119 +22578,36 @@ fn bindgen_test_layout_action_msgs__msg__GoalStatusArray__Sequence() {
         16usize,
         concat!(
             "Offset of field: ",
-            stringify!(action_msgs__msg__GoalStatusArray__Sequence),
+            stringify!(bindgen_action_msgs__msg__GoalStatusArray__Sequence),
             "::",
             stringify!(capacity)
         )
     );
 }
-extern "C" {
-    pub fn action_msgs__msg__GoalStatusArray__init(
-        msg: *mut action_msgs__msg__GoalStatusArray,
-    ) -> bool;
-}
-extern "C" {
-    pub fn action_msgs__msg__GoalStatusArray__fini(msg: *mut action_msgs__msg__GoalStatusArray);
-}
-extern "C" {
-    pub fn action_msgs__msg__GoalStatusArray__create() -> *mut action_msgs__msg__GoalStatusArray;
-}
-extern "C" {
-    pub fn action_msgs__msg__GoalStatusArray__destroy(msg: *mut action_msgs__msg__GoalStatusArray);
-}
-extern "C" {
-    pub fn action_msgs__msg__GoalStatusArray__are_equal(
-        lhs: *const action_msgs__msg__GoalStatusArray,
-        rhs: *const action_msgs__msg__GoalStatusArray,
-    ) -> bool;
-}
-extern "C" {
-    pub fn action_msgs__msg__GoalStatusArray__copy(
-        input: *const action_msgs__msg__GoalStatusArray,
-        output: *mut action_msgs__msg__GoalStatusArray,
-    ) -> bool;
-}
-extern "C" {
-    pub fn action_msgs__msg__GoalStatusArray__get_type_hash(
-        type_support: *const rosidl_message_type_support_t,
-    ) -> *const rosidl_type_hash_t;
-}
-extern "C" {
-    pub fn action_msgs__msg__GoalStatusArray__get_type_description(
-        type_support: *const rosidl_message_type_support_t,
-    ) -> *const rosidl_runtime_c__type_description__TypeDescription;
-}
-extern "C" {
-    pub fn action_msgs__msg__GoalStatusArray__get_individual_type_description_source(
-        type_support: *const rosidl_message_type_support_t,
-    ) -> *const rosidl_runtime_c__type_description__TypeSource;
-}
-extern "C" {
-    pub fn action_msgs__msg__GoalStatusArray__get_type_description_sources(
-        type_support: *const rosidl_message_type_support_t,
-    ) -> *const rosidl_runtime_c__type_description__TypeSource__Sequence;
-}
-extern "C" {
-    pub fn action_msgs__msg__GoalStatusArray__Sequence__init(
-        array: *mut action_msgs__msg__GoalStatusArray__Sequence,
-        size: usize,
-    ) -> bool;
-}
-extern "C" {
-    pub fn action_msgs__msg__GoalStatusArray__Sequence__fini(
-        array: *mut action_msgs__msg__GoalStatusArray__Sequence,
-    );
-}
-extern "C" {
-    pub fn action_msgs__msg__GoalStatusArray__Sequence__create(
-        size: usize,
-    ) -> *mut action_msgs__msg__GoalStatusArray__Sequence;
-}
-extern "C" {
-    pub fn action_msgs__msg__GoalStatusArray__Sequence__destroy(
-        array: *mut action_msgs__msg__GoalStatusArray__Sequence,
-    );
-}
-extern "C" {
-    pub fn action_msgs__msg__GoalStatusArray__Sequence__are_equal(
-        lhs: *const action_msgs__msg__GoalStatusArray__Sequence,
-        rhs: *const action_msgs__msg__GoalStatusArray__Sequence,
-    ) -> bool;
-}
-extern "C" {
-    pub fn action_msgs__msg__GoalStatusArray__Sequence__copy(
-        input: *const action_msgs__msg__GoalStatusArray__Sequence,
-        output: *mut action_msgs__msg__GoalStatusArray__Sequence,
-    ) -> bool;
-}
-extern "C" {
-    pub fn rosidl_typesupport_c__get_message_type_support_handle__action_msgs__msg__GoalStatusArray(
-    ) -> *const rosidl_message_type_support_t;
-}
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
-pub struct action_msgs__srv__CancelGoal_Request {
-    pub goal_info: action_msgs__msg__GoalInfo,
+pub struct bindgen_action_msgs__srv__CancelGoal_Request {
+    pub goal_info: bindgen_action_msgs__msg__GoalInfo,
 }
 #[test]
-fn bindgen_test_layout_action_msgs__srv__CancelGoal_Request() {
-    const UNINIT: ::std::mem::MaybeUninit<action_msgs__srv__CancelGoal_Request> =
+fn bindgen_test_layout_bindgen_action_msgs__srv__CancelGoal_Request() {
+    const UNINIT: ::std::mem::MaybeUninit<bindgen_action_msgs__srv__CancelGoal_Request> =
         ::std::mem::MaybeUninit::uninit();
     let ptr = UNINIT.as_ptr();
     assert_eq!(
-        ::std::mem::size_of::<action_msgs__srv__CancelGoal_Request>(),
+        ::std::mem::size_of::<bindgen_action_msgs__srv__CancelGoal_Request>(),
         24usize,
         concat!(
             "Size of: ",
-            stringify!(action_msgs__srv__CancelGoal_Request)
+            stringify!(bindgen_action_msgs__srv__CancelGoal_Request)
         )
     );
     assert_eq!(
-        ::std::mem::align_of::<action_msgs__srv__CancelGoal_Request>(),
+        ::std::mem::align_of::<bindgen_action_msgs__srv__CancelGoal_Request>(),
         4usize,
         concat!(
             "Alignment of ",
-            stringify!(action_msgs__srv__CancelGoal_Request)
+            stringify!(bindgen_action_msgs__srv__CancelGoal_Request)
         )
     );
     assert_eq!(
@@ -22845,7 +22615,7 @@ fn bindgen_test_layout_action_msgs__srv__CancelGoal_Request() {
         0usize,
         concat!(
             "Offset of field: ",
-            stringify!(action_msgs__srv__CancelGoal_Request),
+            stringify!(bindgen_action_msgs__srv__CancelGoal_Request),
             "::",
             stringify!(goal_info)
         )
@@ -22853,30 +22623,30 @@ fn bindgen_test_layout_action_msgs__srv__CancelGoal_Request() {
 }
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
-pub struct action_msgs__srv__CancelGoal_Request__Sequence {
-    pub data: *mut action_msgs__srv__CancelGoal_Request,
+pub struct bindgen_action_msgs__srv__CancelGoal_Request__Sequence {
+    pub data: *mut bindgen_action_msgs__srv__CancelGoal_Request,
     pub size: usize,
     pub capacity: usize,
 }
 #[test]
-fn bindgen_test_layout_action_msgs__srv__CancelGoal_Request__Sequence() {
-    const UNINIT: ::std::mem::MaybeUninit<action_msgs__srv__CancelGoal_Request__Sequence> =
+fn bindgen_test_layout_bindgen_action_msgs__srv__CancelGoal_Request__Sequence() {
+    const UNINIT: ::std::mem::MaybeUninit<bindgen_action_msgs__srv__CancelGoal_Request__Sequence> =
         ::std::mem::MaybeUninit::uninit();
     let ptr = UNINIT.as_ptr();
     assert_eq!(
-        ::std::mem::size_of::<action_msgs__srv__CancelGoal_Request__Sequence>(),
+        ::std::mem::size_of::<bindgen_action_msgs__srv__CancelGoal_Request__Sequence>(),
         24usize,
         concat!(
             "Size of: ",
-            stringify!(action_msgs__srv__CancelGoal_Request__Sequence)
+            stringify!(bindgen_action_msgs__srv__CancelGoal_Request__Sequence)
         )
     );
     assert_eq!(
-        ::std::mem::align_of::<action_msgs__srv__CancelGoal_Request__Sequence>(),
+        ::std::mem::align_of::<bindgen_action_msgs__srv__CancelGoal_Request__Sequence>(),
         8usize,
         concat!(
             "Alignment of ",
-            stringify!(action_msgs__srv__CancelGoal_Request__Sequence)
+            stringify!(bindgen_action_msgs__srv__CancelGoal_Request__Sequence)
         )
     );
     assert_eq!(
@@ -22884,7 +22654,7 @@ fn bindgen_test_layout_action_msgs__srv__CancelGoal_Request__Sequence() {
         0usize,
         concat!(
             "Offset of field: ",
-            stringify!(action_msgs__srv__CancelGoal_Request__Sequence),
+            stringify!(bindgen_action_msgs__srv__CancelGoal_Request__Sequence),
             "::",
             stringify!(data)
         )
@@ -22894,7 +22664,7 @@ fn bindgen_test_layout_action_msgs__srv__CancelGoal_Request__Sequence() {
         8usize,
         concat!(
             "Offset of field: ",
-            stringify!(action_msgs__srv__CancelGoal_Request__Sequence),
+            stringify!(bindgen_action_msgs__srv__CancelGoal_Request__Sequence),
             "::",
             stringify!(size)
         )
@@ -22904,45 +22674,45 @@ fn bindgen_test_layout_action_msgs__srv__CancelGoal_Request__Sequence() {
         16usize,
         concat!(
             "Offset of field: ",
-            stringify!(action_msgs__srv__CancelGoal_Request__Sequence),
+            stringify!(bindgen_action_msgs__srv__CancelGoal_Request__Sequence),
             "::",
             stringify!(capacity)
         )
     );
 }
-pub const action_msgs__srv__CancelGoal_Response__ERROR_NONE: _bindgen_ty_197 = 0;
+pub const bindgen_action_msgs__srv__CancelGoal_Response__ERROR_NONE: _bindgen_ty_197 = 0;
 pub type _bindgen_ty_197 = ::std::os::raw::c_uint;
-pub const action_msgs__srv__CancelGoal_Response__ERROR_REJECTED: _bindgen_ty_198 = 1;
+pub const bindgen_action_msgs__srv__CancelGoal_Response__ERROR_REJECTED: _bindgen_ty_198 = 1;
 pub type _bindgen_ty_198 = ::std::os::raw::c_uint;
-pub const action_msgs__srv__CancelGoal_Response__ERROR_UNKNOWN_GOAL_ID: _bindgen_ty_199 = 2;
+pub const bindgen_action_msgs__srv__CancelGoal_Response__ERROR_UNKNOWN_GOAL_ID: _bindgen_ty_199 = 2;
 pub type _bindgen_ty_199 = ::std::os::raw::c_uint;
-pub const action_msgs__srv__CancelGoal_Response__ERROR_GOAL_TERMINATED: _bindgen_ty_200 = 3;
+pub const bindgen_action_msgs__srv__CancelGoal_Response__ERROR_GOAL_TERMINATED: _bindgen_ty_200 = 3;
 pub type _bindgen_ty_200 = ::std::os::raw::c_uint;
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
-pub struct action_msgs__srv__CancelGoal_Response {
+pub struct bindgen_action_msgs__srv__CancelGoal_Response {
     pub return_code: i8,
-    pub goals_canceling: action_msgs__msg__GoalInfo__Sequence,
+    pub goals_canceling: bindgen_action_msgs__msg__GoalInfo__Sequence,
 }
 #[test]
-fn bindgen_test_layout_action_msgs__srv__CancelGoal_Response() {
-    const UNINIT: ::std::mem::MaybeUninit<action_msgs__srv__CancelGoal_Response> =
+fn bindgen_test_layout_bindgen_action_msgs__srv__CancelGoal_Response() {
+    const UNINIT: ::std::mem::MaybeUninit<bindgen_action_msgs__srv__CancelGoal_Response> =
         ::std::mem::MaybeUninit::uninit();
     let ptr = UNINIT.as_ptr();
     assert_eq!(
-        ::std::mem::size_of::<action_msgs__srv__CancelGoal_Response>(),
+        ::std::mem::size_of::<bindgen_action_msgs__srv__CancelGoal_Response>(),
         32usize,
         concat!(
             "Size of: ",
-            stringify!(action_msgs__srv__CancelGoal_Response)
+            stringify!(bindgen_action_msgs__srv__CancelGoal_Response)
         )
     );
     assert_eq!(
-        ::std::mem::align_of::<action_msgs__srv__CancelGoal_Response>(),
+        ::std::mem::align_of::<bindgen_action_msgs__srv__CancelGoal_Response>(),
         8usize,
         concat!(
             "Alignment of ",
-            stringify!(action_msgs__srv__CancelGoal_Response)
+            stringify!(bindgen_action_msgs__srv__CancelGoal_Response)
         )
     );
     assert_eq!(
@@ -22950,7 +22720,7 @@ fn bindgen_test_layout_action_msgs__srv__CancelGoal_Response() {
         0usize,
         concat!(
             "Offset of field: ",
-            stringify!(action_msgs__srv__CancelGoal_Response),
+            stringify!(bindgen_action_msgs__srv__CancelGoal_Response),
             "::",
             stringify!(return_code)
         )
@@ -22960,7 +22730,7 @@ fn bindgen_test_layout_action_msgs__srv__CancelGoal_Response() {
         8usize,
         concat!(
             "Offset of field: ",
-            stringify!(action_msgs__srv__CancelGoal_Response),
+            stringify!(bindgen_action_msgs__srv__CancelGoal_Response),
             "::",
             stringify!(goals_canceling)
         )
@@ -22968,30 +22738,30 @@ fn bindgen_test_layout_action_msgs__srv__CancelGoal_Response() {
 }
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
-pub struct action_msgs__srv__CancelGoal_Response__Sequence {
-    pub data: *mut action_msgs__srv__CancelGoal_Response,
+pub struct bindgen_action_msgs__srv__CancelGoal_Response__Sequence {
+    pub data: *mut bindgen_action_msgs__srv__CancelGoal_Response,
     pub size: usize,
     pub capacity: usize,
 }
 #[test]
-fn bindgen_test_layout_action_msgs__srv__CancelGoal_Response__Sequence() {
-    const UNINIT: ::std::mem::MaybeUninit<action_msgs__srv__CancelGoal_Response__Sequence> =
+fn bindgen_test_layout_bindgen_action_msgs__srv__CancelGoal_Response__Sequence() {
+    const UNINIT: ::std::mem::MaybeUninit<bindgen_action_msgs__srv__CancelGoal_Response__Sequence> =
         ::std::mem::MaybeUninit::uninit();
     let ptr = UNINIT.as_ptr();
     assert_eq!(
-        ::std::mem::size_of::<action_msgs__srv__CancelGoal_Response__Sequence>(),
+        ::std::mem::size_of::<bindgen_action_msgs__srv__CancelGoal_Response__Sequence>(),
         24usize,
         concat!(
             "Size of: ",
-            stringify!(action_msgs__srv__CancelGoal_Response__Sequence)
+            stringify!(bindgen_action_msgs__srv__CancelGoal_Response__Sequence)
         )
     );
     assert_eq!(
-        ::std::mem::align_of::<action_msgs__srv__CancelGoal_Response__Sequence>(),
+        ::std::mem::align_of::<bindgen_action_msgs__srv__CancelGoal_Response__Sequence>(),
         8usize,
         concat!(
             "Alignment of ",
-            stringify!(action_msgs__srv__CancelGoal_Response__Sequence)
+            stringify!(bindgen_action_msgs__srv__CancelGoal_Response__Sequence)
         )
     );
     assert_eq!(
@@ -22999,7 +22769,7 @@ fn bindgen_test_layout_action_msgs__srv__CancelGoal_Response__Sequence() {
         0usize,
         concat!(
             "Offset of field: ",
-            stringify!(action_msgs__srv__CancelGoal_Response__Sequence),
+            stringify!(bindgen_action_msgs__srv__CancelGoal_Response__Sequence),
             "::",
             stringify!(data)
         )
@@ -23009,7 +22779,7 @@ fn bindgen_test_layout_action_msgs__srv__CancelGoal_Response__Sequence() {
         8usize,
         concat!(
             "Offset of field: ",
-            stringify!(action_msgs__srv__CancelGoal_Response__Sequence),
+            stringify!(bindgen_action_msgs__srv__CancelGoal_Response__Sequence),
             "::",
             stringify!(size)
         )
@@ -23019,39 +22789,42 @@ fn bindgen_test_layout_action_msgs__srv__CancelGoal_Response__Sequence() {
         16usize,
         concat!(
             "Offset of field: ",
-            stringify!(action_msgs__srv__CancelGoal_Response__Sequence),
+            stringify!(bindgen_action_msgs__srv__CancelGoal_Response__Sequence),
             "::",
             stringify!(capacity)
         )
     );
 }
-pub const action_msgs__srv__CancelGoal_Event__request__MAX_SIZE: _bindgen_ty_201 = 1;
+pub const bindgen_action_msgs__srv__CancelGoal_Event__request__MAX_SIZE: _bindgen_ty_201 = 1;
 pub type _bindgen_ty_201 = ::std::os::raw::c_uint;
-pub const action_msgs__srv__CancelGoal_Event__response__MAX_SIZE: _bindgen_ty_202 = 1;
+pub const bindgen_action_msgs__srv__CancelGoal_Event__response__MAX_SIZE: _bindgen_ty_202 = 1;
 pub type _bindgen_ty_202 = ::std::os::raw::c_uint;
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
-pub struct action_msgs__srv__CancelGoal_Event {
-    pub info: service_msgs__msg__ServiceEventInfo,
-    pub request: action_msgs__srv__CancelGoal_Request__Sequence,
-    pub response: action_msgs__srv__CancelGoal_Response__Sequence,
+pub struct bindgen_action_msgs__srv__CancelGoal_Event {
+    pub info: bindgen_service_msgs__msg__ServiceEventInfo,
+    pub request: bindgen_action_msgs__srv__CancelGoal_Request__Sequence,
+    pub response: bindgen_action_msgs__srv__CancelGoal_Response__Sequence,
 }
 #[test]
-fn bindgen_test_layout_action_msgs__srv__CancelGoal_Event() {
-    const UNINIT: ::std::mem::MaybeUninit<action_msgs__srv__CancelGoal_Event> =
+fn bindgen_test_layout_bindgen_action_msgs__srv__CancelGoal_Event() {
+    const UNINIT: ::std::mem::MaybeUninit<bindgen_action_msgs__srv__CancelGoal_Event> =
         ::std::mem::MaybeUninit::uninit();
     let ptr = UNINIT.as_ptr();
     assert_eq!(
-        ::std::mem::size_of::<action_msgs__srv__CancelGoal_Event>(),
+        ::std::mem::size_of::<bindgen_action_msgs__srv__CancelGoal_Event>(),
         88usize,
-        concat!("Size of: ", stringify!(action_msgs__srv__CancelGoal_Event))
+        concat!(
+            "Size of: ",
+            stringify!(bindgen_action_msgs__srv__CancelGoal_Event)
+        )
     );
     assert_eq!(
-        ::std::mem::align_of::<action_msgs__srv__CancelGoal_Event>(),
+        ::std::mem::align_of::<bindgen_action_msgs__srv__CancelGoal_Event>(),
         8usize,
         concat!(
             "Alignment of ",
-            stringify!(action_msgs__srv__CancelGoal_Event)
+            stringify!(bindgen_action_msgs__srv__CancelGoal_Event)
         )
     );
     assert_eq!(
@@ -23059,7 +22832,7 @@ fn bindgen_test_layout_action_msgs__srv__CancelGoal_Event() {
         0usize,
         concat!(
             "Offset of field: ",
-            stringify!(action_msgs__srv__CancelGoal_Event),
+            stringify!(bindgen_action_msgs__srv__CancelGoal_Event),
             "::",
             stringify!(info)
         )
@@ -23069,7 +22842,7 @@ fn bindgen_test_layout_action_msgs__srv__CancelGoal_Event() {
         40usize,
         concat!(
             "Offset of field: ",
-            stringify!(action_msgs__srv__CancelGoal_Event),
+            stringify!(bindgen_action_msgs__srv__CancelGoal_Event),
             "::",
             stringify!(request)
         )
@@ -23079,7 +22852,7 @@ fn bindgen_test_layout_action_msgs__srv__CancelGoal_Event() {
         64usize,
         concat!(
             "Offset of field: ",
-            stringify!(action_msgs__srv__CancelGoal_Event),
+            stringify!(bindgen_action_msgs__srv__CancelGoal_Event),
             "::",
             stringify!(response)
         )
@@ -23087,30 +22860,30 @@ fn bindgen_test_layout_action_msgs__srv__CancelGoal_Event() {
 }
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
-pub struct action_msgs__srv__CancelGoal_Event__Sequence {
-    pub data: *mut action_msgs__srv__CancelGoal_Event,
+pub struct bindgen_action_msgs__srv__CancelGoal_Event__Sequence {
+    pub data: *mut bindgen_action_msgs__srv__CancelGoal_Event,
     pub size: usize,
     pub capacity: usize,
 }
 #[test]
-fn bindgen_test_layout_action_msgs__srv__CancelGoal_Event__Sequence() {
-    const UNINIT: ::std::mem::MaybeUninit<action_msgs__srv__CancelGoal_Event__Sequence> =
+fn bindgen_test_layout_bindgen_action_msgs__srv__CancelGoal_Event__Sequence() {
+    const UNINIT: ::std::mem::MaybeUninit<bindgen_action_msgs__srv__CancelGoal_Event__Sequence> =
         ::std::mem::MaybeUninit::uninit();
     let ptr = UNINIT.as_ptr();
     assert_eq!(
-        ::std::mem::size_of::<action_msgs__srv__CancelGoal_Event__Sequence>(),
+        ::std::mem::size_of::<bindgen_action_msgs__srv__CancelGoal_Event__Sequence>(),
         24usize,
         concat!(
             "Size of: ",
-            stringify!(action_msgs__srv__CancelGoal_Event__Sequence)
+            stringify!(bindgen_action_msgs__srv__CancelGoal_Event__Sequence)
         )
     );
     assert_eq!(
-        ::std::mem::align_of::<action_msgs__srv__CancelGoal_Event__Sequence>(),
+        ::std::mem::align_of::<bindgen_action_msgs__srv__CancelGoal_Event__Sequence>(),
         8usize,
         concat!(
             "Alignment of ",
-            stringify!(action_msgs__srv__CancelGoal_Event__Sequence)
+            stringify!(bindgen_action_msgs__srv__CancelGoal_Event__Sequence)
         )
     );
     assert_eq!(
@@ -23118,7 +22891,7 @@ fn bindgen_test_layout_action_msgs__srv__CancelGoal_Event__Sequence() {
         0usize,
         concat!(
             "Offset of field: ",
-            stringify!(action_msgs__srv__CancelGoal_Event__Sequence),
+            stringify!(bindgen_action_msgs__srv__CancelGoal_Event__Sequence),
             "::",
             stringify!(data)
         )
@@ -23128,7 +22901,7 @@ fn bindgen_test_layout_action_msgs__srv__CancelGoal_Event__Sequence() {
         8usize,
         concat!(
             "Offset of field: ",
-            stringify!(action_msgs__srv__CancelGoal_Event__Sequence),
+            stringify!(bindgen_action_msgs__srv__CancelGoal_Event__Sequence),
             "::",
             stringify!(size)
         )
@@ -23138,317 +22911,18 @@ fn bindgen_test_layout_action_msgs__srv__CancelGoal_Event__Sequence() {
         16usize,
         concat!(
             "Offset of field: ",
-            stringify!(action_msgs__srv__CancelGoal_Event__Sequence),
+            stringify!(bindgen_action_msgs__srv__CancelGoal_Event__Sequence),
             "::",
             stringify!(capacity)
         )
     );
 }
-extern "C" {
-    pub fn action_msgs__srv__CancelGoal__get_type_hash(
-        type_support: *const rosidl_service_type_support_t,
-    ) -> *const rosidl_type_hash_t;
-}
-extern "C" {
-    pub fn action_msgs__srv__CancelGoal__get_type_description(
-        type_support: *const rosidl_service_type_support_t,
-    ) -> *const rosidl_runtime_c__type_description__TypeDescription;
-}
-extern "C" {
-    pub fn action_msgs__srv__CancelGoal__get_individual_type_description_source(
-        type_support: *const rosidl_service_type_support_t,
-    ) -> *const rosidl_runtime_c__type_description__TypeSource;
-}
-extern "C" {
-    pub fn action_msgs__srv__CancelGoal__get_type_description_sources(
-        type_support: *const rosidl_service_type_support_t,
-    ) -> *const rosidl_runtime_c__type_description__TypeSource__Sequence;
-}
-extern "C" {
-    pub fn action_msgs__srv__CancelGoal_Request__init(
-        msg: *mut action_msgs__srv__CancelGoal_Request,
-    ) -> bool;
-}
-extern "C" {
-    pub fn action_msgs__srv__CancelGoal_Request__fini(
-        msg: *mut action_msgs__srv__CancelGoal_Request,
-    );
-}
-extern "C" {
-    pub fn action_msgs__srv__CancelGoal_Request__create(
-    ) -> *mut action_msgs__srv__CancelGoal_Request;
-}
-extern "C" {
-    pub fn action_msgs__srv__CancelGoal_Request__destroy(
-        msg: *mut action_msgs__srv__CancelGoal_Request,
-    );
-}
-extern "C" {
-    pub fn action_msgs__srv__CancelGoal_Request__are_equal(
-        lhs: *const action_msgs__srv__CancelGoal_Request,
-        rhs: *const action_msgs__srv__CancelGoal_Request,
-    ) -> bool;
-}
-extern "C" {
-    pub fn action_msgs__srv__CancelGoal_Request__copy(
-        input: *const action_msgs__srv__CancelGoal_Request,
-        output: *mut action_msgs__srv__CancelGoal_Request,
-    ) -> bool;
-}
-extern "C" {
-    pub fn action_msgs__srv__CancelGoal_Request__get_type_hash(
-        type_support: *const rosidl_message_type_support_t,
-    ) -> *const rosidl_type_hash_t;
-}
-extern "C" {
-    pub fn action_msgs__srv__CancelGoal_Request__get_type_description(
-        type_support: *const rosidl_message_type_support_t,
-    ) -> *const rosidl_runtime_c__type_description__TypeDescription;
-}
-extern "C" {
-    pub fn action_msgs__srv__CancelGoal_Request__get_individual_type_description_source(
-        type_support: *const rosidl_message_type_support_t,
-    ) -> *const rosidl_runtime_c__type_description__TypeSource;
-}
-extern "C" {
-    pub fn action_msgs__srv__CancelGoal_Request__get_type_description_sources(
-        type_support: *const rosidl_message_type_support_t,
-    ) -> *const rosidl_runtime_c__type_description__TypeSource__Sequence;
-}
-extern "C" {
-    pub fn action_msgs__srv__CancelGoal_Request__Sequence__init(
-        array: *mut action_msgs__srv__CancelGoal_Request__Sequence,
-        size: usize,
-    ) -> bool;
-}
-extern "C" {
-    pub fn action_msgs__srv__CancelGoal_Request__Sequence__fini(
-        array: *mut action_msgs__srv__CancelGoal_Request__Sequence,
-    );
-}
-extern "C" {
-    pub fn action_msgs__srv__CancelGoal_Request__Sequence__create(
-        size: usize,
-    ) -> *mut action_msgs__srv__CancelGoal_Request__Sequence;
-}
-extern "C" {
-    pub fn action_msgs__srv__CancelGoal_Request__Sequence__destroy(
-        array: *mut action_msgs__srv__CancelGoal_Request__Sequence,
-    );
-}
-extern "C" {
-    pub fn action_msgs__srv__CancelGoal_Request__Sequence__are_equal(
-        lhs: *const action_msgs__srv__CancelGoal_Request__Sequence,
-        rhs: *const action_msgs__srv__CancelGoal_Request__Sequence,
-    ) -> bool;
-}
-extern "C" {
-    pub fn action_msgs__srv__CancelGoal_Request__Sequence__copy(
-        input: *const action_msgs__srv__CancelGoal_Request__Sequence,
-        output: *mut action_msgs__srv__CancelGoal_Request__Sequence,
-    ) -> bool;
-}
-extern "C" {
-    pub fn action_msgs__srv__CancelGoal_Response__init(
-        msg: *mut action_msgs__srv__CancelGoal_Response,
-    ) -> bool;
-}
-extern "C" {
-    pub fn action_msgs__srv__CancelGoal_Response__fini(
-        msg: *mut action_msgs__srv__CancelGoal_Response,
-    );
-}
-extern "C" {
-    pub fn action_msgs__srv__CancelGoal_Response__create(
-    ) -> *mut action_msgs__srv__CancelGoal_Response;
-}
-extern "C" {
-    pub fn action_msgs__srv__CancelGoal_Response__destroy(
-        msg: *mut action_msgs__srv__CancelGoal_Response,
-    );
-}
-extern "C" {
-    pub fn action_msgs__srv__CancelGoal_Response__are_equal(
-        lhs: *const action_msgs__srv__CancelGoal_Response,
-        rhs: *const action_msgs__srv__CancelGoal_Response,
-    ) -> bool;
-}
-extern "C" {
-    pub fn action_msgs__srv__CancelGoal_Response__copy(
-        input: *const action_msgs__srv__CancelGoal_Response,
-        output: *mut action_msgs__srv__CancelGoal_Response,
-    ) -> bool;
-}
-extern "C" {
-    pub fn action_msgs__srv__CancelGoal_Response__get_type_hash(
-        type_support: *const rosidl_message_type_support_t,
-    ) -> *const rosidl_type_hash_t;
-}
-extern "C" {
-    pub fn action_msgs__srv__CancelGoal_Response__get_type_description(
-        type_support: *const rosidl_message_type_support_t,
-    ) -> *const rosidl_runtime_c__type_description__TypeDescription;
-}
-extern "C" {
-    pub fn action_msgs__srv__CancelGoal_Response__get_individual_type_description_source(
-        type_support: *const rosidl_message_type_support_t,
-    ) -> *const rosidl_runtime_c__type_description__TypeSource;
-}
-extern "C" {
-    pub fn action_msgs__srv__CancelGoal_Response__get_type_description_sources(
-        type_support: *const rosidl_message_type_support_t,
-    ) -> *const rosidl_runtime_c__type_description__TypeSource__Sequence;
-}
-extern "C" {
-    pub fn action_msgs__srv__CancelGoal_Response__Sequence__init(
-        array: *mut action_msgs__srv__CancelGoal_Response__Sequence,
-        size: usize,
-    ) -> bool;
-}
-extern "C" {
-    pub fn action_msgs__srv__CancelGoal_Response__Sequence__fini(
-        array: *mut action_msgs__srv__CancelGoal_Response__Sequence,
-    );
-}
-extern "C" {
-    pub fn action_msgs__srv__CancelGoal_Response__Sequence__create(
-        size: usize,
-    ) -> *mut action_msgs__srv__CancelGoal_Response__Sequence;
-}
-extern "C" {
-    pub fn action_msgs__srv__CancelGoal_Response__Sequence__destroy(
-        array: *mut action_msgs__srv__CancelGoal_Response__Sequence,
-    );
-}
-extern "C" {
-    pub fn action_msgs__srv__CancelGoal_Response__Sequence__are_equal(
-        lhs: *const action_msgs__srv__CancelGoal_Response__Sequence,
-        rhs: *const action_msgs__srv__CancelGoal_Response__Sequence,
-    ) -> bool;
-}
-extern "C" {
-    pub fn action_msgs__srv__CancelGoal_Response__Sequence__copy(
-        input: *const action_msgs__srv__CancelGoal_Response__Sequence,
-        output: *mut action_msgs__srv__CancelGoal_Response__Sequence,
-    ) -> bool;
-}
-extern "C" {
-    pub fn action_msgs__srv__CancelGoal_Event__init(
-        msg: *mut action_msgs__srv__CancelGoal_Event,
-    ) -> bool;
-}
-extern "C" {
-    pub fn action_msgs__srv__CancelGoal_Event__fini(msg: *mut action_msgs__srv__CancelGoal_Event);
-}
-extern "C" {
-    pub fn action_msgs__srv__CancelGoal_Event__create() -> *mut action_msgs__srv__CancelGoal_Event;
-}
-extern "C" {
-    pub fn action_msgs__srv__CancelGoal_Event__destroy(
-        msg: *mut action_msgs__srv__CancelGoal_Event,
-    );
-}
-extern "C" {
-    pub fn action_msgs__srv__CancelGoal_Event__are_equal(
-        lhs: *const action_msgs__srv__CancelGoal_Event,
-        rhs: *const action_msgs__srv__CancelGoal_Event,
-    ) -> bool;
-}
-extern "C" {
-    pub fn action_msgs__srv__CancelGoal_Event__copy(
-        input: *const action_msgs__srv__CancelGoal_Event,
-        output: *mut action_msgs__srv__CancelGoal_Event,
-    ) -> bool;
-}
-extern "C" {
-    pub fn action_msgs__srv__CancelGoal_Event__get_type_hash(
-        type_support: *const rosidl_message_type_support_t,
-    ) -> *const rosidl_type_hash_t;
-}
-extern "C" {
-    pub fn action_msgs__srv__CancelGoal_Event__get_type_description(
-        type_support: *const rosidl_message_type_support_t,
-    ) -> *const rosidl_runtime_c__type_description__TypeDescription;
-}
-extern "C" {
-    pub fn action_msgs__srv__CancelGoal_Event__get_individual_type_description_source(
-        type_support: *const rosidl_message_type_support_t,
-    ) -> *const rosidl_runtime_c__type_description__TypeSource;
-}
-extern "C" {
-    pub fn action_msgs__srv__CancelGoal_Event__get_type_description_sources(
-        type_support: *const rosidl_message_type_support_t,
-    ) -> *const rosidl_runtime_c__type_description__TypeSource__Sequence;
-}
-extern "C" {
-    pub fn action_msgs__srv__CancelGoal_Event__Sequence__init(
-        array: *mut action_msgs__srv__CancelGoal_Event__Sequence,
-        size: usize,
-    ) -> bool;
-}
-extern "C" {
-    pub fn action_msgs__srv__CancelGoal_Event__Sequence__fini(
-        array: *mut action_msgs__srv__CancelGoal_Event__Sequence,
-    );
-}
-extern "C" {
-    pub fn action_msgs__srv__CancelGoal_Event__Sequence__create(
-        size: usize,
-    ) -> *mut action_msgs__srv__CancelGoal_Event__Sequence;
-}
-extern "C" {
-    pub fn action_msgs__srv__CancelGoal_Event__Sequence__destroy(
-        array: *mut action_msgs__srv__CancelGoal_Event__Sequence,
-    );
-}
-extern "C" {
-    pub fn action_msgs__srv__CancelGoal_Event__Sequence__are_equal(
-        lhs: *const action_msgs__srv__CancelGoal_Event__Sequence,
-        rhs: *const action_msgs__srv__CancelGoal_Event__Sequence,
-    ) -> bool;
-}
-extern "C" {
-    pub fn action_msgs__srv__CancelGoal_Event__Sequence__copy(
-        input: *const action_msgs__srv__CancelGoal_Event__Sequence,
-        output: *mut action_msgs__srv__CancelGoal_Event__Sequence,
-    ) -> bool;
-}
-extern "C" {
-    pub fn rosidl_typesupport_c__get_message_type_support_handle__action_msgs__srv__CancelGoal_Request(
-    ) -> *const rosidl_message_type_support_t;
-}
-extern "C" {
-    pub fn rosidl_typesupport_c__get_message_type_support_handle__action_msgs__srv__CancelGoal_Response(
-    ) -> *const rosidl_message_type_support_t;
-}
-extern "C" {
-    pub fn rosidl_typesupport_c__get_message_type_support_handle__action_msgs__srv__CancelGoal_Event(
-    ) -> *const rosidl_message_type_support_t;
-}
-extern "C" {
-    pub fn rosidl_typesupport_c__get_service_type_support_handle__action_msgs__srv__CancelGoal(
-    ) -> *const rosidl_service_type_support_t;
-}
-extern "C" {
-    pub fn rosidl_typesupport_c__create_service_event_message__action_msgs__srv__CancelGoal(
-        info: *const rosidl_service_introspection_info_t,
-        allocator: *mut rcutils_allocator_t,
-        request_message: *const ::std::os::raw::c_void,
-        response_message: *const ::std::os::raw::c_void,
-    ) -> *mut ::std::os::raw::c_void;
-}
-extern "C" {
-    pub fn rosidl_typesupport_c__destroy_service_event_message__action_msgs__srv__CancelGoal(
-        event_msg: *mut ::std::os::raw::c_void,
-        allocator: *mut rcutils_allocator_t,
-    ) -> bool;
-}
-pub type rcl_action_goal_info_t = action_msgs__msg__GoalInfo;
-pub type rcl_action_goal_status_t = action_msgs__msg__GoalStatus;
+pub type rcl_action_goal_info_t = bindgen_action_msgs__msg__GoalInfo;
+pub type rcl_action_goal_status_t = bindgen_action_msgs__msg__GoalStatus;
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
 pub struct rcl_action_goal_status_array_s {
-    pub msg: action_msgs__msg__GoalStatusArray,
+    pub msg: bindgen_action_msgs__msg__GoalStatusArray,
     pub allocator: rcl_allocator_t,
 }
 #[test]
@@ -23488,11 +22962,11 @@ fn bindgen_test_layout_rcl_action_goal_status_array_s() {
     );
 }
 pub type rcl_action_goal_status_array_t = rcl_action_goal_status_array_s;
-pub type rcl_action_cancel_request_t = action_msgs__srv__CancelGoal_Request;
+pub type rcl_action_cancel_request_t = bindgen_action_msgs__srv__CancelGoal_Request;
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
 pub struct rcl_action_cancel_response_s {
-    pub msg: action_msgs__srv__CancelGoal_Response,
+    pub msg: bindgen_action_msgs__srv__CancelGoal_Response,
     pub allocator: rcl_allocator_t,
 }
 #[test]

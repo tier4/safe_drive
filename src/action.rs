@@ -4,7 +4,7 @@ use crate::{
     error::RCLActionResult,
     msg::{interfaces::action_msgs::msg::GoalStatusSeq, ActionGoal, ActionMsg, ActionResult},
     rcl::{
-        self, action_msgs__srv__CancelGoal_Request, rcl_action_goal_status_array_t,
+        self, bindgen_action_msgs__srv__CancelGoal_Request, rcl_action_goal_status_array_t,
         rcl_action_server_t,
     },
 };
@@ -17,7 +17,7 @@ pub type SendGoalServiceRequest<T> = <<T as ActionMsg>::Goal as ActionGoal>::Req
 type SendGoalServiceResponse<T> = <<T as ActionMsg>::Goal as ActionGoal>::Response;
 type GetResultServiceRequest<T> = <<T as ActionMsg>::Result as ActionResult>::Request;
 type GetResultServiceResponse<T> = <<T as ActionMsg>::Result as ActionResult>::Response;
-pub type CancelRequest = action_msgs__srv__CancelGoal_Request;
+pub type CancelRequest = bindgen_action_msgs__srv__CancelGoal_Request;
 
 #[derive(Debug, Copy, Clone, PartialEq, Eq)]
 pub enum GoalStatus {

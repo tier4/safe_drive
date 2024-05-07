@@ -70,7 +70,7 @@ use crate::{
     },
     parameter::{ParameterServer, Parameters},
     rcl::{
-        self, action_msgs__msg__GoalInfo, action_msgs__msg__GoalInfo__Sequence,
+        self, bindgen_action_msgs__msg__GoalInfo, bindgen_action_msgs__msg__GoalInfo__Sequence,
         rcl_action_client_t, rcl_action_server_t,
     },
     service::{
@@ -716,9 +716,9 @@ impl Selector {
                                 ERROR_NONE
                             };
                             cancel_response.msg.goals_canceling =
-                                action_msgs__msg__GoalInfo__Sequence {
+                                bindgen_action_msgs__msg__GoalInfo__Sequence {
                                     data: accepted_goals.as_mut_ptr() as *mut _
-                                        as *mut action_msgs__msg__GoalInfo,
+                                        as *mut bindgen_action_msgs__msg__GoalInfo,
                                     size: accepted_goals.len() as rcl::size_t,
                                     capacity: accepted_goals.capacity() as rcl::size_t,
                                 };

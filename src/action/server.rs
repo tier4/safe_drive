@@ -12,8 +12,9 @@ use crate::{
     node::Node,
     qos::Profile,
     rcl::{
-        self, action_msgs__msg__GoalInfo, rcl_action_cancel_request_t, rcl_action_goal_handle_t,
-        rcl_action_server_t, rmw_request_id_t, unique_identifier_msgs__msg__UUID,
+        self, bindgen_action_msgs__msg__GoalInfo, rcl_action_cancel_request_t,
+        rcl_action_goal_handle_t, rcl_action_server_t, rmw_request_id_t,
+        unique_identifier_msgs__msg__UUID,
     },
     RecvResult,
 };
@@ -284,8 +285,8 @@ impl<T: ActionMsg> Drop for Server<T> {
     }
 }
 
-impl From<action_msgs__msg__GoalInfo> for GoalInfo {
-    fn from(value: action_msgs__msg__GoalInfo) -> Self {
+impl From<bindgen_action_msgs__msg__GoalInfo> for GoalInfo {
+    fn from(value: bindgen_action_msgs__msg__GoalInfo) -> Self {
         Self {
             goal_id: value.goal_id.into(),
             stamp: value.stamp.into(),
@@ -311,7 +312,7 @@ impl From<crate::rcl::builtin_interfaces__msg__Time> for crate::msg::builtin_int
 #[allow(clippy::result_large_err)]
 fn rcl_action_accept_new_goal(
     server: *mut rcl_action_server_t,
-    goal_info: &action_msgs__msg__GoalInfo,
+    goal_info: &bindgen_action_msgs__msg__GoalInfo,
 ) -> Result<*mut rcl_action_goal_handle_t, rcl::rcutils_error_string_t> {
     let goal_handle = {
         let guard = rcl::MT_UNSAFE_FN.lock();
