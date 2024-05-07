@@ -99,7 +99,7 @@ macro_rules! def_sequence {
 
         impl<const N: usize> $ty<N> {
             pub fn new(size: usize) -> Option<Self> {
-                if N != 0 && size >= N {
+                if N != 0 && size > N {
                     // the size exceeds in the maximum number
                     return None;
                 }
@@ -383,7 +383,7 @@ pub struct RosStringSeq<const STRLEN: usize, const SEQLEN: usize>(
 
 impl<const STRLEN: usize, const SEQLEN: usize> RosStringSeq<STRLEN, SEQLEN> {
     pub fn new(size: usize) -> Option<Self> {
-        if SEQLEN != 0 && size >= SEQLEN {
+        if SEQLEN != 0 && size > SEQLEN {
             // the size exceeds in the maximum number
             return None;
         }
