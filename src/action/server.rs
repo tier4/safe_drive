@@ -142,7 +142,6 @@ pub struct Server<T: ActionMsg> {
     pub(crate) handles: Arc<Mutex<BTreeMap<[u8; 16], GoalHandle<T>>>>,
 }
 
-// FIXME: 誰がhandleのポインタを管理する？
 unsafe impl<T> Send for Server<T> where T: ActionMsg {}
 unsafe impl<T> Sync for Server<T> where T: ActionMsg {}
 
@@ -312,6 +311,7 @@ where
                 let sender = ServerResultSend {
                     data: self.data.clone(),
                     results: self.results.clone(),
+                    handles: self.handles.clone(),
                     request_id: header,
                     _unsync: Default::default(),
                 };
@@ -663,6 +663,7 @@ impl<T: ActionMsg> PinnedDrop for AsyncCancelReceiver<T> {
 pub struct ServerResultSend<T: ActionMsg> {
     data: Arc<ServerData>,
     results: Arc<Mutex<BTreeMap<[u8; 16], T::ResultContent>>>,
+    handles: Arc<Mutex<BTreeMap<[u8; 16], GoalHandle<T>>>>,
 
     request_id: rmw_request_id_t,
     _unsync: PhantomUnsync,
@@ -683,14 +684,11 @@ impl<T: ActionMsg> ServerResultSend<T> {
                     &mut self.request_id,
                     &mut response as *const _ as *mut _,
                 ) {
-                    Ok(()) => {
-                        Ok(Server {
-                            data: self.data,
-                            results: self.results,
-                            // TODO: we don't need handles anymore
-                            handles: Arc::new(Mutex::new(BTreeMap::new())),
-                        })
-                    }
+                    Ok(()) => Ok(Server {
+                        data: self.data,
+                        results: self.results,
+                        handles: self.handles,
+                    }),
                     Err(e) => {
                         let logger = Logger::new("safe_drive");
                         pr_error_in!(

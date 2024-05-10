@@ -115,6 +115,7 @@ where
 unsafe impl<T> Send for GoalHandle<T> where T: ActionMsg {}
 unsafe impl<T> Sync for GoalHandle<T> where T: ActionMsg {}
 
+/// `GoalHandleData` wraps the pointer to `rcl_action_goal_handle_t` and finalizes it when dropped.
 pub(crate) struct GoalHandleData(pub *mut rcl::rcl_action_goal_handle_t);
 
 impl GoalHandleData {
