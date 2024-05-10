@@ -70,6 +70,7 @@ where
         }
 
         self.update(GoalEvent::Canceled)?;
+        self.data.publish_goal_status()?;
 
         Ok(())
     }
@@ -85,6 +86,7 @@ where
         }
 
         self.update(GoalEvent::Succeed)?;
+        self.data.publish_goal_status()?;
 
         Ok(())
     }
@@ -100,10 +102,11 @@ where
     }
 
     pub fn abort(&self) -> Result<(), RCLActionError> {
-        self.update(GoalEvent::Abort)
+        self.update(GoalEvent::Abort)?;
+        self.data.publish_goal_status()?;
+        Ok(())
     }
 
-    // TODO: move update_goal_state here?
     pub(crate) fn update(&self, event: GoalEvent) -> Result<(), RCLActionError> {
         self.handle.update_goal_state(event)
     }

@@ -252,6 +252,54 @@ async fn run_client_cancel(mut client: Client<MyAction>) -> Result<(), DynError>
     Ok(())
 }
 
+async fn run_client_status(client: Client<MyAction>) -> Result<(), DynError> {
+    // send a goal request
+    let uuid: [u8; 16] = rand::random();
+    let goal = MyAction_Goal { a: 10 };
+    let receiver = client.send_goal_with_uuid(goal, uuid)?;
+
+    // receive a goal response
+    let recv = receiver.recv();
+    let client = match async_std::future::timeout(Duration::from_secs(3), recv).await {
+        Ok(Ok((c, response, _header))) => {
+            println!("client: goal response received: {:?}", response);
+            c
+        }
+        Ok(Err(e)) => panic!("{e:?}"),
+        Err(_) => panic!("timed out"),
+    };
+
+    // receive status
+    let mut client = client;
+    let recv = client.recv_status();
+    client = match async_std::future::timeout(Duration::from_secs(3), recv).await {
+        Ok(Ok((c, status))) => {
+            println!("client: status received: {:?}", status);
+            // TODO: validate response. status should be ACCEPTED
+            c
+        }
+        Ok(Err(e)) => panic!("{e:?}"),
+        Err(_) => panic!("timed out"),
+    };
+
+    thread::sleep(Duration::from_secs(10));
+
+    // receive status
+    let mut client = client;
+    let recv = client.recv_status();
+    client = match async_std::future::timeout(Duration::from_secs(3), recv).await {
+        Ok(Ok((c, status))) => {
+            println!("client: status received: {:?}", status);
+            // TODO: validate response. status should be FINISHED
+            c
+        }
+        Ok(Err(e)) => panic!("{e:?}"),
+        Err(_) => panic!("timed out"),
+    };
+
+    Ok(())
+}
+
 #[test]
 fn test_async_action() -> Result<(), Box<dyn std::error::Error + Sync + Send + 'static>> {
     let ctx = Context::new()?;
@@ -280,7 +328,7 @@ fn test_async_action() -> Result<(), Box<dyn std::error::Error + Sync + Send + '
 }
 
 #[test]
-fn test_async_cancel() -> Result<(), DynError> {
+fn test_async_action_cancel() -> Result<(), DynError> {
     let ctx = Context::new()?;
     let client = create_client(
         &ctx,
@@ -303,6 +351,40 @@ fn test_async_cancel() -> Result<(), DynError> {
         });
         async_std::task::spawn(async move {
             let ret = run_client_cancel(client).await;
+            let _ = tx.send(());
+            ret
+        });
+
+        let _ = rx.recv();
+    });
+
+    Ok(())
+}
+
+#[test]
+fn test_async_action_status() -> Result<(), DynError> {
+    let ctx = Context::new()?;
+    let client = create_client(
+        &ctx,
+        "test_async_action_client_status",
+        "test_async_action_status",
+    )?;
+    let server = create_server(
+        &ctx,
+        "test_async_action_server_status",
+        "test_async_action_status",
+        None,
+    )?;
+
+    async_std::task::block_on(async {
+        let (tx, rx) = crossbeam_channel::unbounded();
+
+        async_std::task::spawn({
+            let server = server.clone();
+            run_server(server)
+        });
+        async_std::task::spawn(async move {
+            let ret = run_client_status(client).await;
             let _ = tx.send(());
             ret
         });

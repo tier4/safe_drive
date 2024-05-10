@@ -242,13 +242,8 @@ where
     // Takes a status message for all the ongoing goals.
     // TODO: maybe return status_array.status_list. could it be cloned?
     pub fn try_recv_status(&self) -> RecvResult<GoalStatusArray, ()> {
-        let guard = rcl::MT_UNSAFE_FN.lock();
-
-        let mut status_array: GoalStatusArray = unsafe { MaybeUninit::zeroed().assume_init() };
-        match guard
-            .rcl_action_take_status(&self.data.client, &mut status_array as *const _ as *mut _)
-        {
-            Ok(()) => RecvResult::Ok(status_array),
+        match rcl_action_take_status(&self.data.client) {
+            Ok(status_array) => RecvResult::Ok(status_array),
             Err(RCLActionError::ClientTakeFailed) => RecvResult::RetryLater(()),
             Err(e) => RecvResult::Err(e.into()),
         }
@@ -266,6 +261,16 @@ where
             Ok(false) => RecvResult::RetryLater(()),
             Err(e) => RecvResult::Err(e),
         }
+    }
+
+    // Asynchronously receive a status message.
+    pub async fn recv_status(self) -> Result<(Self, GoalStatusArray), DynError> {
+        AsyncStatusReceiver {
+            data: self.data.clone(),
+            is_waiting: false,
+            _phantom: Default::default(),
+        }
+        .await
     }
 }
 
@@ -779,6 +784,85 @@ impl<T: ActionMsg> Future for AsyncFeedbackReceiver<T> {
     }
 }
 
+#[pin_project(PinnedDrop)]
+pub struct AsyncStatusReceiver<T: ActionMsg> {
+    data: Arc<ClientData>,
+    is_waiting: bool,
+    _phantom: PhantomData<T>,
+}
+
+impl<T: ActionMsg> AsyncStatusReceiver<T> {
+    pub fn give_up(self) -> Client<T> {
+        Client {
+            data: self.data.clone(),
+            _phantom: Default::default(),
+        }
+    }
+}
+
+#[pinned_drop]
+impl<T: ActionMsg> PinnedDrop for AsyncStatusReceiver<T> {
+    fn drop(self: Pin<&mut Self>) {
+        if self.is_waiting {
+            let mut guard = SELECTOR.lock();
+            let _ = guard.send_command(
+                &self.data.node.context,
+                async_selector::Command::RemoveActionClient(self.data.clone()),
+            );
+        }
+    }
+}
+
+impl<T: ActionMsg> Future for AsyncStatusReceiver<T> {
+    type Output = Result<(Client<T>, GoalStatusArray), DynError>;
+
+    fn poll(self: std::pin::Pin<&mut Self>, cx: &mut std::task::Context<'_>) -> Poll<Self::Output> {
+        if is_halt() {
+            return Poll::Ready(Err(Signaled.into()));
+        }
+
+        let this = self.project();
+        *this.is_waiting = false;
+
+        match rcl_action_take_status(&this.data.client) {
+            Ok(status_array) => {
+                let client = Client {
+                    data: this.data.clone(),
+                    _phantom: Default::default(),
+                };
+                return Poll::Ready(Ok((client, status_array)));
+            }
+            Err(RCLActionError::ClientTakeFailed) => {}
+            Err(e) => return Poll::Ready(Err(e.into())),
+        }
+
+        let mut waker = Some(cx.waker().clone());
+        let mut guard = SELECTOR.lock();
+
+        match guard.send_command(
+            &this.data.node.context,
+            async_selector::Command::ActionClient {
+                data: this.data.clone(),
+                feedback: Box::new(|| CallbackResult::Ok),
+                status: Box::new(move || {
+                    let w = waker.take().unwrap();
+                    w.wake();
+                    CallbackResult::Remove
+                }),
+                goal: Box::new(|| CallbackResult::Ok),
+                cancel: Box::new(|| CallbackResult::Ok),
+                result: Box::new(|| CallbackResult::Ok),
+            },
+        ) {
+            Ok(_) => {
+                *this.is_waiting = true;
+                Poll::Pending
+            }
+            Err(e) => Poll::Ready(Err(e)),
+        }
+    }
+}
+
 fn rcl_action_take_goal_response<T>(
     client: &rcl::rcl_action_client_t,
 ) -> RCLActionResult<(SendGoalServiceResponse<T>, rcl::rmw_request_id_t)>
@@ -843,4 +927,13 @@ where
     guard.rcl_action_take_feedback(client, &mut feedback as *const _ as *mut _)?;
 
     Ok(feedback)
+}
+
+fn rcl_action_take_status(client: &rcl::rcl_action_client_t) -> RCLActionResult<GoalStatusArray> {
+    let guard = rcl::MT_UNSAFE_FN.lock();
+
+    let mut status_array: GoalStatusArray = unsafe { MaybeUninit::zeroed().assume_init() };
+    guard.rcl_action_take_status(client, &mut status_array as *const _ as *mut _)?;
+
+    Ok(status_array)
 }

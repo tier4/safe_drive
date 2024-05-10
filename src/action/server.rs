@@ -104,6 +104,22 @@ impl ServerData {
     pub(crate) unsafe fn as_ptr_mut(&self) -> *mut rcl::rcl_action_server_t {
         &self.server as *const _ as *mut _
     }
+
+    pub(crate) fn publish_goal_status(&self) -> RCLActionResult<()> {
+        let guard = rcl::MT_UNSAFE_FN.lock();
+
+        let mut statuses =
+            Box::new(rcl::MTSafeFn::rcl_action_get_zero_initialized_goal_status_array());
+        guard
+            .rcl_action_get_goal_status_array(&self.server, statuses.as_mut())
+            .unwrap();
+
+        guard
+            .rcl_action_publish_status(&self.server, &statuses as *const _ as *const _)
+            .unwrap();
+
+        Ok(())
+    }
 }
 
 unsafe impl Sync for ServerData {}
@@ -444,6 +460,7 @@ impl<T: ActionMsg> ServerGoalSend<T> {
         );
 
         handle.update(GoalEvent::Execute)?;
+        self.data.publish_goal_status()?;
 
         Ok(handle)
     }
@@ -536,6 +553,8 @@ impl<T: ActionMsg> ServerCancelSend<T> {
             let handle = handles.get(&uuid).unwrap();
             handle.update(GoalEvent::CancelGoal)?;
         }
+
+        self.data.publish_goal_status()?;
 
         Ok(())
     }
