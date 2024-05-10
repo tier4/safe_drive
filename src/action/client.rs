@@ -125,16 +125,6 @@ where
         }
     }
 
-    // Send a goal request to the server. the UUID are automatically attached.
-    // pub fn send_goal<GR>(&mut self, goal: <T as ActionMsg>::Goal, callback: GR) -> Result<(), DynError>
-    // where GR: FnOnce(SendGoalServiceResponse<T>) {
-    //     let request = <T as ActionMsg>::new_goal_request(
-
-    //     goal, uuid);
-    //         self.send_goal_request(&request,Box::new(callback) )
-
-    // )
-
     /// Send a goal request to the server with given uuid. the uuid can be any 16-bit slice [u8; 16] i.e. does not have to
     /// strictly conform to the UUID v4 standard.
     pub fn send_goal_with_uuid(
@@ -229,7 +219,7 @@ where
         }
     }
 
-    // Asynchronously receive a feedback message.
+    /// Asynchronously receive a feedback message.
     pub async fn recv_feedback(self) -> Result<(Self, <T as ActionMsg>::Feedback), DynError> {
         AsyncFeedbackReceiver {
             data: self.data.clone(),
@@ -239,7 +229,7 @@ where
         .await
     }
 
-    // Takes a status message for all the ongoing goals.
+    /// Takes a status message for all the ongoing goals.
     // TODO: maybe return status_array.status_list. could it be cloned?
     pub fn try_recv_status(&self) -> RecvResult<GoalStatusArray, ()> {
         match rcl_action_take_status(&self.data.client) {

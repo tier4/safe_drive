@@ -1,5 +1,5 @@
 use parking_lot::Mutex;
-use std::{collections::BTreeMap, sync::Arc};
+use std::{collections::BTreeMap, rc::Rc, sync::Arc};
 
 use super::{server::ServerData, GoalEvent, GoalStatus};
 use crate::{
@@ -11,7 +11,7 @@ use crate::{
 /// GoalHandle contains information about an action goal and is used by server worker threads to send feedback and results.
 pub struct GoalHandle<T: ActionMsg> {
     pub goal_id: [u8; 16],
-    pub(crate) handle: Arc<GoalHandleData>,
+    pub(crate) handle: Rc<GoalHandleData>,
     data: Arc<ServerData>,
     pub results: Arc<Mutex<BTreeMap<[u8; 16], T::ResultContent>>>,
 }
@@ -42,7 +42,7 @@ where
     ) -> Self {
         Self {
             goal_id,
-            handle: Arc::new(GoalHandleData(goal_handle)),
+            handle: Rc::new(GoalHandleData(goal_handle)),
             data,
             results,
         }

@@ -1,11 +1,8 @@
 //! Actions
 
 use crate::{
-    error::RCLActionResult,
-    msg::{interfaces::action_msgs::msg::GoalStatusSeq, ActionGoal, ActionMsg, ActionResult},
-    rcl::{
-        self, action_msgs__srv__CancelGoal_Request, rcl_action_goal_handle_t, rcl_action_server_t,
-    },
+    msg::{ActionGoal, ActionMsg, ActionResult},
+    rcl::action_msgs__srv__CancelGoal_Request,
 };
 
 pub mod client;

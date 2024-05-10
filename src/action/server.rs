@@ -247,7 +247,6 @@ where
                     rcl::MTSafeFn::rcl_action_get_zero_initialized_cancel_response();
 
                 // compute which exact goals are requested to be cancelled
-                // TODO: handle ERROR_UNKNOWN_GOAL_ID etc.
                 if let Err(e) = guard.rcl_action_process_cancel_request(
                     unsafe { self.data.as_ptr_mut() },
                     &request,
@@ -449,7 +448,6 @@ impl<T: ActionMsg> ServerGoalSend<T> {
         goal_info.stamp.nanosec = timestamp.nanosec;
 
         let server_ptr = unsafe { self.data.as_ptr_mut() };
-        // TODO: wrap in a Box?
         let handle_t = rcl_action_accept_new_goal(server_ptr, &goal_info)?;
 
         let handle = GoalHandle::new(
