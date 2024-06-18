@@ -922,7 +922,14 @@ where
 fn rcl_action_take_status(client: &rcl::rcl_action_client_t) -> RCLActionResult<GoalStatusArray> {
     let guard = rcl::MT_UNSAFE_FN.lock();
 
-    let mut status_array: GoalStatusArray = unsafe { MaybeUninit::zeroed().assume_init() };
+    // let mut status_array: GoalStatusArray = unsafe { MaybeUninit::zeroed().assume_init() };
+    // guard.rcl_action_take_status(client, &mut status_array as *const _ as *mut _)?;
+
+    // let mut status_array = unsafe { action_msgs__msg__GoalStatusArray__create() };
+    // guard.rcl_action_take_status(client, status_array as *mut _)?;
+
+    let mut status_array = GoalStatusArray::new().unwrap();
+
     guard.rcl_action_take_status(client, &mut status_array as *const _ as *mut _)?;
 
     Ok(status_array)

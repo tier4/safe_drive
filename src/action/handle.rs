@@ -120,11 +120,10 @@ pub(crate) struct GoalHandleData(pub *mut rcl::rcl_action_goal_handle_t);
 
 impl GoalHandleData {
     pub(crate) fn update_goal_state(&self, event: GoalEvent) -> Result<(), RCLActionError> {
+        println!("update_goal_state event: {:?}", event);
         let guard = rcl::MT_UNSAFE_FN.lock();
 
-        guard
-            .rcl_action_update_goal_state(self.0, event as u32)
-            .unwrap();
+        guard.rcl_action_update_goal_state(self.0, event as u32)?;
 
         Ok(())
     }

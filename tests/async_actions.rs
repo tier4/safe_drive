@@ -269,20 +269,24 @@ async fn run_client_status(client: Client<MyAction>) -> Result<(), DynError> {
         Err(_) => panic!("timed out"),
     };
 
+    std::thread::sleep(Duration::from_secs(2));
+
     // receive status
     let mut client = client;
     let recv = client.recv_status();
     client = match async_std::future::timeout(Duration::from_secs(3), recv).await {
         Ok(Ok((c, status))) => {
             println!("client: status received: {:?}", status);
-            // TODO: validate response. status should be ACCEPTED
+            // #=> client: status received: GoalStatusArray { status_list: GoalStatusSeq { data: 0x0, size: 0, capacity: 0 } }
+
+            // TODO: Status should be ACCEPTED
             c
         }
         Ok(Err(e)) => panic!("{e:?}"),
         Err(_) => panic!("timed out"),
     };
 
-    thread::sleep(Duration::from_secs(10));
+    std::thread::sleep(Duration::from_secs(10)); // wait for the task to finish
 
     // receive status
     let mut client = client;
@@ -290,7 +294,7 @@ async fn run_client_status(client: Client<MyAction>) -> Result<(), DynError> {
     client = match async_std::future::timeout(Duration::from_secs(3), recv).await {
         Ok(Ok((c, status))) => {
             println!("client: status received: {:?}", status);
-            // TODO: validate response. status should be FINISHED
+            // TODO: Status should be FINISHED
             c
         }
         Ok(Err(e)) => panic!("{e:?}"),
