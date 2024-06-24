@@ -210,7 +210,7 @@ $ mkdir msg
 $ cd msg
 </code></pre>
 <h3 id="primitive-type-my_interfacesmsgmymsgmsg"><a class="header" href="#primitive-type-my_interfacesmsgmymsgmsg">Primitive Type: <code>my_interfaces/msg/MyMsg.msg</code></a></h3>
-<p>Then create a file, <code>msgtest/src/my_interfaces/msg/MyMsg.msg</code>, as follows.</p>
+<p>Then create a file, <code>msgtest/src/my_interfaces/msg</code>, as follows.</p>
 <pre><code class="language-text">int32 integer_value
 int32[] unbounded_integer_array
 int32[5] five_integers_array
@@ -495,7 +495,7 @@ safe_drive_version = &quot;0.3&quot;
 <h3 id="edit-listenersrcmainrs"><a class="header" href="#edit-listenersrcmainrs">Edit <code>listener/src/main.rs</code></a></h3>
 <p>The listener can also be implemented straightforwardly as follows.</p>
 <p><code>msgtest/src/listener/src/main.rs</code></p>
-<pre><pre class="playground"><code class="language-rust">use my_interfaces;
+<pre><pre class="playground"><code class="language-rust">use my_interfaces_rs::my_interfaces;
 use safe_drive::{context::Context, error::DynError, logger::Logger, pr_info};
 
 fn main() -&gt; Result&lt;(), DynError&gt; {
@@ -536,6 +536,7 @@ fn main() -&gt; Result&lt;(), DynError&gt; {
                 pr_info!(logger, &quot;up_to_five_integers_array: {}&quot;, msg);
             }
         }),
+        false,
     );
 
     // Spin.
