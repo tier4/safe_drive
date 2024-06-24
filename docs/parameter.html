@@ -177,13 +177,13 @@
 <p><a href="https://github.com/tier4/safe_drive_tutorial/tree/main/params">Source code</a>.</p>
 <p>This chapter introduces how to use parameters.
 A node can have parameters as follows.</p>
-<pre class="mermaid">graph TD;
-    NodeA --&gt; ParamA1:i64;
-    NodeA --&gt; ParamA2:bool;
-    NodeA --&gt; ParamA3:String;
-    NodeB --&gt; ParamB1:f64;
-    NodeB --&gt; ParamB2:f64;
-</pre>
+<pre><code class="language-mermaid">graph TD;
+   NodeA --&gt; ParamA1:i64;
+   NodeA --&gt; ParamA2:bool;
+   NodeA --&gt; ParamA3:String;
+   NodeB --&gt; ParamB1:f64;
+   NodeB --&gt; ParamB2:f64;
+</code></pre>
 <p>In this figure, NodeA has 3 parameters whose types are
 <code>i64</code>, <code>bool</code>, and <code>String</code>, respectively,
 and NodeB has 2 parameters whose types are <code>f64</code>.
@@ -202,7 +202,7 @@ $ cargo new async_param_server
 <p>To manage 2 packages, let's prepare <code>Cargo.toml</code> file for a workspace as follows.</p>
 <p><code>params/Cargo.toml</code></p>
 <pre><code class="language-toml">[workspace]
-members = [&quot;param_server&quot;, &quot;async_param_server&quot;]
+members = ["param_server", "async_param_server"]
 </code></pre>
 <p>The following table shows files we use in this chapter.</p>
 <div class="table-wrapper"><table><thead><tr><th>File</th><th>What?</th></tr></thead><tbody>
@@ -264,19 +264,19 @@ pub struct Parameters { /* omitted private fields */ }
 }
 <span class="boring">}</span></code></pre></pre>
 <p>In summary, a parameter server can be represented as follows.</p>
-<pre class="mermaid">graph TD;
-    ParameterServer --&gt; Parameters;
-    Parameters --&gt; Parameter;
-    Parameter --&gt; Descriptor;
-    Parameter --&gt; Value;
-</pre>
+<pre><code class="language-mermaid">graph TD;
+   ParameterServer --&gt; Parameters;
+   Parameters --&gt; Parameter;
+   Parameter --&gt; Descriptor;
+   Parameter --&gt; Value;
+</code></pre>
 <h2 id="parameter-setting-and-waiting-update-by-callback"><a class="header" href="#parameter-setting-and-waiting-update-by-callback">Parameter Setting and Waiting Update by Callback</a></h2>
 <p>We will explain how to set parameters,
 and how to wait updating by using a callback function.</p>
 <h3 id="edit-param_servercargotoml"><a class="header" href="#edit-param_servercargotoml">Edit <code>param_server/Cargo.toml</code></a></h3>
 <p>Add <code>safe_drive</code> to the dependencies section of <code>Cargo.toml</code> as follows.</p>
 <pre><code class="language-toml">[dependencies]
-safe_drive = &quot;0.3&quot;
+safe_drive = "0.3"
 </code></pre>
 <h3 id="edit-param_serversrcmainrs"><a class="header" href="#edit-param_serversrcmainrs">Edit <code>param_server/src/main.rs</code></a></h3>
 <p><code>param_server</code> can be implemented as follows.
@@ -286,7 +286,7 @@ This sets 2 parameters up and waits updating.</p>
 fn main() -&gt; Result&lt;(), DynError&gt; {
     // Create a context and a node.
     let ctx = Context::new()?;
-    let node = ctx.create_node(&quot;param_server&quot;, None, Default::default())?;
+    let node = ctx.create_node("param_server", None, Default::default())?;
 
     // Create a parameter server.
     let param_server = node.create_parameter_server()?;
@@ -296,40 +296,40 @@ fn main() -&gt; Result&lt;(), DynError&gt; {
 
         // Statically typed parameter.
         params.set_parameter(
-            &quot;my_flag&quot;.to_string(),                     // parameter name
+            "my_flag".to_string(),                     // parameter name
             Value::Bool(false),                        // value
             false,                                     // read only?
-            Some(&quot;my flag's description&quot;.to_string()), // description
+            Some("my flag's description".to_string()), // description
         )?;
 
         // Dynamically typed parameter.
         params.set_dynamically_typed_parameter(
-            &quot;my_dynamic_type_flag&quot;.to_string(), // parameter name
+            "my_dynamic_type_flag".to_string(), // parameter name
             Value::Bool(false),                 // value
             false,                              // read only?
-            Some(&quot;my dynamic type flag's description&quot;.to_string()), // description
+            Some("my dynamic type flag's description".to_string()), // description
         )?;
 
         // Add Directly from Parameter struct
         let parameter_to_set = Parameter {
             Descriptor {
-                Some(&quot;my parameter description&quot;.to_string()),                 // parameter description
-                Some(&quot;my parameter addutional_constraints&quot;.to_string()),      // parameter additional constraints
-                false,                                                                  // read only ?
-                false,                                                                  // static or Dynamic
-                None,                                                                   // floating point range 
-                None,                                                                   // integer point range 
+                Some("my parameter description".to_string()),               // parameter description
+                Some("my parameter addutional_constraints".to_string()),    // parameter additional constraints
+                false,                                                      // read only ?
+                false,                                                      // static or Dynamic
+                None,                                                       // floating point range 
+                None,                                                       // integer point range 
             },
-            Value::Bool(false),                                                         // value
+            Value::Bool(false),                                             // value
         }
         params.add_parameter(
-            (&quot;my parameter&quot;).to_string(),                                     // name
-            parameter_to_set,                                                           // parameter
+            ("my parameter").to_string(),       // name
+            parameter_to_set,                   // parameter
         )?;
     }
 
     // Create a logger and a selector.
-    let logger = Logger::new(&quot;param_server&quot;);
+    let logger = Logger::new("param_server");
     let mut selector = ctx.create_selector()?;
 
     // Add a callback function to the parameter server.
@@ -340,9 +340,9 @@ fn main() -&gt; Result&lt;(), DynError&gt; {
             let mut keys = String::new();
             for key in updated.iter() {
                 let value = &amp;params.get_parameter(key).unwrap().value;
-                keys = format!(&quot;{keys}{key} = {}, &quot;, value);
+                keys = format!("{keys}{key} = {}, ", value);
             }
-            pr_info!(logger, &quot;updated parameters: {keys}&quot;);
+            pr_info!(logger, "updated parameters: {keys}");
         }),
     );
 
@@ -369,36 +369,36 @@ for mutual exclusion by <code>write()</code> method.</p>
 
     // Statically typed parameter.
     params.set_parameter(
-        &quot;my_flag&quot;.to_string(),                     // parameter name
+        "my_flag".to_string(),                     // parameter name
         Value::Bool(false),                        // value
         false,                                     // read only?
-        Some(&quot;my flag's description&quot;.to_string()), // description
+        Some("my flag's description".to_string()), // description
     )?;
 
     // Dynamically typed parameter.
     params.set_dynamically_typed_parameter(
-        &quot;my_dynamic_type_flag&quot;.to_string(), // parameter name
+        "my_dynamic_type_flag".to_string(), // parameter name
         Value::Bool(false),                 // value
         false,                              // read only?
-        Some(&quot;my dynamic type flag's description&quot;.to_string()), // description
+        Some("my dynamic type flag's description".to_string()), // description
     )?;
 
     // Add Directly from Parameter struct
-        let parameter_to_set = Parameter {
-            Descriptor {
-                Some(&quot;my parameter description&quot;.to_string()),                 // parameter description
-                Some(&quot;my parameter addutional_constraints&quot;.to_string()),      // parameter additional constraints
-                false,                                                                  // read only ?
-                false,                                                                  // static or Dynamic
-                None,                                                                   // floating point range 
-                None,                                                                   // integer point range 
-            },
-            Value::Bool(false),                                                         // value
-        }
-        params.add_parameter(
-            (&quot;my parameter&quot;).to_string(),                                     // name
-            parameter_to_set,                                                           // parameter
-        )?;
+    let parameter_to_set = Parameter {
+        Descriptor {
+            Some("my parameter description".to_string()),               // parameter description
+            Some("my parameter addutional_constraints".to_string()),    // parameter additional constraints
+            false,                                                      // read only ?
+            false,                                                      // static or Dynamic
+            None,                                                       // floating point range 
+            None,                                                       // integer point range 
+        },
+        Value::Bool(false),                                             // value
+    }
+    params.add_parameter(
+        ("my parameter").to_string(),       // name
+        parameter_to_set,                   // parameter
+    )?;
 }
 <span class="boring">}</span></code></pre></pre>
 <p>To set a statically typed parameters, use <code>set_parameter()</code>.
@@ -420,9 +420,9 @@ selector.add_parameter_server(
         let mut keys = String::new();
         for key in updated.iter() {
             let value = &amp;params.get_parameter(key).unwrap().value;
-            keys = format!(&quot;{keys}{key} = {}, &quot;, value);
+            keys = format!("{keys}{key} = {}, ", value);
         }
-        pr_info!(logger, &quot;updated parameters: {keys}&quot;);
+        pr_info!(logger, "updated parameters: {keys}");
     }),
 );
 
@@ -460,8 +460,8 @@ and statically typed.</p>
 <h3 id="edit-async_param_servercargotoml"><a class="header" href="#edit-async_param_servercargotoml">Edit <code>async_param_server/Cargo.toml</code></a></h3>
 <p>Add <code>safe_drive</code> and <code>tokio</code> to the dependencies section of <code>Cargo.toml</code> as follows.</p>
 <pre><code class="language-toml">[dependencies]
-safe_drive = &quot;0.3&quot;
-tokio = { version = &quot;1&quot;, features = [&quot;full&quot;] }
+safe_drive = "0.3"
+tokio = { version = "1", features = ["full"] }
 </code></pre>
 <h3 id="edit-async_param_serversrcmainrs"><a class="header" href="#edit-async_param_serversrcmainrs">Edit <code>async_param_server/src/main.rs</code></a></h3>
 <p><code>async_param_server</code> can be implemented as follows.
@@ -472,7 +472,7 @@ This sets 2 parameters up and waits updating.</p>
 async fn main() -&gt; Result&lt;(), DynError&gt; {
     // Create a context and a node.
     let ctx = Context::new()?;
-    let node = ctx.create_node(&quot;async_param_server&quot;, None, Default::default())?;
+    let node = ctx.create_node("async_param_server", None, Default::default())?;
 
     // Create a parameter server.
     let mut param_server = node.create_parameter_server()?;
@@ -482,40 +482,40 @@ async fn main() -&gt; Result&lt;(), DynError&gt; {
 
         // Statically typed parameter.
         params.set_parameter(
-            &quot;my_flag&quot;.to_string(),                     // parameter name
+            "my_flag".to_string(),                     // parameter name
             Value::Bool(false),                        // value
             false,                                     // read only?
-            Some(&quot;my flag's description&quot;.to_string()), // description
+            Some("my flag's description".to_string()), // description
         )?;
 
         // Dynamically typed parameter.
         params.set_dynamically_typed_parameter(
-            &quot;my_dynamic_type_flag&quot;.to_string(), // parameter name
+            "my_dynamic_type_flag".to_string(), // parameter name
             Value::Bool(false),                 // value
             false,                              // read only?
-            Some(&quot;my dynamic type flag's description&quot;.to_string()), // description
+            Some("my dynamic type flag's description".to_string()), // description
         )?;
 
         // Add Directly from Parameter struct
         let parameter_to_set = Parameter {
             Descriptor {
-                Some(&quot;my parameter description&quot;.to_string()),                 // parameter description
-                Some(&quot;my parameter addutional_constraints&quot;.to_string()),      // parameter additional constraints
-                false,                                                                  // read only ?
-                false,                                                                  // static or Dynamic
-                None,                                                                   // floating point range 
-                None,                                                                   // integer point range 
+                Some("my parameter description".to_string()),               // parameter description
+                Some("my parameter addutional_constraints".to_string()),    // parameter additional constraints
+                false,                                                      // read only ?
+                false,                                                      // static or Dynamic
+                None,                                                       // floating point range 
+                None,                                                       // integer point range 
             },
-            Value::Bool(false),                                                         // value
+            Value::Bool(false),                                             // value
         }
         params.add_parameter(
-            (&quot;my parameter&quot;).to_string(),                                     // name
-            parameter_to_set,                                                           // parameter
+            ("my parameter").to_string(),       // name
+            parameter_to_set,                   // parameter
         )?;
     }
 
     // Create a logger.
-    let logger = Logger::new(&quot;async_param_server&quot;);
+    let logger = Logger::new("async_param_server");
 
     loop {
         // Wait update asynchronously.
@@ -527,9 +527,9 @@ async fn main() -&gt; Result&lt;(), DynError&gt; {
         let mut keys = String::new();
         for key in updated.iter() {
             let value = &amp;params.get_parameter(key).unwrap().value;
-            keys = format!(&quot;{keys}{key} = {}, &quot;, value);
+            keys = format!("{keys}{key} = {}, ", value);
         }
-        pr_info!(logger, &quot;updated parameters: {keys}&quot;);
+        pr_info!(logger, "updated parameters: {keys}");
     }
 }</code></pre></pre>
 <p>Important things are only following 2 lines.</p>

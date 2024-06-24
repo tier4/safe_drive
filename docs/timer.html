@@ -190,7 +190,7 @@ $ cd wall_timer
 </code></pre>
 <p>Then, add <code>safe_drive</code> to the dependencies of <code>Cargo.toml</code>.</p>
 <pre><code class="language-toml">[dependencies]
-safe_drive = &quot;0.3&quot;
+safe_drive = "0.3"
 </code></pre>
 <p>The following code is an example using a wall-timer.
 The important method is <code>Selector::add_wall_timer()</code> which takes
@@ -203,14 +203,14 @@ use std::{rc::Rc, time::Duration};
 fn main() -&gt; Result&lt;(), DynError&gt; {
     // Create a context, a node, a subscriber, a publisher, and a selector.
     let ctx = Context::new()?;
-    let node = ctx.create_node(&quot;my_node&quot;, None, Default::default())?;
-    let subscriber = node.create_subscriber::&lt;std_msgs::msg::UInt64&gt;(&quot;my_topic&quot;, None)?;
-    let publisher = node.create_publisher::&lt;std_msgs::msg::UInt64&gt;(&quot;my_topic&quot;, None)?;
+    let node = ctx.create_node("my_node", None, Default::default())?;
+    let subscriber = node.create_subscriber::&lt;std_msgs::msg::UInt64&gt;("my_topic", None)?;
+    let publisher = node.create_publisher::&lt;std_msgs::msg::UInt64&gt;("my_topic", None)?;
     let mut selector = ctx.create_selector()?;
 
     // Create a logger.
     // To share this by multiple callback functions, use Rc.
-    let logger = Rc::new(Logger::new(&quot;wall timer example&quot;));
+    let logger = Rc::new(Logger::new("wall timer example"));
 
     // Add a wall timer to publish periodically.
     let mut cnt = Box::new(0);
@@ -218,13 +218,13 @@ fn main() -&gt; Result&lt;(), DynError&gt; {
     let logger1 = logger.clone();
 
     selector.add_wall_timer(
-        &quot;publisher&quot;, // the name of timer
+        "publisher", // the name of timer
         Duration::from_secs(1),
         Box::new(move || {
             msg.data = *cnt;
             *cnt += 1;
             publisher.send(&amp;msg).unwrap();
-            pr_info!(logger1, &quot;send: msg.data = {}&quot;, msg.data);
+            pr_info!(logger1, "send: msg.data = {}", msg.data);
         }),
     );
 
@@ -232,7 +232,7 @@ fn main() -&gt; Result&lt;(), DynError&gt; {
     selector.add_subscriber(
         subscriber,
         Box::new(move |msg| {
-            pr_info!(logger, &quot;received: msg.data = {}&quot;, msg.data);
+            pr_info!(logger, "received: msg.data = {}", msg.data);
         }),
     );
 
@@ -246,18 +246,18 @@ and the timers will be invoked when calling the <code>Selector::wait()</code> me
 <pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
 </span><span class="boring">fn main() {
 </span>selector.add_wall_timer(
-    &quot;publisher&quot;, // the name of timer
+    "publisher", // the name of timer
     Duration::from_secs(1),
     Box::new(move || {
         msg.data = *cnt;
         *cnt += 1;
         publisher.send(&amp;msg).unwrap();
-        pr_info!(logger1, &quot;send: msg.data = {}&quot;, msg.data);
+        pr_info!(logger1, "send: msg.data = {}", msg.data);
     }),
 );
 <span class="boring">}</span></code></pre></pre>
 <ul>
-<li><code>&quot;publisher&quot;</code> is the name of this timer. The name is used for statistics. You can use any name.</li>
+<li><code>"publisher"</code> is the name of this timer. The name is used for statistics. You can use any name.</li>
 <li><code>Duration::from_secs(1)</code> is the duration for periodic invoking. This argument means the callback function is invoked every 1 second.</li>
 <li><code>Box::new(move || ...)</code> is the callback function.</li>
 </ul>
@@ -284,7 +284,7 @@ pub fn main() -&gt; Result&lt;(), DynError&gt; {
     // Create a context, a publisher, and a logger.
     let ctx = Context::new()?;
     let mut selector = ctx.create_selector()?;
-    let logger = Rc::new(Logger::new(&quot;one-shot timer example&quot;));
+    let logger = Rc::new(Logger::new("one-shot timer example"));
 
     let queue = Rc::new(RefCell::new(VecDeque::new()));
 
@@ -293,14 +293,14 @@ pub fn main() -&gt; Result&lt;(), DynError&gt; {
     selector.add_timer(
         Duration::from_secs(2),
         Box::new(move || {
-            pr_info!(logger, &quot;fired!&quot;);
+            pr_info!(logger, "fired!");
 
             // Insert a timer to the queue.
             let mut q = queue1.borrow_mut();
             let logger1 = logger.clone();
             q.push_back((
                 Duration::from_secs(2),
-                (Box::new(move || pr_info!(logger1, &quot;fired! again!&quot;))),
+                (Box::new(move || pr_info!(logger1, "fired! again!"))),
             ));
         }),
     );

@@ -199,15 +199,15 @@ use std::time::Duration;
 fn main() -&gt; Result&lt;(), DynError&gt; {
     // Create a context and a node.
     let ctx = Context::new()?;
-    let node = ctx.create_node(&quot;listen_client&quot;, None, Default::default())?;
+    let node = ctx.create_node("listen_client", None, Default::default())?;
 
     // Create 2 selectors.
     let selector = ctx.create_selector()?;
     let selector_client = ctx.create_selector()?;
 
     // Create a subscriber, a client, and a logger.
-    let subscriber = node.create_subscriber::&lt;std_msgs::msg::Empty&gt;(&quot;pubsubsrv_topic&quot;, None)?;
-    let client = node.create_client::&lt;std_srvs::srv::Empty&gt;(&quot;pubsubsrv_service&quot;, None)?;
+    let subscriber = node.create_subscriber::&lt;std_msgs::msg::Empty&gt;("pubsubsrv_topic", None)?;
+    let client = node.create_client::&lt;std_srvs::srv::Empty&gt;("pubsubsrv_service", None)?;
 
     worker(selector, selector_client, subscriber, client)?;
 
@@ -221,12 +221,12 @@ fn worker(
     client: Client&lt;std_srvs::srv::Empty&gt;,
 ) -&gt; Result&lt;(), DynError&gt; {
     let mut client = Some(client);
-    let logger = Logger::new(&quot;listen_client&quot;);
+    let logger = Logger::new("listen_client");
 
     selector.add_subscriber(
         subscriber,
         Box::new(move |_msg| {
-            pr_info!(logger, &quot;receive a message&quot;);
+            pr_info!(logger, "receive a message");
 
             // Take the client.
             let c = client.take().unwrap();
@@ -239,12 +239,12 @@ fn worker(
             // Receive a response.
             match receiver.recv_timeout(Duration::from_millis(20), &amp;mut selector_client) {
                 RecvResult::Ok((c, _response, _header)) =&gt; {
-                    pr_info!(logger, &quot;receive a response&quot;);
+                    pr_info!(logger, "receive a response");
                     client = Some(c)
                 }
                 RecvResult::RetryLater(r) =&gt; client = Some(r.give_up()),
                 RecvResult::Err(e) =&gt; {
-                    pr_fatal!(logger, &quot;{e}&quot;);
+                    pr_fatal!(logger, "{e}");
                     panic!()
                 }
             }
@@ -275,12 +275,12 @@ let receiver = c.send(&amp;request).unwrap();
 // Receive a response.
 match receiver.recv_timeout(Duration::from_millis(20), &amp;mut selector_client) {
     RecvResult::Ok((c, _response, _header)) =&gt; {
-        pr_info!(logger, &quot;receive a response&quot;);
+        pr_info!(logger, "receive a response");
         client = Some(c)
     }
     RecvResult::RetryLater(r) =&gt; client = Some(r.give_up()),
     RecvResult::Err(e) =&gt; {
-        pr_fatal!(logger, &quot;{e}&quot;);
+        pr_fatal!(logger, "{e}");
         panic!()
     }
 }
@@ -290,11 +290,11 @@ it sends a request to the server and receives a response
 by <code>recv_timeout()</code> method.</p>
 <h2 id="state-change"><a class="header" href="#state-change">State Change</a></h2>
 <p>A service's state can be represented as follows.</p>
-<pre class="mermaid">graph LR;
-    Start--&gt;Send
-    Send--&gt;Receive
-    Receive--&gt;Send
-</pre>
+<pre><code class="language-mermaid">graph LR;
+   Start--&gt;Send
+   Send--&gt;Receive
+   Receive--&gt;Send
+</code></pre>
 <p>To represent the state, <code>safe_drive</code> uses the type system of Rust.</p>
 <p>First, a client is created as follows.
 At that time, it must be <code>Send</code> state.</p>
@@ -317,12 +317,12 @@ to send a new request if it successfully receives a response.</p>
 </span>// Receive a response.
 match receiver.recv_timeout(Duration::from_millis(20), &amp;mut selector_client) {
     RecvResult::Ok((c, _response, _header)) =&gt; {
-        pr_info!(logger, &quot;receive a response&quot;);
+        pr_info!(logger, "receive a response");
         client = Some(c)
     }
     RecvResult::RetryLater(r) =&gt; client = Some(r.give_up()),
     RecvResult::Err(e) =&gt; {
-        pr_fatal!(logger, &quot;{e}&quot;);
+        pr_fatal!(logger, "{e}");
         panic!()
     }
 }

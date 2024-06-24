@@ -180,7 +180,7 @@ This communication is so-called topic by ROS2.
 There are <code>N</code> senders and <code>M</code> receivers in a topic.
 This tutorial implements 1 sender (in Rust) and 2 receivers (in Rust and C++).</p>
 <p>The following figure is a example topology.</p>
-<pre class="mermaid">graph TD;
+<pre><code class="language-mermaid">graph TD;
     Publisher1--&gt;TopicA;
     Publisher2--&gt;TopicA;
     TopicA--&gt;Subscriber1;
@@ -191,7 +191,7 @@ This tutorial implements 1 sender (in Rust) and 2 receivers (in Rust and C++).</
     Publisher5--&gt;TopicB;
     TopicB--&gt;Subscriber4;
     TopicB--&gt;Subscriber5;
-</pre>
+</code></pre>
 <p>There are 2 topics, <code>TopicA</code> and <code>TopicB</code> in this figure.
 If <code>Publisher2</code> of <code>TopicA</code> send a message,
 <code>Subscriber1-3</code> subscribing <code>TopicA</code> receive the message.
@@ -219,7 +219,7 @@ we will use throughout this tutorial.</p>
 <p>To handle multiple projects of <code>cargo</code>, we recommend to prepare <code>Cargo.toml</code> for the workspace as follows.</p>
 <p><code>pubsub/src/Cargo.toml</code></p>
 <pre><code class="language-toml">[workspace]
-members = [&quot;my_talker&quot;, &quot;my_listener&quot;]
+members = ["my_talker", "my_listener"]
 </code></pre>
 <p>The workspace enables <code>rust-analyzer</code> and reduces compilation time.</p>
 <hr />
@@ -240,13 +240,13 @@ Currently, safe_drive's repository is private,
 and we need to specify the path as follows.</p>
 <p><code>pubsub/src/my_talker/Cargo.toml</code></p>
 <pre><code class="language-toml">[dependencies]
-safe_drive = &quot;0.3&quot;
-std_msgs = { path = &quot;/tmp/safe_drive_tutorial/pubsub/std_msgs&quot; }
+safe_drive = "0.3"
+std_msgs = { path = "/tmp/safe_drive_tutorial/pubsub/std_msgs" }
 
 [package.metadata.ros]
-msg = [&quot;std_msgs&quot;]
-msg_dir = &quot;/tmp/safe_drive_tutorial/pubsub&quot;
-safe_drive_version = &quot;0.3&quot;
+msg = ["std_msgs"]
+msg_dir = "/tmp/safe_drive_tutorial/pubsub"
+safe_drive_version = "0.3"
 </code></pre>
 <h3 id="edit-my_talkersrcmainrs"><a class="header" href="#edit-my_talkersrcmainrs">Edit <code>my_talker/src/main.rs</code></a></h3>
 <p>my_talker is very simple.
@@ -263,14 +263,14 @@ A node contains publishers, subscribers, servers, and clients.
 A node is a functional unit of ROS2.
 Publishers and subscribers can be created by a node.</p>
 <p>The following figure is an example hierarchy.</p>
-<pre class="mermaid">graph TD;
+<pre><code class="language-mermaid">graph TD;
     Context--&gt;NodeA
     NodeA--&gt;SubscriberA
     NodeA--&gt;SubscriberB
     NodeA--&gt;PublisherA
     NodeA--&gt;PublisherB
     NodeA--&gt;PublisherC
-</pre>
+</code></pre>
 <p>In this figure, <code>NodeA</code> is created by a context,
 and subscribers and publishers are created by the node.</p>
 <p>Now, we have understood the basics of ROS2.
@@ -287,22 +287,22 @@ fn main() -&gt; Result&lt;(), DynError&gt; {
     let ctx = Context::new()?;
 
     // Create a node.
-    let node = ctx.create_node(&quot;my_talker&quot;, None, Default::default())?;
+    let node = ctx.create_node("my_talker", None, Default::default())?;
 
     // Create a publisher.
-    let publisher = node.create_publisher::&lt;std_msgs::msg::String&gt;(&quot;my_topic&quot;, None)?;
+    let publisher = node.create_publisher::&lt;std_msgs::msg::String&gt;("my_topic", None)?;
 
     // Create a logger.
-    let logger = Logger::new(&quot;my_talker&quot;);
+    let logger = Logger::new("my_talker");
 
     let mut cnt = 0; // Counter.
     let mut msg = std_msgs::msg::String::new().unwrap();
     loop {
         // Create a message to be sent.
-        let data = format!(&quot;Hello, World!: cnt = {cnt}&quot;);
+        let data = format!("Hello, World!: cnt = {cnt}");
         msg.data.assign(&amp;data);
 
-        pr_info!(logger, &quot;send: {}&quot;, msg.data); // Print log.
+        pr_info!(logger, "send: {}", msg.data); // Print log.
 
         // Send a message.
         publisher.send(&amp;msg)?;
@@ -317,14 +317,14 @@ fn main() -&gt; Result&lt;(), DynError&gt; {
 <pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
 </span><span class="boring">fn main() {
 </span>// Create a node.
-let node = ctx.create_node(&quot;my_talker&quot;, None, Default::default())?;
+let node = ctx.create_node("my_talker", None, Default::default())?;
 <span class="boring">}</span></code></pre></pre>
 <p>The arguments indicate as follows.</p>
 <ul>
-<li><code>&quot;my_talker&quot;</code> : the name of the node.</li>
+<li><code>"my_talker"</code> : the name of the node.</li>
 <li>Node : namespace.
 <ul>
-<li>We can pass a namespace like <code>Some(&quot;namespace&quot;)</code>.</li>
+<li>We can pass a namespace like <code>Some("namespace")</code>.</li>
 <li>If <code>None</code> is passed, the node has no namespace.</li>
 </ul>
 </li>
@@ -334,18 +334,18 @@ let node = ctx.create_node(&quot;my_talker&quot;, None, Default::default())?;
 <pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
 </span><span class="boring">fn main() {
 </span>// Create a publisher.
-let publisher = node.create_publisher::&lt;std_msgs::msg::String&gt;(&quot;my_topic&quot;, None)?;
+let publisher = node.create_publisher::&lt;std_msgs::msg::String&gt;("my_topic", None)?;
 <span class="boring">}</span></code></pre></pre>
 <ul>
 <li><code>&lt;std_msgs::msg::String&gt;</code> : the publisher can send values of <code>std_msgs::msg::String</code>.</li>
-<li><code>&quot;my_topic&quot;</code> : the topic name to which the publisher send messages.</li>
+<li><code>"my_topic"</code> : the topic name to which the publisher send messages.</li>
 <li><code>None</code> : QoS of the publisher. QoS will be described in a later chapter.</li>
 </ul>
 <p>A message can be sent by <code>send</code> method as follows.</p>
 <pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
 </span><span class="boring">fn main() {
 </span>// Create a message to be sent.
-let data = format!(&quot;Hello, World!: cnt = {cnt}&quot;);
+let data = format!("Hello, World!: cnt = {cnt}");
 msg.data.assign(&amp;data);
 
 // Send a message.
@@ -356,13 +356,13 @@ It can be created as follows.</p>
 <pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
 </span><span class="boring">fn main() {
 </span>// Create a logger.
-let logger = Logger::new(&quot;my_talker&quot;);
+let logger = Logger::new("my_talker");
 <span class="boring">}</span></code></pre></pre>
-<p>The argument of <code>&quot;my_talker&quot;</code> is the name of the logger.
+<p>The argument of <code>"my_talker"</code> is the name of the logger.
 To print a message, use <code>pr_*</code> macros as follows.</p>
 <pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
 </span><span class="boring">fn main() {
-</span>pr_info!(logger, &quot;send: {}&quot;, msg.data); // Print log.
+</span>pr_info!(logger, "send: {}", msg.data); // Print log.
 <span class="boring">}</span></code></pre></pre>
 <p>There are macros for logging as follows.</p>
 <ul>
@@ -376,13 +376,13 @@ To print a message, use <code>pr_*</code> macros as follows.</p>
 <p><code>package.xml</code> is used by colcon, which is a build tool used by ROS2.
 It contains the package name, maintainer, description, etc, as follows.</p>
 <p><code>pubsub/src/my_talker/package.xml</code></p>
-<pre><code class="language-xml">&lt;?xml version=&quot;1.0&quot;?&gt;
-&lt;?xml-model href=&quot;http://download.ros.org/schema/package_format3.xsd&quot; schematypens=&quot;http://www.w3.org/2001/XMLSchema&quot;?&gt;
-&lt;package format=&quot;3&quot;&gt;
+<pre><code class="language-xml">&lt;?xml version="1.0"?&gt;
+&lt;?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?&gt;
+&lt;package format="3"&gt;
   &lt;name&gt;my_talker&lt;/name&gt;
   &lt;version&gt;0.0.0&lt;/version&gt;
   &lt;description&gt;My Talker in Rust&lt;/description&gt;
-  &lt;maintainer email=&quot;yuuki.takano@tier4.jp&quot;&gt;Yuuki Takano&lt;/maintainer&gt;
+  &lt;maintainer email="yuuki.takano@tier4.jp"&gt;Yuuki Takano&lt;/maintainer&gt;
   &lt;license&gt;Apache License 2.0&lt;/license&gt;
 
   &lt;depend&gt;std_msgs&lt;/depend&gt;
@@ -432,13 +432,13 @@ We created and will edit files of the listener as follows.</p>
 Add safe_drive to the dependencies as follows.</p>
 <pre><code class="language-toml"># pubsub/src/my_listener/Cargo.toml
 [dependencies]
-safe_drive = &quot;0.3&quot;
-std_msgs = { path = &quot;/tmp/safe_drive_tutorial/pubsub/std_msgs&quot; }
+safe_drive = "0.3"
+std_msgs = { path = "/tmp/safe_drive_tutorial/pubsub/std_msgs" }
 
 [package.metadata.ros]
-msg = [&quot;std_msgs&quot;]
-msg_dir = &quot;/tmp/safe_drive_tutorial/pubsub&quot;
-safe_drive_version = &quot;0.3&quot;
+msg = ["std_msgs"]
+msg_dir = "/tmp/safe_drive_tutorial/pubsub"
+safe_drive_version = "0.3"
 </code></pre>
 <h3 id="edit-my_listenersrcmainrs"><a class="header" href="#edit-my_listenersrcmainrs">Edit <code>my_listener/src/main.rs</code></a></h3>
 <p>To implement subscriber,
@@ -454,13 +454,13 @@ fn main() -&gt; Result&lt;(), DynError&gt; {
     let ctx = Context::new()?;
 
     // Create a node.
-    let node = ctx.create_node(&quot;my_listener&quot;, None, Default::default())?;
+    let node = ctx.create_node("my_listener", None, Default::default())?;
 
     // Create a subscriber.
-    let subscriber = node.create_subscriber::&lt;std_msgs::msg::String&gt;(&quot;my_topic&quot;, None)?;
+    let subscriber = node.create_subscriber::&lt;std_msgs::msg::String&gt;("my_topic", None)?;
 
     // Create a logger.
-    let logger = Logger::new(&quot;my_listener&quot;);
+    let logger = Logger::new("my_listener");
 
     // Create a selector.
     let mut selector = ctx.create_selector()?;
@@ -469,7 +469,7 @@ fn main() -&gt; Result&lt;(), DynError&gt; {
     selector.add_subscriber(
         subscriber,
         Box::new(move |msg| {
-            pr_info!(logger, &quot;receive: {}&quot;, msg.data);
+            pr_info!(logger, "receive: {}", msg.data);
         }),
     );
 
@@ -484,11 +484,11 @@ fn main() -&gt; Result&lt;(), DynError&gt; {
 <pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
 </span><span class="boring">fn main() {
 </span>// Create a subscriber.
-let subscriber = node.create_subscriber::&lt;std_msgs::msg::String&gt;(&quot;my_topic&quot;, None)?;
+let subscriber = node.create_subscriber::&lt;std_msgs::msg::String&gt;("my_topic", None)?;
 <span class="boring">}</span></code></pre></pre>
 <p>The arguments are as follows.</p>
 <ul>
-<li><code>&quot;my_topic&quot;</code> : the name of the topic to which the subscriber is subscribing.</li>
+<li><code>"my_topic"</code> : the name of the topic to which the subscriber is subscribing.</li>
 <li><code>None</code> : QoS of the subscriber. Discussed in a later chapter.</li>
 </ul>
 <p>To add and invoke a callback function.
@@ -505,7 +505,7 @@ let mut selector = ctx.create_selector()?;
 selector.add_subscriber(
     subscriber,
     Box::new(move |msg| {
-        pr_info!(logger, &quot;receive: {}&quot;, msg.data);
+        pr_info!(logger, "receive: {}", msg.data);
     }),
 );
 
@@ -517,7 +517,7 @@ loop {
 <p>The arguments of <code>add_subscriber</code> method are as follows.</p>
 <ul>
 <li><code>subscriber</code> : the subscriber.</li>
-<li><code>Box::new(move |msg| { pr_info!(logger, &quot;receive: {}&quot;, msg.data); })</code> : the callback function.</li>
+<li><code>Box::new(move |msg| { pr_info!(logger, "receive: {}", msg.data); })</code> : the callback function.</li>
 <li><code>false</code> : the callback function is called only once or not. If <code>false</code> is passed, the callback function is invoked every time and forever.</li>
 </ul>
 <p><code>selector.wait()</code> wait events.
@@ -527,13 +527,13 @@ To receive events forever, use infinite loop.</p>
 The only difference is the name of the package,
 which is <code>my_listener</code>.</p>
 <p><code>pubsub/src/my_listener/package.xml</code></p>
-<pre><code class="language-xml">&lt;?xml version=&quot;1.0&quot;?&gt;
-&lt;?xml-model href=&quot;http://download.ros.org/schema/package_format3.xsd&quot; schematypens=&quot;http://www.w3.org/2001/XMLSchema&quot;?&gt;
-&lt;package format=&quot;3&quot;&gt;
+<pre><code class="language-xml">&lt;?xml version="1.0"?&gt;
+&lt;?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?&gt;
+&lt;package format="3"&gt;
   &lt;name&gt;my_listener&lt;/name&gt;
   &lt;version&gt;0.0.0&lt;/version&gt;
   &lt;description&gt;My Listener in Rust&lt;/description&gt;
-  &lt;maintainer email=&quot;yuuki.takano@tier4.jp&quot;&gt;Yuuki Takano&lt;/maintainer&gt;
+  &lt;maintainer email="yuuki.takano@tier4.jp"&gt;Yuuki Takano&lt;/maintainer&gt;
   &lt;license&gt;Apache License 2.0&lt;/license&gt;
 
   &lt;depend&gt;std_msgs&lt;/depend&gt;
@@ -556,7 +556,7 @@ $ colcon build --cargo-args --release
 <p>To execute <code>my_listener</code>, load the setting of our projects and
 execute it by using <code>ros2</code> command as follows.</p>
 <pre><code class="language-text">$ . ./install/setup.bash
-$ ros2 run my_talker my_talker
+$ ros2 run my_listener my_listener
 [INFO] [1656050459.231579900] [my_listener]: receive: Hello, World!: cnt = 4
 [INFO] [1656050460.231831200] [my_listener]: receive: Hello, World!: cnt = 5
 [INFO] [1656050461.232120000] [my_listener]: receive: Hello, World!: cnt = 6
