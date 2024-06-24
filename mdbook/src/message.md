@@ -56,7 +56,7 @@ $ cd msg
 
 ### Primitive Type: `my_interfaces/msg/MyMsg.msg`
 
-Then create a file, `msgtest/src/my_interfaces/msg`, as follows.
+Then create a file, `msgtest/src/my_interfaces/msg/MyMsg.msg`, as follows.
 
 ```text
 int32 integer_value
@@ -414,7 +414,7 @@ The listener can also be implemented straightforwardly as follows.
 `msgtest/src/listener/src/main.rs`
 
 ```rust
-use my_interfaces_rs::my_interfaces;
+use my_interfaces;
 use safe_drive::{context::Context, error::DynError, logger::Logger, pr_info};
 
 fn main() -> Result<(), DynError> {
@@ -455,7 +455,6 @@ fn main() -> Result<(), DynError> {
                 pr_info!(logger, "up_to_five_integers_array: {}", msg);
             }
         }),
-        false,
     );
 
     // Spin.

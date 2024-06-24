@@ -469,7 +469,7 @@ execute it by using `ros2` command as follows.
 
 ```text
 $ . ./install/setup.bash
-$ ros2 run my_talker my_talker
+$ ros2 run my_listener my_listener
 [INFO] [1656050459.231579900] [my_listener]: receive: Hello, World!: cnt = 4
 [INFO] [1656050460.231831200] [my_listener]: receive: Hello, World!: cnt = 5
 [INFO] [1656050461.232120000] [my_listener]: receive: Hello, World!: cnt = 6
