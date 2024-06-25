@@ -184,7 +184,7 @@ $ source $HOME/.cargo/env
 <p>Choose <code>Default</code> when installing Rust.</p>
 <h2 id="install-ros2"><a class="header" href="#install-ros2">Install ROS2</a></h2>
 <pre><code class="language-text">$ curl -s https://raw.githubusercontent.com/ros/rosdistro/master/ros.asc | sudo apt-key add -
-$ sudo sh -c 'echo &quot;deb [arch=$(dpkg --print-architecture)] http://packages.ros.org/ros2/ubuntu $(lsb_release -cs) main&quot; &gt; /etc/apt/sources.list.d/ros2-latest.list'
+$ sudo sh -c 'echo "deb [arch=$(dpkg --print-architecture)] http://packages.ros.org/ros2/ubuntu $(lsb_release -cs) main" &gt; /etc/apt/sources.list.d/ros2-latest.list'
 $ sudo curl -sSL https://raw.githubusercontent.com/ros/rosdistro/master/ros.key -o /usr/share/keyrings/ros-archive-keyring.gpg
 </code></pre>
 <pre><code class="language-text">$ sudo apt update

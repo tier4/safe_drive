@@ -221,7 +221,7 @@ $ source $HOME/.cargo/env
 <p>Choose <code>Default</code> when installing Rust.</p>
 <h2 id="install-ros2"><a class="header" href="#install-ros2">Install ROS2</a></h2>
 <pre><code class="language-text">$ curl -s https://raw.githubusercontent.com/ros/rosdistro/master/ros.asc | sudo apt-key add -
-$ sudo sh -c 'echo &quot;deb [arch=$(dpkg --print-architecture)] http://packages.ros.org/ros2/ubuntu $(lsb_release -cs) main&quot; &gt; /etc/apt/sources.list.d/ros2-latest.list'
+$ sudo sh -c 'echo "deb [arch=$(dpkg --print-architecture)] http://packages.ros.org/ros2/ubuntu $(lsb_release -cs) main" &gt; /etc/apt/sources.list.d/ros2-latest.list'
 $ sudo curl -sSL https://raw.githubusercontent.com/ros/rosdistro/master/ros.key -o /usr/share/keyrings/ros-archive-keyring.gpg
 </code></pre>
 <pre><code class="language-text">$ sudo apt update
@@ -245,7 +245,7 @@ This communication is so-called topic by ROS2.
 There are <code>N</code> senders and <code>M</code> receivers in a topic.
 This tutorial implements 1 sender (in Rust) and 2 receivers (in Rust and C++).</p>
 <p>The following figure is a example topology.</p>
-<pre class="mermaid">graph TD;
+<pre><code class="language-mermaid">graph TD;
     Publisher1--&gt;TopicA;
     Publisher2--&gt;TopicA;
     TopicA--&gt;Subscriber1;
@@ -256,7 +256,7 @@ This tutorial implements 1 sender (in Rust) and 2 receivers (in Rust and C++).</
     Publisher5--&gt;TopicB;
     TopicB--&gt;Subscriber4;
     TopicB--&gt;Subscriber5;
-</pre>
+</code></pre>
 <p>There are 2 topics, <code>TopicA</code> and <code>TopicB</code> in this figure.
 If <code>Publisher2</code> of <code>TopicA</code> send a message,
 <code>Subscriber1-3</code> subscribing <code>TopicA</code> receive the message.
@@ -284,7 +284,7 @@ we will use throughout this tutorial.</p>
 <p>To handle multiple projects of <code>cargo</code>, we recommend to prepare <code>Cargo.toml</code> for the workspace as follows.</p>
 <p><code>pubsub/src/Cargo.toml</code></p>
 <pre><code class="language-toml">[workspace]
-members = [&quot;my_talker&quot;, &quot;my_listener&quot;]
+members = ["my_talker", "my_listener"]
 </code></pre>
 <p>The workspace enables <code>rust-analyzer</code> and reduces compilation time.</p>
 <hr />
@@ -305,13 +305,13 @@ Currently, safe_drive's repository is private,
 and we need to specify the path as follows.</p>
 <p><code>pubsub/src/my_talker/Cargo.toml</code></p>
 <pre><code class="language-toml">[dependencies]
-safe_drive = &quot;0.3&quot;
-std_msgs = { path = &quot;/tmp/safe_drive_tutorial/pubsub/std_msgs&quot; }
+safe_drive = "0.3"
+std_msgs = { path = "/tmp/safe_drive_tutorial/pubsub/std_msgs" }
 
 [package.metadata.ros]
-msg = [&quot;std_msgs&quot;]
-msg_dir = &quot;/tmp/safe_drive_tutorial/pubsub&quot;
-safe_drive_version = &quot;0.3&quot;
+msg = ["std_msgs"]
+msg_dir = "/tmp/safe_drive_tutorial/pubsub"
+safe_drive_version = "0.3"
 </code></pre>
 <h3 id="edit-my_talkersrcmainrs"><a class="header" href="#edit-my_talkersrcmainrs">Edit <code>my_talker/src/main.rs</code></a></h3>
 <p>my_talker is very simple.
@@ -328,14 +328,14 @@ A node contains publishers, subscribers, servers, and clients.
 A node is a functional unit of ROS2.
 Publishers and subscribers can be created by a node.</p>
 <p>The following figure is an example hierarchy.</p>
-<pre class="mermaid">graph TD;
+<pre><code class="language-mermaid">graph TD;
     Context--&gt;NodeA
     NodeA--&gt;SubscriberA
     NodeA--&gt;SubscriberB
     NodeA--&gt;PublisherA
     NodeA--&gt;PublisherB
     NodeA--&gt;PublisherC
-</pre>
+</code></pre>
 <p>In this figure, <code>NodeA</code> is created by a context,
 and subscribers and publishers are created by the node.</p>
 <p>Now, we have understood the basics of ROS2.
@@ -352,22 +352,22 @@ fn main() -&gt; Result&lt;(), DynError&gt; {
     let ctx = Context::new()?;
 
     // Create a node.
-    let node = ctx.create_node(&quot;my_talker&quot;, None, Default::default())?;
+    let node = ctx.create_node("my_talker", None, Default::default())?;
 
     // Create a publisher.
-    let publisher = node.create_publisher::&lt;std_msgs::msg::String&gt;(&quot;my_topic&quot;, None)?;
+    let publisher = node.create_publisher::&lt;std_msgs::msg::String&gt;("my_topic", None)?;
 
     // Create a logger.
-    let logger = Logger::new(&quot;my_talker&quot;);
+    let logger = Logger::new("my_talker");
 
     let mut cnt = 0; // Counter.
     let mut msg = std_msgs::msg::String::new().unwrap();
     loop {
         // Create a message to be sent.
-        let data = format!(&quot;Hello, World!: cnt = {cnt}&quot;);
+        let data = format!("Hello, World!: cnt = {cnt}");
         msg.data.assign(&amp;data);
 
-        pr_info!(logger, &quot;send: {}&quot;, msg.data); // Print log.
+        pr_info!(logger, "send: {}", msg.data); // Print log.
 
         // Send a message.
         publisher.send(&amp;msg)?;
@@ -382,14 +382,14 @@ fn main() -&gt; Result&lt;(), DynError&gt; {
 <pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
 </span><span class="boring">fn main() {
 </span>// Create a node.
-let node = ctx.create_node(&quot;my_talker&quot;, None, Default::default())?;
+let node = ctx.create_node("my_talker", None, Default::default())?;
 <span class="boring">}</span></code></pre></pre>
 <p>The arguments indicate as follows.</p>
 <ul>
-<li><code>&quot;my_talker&quot;</code> : the name of the node.</li>
+<li><code>"my_talker"</code> : the name of the node.</li>
 <li>Node : namespace.
 <ul>
-<li>We can pass a namespace like <code>Some(&quot;namespace&quot;)</code>.</li>
+<li>We can pass a namespace like <code>Some("namespace")</code>.</li>
 <li>If <code>None</code> is passed, the node has no namespace.</li>
 </ul>
 </li>
@@ -399,18 +399,18 @@ let node = ctx.create_node(&quot;my_talker&quot;, None, Default::default())?;
 <pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
 </span><span class="boring">fn main() {
 </span>// Create a publisher.
-let publisher = node.create_publisher::&lt;std_msgs::msg::String&gt;(&quot;my_topic&quot;, None)?;
+let publisher = node.create_publisher::&lt;std_msgs::msg::String&gt;("my_topic", None)?;
 <span class="boring">}</span></code></pre></pre>
 <ul>
 <li><code>&lt;std_msgs::msg::String&gt;</code> : the publisher can send values of <code>std_msgs::msg::String</code>.</li>
-<li><code>&quot;my_topic&quot;</code> : the topic name to which the publisher send messages.</li>
+<li><code>"my_topic"</code> : the topic name to which the publisher send messages.</li>
 <li><code>None</code> : QoS of the publisher. QoS will be described in a later chapter.</li>
 </ul>
 <p>A message can be sent by <code>send</code> method as follows.</p>
 <pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
 </span><span class="boring">fn main() {
 </span>// Create a message to be sent.
-let data = format!(&quot;Hello, World!: cnt = {cnt}&quot;);
+let data = format!("Hello, World!: cnt = {cnt}");
 msg.data.assign(&amp;data);
 
 // Send a message.
@@ -421,13 +421,13 @@ It can be created as follows.</p>
 <pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
 </span><span class="boring">fn main() {
 </span>// Create a logger.
-let logger = Logger::new(&quot;my_talker&quot;);
+let logger = Logger::new("my_talker");
 <span class="boring">}</span></code></pre></pre>
-<p>The argument of <code>&quot;my_talker&quot;</code> is the name of the logger.
+<p>The argument of <code>"my_talker"</code> is the name of the logger.
 To print a message, use <code>pr_*</code> macros as follows.</p>
 <pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
 </span><span class="boring">fn main() {
-</span>pr_info!(logger, &quot;send: {}&quot;, msg.data); // Print log.
+</span>pr_info!(logger, "send: {}", msg.data); // Print log.
 <span class="boring">}</span></code></pre></pre>
 <p>There are macros for logging as follows.</p>
 <ul>
@@ -441,13 +441,13 @@ To print a message, use <code>pr_*</code> macros as follows.</p>
 <p><code>package.xml</code> is used by colcon, which is a build tool used by ROS2.
 It contains the package name, maintainer, description, etc, as follows.</p>
 <p><code>pubsub/src/my_talker/package.xml</code></p>
-<pre><code class="language-xml">&lt;?xml version=&quot;1.0&quot;?&gt;
-&lt;?xml-model href=&quot;http://download.ros.org/schema/package_format3.xsd&quot; schematypens=&quot;http://www.w3.org/2001/XMLSchema&quot;?&gt;
-&lt;package format=&quot;3&quot;&gt;
+<pre><code class="language-xml">&lt;?xml version="1.0"?&gt;
+&lt;?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?&gt;
+&lt;package format="3"&gt;
   &lt;name&gt;my_talker&lt;/name&gt;
   &lt;version&gt;0.0.0&lt;/version&gt;
   &lt;description&gt;My Talker in Rust&lt;/description&gt;
-  &lt;maintainer email=&quot;yuuki.takano@tier4.jp&quot;&gt;Yuuki Takano&lt;/maintainer&gt;
+  &lt;maintainer email="yuuki.takano@tier4.jp"&gt;Yuuki Takano&lt;/maintainer&gt;
   &lt;license&gt;Apache License 2.0&lt;/license&gt;
 
   &lt;depend&gt;std_msgs&lt;/depend&gt;
@@ -497,13 +497,13 @@ We created and will edit files of the listener as follows.</p>
 Add safe_drive to the dependencies as follows.</p>
 <pre><code class="language-toml"># pubsub/src/my_listener/Cargo.toml
 [dependencies]
-safe_drive = &quot;0.3&quot;
-std_msgs = { path = &quot;/tmp/safe_drive_tutorial/pubsub/std_msgs&quot; }
+safe_drive = "0.3"
+std_msgs = { path = "/tmp/safe_drive_tutorial/pubsub/std_msgs" }
 
 [package.metadata.ros]
-msg = [&quot;std_msgs&quot;]
-msg_dir = &quot;/tmp/safe_drive_tutorial/pubsub&quot;
-safe_drive_version = &quot;0.3&quot;
+msg = ["std_msgs"]
+msg_dir = "/tmp/safe_drive_tutorial/pubsub"
+safe_drive_version = "0.3"
 </code></pre>
 <h3 id="edit-my_listenersrcmainrs"><a class="header" href="#edit-my_listenersrcmainrs">Edit <code>my_listener/src/main.rs</code></a></h3>
 <p>To implement subscriber,
@@ -519,13 +519,13 @@ fn main() -&gt; Result&lt;(), DynError&gt; {
     let ctx = Context::new()?;
 
     // Create a node.
-    let node = ctx.create_node(&quot;my_listener&quot;, None, Default::default())?;
+    let node = ctx.create_node("my_listener", None, Default::default())?;
 
     // Create a subscriber.
-    let subscriber = node.create_subscriber::&lt;std_msgs::msg::String&gt;(&quot;my_topic&quot;, None)?;
+    let subscriber = node.create_subscriber::&lt;std_msgs::msg::String&gt;("my_topic", None)?;
 
     // Create a logger.
-    let logger = Logger::new(&quot;my_listener&quot;);
+    let logger = Logger::new("my_listener");
 
     // Create a selector.
     let mut selector = ctx.create_selector()?;
@@ -534,7 +534,7 @@ fn main() -&gt; Result&lt;(), DynError&gt; {
     selector.add_subscriber(
         subscriber,
         Box::new(move |msg| {
-            pr_info!(logger, &quot;receive: {}&quot;, msg.data);
+            pr_info!(logger, "receive: {}", msg.data);
         }),
     );
 
@@ -549,11 +549,11 @@ fn main() -&gt; Result&lt;(), DynError&gt; {
 <pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
 </span><span class="boring">fn main() {
 </span>// Create a subscriber.
-let subscriber = node.create_subscriber::&lt;std_msgs::msg::String&gt;(&quot;my_topic&quot;, None)?;
+let subscriber = node.create_subscriber::&lt;std_msgs::msg::String&gt;("my_topic", None)?;
 <span class="boring">}</span></code></pre></pre>
 <p>The arguments are as follows.</p>
 <ul>
-<li><code>&quot;my_topic&quot;</code> : the name of the topic to which the subscriber is subscribing.</li>
+<li><code>"my_topic"</code> : the name of the topic to which the subscriber is subscribing.</li>
 <li><code>None</code> : QoS of the subscriber. Discussed in a later chapter.</li>
 </ul>
 <p>To add and invoke a callback function.
@@ -570,7 +570,7 @@ let mut selector = ctx.create_selector()?;
 selector.add_subscriber(
     subscriber,
     Box::new(move |msg| {
-        pr_info!(logger, &quot;receive: {}&quot;, msg.data);
+        pr_info!(logger, "receive: {}", msg.data);
     }),
 );
 
@@ -582,7 +582,7 @@ loop {
 <p>The arguments of <code>add_subscriber</code> method are as follows.</p>
 <ul>
 <li><code>subscriber</code> : the subscriber.</li>
-<li><code>Box::new(move |msg| { pr_info!(logger, &quot;receive: {}&quot;, msg.data); })</code> : the callback function.</li>
+<li><code>Box::new(move |msg| { pr_info!(logger, "receive: {}", msg.data); })</code> : the callback function.</li>
 <li><code>false</code> : the callback function is called only once or not. If <code>false</code> is passed, the callback function is invoked every time and forever.</li>
 </ul>
 <p><code>selector.wait()</code> wait events.
@@ -592,13 +592,13 @@ To receive events forever, use infinite loop.</p>
 The only difference is the name of the package,
 which is <code>my_listener</code>.</p>
 <p><code>pubsub/src/my_listener/package.xml</code></p>
-<pre><code class="language-xml">&lt;?xml version=&quot;1.0&quot;?&gt;
-&lt;?xml-model href=&quot;http://download.ros.org/schema/package_format3.xsd&quot; schematypens=&quot;http://www.w3.org/2001/XMLSchema&quot;?&gt;
-&lt;package format=&quot;3&quot;&gt;
+<pre><code class="language-xml">&lt;?xml version="1.0"?&gt;
+&lt;?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?&gt;
+&lt;package format="3"&gt;
   &lt;name&gt;my_listener&lt;/name&gt;
   &lt;version&gt;0.0.0&lt;/version&gt;
   &lt;description&gt;My Listener in Rust&lt;/description&gt;
-  &lt;maintainer email=&quot;yuuki.takano@tier4.jp&quot;&gt;Yuuki Takano&lt;/maintainer&gt;
+  &lt;maintainer email="yuuki.takano@tier4.jp"&gt;Yuuki Takano&lt;/maintainer&gt;
   &lt;license&gt;Apache License 2.0&lt;/license&gt;
 
   &lt;depend&gt;std_msgs&lt;/depend&gt;
@@ -621,7 +621,7 @@ $ colcon build --cargo-args --release
 <p>To execute <code>my_listener</code>, load the setting of our projects and
 execute it by using <code>ros2</code> command as follows.</p>
 <pre><code class="language-text">$ . ./install/setup.bash
-$ ros2 run my_talker my_talker
+$ ros2 run my_listener my_listener
 [INFO] [1656050459.231579900] [my_listener]: receive: Hello, World!: cnt = 4
 [INFO] [1656050460.231831200] [my_listener]: receive: Hello, World!: cnt = 5
 [INFO] [1656050461.232120000] [my_listener]: receive: Hello, World!: cnt = 6
@@ -645,7 +645,7 @@ $ cd wall_timer
 </code></pre>
 <p>Then, add <code>safe_drive</code> to the dependencies of <code>Cargo.toml</code>.</p>
 <pre><code class="language-toml">[dependencies]
-safe_drive = &quot;0.3&quot;
+safe_drive = "0.3"
 </code></pre>
 <p>The following code is an example using a wall-timer.
 The important method is <code>Selector::add_wall_timer()</code> which takes
@@ -658,14 +658,14 @@ use std::{rc::Rc, time::Duration};
 fn main() -&gt; Result&lt;(), DynError&gt; {
     // Create a context, a node, a subscriber, a publisher, and a selector.
     let ctx = Context::new()?;
-    let node = ctx.create_node(&quot;my_node&quot;, None, Default::default())?;
-    let subscriber = node.create_subscriber::&lt;std_msgs::msg::UInt64&gt;(&quot;my_topic&quot;, None)?;
-    let publisher = node.create_publisher::&lt;std_msgs::msg::UInt64&gt;(&quot;my_topic&quot;, None)?;
+    let node = ctx.create_node("my_node", None, Default::default())?;
+    let subscriber = node.create_subscriber::&lt;std_msgs::msg::UInt64&gt;("my_topic", None)?;
+    let publisher = node.create_publisher::&lt;std_msgs::msg::UInt64&gt;("my_topic", None)?;
     let mut selector = ctx.create_selector()?;
 
     // Create a logger.
     // To share this by multiple callback functions, use Rc.
-    let logger = Rc::new(Logger::new(&quot;wall timer example&quot;));
+    let logger = Rc::new(Logger::new("wall timer example"));
 
     // Add a wall timer to publish periodically.
     let mut cnt = Box::new(0);
@@ -673,13 +673,13 @@ fn main() -&gt; Result&lt;(), DynError&gt; {
     let logger1 = logger.clone();
 
     selector.add_wall_timer(
-        &quot;publisher&quot;, // the name of timer
+        "publisher", // the name of timer
         Duration::from_secs(1),
         Box::new(move || {
             msg.data = *cnt;
             *cnt += 1;
             publisher.send(&amp;msg).unwrap();
-            pr_info!(logger1, &quot;send: msg.data = {}&quot;, msg.data);
+            pr_info!(logger1, "send: msg.data = {}", msg.data);
         }),
     );
 
@@ -687,7 +687,7 @@ fn main() -&gt; Result&lt;(), DynError&gt; {
     selector.add_subscriber(
         subscriber,
         Box::new(move |msg| {
-            pr_info!(logger, &quot;received: msg.data = {}&quot;, msg.data);
+            pr_info!(logger, "received: msg.data = {}", msg.data);
         }),
     );
 
@@ -701,18 +701,18 @@ and the timers will be invoked when calling the <code>Selector::wait()</code> me
 <pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
 </span><span class="boring">fn main() {
 </span>selector.add_wall_timer(
-    &quot;publisher&quot;, // the name of timer
+    "publisher", // the name of timer
     Duration::from_secs(1),
     Box::new(move || {
         msg.data = *cnt;
         *cnt += 1;
         publisher.send(&amp;msg).unwrap();
-        pr_info!(logger1, &quot;send: msg.data = {}&quot;, msg.data);
+        pr_info!(logger1, "send: msg.data = {}", msg.data);
     }),
 );
 <span class="boring">}</span></code></pre></pre>
 <ul>
-<li><code>&quot;publisher&quot;</code> is the name of this timer. The name is used for statistics. You can use any name.</li>
+<li><code>"publisher"</code> is the name of this timer. The name is used for statistics. You can use any name.</li>
 <li><code>Duration::from_secs(1)</code> is the duration for periodic invoking. This argument means the callback function is invoked every 1 second.</li>
 <li><code>Box::new(move || ...)</code> is the callback function.</li>
 </ul>
@@ -739,7 +739,7 @@ pub fn main() -&gt; Result&lt;(), DynError&gt; {
     // Create a context, a publisher, and a logger.
     let ctx = Context::new()?;
     let mut selector = ctx.create_selector()?;
-    let logger = Rc::new(Logger::new(&quot;one-shot timer example&quot;));
+    let logger = Rc::new(Logger::new("one-shot timer example"));
 
     let queue = Rc::new(RefCell::new(VecDeque::new()));
 
@@ -748,14 +748,14 @@ pub fn main() -&gt; Result&lt;(), DynError&gt; {
     selector.add_timer(
         Duration::from_secs(2),
         Box::new(move || {
-            pr_info!(logger, &quot;fired!&quot;);
+            pr_info!(logger, "fired!");
 
             // Insert a timer to the queue.
             let mut q = queue1.borrow_mut();
             let logger1 = logger.clone();
             q.push_back((
                 Duration::from_secs(2),
-                (Box::new(move || pr_info!(logger1, &quot;fired! again!&quot;))),
+                (Box::new(move || pr_info!(logger1, "fired! again!"))),
             ));
         }),
     );
@@ -852,19 +852,19 @@ At the moment, the following directories is present.</p>
 prepare workspace's <code>Cargo.toml</code> as follows.</p>
 <p><code>mt_pubsub/src/Cargo.toml</code></p>
 <pre><code class="language-toml">[workspace]
-members = [&quot;publishers&quot;, &quot;subscribers&quot;]
+members = ["publishers", "subscribers"]
 </code></pre>
 <p><code>package.xml</code>s are almost same as <a href="./pubsub.html">Publish and Subscribe</a>.
 If you cannot understand what these files do,
 please go back to the previous chapter.</p>
 <p><code>publishers/package.xml</code></p>
-<pre><code class="language-xml">&lt;?xml version=&quot;1.0&quot;?&gt;
-&lt;?xml-model href=&quot;http://download.ros.org/schema/package_format3.xsd&quot; schematypens=&quot;http://www.w3.org/2001/XMLSchema&quot;?&gt;
-&lt;package format=&quot;3&quot;&gt;
+<pre><code class="language-xml">&lt;?xml version="1.0"?&gt;
+&lt;?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?&gt;
+&lt;package format="3"&gt;
   &lt;name&gt;publishers&lt;/name&gt;
   &lt;version&gt;0.0.0&lt;/version&gt;
   &lt;description&gt;MT-Publishers&lt;/description&gt;
-  &lt;maintainer email=&quot;yuuki.takano@tier4.jp&quot;&gt;Yuuki Takano&lt;/maintainer&gt;
+  &lt;maintainer email="yuuki.takano@tier4.jp"&gt;Yuuki Takano&lt;/maintainer&gt;
   &lt;license&gt;Apache License 2.0&lt;/license&gt;
 
   &lt;depend&gt;std_msgs&lt;/depend&gt;
@@ -884,14 +884,14 @@ please go back to the previous chapter.</p>
 <p>To use <code>async_std</code>, we have to update <code>Cargo.toml</code> as follows.</p>
 <p><code>Cargo.toml</code></p>
 <pre><code class="language-toml">[dependencies]
-async-std = { version = &quot;1&quot;, features = [&quot;attributes&quot;] }
-safe_drive = &quot;0.3&quot;
-std_msgs = { path = &quot;/tmp/safe_drive_tutorial/mt_pubsub/std_msgs&quot; }
+async-std = { version = "1", features = ["attributes"] }
+safe_drive = "0.3"
+std_msgs = { path = "/tmp/safe_drive_tutorial/mt_pubsub/std_msgs" }
 
 [package.metadata.ros]
-msg = [&quot;std_msgs&quot;]
-msg_dir = &quot;/tmp/safe_drive_tutorial/mt_pubsub&quot;
-safe_drive_version = &quot;0.3&quot;
+msg = ["std_msgs"]
+msg_dir = "/tmp/safe_drive_tutorial/mt_pubsub"
+safe_drive_version = "0.3"
 </code></pre>
 <h2 id="publishers"><a class="header" href="#publishers">Publishers</a></h2>
 <p>The <code>publishers</code> publishes messages to 2 topics periodically.
@@ -907,26 +907,26 @@ use std::time::Duration;
 async fn main() -&gt; Result&lt;(), DynError&gt; {
     // Create a context and a node.
     let ctx = Context::new()?;
-    let node = ctx.create_node(&quot;publishers&quot;, None, Default::default())?;
+    let node = ctx.create_node("publishers", None, Default::default())?;
 
     // Create publishers.
-    let publisher1 = node.create_publisher::&lt;std_msgs::msg::String&gt;(&quot;topic1&quot;, None)?;
-    let publisher2 = node.create_publisher::&lt;std_msgs::msg::String&gt;(&quot;topic2&quot;, None)?;
+    let publisher1 = node.create_publisher::&lt;std_msgs::msg::String&gt;("topic1", None)?;
+    let publisher2 = node.create_publisher::&lt;std_msgs::msg::String&gt;("topic2", None)?;
 
-    // Create a task which sends &quot;Hello, World!&quot;.
+    // Create a task which sends "Hello, World!".
     let task1 = async_std::task::spawn(async move {
         let mut msg = std_msgs::msg::String::new().unwrap();
-        msg.data.assign(&quot;Hello, World!&quot;);
+        msg.data.assign("Hello, World!");
         for _ in 0..50 {
             publisher1.send(&amp;msg).unwrap(); // Send a message.
             async_std::task::sleep(Duration::from_millis(500)).await; // Sleep 500ms.
         }
     });
 
-    // Create a task which sends &quot;Hello, Universe!&quot;.
+    // Create a task which sends "Hello, Universe!".
     let task2 = async_std::task::spawn(async move {
         let mut msg = std_msgs::msg::String::new().unwrap();
-        msg.data.assign(&quot;Hello, Universe!&quot;);
+        msg.data.assign("Hello, Universe!");
         for _ in 0..100 {
             publisher2.send(&amp;msg).unwrap(); // Send a message.
             async_std::task::sleep(Duration::from_millis(250)).await; // Sleep 250ms.
@@ -940,14 +940,14 @@ async fn main() -&gt; Result&lt;(), DynError&gt; {
 }</code></pre></pre>
 <p>The <code>async_std::task::spawn</code> creates a asynchronous task,
 which is similar to a thread.
-The following is a excerpt creating a task which sends &quot;Hello, World!&quot;
-to &quot;topic1&quot; every 500ms.</p>
+The following is a excerpt creating a task which sends "Hello, World!"
+to "topic1" every 500ms.</p>
 <pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
 </span><span class="boring">fn main() {
-</span>// Create a task which sends &quot;Hello, World!&quot;.
+</span>// Create a task which sends "Hello, World!".
 let task1 = async_std::task::spawn(async move {
     let mut msg = std_msgs::msg::String::new().unwrap();
-    msg.data.assign(&quot;Hello, World!&quot;);
+    msg.data.assign("Hello, World!");
     for _ in 0..50 {
         publisher1.send(&amp;msg).unwrap(); // Send a message.
         async_std::task::sleep(Duration::from_millis(500)).await; // Sleep 500ms.
@@ -970,11 +970,11 @@ The main function is almost same as previous one.</p>
 async fn main() -&gt; Result&lt;(), DynError&gt; {
     // Create a context and a node.
     let ctx = Context::new()?;
-    let node = ctx.create_node(&quot;subscribers&quot;, None, Default::default())?;
+    let node = ctx.create_node("subscribers", None, Default::default())?;
 
     // Create subscribers.
-    let subscriber1 = node.create_subscriber::&lt;std_msgs::msg::String&gt;(&quot;topic1&quot;, None)?;
-    let subscriber2 = node.create_subscriber::&lt;std_msgs::msg::String&gt;(&quot;topic2&quot;, None)?;
+    let subscriber1 = node.create_subscriber::&lt;std_msgs::msg::String&gt;("topic1", None)?;
+    let subscriber2 = node.create_subscriber::&lt;std_msgs::msg::String&gt;("topic2", None)?;
 
     // Receive messages.
     let task1 = async_std::task::spawn(receiver(subscriber1));
@@ -992,7 +992,7 @@ async fn receiver(mut subscriber: Subscriber&lt;std_msgs::msg::String&gt;) -&gt;
     loop {
         // Receive a message
         let msg = subscriber.recv().await?;
-        pr_info!(logger, &quot;{}&quot;, msg.data);
+        pr_info!(logger, "{}", msg.data);
     }
 }</code></pre></pre>
 <p><code>Subscriber::recv</code> is an asynchronous function to receive a message.
@@ -1014,10 +1014,10 @@ async fn receiver(mut subscriber: Subscriber&lt;std_msgs::msg::String&gt;) -&gt;
     loop {
         // Receive a message with 3s timeout.
         match timeout(Duration::from_secs(3), subscriber.recv()).await {
-            Ok(result) =&gt; pr_info!(logger, &quot;received: {}&quot;, result?.data),
+            Ok(result) =&gt; pr_info!(logger, "received: {}", result?.data),
             Err(_) =&gt; {
                 // Timed out. Finish receiving.
-                pr_warn!(logger, &quot;timeout&quot;);
+                pr_warn!(logger, "timeout");
                 break;
             }
         }
@@ -1071,7 +1071,7 @@ In this tutorial, we will describe how to define user defined types.</p>
 <p>The workspace's <code>Cargo.toml</code> should be created as follows.</p>
 <p><code>msgtest/src/Cargo.toml</code></p>
 <pre><code class="language-toml">[workspace]
-members = [&quot;talker&quot;, &quot;listener&quot;]
+members = ["talker", "listener"]
 </code></pre>
 <p>Then, create projects as follows.</p>
 <pre><code class="language-text">$ cd msgtest/src
@@ -1089,7 +1089,7 @@ $ mkdir msg
 $ cd msg
 </code></pre>
 <h3 id="primitive-type-my_interfacesmsgmymsgmsg"><a class="header" href="#primitive-type-my_interfacesmsgmymsgmsg">Primitive Type: <code>my_interfaces/msg/MyMsg.msg</code></a></h3>
-<p>Then create a file, <code>msgtest/src/my_interfaces/msg</code>, as follows.</p>
+<p>Then create a file, <code>msgtest/src/my_interfaces/msg/MyMsg.msg</code>, as follows.</p>
 <pre><code class="language-text">int32 integer_value
 int32[] unbounded_integer_array
 int32[5] five_integers_array
@@ -1130,9 +1130,9 @@ we have to edit <code>CMakeLists.txt</code> as follows.</p>
 <pre><code class="language-cmake">find_package(rosidl_default_generators REQUIRED)
 
 rosidl_generate_interfaces(${PROJECT_NAME}
-  &quot;msg/MyMsg.msg&quot;
-  &quot;msg/MyMsgs.msg&quot;
-  &quot;msg/MyMsgStr.msg&quot;
+  "msg/MyMsg.msg"
+  "msg/MyMsgs.msg"
+  "msg/MyMsgStr.msg"
 )
 </code></pre>
 <p>We have to specify messages files in <code>CMakeLists.txt</code>.</p>
@@ -1181,24 +1181,24 @@ So, <code>MyMsg</code> and <code>MyMsgs</code> are generated as follows.</p>
 The most important thing is to add <code>my_interfaces</code>, which defines message types we use.</p>
 <pre><code class="language-toml"># msgtest/src/talker/Cargo.toml
 [dependencies]
-safe_drive = &quot;0.3&quot;
-my_interfaces = { path = &quot;/tmp/safe_drive_tutorial/msgtest/my_interfaces&quot; }
+safe_drive = "0.3"
+my_interfaces = { path = "/tmp/safe_drive_tutorial/msgtest/my_interfaces" }
 
 [package.metadata.ros]
-msg = [&quot;my_interfaces&quot;]
-msg_dir = &quot;/tmp/safe_drive_tutorial/msgtest&quot;
-safe_drive_version = &quot;0.3&quot;
+msg = ["my_interfaces"]
+msg_dir = "/tmp/safe_drive_tutorial/msgtest"
+safe_drive_version = "0.3"
 </code></pre>
 <h3 id="create-talkerpackagexml"><a class="header" href="#create-talkerpackagexml">Create <code>talker/package.xml</code></a></h3>
 <p>Then create <code>package.xml</code> as follows.</p>
 <p><code>msgtest/src/talker/package.xml</code></p>
-<pre><code class="language-xml">&lt;?xml version=&quot;1.0&quot;?&gt;
-&lt;?xml-model href=&quot;http://download.ros.org/schema/package_format3.xsd&quot; schematypens=&quot;http://www.w3.org/2001/XMLSchema&quot;?&gt;
-&lt;package format=&quot;3&quot;&gt;
+<pre><code class="language-xml">&lt;?xml version="1.0"?&gt;
+&lt;?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?&gt;
+&lt;package format="3"&gt;
   &lt;name&gt;talker&lt;/name&gt;
   &lt;version&gt;0.0.0&lt;/version&gt;
   &lt;description&gt;Talker in Rust&lt;/description&gt;
-  &lt;maintainer email=&quot;yuuki.takano@tier4.jp&quot;&gt;Yuuki Takano&lt;/maintainer&gt;
+  &lt;maintainer email="yuuki.takano@tier4.jp"&gt;Yuuki Takano&lt;/maintainer&gt;
   &lt;license&gt;Apache License 2.0&lt;/license&gt;
 
   &lt;test_depend&gt;ament_lint_auto&lt;/test_depend&gt;
@@ -1257,24 +1257,24 @@ fn main() -&gt; Result&lt;(), DynError&gt; {
     let ctx = Context::new()?;
 
     // Create a node.
-    let node = ctx.create_node(&quot;talker&quot;, None, Default::default())?;
+    let node = ctx.create_node("talker", None, Default::default())?;
 
     // Create a publisher.
-    let publisher = node.create_publisher::&lt;my_interfaces::msg::MyMsgs&gt;(&quot;my_topic&quot;, None)?;
+    let publisher = node.create_publisher::&lt;my_interfaces::msg::MyMsgs&gt;("my_topic", None)?;
 
     // Create a logger.
-    let logger = Logger::new(&quot;talker&quot;);
+    let logger = Logger::new("talker");
 
     // Create a message
     let my_msg1 = create_message()?;
     let my_msg2 = create_message()?;
 
-    let mut my_msgs = my_interfaces::msg::MyMsgs::new().ok_or(&quot;failed to create MyMsgs&quot;)?;
+    let mut my_msgs = my_interfaces::msg::MyMsgs::new().ok_or("failed to create MyMsgs")?;
     my_msgs.msg1 = my_msg1;
     my_msgs.msg2 = my_msg2;
 
     loop {
-        pr_info!(logger, &quot;send: {:?}&quot;, my_msgs); // Print log.
+        pr_info!(logger, "send: {:?}", my_msgs); // Print log.
 
         // Send a message.
         publisher.send(&amp;my_msgs)?;
@@ -1340,24 +1340,24 @@ you can thus update the elements of the array via the slice.</p>
 <p>The listener also requires <code>my_interfaces</code>, and edit <code>Cargo.toml</code> as follows.</p>
 <pre><code class="language-toml"># msgtest/src/listener/Cargo.toml
 [dependencies]
-safe_drive = &quot;0.3&quot;
-my_interfaces = { path = &quot;/tmp/safe_drive_tutorial/msgtest/my_interfaces&quot; }
+safe_drive = "0.3"
+my_interfaces = { path = "/tmp/safe_drive_tutorial/msgtest/my_interfaces" }
 
 [package.metadata.ros]
-msg = [&quot;my_interfaces&quot;]
-msg_dir = &quot;/tmp/safe_drive_tutorial/msgtest&quot;
-safe_drive_version = &quot;0.3&quot;
+msg = ["my_interfaces"]
+msg_dir = "/tmp/safe_drive_tutorial/msgtest"
+safe_drive_version = "0.3"
 </code></pre>
 <h3 id="create-listenerpackagexml"><a class="header" href="#create-listenerpackagexml">Create <code>listener/package.xml</code></a></h3>
 <p>Then create <code>package.xml</code> as follows.</p>
 <p><code>msgtest/src/listener/package.xml</code></p>
-<pre><code class="language-xml">&lt;?xml version=&quot;1.0&quot;?&gt;
-&lt;?xml-model href=&quot;http://download.ros.org/schema/package_format3.xsd&quot; schematypens=&quot;http://www.w3.org/2001/XMLSchema&quot;?&gt;
-&lt;package format=&quot;3&quot;&gt;
+<pre><code class="language-xml">&lt;?xml version="1.0"?&gt;
+&lt;?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?&gt;
+&lt;package format="3"&gt;
   &lt;name&gt;listener&lt;/name&gt;
   &lt;version&gt;0.0.0&lt;/version&gt;
   &lt;description&gt;Listener in Rust&lt;/description&gt;
-  &lt;maintainer email=&quot;yuuki.takano@tier4.jp&quot;&gt;Yuuki Takano&lt;/maintainer&gt;
+  &lt;maintainer email="yuuki.takano@tier4.jp"&gt;Yuuki Takano&lt;/maintainer&gt;
   &lt;license&gt;Apache License 2.0&lt;/license&gt;
 
   &lt;test_depend&gt;ament_lint_auto&lt;/test_depend&gt;
@@ -1374,7 +1374,7 @@ safe_drive_version = &quot;0.3&quot;
 <h3 id="edit-listenersrcmainrs"><a class="header" href="#edit-listenersrcmainrs">Edit <code>listener/src/main.rs</code></a></h3>
 <p>The listener can also be implemented straightforwardly as follows.</p>
 <p><code>msgtest/src/listener/src/main.rs</code></p>
-<pre><pre class="playground"><code class="language-rust">use my_interfaces_rs::my_interfaces;
+<pre><pre class="playground"><code class="language-rust">use my_interfaces;
 use safe_drive::{context::Context, error::DynError, logger::Logger, pr_info};
 
 fn main() -&gt; Result&lt;(), DynError&gt; {
@@ -1382,18 +1382,18 @@ fn main() -&gt; Result&lt;(), DynError&gt; {
     let ctx = Context::new()?;
 
     // Create a node.
-    let node = ctx.create_node(&quot;listener&quot;, None, Default::default())?;
+    let node = ctx.create_node("listener", None, Default::default())?;
 
     // Create a subscriber.
-    let subscriber = node.create_subscriber::&lt;my_interfaces::msg::MyMsgs&gt;(&quot;my_topic&quot;, None)?;
+    let subscriber = node.create_subscriber::&lt;my_interfaces::msg::MyMsgs&gt;("my_topic", None)?;
 
     // Create a logger.
-    let logger = Logger::new(&quot;listener&quot;);
+    let logger = Logger::new("listener");
 
     // Create a selector.
     let mut selector = ctx.create_selector()?;
 
-    pr_info!(logger, &quot;listening&quot;);
+    pr_info!(logger, "listening");
 
     // Add a callback function.
     selector.add_subscriber(
@@ -1401,21 +1401,20 @@ fn main() -&gt; Result&lt;(), DynError&gt; {
         Box::new(move |msg| {
             let msg = &amp;msg.msg1;
 
-            pr_info!(logger, &quot;message: {}&quot;, msg.integer_value);
+            pr_info!(logger, "message: {}", msg.integer_value);
 
             for msg in msg.five_integers_array.iter() {
-                pr_info!(logger, &quot;five_integers_array: {}&quot;, msg);
+                pr_info!(logger, "five_integers_array: {}", msg);
             }
 
             for msg in msg.unbounded_integer_array.iter() {
-                pr_info!(logger, &quot;unbounded_integer_array: {}&quot;, msg);
+                pr_info!(logger, "unbounded_integer_array: {}", msg);
             }
 
             for msg in msg.up_to_five_integers_array.iter() {
-                pr_info!(logger, &quot;up_to_five_integers_array: {}&quot;, msg);
+                pr_info!(logger, "up_to_five_integers_array: {}", msg);
             }
         }),
-        false,
     );
 
     // Spin.
@@ -1508,47 +1507,47 @@ we can use <code>as_slice_mut()</code> or <code>as_slice_mut()</code> as follows
     let mut my_msg = my_interfaces::msg::MyMsgStr::new().unwrap();
 
     // string message
-    my_msg.message.assign(&quot;Hello, World!&quot;);
+    my_msg.message.assign("Hello, World!");
 
     // string[2] static_array_str
-    my_msg.static_array_str[0].assign(&quot;static array 0&quot;);
-    my_msg.static_array_str[1].assign(&quot;static array 1&quot;);
+    my_msg.static_array_str[0].assign("static array 0");
+    my_msg.static_array_str[1].assign("static array 1");
 
     // string[] dynamic_array_str
-    let mut msgs = RosStringSeq::new(3).ok_or(&quot;failed to create string&quot;)?;
+    let mut msgs = RosStringSeq::new(3).ok_or("failed to create string")?;
     let ref_msgs = msgs.as_slice_mut();
-    ref_msgs[0].assign(&quot;dynamic array 0&quot;);
-    ref_msgs[1].assign(&quot;dynamic array 1&quot;);
-    ref_msgs[2].assign(&quot;dynamic array 2&quot;);
+    ref_msgs[0].assign("dynamic array 0");
+    ref_msgs[1].assign("dynamic array 1");
+    ref_msgs[2].assign("dynamic array 2");
     my_msg.dynamic_array_str = msgs;
 
     // string[&lt;=3] bounded_array_str
-    let mut msgs = RosStringSeq::new(2).ok_or(&quot;failed to create string&quot;)?;
+    let mut msgs = RosStringSeq::new(2).ok_or("failed to create string")?;
     let ref_msgs = msgs.as_slice_mut();
-    ref_msgs[0].assign(&quot;bounded array 0&quot;);
-    ref_msgs[1].assign(&quot;bounded array 1&quot;);
+    ref_msgs[0].assign("bounded array 0");
+    ref_msgs[1].assign("bounded array 1");
     my_msg.bounded_array_str = msgs;
 
     // string&lt;=10 bounded_str
-    my_msg.bounded_str.assign(&quot;Hello!&quot;);
+    my_msg.bounded_str.assign("Hello!");
 
     // string&lt;=10[2] static_array_bounded_str
-    my_msg.static_array_bounded_str[0].assign(&quot;msg1&quot;);
-    my_msg.static_array_bounded_str[1].assign(&quot;msg2&quot;);
+    my_msg.static_array_bounded_str[0].assign("msg1");
+    my_msg.static_array_bounded_str[1].assign("msg2");
 
     // string&lt;=10[] dynamic_array_bounded_str
-    let mut msgs = RosStringSeq::new(3).ok_or(&quot;failed to create string&quot;)?;
+    let mut msgs = RosStringSeq::new(3).ok_or("failed to create string")?;
     let ref_msgs = msgs.as_slice_mut();
-    ref_msgs[0].assign(&quot;msg3&quot;);
-    ref_msgs[1].assign(&quot;msg4&quot;);
-    ref_msgs[2].assign(&quot;msg5&quot;);
+    ref_msgs[0].assign("msg3");
+    ref_msgs[1].assign("msg4");
+    ref_msgs[2].assign("msg5");
     my_msg.dynamic_array_bounded_str = msgs;
 
     // string&lt;=10[&lt;=3] bounded_array_bounded_str
-    let mut msgs = RosStringSeq::new(2).ok_or(&quot;failed to create string&quot;)?;
+    let mut msgs = RosStringSeq::new(2).ok_or("failed to create string")?;
     let ref_msgs = msgs.as_slice_mut();
-    ref_msgs[0].assign(&quot;msg3&quot;);
-    ref_msgs[1].assign(&quot;msg5&quot;);
+    ref_msgs[0].assign("msg3");
+    ref_msgs[1].assign("msg5");
     my_msg.bounded_array_bounded_str = msgs;
 
     Ok(my_msg)
@@ -1558,14 +1557,14 @@ we can use <code>as_slice_mut()</code> or <code>as_slice_mut()</code> as follows
 <p><a href="https://github.com/tier4/safe_drive_tutorial/tree/main/srvtest">Source code</a>.</p>
 <p>A service is a communication consisting requests and responses.
 There are a server and clients for a service as follows.</p>
-<pre class="mermaid">graph TD;
+<pre><code class="language-mermaid">graph TD;
     Server--response--&gt;Client1;
     Server--response--&gt;Client2;
     Server--response--&gt;Client3;
     Client1--request--&gt;Server;
     Client2--request--&gt;Server;
     Client3--request--&gt;Server;
-</pre>
+</code></pre>
 <p>A client sends a request and the server replies the request.
 In this tutorial, we will describe how to implement a client and a server in Rust by using <code>safe_drive</code>.</p>
 <h2 id="create-base-files"><a class="header" href="#create-base-files">Create Base Files</a></h2>
@@ -1587,7 +1586,7 @@ $ ros2 pkg create --build-type ament_cmake srvmsg
 <p>In addition to that, create the workspace's <code>Cargo.toml</code> as follows.</p>
 <p><code>srvtest/src/Cargo.toml</code></p>
 <pre><code class="language-toml">[workspace]
-members = [ &quot;client&quot;, &quot;server&quot;]
+members = [ "client", "server"]
 </code></pre>
 <h2 id="define-protocol"><a class="header" href="#define-protocol">Define Protocol</a></h2>
 <p>First of all, let's define a protocol for a service.
@@ -1617,7 +1616,7 @@ and returns the summation of the values.</p>
 find_package(rosidl_default_generators REQUIRED)
 
 rosidl_generate_interfaces(${PROJECT_NAME}
-  &quot;srv/AddTwoInts.srv&quot;
+  "srv/AddTwoInts.srv"
 )
 </code></pre>
 <h3 id="edit-srvmsgpackagexml"><a class="header" href="#edit-srvmsgpackagexml">Edit <code>srvmsg/package.xml</code></a></h3>
@@ -1633,25 +1632,25 @@ rosidl_generate_interfaces(${PROJECT_NAME}
 <p>To generate Rust types from <code>.srv</code> files,
 we have to edit <code>Cargo.toml</code> as follows.</p>
 <pre><code class="language-toml">[dependencies]
-safe_drive = &quot;0.3&quot;
-srvmsg = { path = &quot;/tmp/safe_drive_tutorial/srvtest/srvmsg&quot; }
-tokio = { version = &quot;1&quot;, features = [&quot;full&quot;] }
+safe_drive = "0.3"
+srvmsg = { path = "/tmp/safe_drive_tutorial/srvtest/srvmsg" }
+tokio = { version = "1", features = ["full"] }
 
 [package.metadata.ros]
-msg = [&quot;srvmsg&quot;]
-msg_dir = &quot;/tmp/safe_drive_tutorial/srvtest&quot;
-safe_drive_version = &quot;0.3&quot;
+msg = ["srvmsg"]
+msg_dir = "/tmp/safe_drive_tutorial/srvtest"
+safe_drive_version = "0.3"
 </code></pre>
 <h3 id="create-serverpackagexml"><a class="header" href="#create-serverpackagexml">Create <code>server/package.xml</code></a></h3>
 <p><code>package.xml</code> is also required as follows.</p>
 <p><code>srvtest/src/server/package.xml</code></p>
-<pre><code class="language-xml">&lt;?xml version=&quot;1.0&quot;?&gt;
-&lt;?xml-model href=&quot;http://download.ros.org/schema/package_format3.xsd&quot; schematypens=&quot;http://www.w3.org/2001/XMLSchema&quot;?&gt;
-&lt;package format=&quot;3&quot;&gt;
+<pre><code class="language-xml">&lt;?xml version="1.0"?&gt;
+&lt;?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?&gt;
+&lt;package format="3"&gt;
   &lt;name&gt;server&lt;/name&gt;
   &lt;version&gt;0.0.0&lt;/version&gt;
   &lt;description&gt;Server in Rust&lt;/description&gt;
-  &lt;maintainer email=&quot;yuuki.takano@tier4.jp&quot;&gt;Yuuki Takano&lt;/maintainer&gt;
+  &lt;maintainer email="yuuki.takano@tier4.jp"&gt;Yuuki Takano&lt;/maintainer&gt;
   &lt;license&gt;Apache License 2.0&lt;/license&gt;
 
   &lt;test_depend&gt;ament_lint_auto&lt;/test_depend&gt;
@@ -1710,22 +1709,22 @@ fn main() -&gt; Result&lt;(), DynError&gt; {
     let ctx = Context::new()?;
 
     // Create a node.
-    let node = ctx.create_node(&quot;server_node&quot;, None, Default::default())?;
+    let node = ctx.create_node("server_node", None, Default::default())?;
 
     // Create a server.
-    let server = node.create_server::&lt;AddTwoInts&gt;(&quot;my_service&quot;, Some(Profile::default()))?;
+    let server = node.create_server::&lt;AddTwoInts&gt;("my_service", Some(Profile::default()))?;
 
     // Create a selector.
     let mut selector = ctx.create_selector()?;
 
     // Create a logger.
-    let logger = Logger::new(&quot;server&quot;);
+    let logger = Logger::new("server");
 
     selector.add_server(
         server,
         Box::new(move |msg, _header| {
             let mut response = AddTwoInts_Response::new().unwrap();
-            pr_error!(logger, &quot;recv: {:?}&quot;, msg);
+            pr_error!(logger, "recv: {:?}", msg);
             response.result = msg.x + msg.y;
             response
         }),
@@ -1739,10 +1738,10 @@ fn main() -&gt; Result&lt;(), DynError&gt; {
 <pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
 </span><span class="boring">fn main() {
 </span>// Create a server.
-let server = node.create_server::&lt;AddTwoInts&gt;(&quot;my_service&quot;, Some(Profile::default()))?;
+let server = node.create_server::&lt;AddTwoInts&gt;("my_service", Some(Profile::default()))?;
 <span class="boring">}</span></code></pre></pre>
 <p><code>AddTwoInts</code> of <code>create_server::&lt;AddTwoInts&gt;</code> indicates the protocol of the server.
-The arguments of <code>&quot;my_service&quot;</code> and <code>Some(Profile::default())</code> are the service name and QoS.
+The arguments of <code>"my_service"</code> and <code>Some(Profile::default())</code> are the service name and QoS.
 If you pass <code>None</code> instead of <code>Some(Profile::default())</code>, <code>Profile::default()</code> is used.</p>
 <p>The callback was passed as follows.</p>
 <pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
@@ -1751,7 +1750,7 @@ If you pass <code>None</code> instead of <code>Some(Profile::default())</code>, 
     server,
     Box::new(move |msg, _header| {
         let mut response = AddTwoInts_Response::new().unwrap();
-        pr_error!(logger, &quot;recv: {:?}&quot;, msg);
+        pr_error!(logger, "recv: {:?}", msg);
         response.result = msg.x + msg.y;
         response
     }),
@@ -1764,25 +1763,25 @@ If you pass <code>None</code> instead of <code>Some(Profile::default())</code>, 
 <p><code>safe_drive</code>, and <code>tokio</code> must be added to <code>Cargo.toml</code> as follows.</p>
 <p><code>srvtest/src/client/Cargo.toml</code></p>
 <pre><code class="language-toml">[dependencies]
-safe_drive = &quot;0.3&quot;
-srvmsg = { path = &quot;/tmp/safe_drive_tutorial/srvtest/srvmsg&quot; }
-tokio = { version = &quot;1&quot;, features = [&quot;full&quot;] }
+safe_drive = "0.3"
+srvmsg = { path = "/tmp/safe_drive_tutorial/srvtest/srvmsg" }
+tokio = { version = "1", features = ["full"] }
 
 [package.metadata.ros]
-msg = [&quot;srvmsg&quot;]
-msg_dir = &quot;/tmp/safe_drive_tutorial/srvtest&quot;
-safe_drive_version = &quot;0.3&quot;
+msg = ["srvmsg"]
+msg_dir = "/tmp/safe_drive_tutorial/srvtest"
+safe_drive_version = "0.3"
 </code></pre>
 <h3 id="create-clientpackagexml"><a class="header" href="#create-clientpackagexml">Create <code>client/package.xml</code></a></h3>
 <p><code>package.xml</code> is also required as follows.</p>
 <p><code>srvtest/src/client/package.xml</code></p>
-<pre><code class="language-xml">&lt;?xml version=&quot;1.0&quot;?&gt;
-&lt;?xml-model href=&quot;http://download.ros.org/schema/package_format3.xsd&quot; schematypens=&quot;http://www.w3.org/2001/XMLSchema&quot;?&gt;
-&lt;package format=&quot;3&quot;&gt;
+<pre><code class="language-xml">&lt;?xml version="1.0"?&gt;
+&lt;?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?&gt;
+&lt;package format="3"&gt;
   &lt;name&gt;client&lt;/name&gt;
   &lt;version&gt;0.0.0&lt;/version&gt;
   &lt;description&gt;Client in Rust&lt;/description&gt;
-  &lt;maintainer email=&quot;yuuki.takano@tier4.jp&quot;&gt;Yuuki Takano&lt;/maintainer&gt;
+  &lt;maintainer email="yuuki.takano@tier4.jp"&gt;Yuuki Takano&lt;/maintainer&gt;
   &lt;license&gt;Apache License 2.0&lt;/license&gt;
 
   &lt;test_depend&gt;ament_lint_auto&lt;/test_depend&gt;
@@ -1811,12 +1810,12 @@ use tokio::time::timeout;
 async fn main() -&gt; Result&lt;(), DynError&gt; {
     // Create a context and a node.
     let ctx = Context::new()?;
-    let node = ctx.create_node(&quot;client&quot;, None, Default::default())?;
+    let node = ctx.create_node("client", None, Default::default())?;
 
-    let logger = Logger::new(&quot;client&quot;);
+    let logger = Logger::new("client");
 
     // Create a client.
-    let mut client = node.create_client::&lt;AddTwoInts&gt;(&quot;my_service&quot;, Some(Profile::default()))?;
+    let mut client = node.create_client::&lt;AddTwoInts&gt;("my_service", Some(Profile::default()))?;
 
     let mut n = 0;
     loop {
@@ -1833,15 +1832,15 @@ async fn main() -&gt; Result&lt;(), DynError&gt; {
 
         match timeout(Duration::from_secs(1), &amp;mut receiver).await {
             Ok(Ok((c, response, _header))) =&gt; {
-                pr_info!(logger, &quot;received {:?}&quot;, response);
+                pr_info!(logger, "received {:?}", response);
                 client = c;
             }
             Ok(Err(e)) =&gt; {
-                pr_error!(logger, &quot;error: {e}&quot;);
+                pr_error!(logger, "error: {e}");
                 return Err(e);
             }
             Err(elapsed) =&gt; {
-                pr_warn!(logger, &quot;timeout: {elapsed}&quot;);
+                pr_warn!(logger, "timeout: {elapsed}");
                 client = receiver.give_up();
             }
         }
@@ -1893,13 +1892,13 @@ and it can be used for the server as follows.</p>
 <p><a href="https://github.com/tier4/safe_drive_tutorial/tree/main/params">Source code</a>.</p>
 <p>This chapter introduces how to use parameters.
 A node can have parameters as follows.</p>
-<pre class="mermaid">graph TD;
-    NodeA --&gt; ParamA1:i64;
-    NodeA --&gt; ParamA2:bool;
-    NodeA --&gt; ParamA3:String;
-    NodeB --&gt; ParamB1:f64;
-    NodeB --&gt; ParamB2:f64;
-</pre>
+<pre><code class="language-mermaid">graph TD;
+   NodeA --&gt; ParamA1:i64;
+   NodeA --&gt; ParamA2:bool;
+   NodeA --&gt; ParamA3:String;
+   NodeB --&gt; ParamB1:f64;
+   NodeB --&gt; ParamB2:f64;
+</code></pre>
 <p>In this figure, NodeA has 3 parameters whose types are
 <code>i64</code>, <code>bool</code>, and <code>String</code>, respectively,
 and NodeB has 2 parameters whose types are <code>f64</code>.
@@ -1918,7 +1917,7 @@ $ cargo new async_param_server
 <p>To manage 2 packages, let's prepare <code>Cargo.toml</code> file for a workspace as follows.</p>
 <p><code>params/Cargo.toml</code></p>
 <pre><code class="language-toml">[workspace]
-members = [&quot;param_server&quot;, &quot;async_param_server&quot;]
+members = ["param_server", "async_param_server"]
 </code></pre>
 <p>The following table shows files we use in this chapter.</p>
 <div class="table-wrapper"><table><thead><tr><th>File</th><th>What?</th></tr></thead><tbody>
@@ -1980,19 +1979,19 @@ pub struct Parameters { /* omitted private fields */ }
 }
 <span class="boring">}</span></code></pre></pre>
 <p>In summary, a parameter server can be represented as follows.</p>
-<pre class="mermaid">graph TD;
-    ParameterServer --&gt; Parameters;
-    Parameters --&gt; Parameter;
-    Parameter --&gt; Descriptor;
-    Parameter --&gt; Value;
-</pre>
+<pre><code class="language-mermaid">graph TD;
+   ParameterServer --&gt; Parameters;
+   Parameters --&gt; Parameter;
+   Parameter --&gt; Descriptor;
+   Parameter --&gt; Value;
+</code></pre>
 <h2 id="parameter-setting-and-waiting-update-by-callback"><a class="header" href="#parameter-setting-and-waiting-update-by-callback">Parameter Setting and Waiting Update by Callback</a></h2>
 <p>We will explain how to set parameters,
 and how to wait updating by using a callback function.</p>
 <h3 id="edit-param_servercargotoml"><a class="header" href="#edit-param_servercargotoml">Edit <code>param_server/Cargo.toml</code></a></h3>
 <p>Add <code>safe_drive</code> to the dependencies section of <code>Cargo.toml</code> as follows.</p>
 <pre><code class="language-toml">[dependencies]
-safe_drive = &quot;0.3&quot;
+safe_drive = "0.3"
 </code></pre>
 <h3 id="edit-param_serversrcmainrs"><a class="header" href="#edit-param_serversrcmainrs">Edit <code>param_server/src/main.rs</code></a></h3>
 <p><code>param_server</code> can be implemented as follows.
@@ -2002,7 +2001,7 @@ This sets 2 parameters up and waits updating.</p>
 fn main() -&gt; Result&lt;(), DynError&gt; {
     // Create a context and a node.
     let ctx = Context::new()?;
-    let node = ctx.create_node(&quot;param_server&quot;, None, Default::default())?;
+    let node = ctx.create_node("param_server", None, Default::default())?;
 
     // Create a parameter server.
     let param_server = node.create_parameter_server()?;
@@ -2012,40 +2011,40 @@ fn main() -&gt; Result&lt;(), DynError&gt; {
 
         // Statically typed parameter.
         params.set_parameter(
-            &quot;my_flag&quot;.to_string(),                     // parameter name
+            "my_flag".to_string(),                     // parameter name
             Value::Bool(false),                        // value
             false,                                     // read only?
-            Some(&quot;my flag's description&quot;.to_string()), // description
+            Some("my flag's description".to_string()), // description
         )?;
 
         // Dynamically typed parameter.
         params.set_dynamically_typed_parameter(
-            &quot;my_dynamic_type_flag&quot;.to_string(), // parameter name
+            "my_dynamic_type_flag".to_string(), // parameter name
             Value::Bool(false),                 // value
             false,                              // read only?
-            Some(&quot;my dynamic type flag's description&quot;.to_string()), // description
+            Some("my dynamic type flag's description".to_string()), // description
         )?;
 
         // Add Directly from Parameter struct
         let parameter_to_set = Parameter {
             Descriptor {
-                Some(&quot;my parameter description&quot;.to_string()),                 // parameter description
-                Some(&quot;my parameter addutional_constraints&quot;.to_string()),      // parameter additional constraints
-                false,                                                                  // read only ?
-                false,                                                                  // static or Dynamic
-                None,                                                                   // floating point range 
-                None,                                                                   // integer point range 
+                Some("my parameter description".to_string()),               // parameter description
+                Some("my parameter addutional_constraints".to_string()),    // parameter additional constraints
+                false,                                                      // read only ?
+                false,                                                      // static or Dynamic
+                None,                                                       // floating point range 
+                None,                                                       // integer point range 
             },
-            Value::Bool(false),                                                         // value
+            Value::Bool(false),                                             // value
         }
         params.add_parameter(
-            (&quot;my parameter&quot;).to_string(),                                     // name
-            parameter_to_set,                                                           // parameter
+            ("my parameter").to_string(),       // name
+            parameter_to_set,                   // parameter
         )?;
     }
 
     // Create a logger and a selector.
-    let logger = Logger::new(&quot;param_server&quot;);
+    let logger = Logger::new("param_server");
     let mut selector = ctx.create_selector()?;
 
     // Add a callback function to the parameter server.
@@ -2056,9 +2055,9 @@ fn main() -&gt; Result&lt;(), DynError&gt; {
             let mut keys = String::new();
             for key in updated.iter() {
                 let value = &amp;params.get_parameter(key).unwrap().value;
-                keys = format!(&quot;{keys}{key} = {}, &quot;, value);
+                keys = format!("{keys}{key} = {}, ", value);
             }
-            pr_info!(logger, &quot;updated parameters: {keys}&quot;);
+            pr_info!(logger, "updated parameters: {keys}");
         }),
     );
 
@@ -2085,36 +2084,36 @@ for mutual exclusion by <code>write()</code> method.</p>
 
     // Statically typed parameter.
     params.set_parameter(
-        &quot;my_flag&quot;.to_string(),                     // parameter name
+        "my_flag".to_string(),                     // parameter name
         Value::Bool(false),                        // value
         false,                                     // read only?
-        Some(&quot;my flag's description&quot;.to_string()), // description
+        Some("my flag's description".to_string()), // description
     )?;
 
     // Dynamically typed parameter.
     params.set_dynamically_typed_parameter(
-        &quot;my_dynamic_type_flag&quot;.to_string(), // parameter name
+        "my_dynamic_type_flag".to_string(), // parameter name
         Value::Bool(false),                 // value
         false,                              // read only?
-        Some(&quot;my dynamic type flag's description&quot;.to_string()), // description
+        Some("my dynamic type flag's description".to_string()), // description
     )?;
 
     // Add Directly from Parameter struct
-        let parameter_to_set = Parameter {
-            Descriptor {
-                Some(&quot;my parameter description&quot;.to_string()),                 // parameter description
-                Some(&quot;my parameter addutional_constraints&quot;.to_string()),      // parameter additional constraints
-                false,                                                                  // read only ?
-                false,                                                                  // static or Dynamic
-                None,                                                                   // floating point range 
-                None,                                                                   // integer point range 
-            },
-            Value::Bool(false),                                                         // value
-        }
-        params.add_parameter(
-            (&quot;my parameter&quot;).to_string(),                                     // name
-            parameter_to_set,                                                           // parameter
-        )?;
+    let parameter_to_set = Parameter {
+        Descriptor {
+            Some("my parameter description".to_string()),               // parameter description
+            Some("my parameter addutional_constraints".to_string()),    // parameter additional constraints
+            false,                                                      // read only ?
+            false,                                                      // static or Dynamic
+            None,                                                       // floating point range 
+            None,                                                       // integer point range 
+        },
+        Value::Bool(false),                                             // value
+    }
+    params.add_parameter(
+        ("my parameter").to_string(),       // name
+        parameter_to_set,                   // parameter
+    )?;
 }
 <span class="boring">}</span></code></pre></pre>
 <p>To set a statically typed parameters, use <code>set_parameter()</code>.
@@ -2136,9 +2135,9 @@ selector.add_parameter_server(
         let mut keys = String::new();
         for key in updated.iter() {
             let value = &amp;params.get_parameter(key).unwrap().value;
-            keys = format!(&quot;{keys}{key} = {}, &quot;, value);
+            keys = format!("{keys}{key} = {}, ", value);
         }
-        pr_info!(logger, &quot;updated parameters: {keys}&quot;);
+        pr_info!(logger, "updated parameters: {keys}");
     }),
 );
 
@@ -2176,8 +2175,8 @@ and statically typed.</p>
 <h3 id="edit-async_param_servercargotoml"><a class="header" href="#edit-async_param_servercargotoml">Edit <code>async_param_server/Cargo.toml</code></a></h3>
 <p>Add <code>safe_drive</code> and <code>tokio</code> to the dependencies section of <code>Cargo.toml</code> as follows.</p>
 <pre><code class="language-toml">[dependencies]
-safe_drive = &quot;0.3&quot;
-tokio = { version = &quot;1&quot;, features = [&quot;full&quot;] }
+safe_drive = "0.3"
+tokio = { version = "1", features = ["full"] }
 </code></pre>
 <h3 id="edit-async_param_serversrcmainrs"><a class="header" href="#edit-async_param_serversrcmainrs">Edit <code>async_param_server/src/main.rs</code></a></h3>
 <p><code>async_param_server</code> can be implemented as follows.
@@ -2188,7 +2187,7 @@ This sets 2 parameters up and waits updating.</p>
 async fn main() -&gt; Result&lt;(), DynError&gt; {
     // Create a context and a node.
     let ctx = Context::new()?;
-    let node = ctx.create_node(&quot;async_param_server&quot;, None, Default::default())?;
+    let node = ctx.create_node("async_param_server", None, Default::default())?;
 
     // Create a parameter server.
     let mut param_server = node.create_parameter_server()?;
@@ -2198,40 +2197,40 @@ async fn main() -&gt; Result&lt;(), DynError&gt; {
 
         // Statically typed parameter.
         params.set_parameter(
-            &quot;my_flag&quot;.to_string(),                     // parameter name
+            "my_flag".to_string(),                     // parameter name
             Value::Bool(false),                        // value
             false,                                     // read only?
-            Some(&quot;my flag's description&quot;.to_string()), // description
+            Some("my flag's description".to_string()), // description
         )?;
 
         // Dynamically typed parameter.
         params.set_dynamically_typed_parameter(
-            &quot;my_dynamic_type_flag&quot;.to_string(), // parameter name
+            "my_dynamic_type_flag".to_string(), // parameter name
             Value::Bool(false),                 // value
             false,                              // read only?
-            Some(&quot;my dynamic type flag's description&quot;.to_string()), // description
+            Some("my dynamic type flag's description".to_string()), // description
         )?;
 
         // Add Directly from Parameter struct
         let parameter_to_set = Parameter {
             Descriptor {
-                Some(&quot;my parameter description&quot;.to_string()),                 // parameter description
-                Some(&quot;my parameter addutional_constraints&quot;.to_string()),      // parameter additional constraints
-                false,                                                                  // read only ?
-                false,                                                                  // static or Dynamic
-                None,                                                                   // floating point range 
-                None,                                                                   // integer point range 
+                Some("my parameter description".to_string()),               // parameter description
+                Some("my parameter addutional_constraints".to_string()),    // parameter additional constraints
+                false,                                                      // read only ?
+                false,                                                      // static or Dynamic
+                None,                                                       // floating point range 
+                None,                                                       // integer point range 
             },
-            Value::Bool(false),                                                         // value
+            Value::Bool(false),                                             // value
         }
         params.add_parameter(
-            (&quot;my parameter&quot;).to_string(),                                     // name
-            parameter_to_set,                                                           // parameter
+            ("my parameter").to_string(),       // name
+            parameter_to_set,                   // parameter
         )?;
     }
 
     // Create a logger.
-    let logger = Logger::new(&quot;async_param_server&quot;);
+    let logger = Logger::new("async_param_server");
 
     loop {
         // Wait update asynchronously.
@@ -2243,9 +2242,9 @@ async fn main() -&gt; Result&lt;(), DynError&gt; {
         let mut keys = String::new();
         for key in updated.iter() {
             let value = &amp;params.get_parameter(key).unwrap().value;
-            keys = format!(&quot;{keys}{key} = {}, &quot;, value);
+            keys = format!("{keys}{key} = {}, ", value);
         }
-        pr_info!(logger, &quot;updated parameters: {keys}&quot;);
+        pr_info!(logger, "updated parameters: {keys}");
     }
 }</code></pre></pre>
 <p>Important things are only following 2 lines.</p>
@@ -2278,7 +2277,7 @@ To use CycloneDDS, please install it as <a href="http://docs.ros.org.ros.informa
 <p>Add <code>safe_drive</code> to dependencies section of <code>Cargo.toml</code> as follows.</p>
 <p><code>Cargo.toml</code></p>
 <pre><code class="language-toml">[dependencies]
-safe_drive = &quot;0.3&quot;
+safe_drive = "0.3"
 </code></pre>
 <h2 id="mainrs"><a class="header" href="#mainrs"><code>main.rs</code></a></h2>
 <p><code>main.rs</code> can be implemented as follows,
@@ -2287,17 +2286,17 @@ but almost every lines are same as shown before.</p>
 <pre><pre class="playground"><code class="language-rust">use safe_drive::{context::Context, msg::common_interfaces::std_msgs};
 use std::{error::Error, time::Duration};
 
-const TOPIC_NAME: &amp;str = &quot;pubsub_loaned&quot;;
+const TOPIC_NAME: &amp;str = "pubsub_loaned";
 
 fn main() -&gt; Result&lt;(), Box&lt;dyn Error + Sync + Send + 'static&gt;&gt; {
     // create a context
     let ctx = Context::new()?;
 
     // create a subscribe node
-    let node_sub = ctx.create_node(&quot;loaned_sub_node&quot;, None, Default::default())?;
+    let node_sub = ctx.create_node("loaned_sub_node", None, Default::default())?;
 
     // create a publish node
-    let node_pub = ctx.create_node(&quot;loaned_pub_node&quot;, None, Default::default())?;
+    let node_pub = ctx.create_node("loaned_pub_node", None, Default::default())?;
 
     std::thread::sleep(Duration::from_millis(500));
 
@@ -2306,7 +2305,7 @@ fn main() -&gt; Result&lt;(), Box&lt;dyn Error + Sync + Send + 'static&gt;&gt; {
     let publisher = node_pub.create_publisher::&lt;std_msgs::msg::Bool&gt;(TOPIC_NAME, None)?;
 
     let mut loaned = publisher.borrow_loaned_message()?;
-    *loaned = std_msgs::msg::Bool::new().ok_or(&quot;failed to new Bool&quot;)?;
+    *loaned = std_msgs::msg::Bool::new().ok_or("failed to new Bool")?;
     loaned.data = false;
     publisher.send_loaned(loaned)?; // send message
 
@@ -2328,7 +2327,7 @@ fn main() -&gt; Result&lt;(), Box&lt;dyn Error + Sync + Send + 'static&gt;&gt; {
 <pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
 </span><span class="boring">fn main() {
 </span>let mut loaned = publisher.borrow_loaned_message()?;
-*loaned = std_msgs::msg::Bool::new().ok_or(&quot;failed to new Bool&quot;)?;
+*loaned = std_msgs::msg::Bool::new().ok_or("failed to new Bool")?;
 loaned.data = false;
 publisher.send_loaned(loaned)?; // send message
 <span class="boring">}</span></code></pre></pre>
@@ -2340,9 +2339,9 @@ and it uses conventional copied APIs if zero copy is not available.</p>
 <p>To enable zero copy, please prepare cyclonedds.xml, which is a configuration file of CycloneDDS, as follows.
 You can use arbitrary name for it.</p>
 <p><code>cyclonedds.xml</code></p>
-<pre><code class="language-xml">&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot; ?&gt;
-&lt;CycloneDDS xmlns=&quot;https://cdds.io/config&quot; xmlns:xsi=&quot;http://www.w3.org/2001/XMLSchema-instance&quot; xsi:schemaLocation=&quot;https://cdds.io/config https://raw.githubusercontent.com/eclipse-cyclonedds/cyclonedds/iceoryx/etc/cyclonedds.xsd&quot;&gt;
-    &lt;Domain id=&quot;any&quot;&gt;
+<pre><code class="language-xml">&lt;?xml version="1.0" encoding="UTF-8" ?&gt;
+&lt;CycloneDDS xmlns="https://cdds.io/config" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="https://cdds.io/config https://raw.githubusercontent.com/eclipse-cyclonedds/cyclonedds/iceoryx/etc/cyclonedds.xsd"&gt;
+    &lt;Domain id="any"&gt;
         &lt;SharedMemory&gt;
             &lt;Enable&gt;true&lt;/Enable&gt;
             &lt;LogLevel&gt;info&lt;/LogLevel&gt;
@@ -2371,7 +2370,7 @@ $ cargo new requester
 </code></pre>
 <pre><code class="language-text">$ cat Cargo.toml
 [workspace]
-members = [&quot;requester&quot;, &quot;forwarder&quot;]
+members = ["requester", "forwarder"]
 </code></pre>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="request-to-server-in-callback"><a class="header" href="#request-to-server-in-callback">Request to Server in Callback</a></h1>
 <p><a href="https://github.com/tier4/safe_drive_tutorial/tree/main/pubsubsrv">Source code</a>.</p>
@@ -2399,15 +2398,15 @@ use std::time::Duration;
 fn main() -&gt; Result&lt;(), DynError&gt; {
     // Create a context and a node.
     let ctx = Context::new()?;
-    let node = ctx.create_node(&quot;listen_client&quot;, None, Default::default())?;
+    let node = ctx.create_node("listen_client", None, Default::default())?;
 
     // Create 2 selectors.
     let selector = ctx.create_selector()?;
     let selector_client = ctx.create_selector()?;
 
     // Create a subscriber, a client, and a logger.
-    let subscriber = node.create_subscriber::&lt;std_msgs::msg::Empty&gt;(&quot;pubsubsrv_topic&quot;, None)?;
-    let client = node.create_client::&lt;std_srvs::srv::Empty&gt;(&quot;pubsubsrv_service&quot;, None)?;
+    let subscriber = node.create_subscriber::&lt;std_msgs::msg::Empty&gt;("pubsubsrv_topic", None)?;
+    let client = node.create_client::&lt;std_srvs::srv::Empty&gt;("pubsubsrv_service", None)?;
 
     worker(selector, selector_client, subscriber, client)?;
 
@@ -2421,12 +2420,12 @@ fn worker(
     client: Client&lt;std_srvs::srv::Empty&gt;,
 ) -&gt; Result&lt;(), DynError&gt; {
     let mut client = Some(client);
-    let logger = Logger::new(&quot;listen_client&quot;);
+    let logger = Logger::new("listen_client");
 
     selector.add_subscriber(
         subscriber,
         Box::new(move |_msg| {
-            pr_info!(logger, &quot;receive a message&quot;);
+            pr_info!(logger, "receive a message");
 
             // Take the client.
             let c = client.take().unwrap();
@@ -2439,12 +2438,12 @@ fn worker(
             // Receive a response.
             match receiver.recv_timeout(Duration::from_millis(20), &amp;mut selector_client) {
                 RecvResult::Ok((c, _response, _header)) =&gt; {
-                    pr_info!(logger, &quot;receive a response&quot;);
+                    pr_info!(logger, "receive a response");
                     client = Some(c)
                 }
                 RecvResult::RetryLater(r) =&gt; client = Some(r.give_up()),
                 RecvResult::Err(e) =&gt; {
-                    pr_fatal!(logger, &quot;{e}&quot;);
+                    pr_fatal!(logger, "{e}");
                     panic!()
                 }
             }
@@ -2475,12 +2474,12 @@ let receiver = c.send(&amp;request).unwrap();
 // Receive a response.
 match receiver.recv_timeout(Duration::from_millis(20), &amp;mut selector_client) {
     RecvResult::Ok((c, _response, _header)) =&gt; {
-        pr_info!(logger, &quot;receive a response&quot;);
+        pr_info!(logger, "receive a response");
         client = Some(c)
     }
     RecvResult::RetryLater(r) =&gt; client = Some(r.give_up()),
     RecvResult::Err(e) =&gt; {
-        pr_fatal!(logger, &quot;{e}&quot;);
+        pr_fatal!(logger, "{e}");
         panic!()
     }
 }
@@ -2490,11 +2489,11 @@ it sends a request to the server and receives a response
 by <code>recv_timeout()</code> method.</p>
 <h2 id="state-change"><a class="header" href="#state-change">State Change</a></h2>
 <p>A service's state can be represented as follows.</p>
-<pre class="mermaid">graph LR;
-    Start--&gt;Send
-    Send--&gt;Receive
-    Receive--&gt;Send
-</pre>
+<pre><code class="language-mermaid">graph LR;
+   Start--&gt;Send
+   Send--&gt;Receive
+   Receive--&gt;Send
+</code></pre>
 <p>To represent the state, <code>safe_drive</code> uses the type system of Rust.</p>
 <p>First, a client is created as follows.
 At that time, it must be <code>Send</code> state.</p>
@@ -2517,12 +2516,12 @@ to send a new request if it successfully receives a response.</p>
 </span>// Receive a response.
 match receiver.recv_timeout(Duration::from_millis(20), &amp;mut selector_client) {
     RecvResult::Ok((c, _response, _header)) =&gt; {
-        pr_info!(logger, &quot;receive a response&quot;);
+        pr_info!(logger, "receive a response");
         client = Some(c)
     }
     RecvResult::RetryLater(r) =&gt; client = Some(r.give_up()),
     RecvResult::Err(e) =&gt; {
-        pr_fatal!(logger, &quot;{e}&quot;);
+        pr_fatal!(logger, "{e}");
         panic!()
     }
 }
@@ -2587,8 +2586,8 @@ We recommend pass one of a feature to enable editor's support.</p>
 <p>If you use ROS2 humble and Visual Studio Code,
 please add <code>iron</code> in <code>rust-analyzer -&gt; cargo -&gt; features</code> as follows.</p>
 <pre><code class="language-json">{
-    &quot;rust-analyzer.cargo.features&quot;: [
-        &quot;iron&quot;
+    "rust-analyzer.cargo.features": [
+        "iron"
     ]
 }
 </code></pre>
@@ -2683,12 +2682,12 @@ Documents are written in Markdown and located in <a href="https://github.com/tie
 These Markdown files are compiled to HTML files and located in <a href="https://github.com/tier4/safe_drive/tree/main/docs">docs</a>,
 and published at <a href="https://tier4.github.io/safe_drive/">https://tier4.github.io/safe_drive/</a>.</p>
 <p>You can use (Mermaid)[https://mermaid.js.org/#/] notation in Markdown as follows.</p>
-<pre class="mermaid">graph TD;
+<pre><code class="language-mermaid">graph TD;
     A--&gt;B;
     A--&gt;C;
     B--&gt;D;
     C--&gt;D;
-</pre>
+</code></pre>
 <p>The compilation can be done by <code>make</code> as follows.</p>
 <pre><code class="language-text">$ make doc
 </code></pre>

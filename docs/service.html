@@ -177,14 +177,14 @@
 <p><a href="https://github.com/tier4/safe_drive_tutorial/tree/main/srvtest">Source code</a>.</p>
 <p>A service is a communication consisting requests and responses.
 There are a server and clients for a service as follows.</p>
-<pre class="mermaid">graph TD;
+<pre><code class="language-mermaid">graph TD;
     Server--response--&gt;Client1;
     Server--response--&gt;Client2;
     Server--response--&gt;Client3;
     Client1--request--&gt;Server;
     Client2--request--&gt;Server;
     Client3--request--&gt;Server;
-</pre>
+</code></pre>
 <p>A client sends a request and the server replies the request.
 In this tutorial, we will describe how to implement a client and a server in Rust by using <code>safe_drive</code>.</p>
 <h2 id="create-base-files"><a class="header" href="#create-base-files">Create Base Files</a></h2>
@@ -206,7 +206,7 @@ $ ros2 pkg create --build-type ament_cmake srvmsg
 <p>In addition to that, create the workspace's <code>Cargo.toml</code> as follows.</p>
 <p><code>srvtest/src/Cargo.toml</code></p>
 <pre><code class="language-toml">[workspace]
-members = [ &quot;client&quot;, &quot;server&quot;]
+members = [ "client", "server"]
 </code></pre>
 <h2 id="define-protocol"><a class="header" href="#define-protocol">Define Protocol</a></h2>
 <p>First of all, let's define a protocol for a service.
@@ -236,7 +236,7 @@ and returns the summation of the values.</p>
 find_package(rosidl_default_generators REQUIRED)
 
 rosidl_generate_interfaces(${PROJECT_NAME}
-  &quot;srv/AddTwoInts.srv&quot;
+  "srv/AddTwoInts.srv"
 )
 </code></pre>
 <h3 id="edit-srvmsgpackagexml"><a class="header" href="#edit-srvmsgpackagexml">Edit <code>srvmsg/package.xml</code></a></h3>
@@ -252,25 +252,25 @@ rosidl_generate_interfaces(${PROJECT_NAME}
 <p>To generate Rust types from <code>.srv</code> files,
 we have to edit <code>Cargo.toml</code> as follows.</p>
 <pre><code class="language-toml">[dependencies]
-safe_drive = &quot;0.3&quot;
-srvmsg = { path = &quot;/tmp/safe_drive_tutorial/srvtest/srvmsg&quot; }
-tokio = { version = &quot;1&quot;, features = [&quot;full&quot;] }
+safe_drive = "0.3"
+srvmsg = { path = "/tmp/safe_drive_tutorial/srvtest/srvmsg" }
+tokio = { version = "1", features = ["full"] }
 
 [package.metadata.ros]
-msg = [&quot;srvmsg&quot;]
-msg_dir = &quot;/tmp/safe_drive_tutorial/srvtest&quot;
-safe_drive_version = &quot;0.3&quot;
+msg = ["srvmsg"]
+msg_dir = "/tmp/safe_drive_tutorial/srvtest"
+safe_drive_version = "0.3"
 </code></pre>
 <h3 id="create-serverpackagexml"><a class="header" href="#create-serverpackagexml">Create <code>server/package.xml</code></a></h3>
 <p><code>package.xml</code> is also required as follows.</p>
 <p><code>srvtest/src/server/package.xml</code></p>
-<pre><code class="language-xml">&lt;?xml version=&quot;1.0&quot;?&gt;
-&lt;?xml-model href=&quot;http://download.ros.org/schema/package_format3.xsd&quot; schematypens=&quot;http://www.w3.org/2001/XMLSchema&quot;?&gt;
-&lt;package format=&quot;3&quot;&gt;
+<pre><code class="language-xml">&lt;?xml version="1.0"?&gt;
+&lt;?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?&gt;
+&lt;package format="3"&gt;
   &lt;name&gt;server&lt;/name&gt;
   &lt;version&gt;0.0.0&lt;/version&gt;
   &lt;description&gt;Server in Rust&lt;/description&gt;
-  &lt;maintainer email=&quot;yuuki.takano@tier4.jp&quot;&gt;Yuuki Takano&lt;/maintainer&gt;
+  &lt;maintainer email="yuuki.takano@tier4.jp"&gt;Yuuki Takano&lt;/maintainer&gt;
   &lt;license&gt;Apache License 2.0&lt;/license&gt;
 
   &lt;test_depend&gt;ament_lint_auto&lt;/test_depend&gt;
@@ -329,22 +329,22 @@ fn main() -&gt; Result&lt;(), DynError&gt; {
     let ctx = Context::new()?;
 
     // Create a node.
-    let node = ctx.create_node(&quot;server_node&quot;, None, Default::default())?;
+    let node = ctx.create_node("server_node", None, Default::default())?;
 
     // Create a server.
-    let server = node.create_server::&lt;AddTwoInts&gt;(&quot;my_service&quot;, Some(Profile::default()))?;
+    let server = node.create_server::&lt;AddTwoInts&gt;("my_service", Some(Profile::default()))?;
 
     // Create a selector.
     let mut selector = ctx.create_selector()?;
 
     // Create a logger.
-    let logger = Logger::new(&quot;server&quot;);
+    let logger = Logger::new("server");
 
     selector.add_server(
         server,
         Box::new(move |msg, _header| {
             let mut response = AddTwoInts_Response::new().unwrap();
-            pr_error!(logger, &quot;recv: {:?}&quot;, msg);
+            pr_error!(logger, "recv: {:?}", msg);
             response.result = msg.x + msg.y;
             response
         }),
@@ -358,10 +358,10 @@ fn main() -&gt; Result&lt;(), DynError&gt; {
 <pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
 </span><span class="boring">fn main() {
 </span>// Create a server.
-let server = node.create_server::&lt;AddTwoInts&gt;(&quot;my_service&quot;, Some(Profile::default()))?;
+let server = node.create_server::&lt;AddTwoInts&gt;("my_service", Some(Profile::default()))?;
 <span class="boring">}</span></code></pre></pre>
 <p><code>AddTwoInts</code> of <code>create_server::&lt;AddTwoInts&gt;</code> indicates the protocol of the server.
-The arguments of <code>&quot;my_service&quot;</code> and <code>Some(Profile::default())</code> are the service name and QoS.
+The arguments of <code>"my_service"</code> and <code>Some(Profile::default())</code> are the service name and QoS.
 If you pass <code>None</code> instead of <code>Some(Profile::default())</code>, <code>Profile::default()</code> is used.</p>
 <p>The callback was passed as follows.</p>
 <pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
@@ -370,7 +370,7 @@ If you pass <code>None</code> instead of <code>Some(Profile::default())</code>, 
     server,
     Box::new(move |msg, _header| {
         let mut response = AddTwoInts_Response::new().unwrap();
-        pr_error!(logger, &quot;recv: {:?}&quot;, msg);
+        pr_error!(logger, "recv: {:?}", msg);
         response.result = msg.x + msg.y;
         response
     }),
@@ -383,25 +383,25 @@ If you pass <code>None</code> instead of <code>Some(Profile::default())</code>, 
 <p><code>safe_drive</code>, and <code>tokio</code> must be added to <code>Cargo.toml</code> as follows.</p>
 <p><code>srvtest/src/client/Cargo.toml</code></p>
 <pre><code class="language-toml">[dependencies]
-safe_drive = &quot;0.3&quot;
-srvmsg = { path = &quot;/tmp/safe_drive_tutorial/srvtest/srvmsg&quot; }
-tokio = { version = &quot;1&quot;, features = [&quot;full&quot;] }
+safe_drive = "0.3"
+srvmsg = { path = "/tmp/safe_drive_tutorial/srvtest/srvmsg" }
+tokio = { version = "1", features = ["full"] }
 
 [package.metadata.ros]
-msg = [&quot;srvmsg&quot;]
-msg_dir = &quot;/tmp/safe_drive_tutorial/srvtest&quot;
-safe_drive_version = &quot;0.3&quot;
+msg = ["srvmsg"]
+msg_dir = "/tmp/safe_drive_tutorial/srvtest"
+safe_drive_version = "0.3"
 </code></pre>
 <h3 id="create-clientpackagexml"><a class="header" href="#create-clientpackagexml">Create <code>client/package.xml</code></a></h3>
 <p><code>package.xml</code> is also required as follows.</p>
 <p><code>srvtest/src/client/package.xml</code></p>
-<pre><code class="language-xml">&lt;?xml version=&quot;1.0&quot;?&gt;
-&lt;?xml-model href=&quot;http://download.ros.org/schema/package_format3.xsd&quot; schematypens=&quot;http://www.w3.org/2001/XMLSchema&quot;?&gt;
-&lt;package format=&quot;3&quot;&gt;
+<pre><code class="language-xml">&lt;?xml version="1.0"?&gt;
+&lt;?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?&gt;
+&lt;package format="3"&gt;
   &lt;name&gt;client&lt;/name&gt;
   &lt;version&gt;0.0.0&lt;/version&gt;
   &lt;description&gt;Client in Rust&lt;/description&gt;
-  &lt;maintainer email=&quot;yuuki.takano@tier4.jp&quot;&gt;Yuuki Takano&lt;/maintainer&gt;
+  &lt;maintainer email="yuuki.takano@tier4.jp"&gt;Yuuki Takano&lt;/maintainer&gt;
   &lt;license&gt;Apache License 2.0&lt;/license&gt;
 
   &lt;test_depend&gt;ament_lint_auto&lt;/test_depend&gt;
@@ -430,12 +430,12 @@ use tokio::time::timeout;
 async fn main() -&gt; Result&lt;(), DynError&gt; {
     // Create a context and a node.
     let ctx = Context::new()?;
-    let node = ctx.create_node(&quot;client&quot;, None, Default::default())?;
+    let node = ctx.create_node("client", None, Default::default())?;
 
-    let logger = Logger::new(&quot;client&quot;);
+    let logger = Logger::new("client");
 
     // Create a client.
-    let mut client = node.create_client::&lt;AddTwoInts&gt;(&quot;my_service&quot;, Some(Profile::default()))?;
+    let mut client = node.create_client::&lt;AddTwoInts&gt;("my_service", Some(Profile::default()))?;
 
     let mut n = 0;
     loop {
@@ -452,15 +452,15 @@ async fn main() -&gt; Result&lt;(), DynError&gt; {
 
         match timeout(Duration::from_secs(1), &amp;mut receiver).await {
             Ok(Ok((c, response, _header))) =&gt; {
-                pr_info!(logger, &quot;received {:?}&quot;, response);
+                pr_info!(logger, "received {:?}", response);
                 client = c;
             }
             Ok(Err(e)) =&gt; {
-                pr_error!(logger, &quot;error: {e}&quot;);
+                pr_error!(logger, "error: {e}");
                 return Err(e);
             }
             Err(elapsed) =&gt; {
-                pr_warn!(logger, &quot;timeout: {elapsed}&quot;);
+                pr_warn!(logger, "timeout: {elapsed}");
                 client = receiver.give_up();
             }
         }

@@ -191,7 +191,7 @@ To use CycloneDDS, please install it as <a href="http://docs.ros.org.ros.informa
 <p>Add <code>safe_drive</code> to dependencies section of <code>Cargo.toml</code> as follows.</p>
 <p><code>Cargo.toml</code></p>
 <pre><code class="language-toml">[dependencies]
-safe_drive = &quot;0.3&quot;
+safe_drive = "0.3"
 </code></pre>
 <h2 id="mainrs"><a class="header" href="#mainrs"><code>main.rs</code></a></h2>
 <p><code>main.rs</code> can be implemented as follows,
@@ -200,17 +200,17 @@ but almost every lines are same as shown before.</p>
 <pre><pre class="playground"><code class="language-rust">use safe_drive::{context::Context, msg::common_interfaces::std_msgs};
 use std::{error::Error, time::Duration};
 
-const TOPIC_NAME: &amp;str = &quot;pubsub_loaned&quot;;
+const TOPIC_NAME: &amp;str = "pubsub_loaned";
 
 fn main() -&gt; Result&lt;(), Box&lt;dyn Error + Sync + Send + 'static&gt;&gt; {
     // create a context
     let ctx = Context::new()?;
 
     // create a subscribe node
-    let node_sub = ctx.create_node(&quot;loaned_sub_node&quot;, None, Default::default())?;
+    let node_sub = ctx.create_node("loaned_sub_node", None, Default::default())?;
 
     // create a publish node
-    let node_pub = ctx.create_node(&quot;loaned_pub_node&quot;, None, Default::default())?;
+    let node_pub = ctx.create_node("loaned_pub_node", None, Default::default())?;
 
     std::thread::sleep(Duration::from_millis(500));
 
@@ -219,7 +219,7 @@ fn main() -&gt; Result&lt;(), Box&lt;dyn Error + Sync + Send + 'static&gt;&gt; {
     let publisher = node_pub.create_publisher::&lt;std_msgs::msg::Bool&gt;(TOPIC_NAME, None)?;
 
     let mut loaned = publisher.borrow_loaned_message()?;
-    *loaned = std_msgs::msg::Bool::new().ok_or(&quot;failed to new Bool&quot;)?;
+    *loaned = std_msgs::msg::Bool::new().ok_or("failed to new Bool")?;
     loaned.data = false;
     publisher.send_loaned(loaned)?; // send message
 
@@ -241,7 +241,7 @@ fn main() -&gt; Result&lt;(), Box&lt;dyn Error + Sync + Send + 'static&gt;&gt; {
 <pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
 </span><span class="boring">fn main() {
 </span>let mut loaned = publisher.borrow_loaned_message()?;
-*loaned = std_msgs::msg::Bool::new().ok_or(&quot;failed to new Bool&quot;)?;
+*loaned = std_msgs::msg::Bool::new().ok_or("failed to new Bool")?;
 loaned.data = false;
 publisher.send_loaned(loaned)?; // send message
 <span class="boring">}</span></code></pre></pre>
@@ -253,9 +253,9 @@ and it uses conventional copied APIs if zero copy is not available.</p>
 <p>To enable zero copy, please prepare cyclonedds.xml, which is a configuration file of CycloneDDS, as follows.
 You can use arbitrary name for it.</p>
 <p><code>cyclonedds.xml</code></p>
-<pre><code class="language-xml">&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot; ?&gt;
-&lt;CycloneDDS xmlns=&quot;https://cdds.io/config&quot; xmlns:xsi=&quot;http://www.w3.org/2001/XMLSchema-instance&quot; xsi:schemaLocation=&quot;https://cdds.io/config https://raw.githubusercontent.com/eclipse-cyclonedds/cyclonedds/iceoryx/etc/cyclonedds.xsd&quot;&gt;
-    &lt;Domain id=&quot;any&quot;&gt;
+<pre><code class="language-xml">&lt;?xml version="1.0" encoding="UTF-8" ?&gt;
+&lt;CycloneDDS xmlns="https://cdds.io/config" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="https://cdds.io/config https://raw.githubusercontent.com/eclipse-cyclonedds/cyclonedds/iceoryx/etc/cyclonedds.xsd"&gt;
+    &lt;Domain id="any"&gt;
         &lt;SharedMemory&gt;
             &lt;Enable&gt;true&lt;/Enable&gt;
             &lt;LogLevel&gt;info&lt;/LogLevel&gt;
