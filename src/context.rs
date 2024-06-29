@@ -77,7 +77,7 @@ impl Context {
             // initialize context
             guard.rcl_init(
                 CARGS.len() as i32,
-                CARGS.as_ptr() as *const *const i8,
+                CARGS.as_ptr() as *const *const ::std::os::raw::c_char,
                 options.as_ptr(),
                 &mut context,
             )?;
