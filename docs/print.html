@@ -245,7 +245,7 @@ This communication is so-called topic by ROS2.
 There are <code>N</code> senders and <code>M</code> receivers in a topic.
 This tutorial implements 1 sender (in Rust) and 2 receivers (in Rust and C++).</p>
 <p>The following figure is a example topology.</p>
-<pre><code class="language-mermaid">graph TD;
+<pre class="mermaid">graph TD;
     Publisher1--&gt;TopicA;
     Publisher2--&gt;TopicA;
     TopicA--&gt;Subscriber1;
@@ -256,7 +256,7 @@ This tutorial implements 1 sender (in Rust) and 2 receivers (in Rust and C++).</
     Publisher5--&gt;TopicB;
     TopicB--&gt;Subscriber4;
     TopicB--&gt;Subscriber5;
-</code></pre>
+</pre>
 <p>There are 2 topics, <code>TopicA</code> and <code>TopicB</code> in this figure.
 If <code>Publisher2</code> of <code>TopicA</code> send a message,
 <code>Subscriber1-3</code> subscribing <code>TopicA</code> receive the message.
@@ -328,14 +328,14 @@ A node contains publishers, subscribers, servers, and clients.
 A node is a functional unit of ROS2.
 Publishers and subscribers can be created by a node.</p>
 <p>The following figure is an example hierarchy.</p>
-<pre><code class="language-mermaid">graph TD;
+<pre class="mermaid">graph TD;
     Context--&gt;NodeA
     NodeA--&gt;SubscriberA
     NodeA--&gt;SubscriberB
     NodeA--&gt;PublisherA
     NodeA--&gt;PublisherB
     NodeA--&gt;PublisherC
-</code></pre>
+</pre>
 <p>In this figure, <code>NodeA</code> is created by a context,
 and subscribers and publishers are created by the node.</p>
 <p>Now, we have understood the basics of ROS2.
@@ -1557,14 +1557,14 @@ we can use <code>as_slice_mut()</code> or <code>as_slice_mut()</code> as follows
 <p><a href="https://github.com/tier4/safe_drive_tutorial/tree/main/srvtest">Source code</a>.</p>
 <p>A service is a communication consisting requests and responses.
 There are a server and clients for a service as follows.</p>
-<pre><code class="language-mermaid">graph TD;
+<pre class="mermaid">graph TD;
     Server--response--&gt;Client1;
     Server--response--&gt;Client2;
     Server--response--&gt;Client3;
     Client1--request--&gt;Server;
     Client2--request--&gt;Server;
     Client3--request--&gt;Server;
-</code></pre>
+</pre>
 <p>A client sends a request and the server replies the request.
 In this tutorial, we will describe how to implement a client and a server in Rust by using <code>safe_drive</code>.</p>
 <h2 id="create-base-files"><a class="header" href="#create-base-files">Create Base Files</a></h2>
@@ -1702,7 +1702,7 @@ pub struct AddTwoInts_Response {
 <h3 id="edit-serversrcmainrs"><a class="header" href="#edit-serversrcmainrs">Edit <code>server/src/main.rs</code></a></h3>
 <p>You have to create a server by <code>create_server()</code> method and register a callback function to a selector as follows.</p>
 <pre><pre class="playground"><code class="language-rust">use safe_drive::{context::Context, error::DynError, logger::Logger, pr_error, qos::Profile};
-use srvmsg_rs::srvmsg::srv::{AddTwoInts, AddTwoInts_Response};
+use srvmsg::srv::{AddTwoInts, AddTwoInts_Response};
 
 fn main() -&gt; Result&lt;(), DynError&gt; {
     // Create a context.
@@ -1802,7 +1802,7 @@ In this tutorial, we use <a href="https://tokio.rs/">Tokio</a>, which is the mos
 <pre><pre class="playground"><code class="language-rust">use safe_drive::{
     context::Context, error::DynError, logger::Logger, pr_error, pr_info, pr_warn, qos::Profile,
 };
-use srvmsg_rs::srvmsg::srv::{AddTwoInts, AddTwoInts_Request};
+use srvmsg::srv::{AddTwoInts, AddTwoInts_Request};
 use std::time::Duration;
 use tokio::time::timeout;
 
@@ -1892,13 +1892,13 @@ and it can be used for the server as follows.</p>
 <p><a href="https://github.com/tier4/safe_drive_tutorial/tree/main/params">Source code</a>.</p>
 <p>This chapter introduces how to use parameters.
 A node can have parameters as follows.</p>
-<pre><code class="language-mermaid">graph TD;
-   NodeA --&gt; ParamA1:i64;
-   NodeA --&gt; ParamA2:bool;
-   NodeA --&gt; ParamA3:String;
-   NodeB --&gt; ParamB1:f64;
-   NodeB --&gt; ParamB2:f64;
-</code></pre>
+<pre class="mermaid">graph TD;
+    NodeA --&gt; ParamA1:i64;
+    NodeA --&gt; ParamA2:bool;
+    NodeA --&gt; ParamA3:String;
+    NodeB --&gt; ParamB1:f64;
+    NodeB --&gt; ParamB2:f64;
+</pre>
 <p>In this figure, NodeA has 3 parameters whose types are
 <code>i64</code>, <code>bool</code>, and <code>String</code>, respectively,
 and NodeB has 2 parameters whose types are <code>f64</code>.
@@ -1979,12 +1979,12 @@ pub struct Parameters { /* omitted private fields */ }
 }
 <span class="boring">}</span></code></pre></pre>
 <p>In summary, a parameter server can be represented as follows.</p>
-<pre><code class="language-mermaid">graph TD;
-   ParameterServer --&gt; Parameters;
-   Parameters --&gt; Parameter;
-   Parameter --&gt; Descriptor;
-   Parameter --&gt; Value;
-</code></pre>
+<pre class="mermaid">graph TD;
+    ParameterServer --&gt; Parameters;
+    Parameters --&gt; Parameter;
+    Parameter --&gt; Descriptor;
+    Parameter --&gt; Value;
+</pre>
 <h2 id="parameter-setting-and-waiting-update-by-callback"><a class="header" href="#parameter-setting-and-waiting-update-by-callback">Parameter Setting and Waiting Update by Callback</a></h2>
 <p>We will explain how to set parameters,
 and how to wait updating by using a callback function.</p>
@@ -1996,7 +1996,13 @@ safe_drive = "0.3"
 <h3 id="edit-param_serversrcmainrs"><a class="header" href="#edit-param_serversrcmainrs">Edit <code>param_server/src/main.rs</code></a></h3>
 <p><code>param_server</code> can be implemented as follows.
 This sets 2 parameters up and waits updating.</p>
-<pre><pre class="playground"><code class="language-rust">use safe_drive::{context::Context, error::DynError, logger::Logger, parameter::Value, pr_info};
+<pre><pre class="playground"><code class="language-rust">use safe_drive::{
+    context::Context,
+    error::DynError,
+    logger::Logger,
+    parameter::{Descriptor, Parameter, Value},
+    pr_info,
+};
 
 fn main() -&gt; Result&lt;(), DynError&gt; {
     // Create a context and a node.
@@ -2027,19 +2033,19 @@ fn main() -&gt; Result&lt;(), DynError&gt; {
 
         // Add Directly from Parameter struct
         let parameter_to_set = Parameter {
-            Descriptor {
-                Some("my parameter description".to_string()),               // parameter description
-                Some("my parameter addutional_constraints".to_string()),    // parameter additional constraints
-                false,                                                      // read only ?
-                false,                                                      // static or Dynamic
-                None,                                                       // floating point range 
-                None,                                                       // integer point range 
+            descriptor: Descriptor {
+                description: "my parameter description".to_string(), // parameter description
+                additional_constraints: "my parameter addutional_constraints".to_string(), // parameter additional constraints
+                read_only: false,           // read only ?
+                dynamic_typing: false,      // static or Dynamic
+                floating_point_range: None, // floating point range
+                integer_range: None,        // integer point range
             },
-            Value::Bool(false),                                             // value
-        }
+            value: Value::Bool(false), // value
+        };
         params.add_parameter(
-            ("my parameter").to_string(),       // name
-            parameter_to_set,                   // parameter
+            ("my parameter").to_string(), // name
+            parameter_to_set,             // parameter
         )?;
     }
 
@@ -2100,19 +2106,19 @@ for mutual exclusion by <code>write()</code> method.</p>
 
     // Add Directly from Parameter struct
     let parameter_to_set = Parameter {
-        Descriptor {
-            Some("my parameter description".to_string()),               // parameter description
-            Some("my parameter addutional_constraints".to_string()),    // parameter additional constraints
-            false,                                                      // read only ?
-            false,                                                      // static or Dynamic
-            None,                                                       // floating point range 
-            None,                                                       // integer point range 
+        descriptor: Descriptor {
+            description: "my parameter description".to_string(), // parameter description
+            additional_constraints: "my parameter addutional_constraints".to_string(), // parameter additional constraints
+            read_only: false,           // read only ?
+            dynamic_typing: false,      // static or Dynamic
+            floating_point_range: None, // floating point range
+            integer_range: None,        // integer point range
         },
-        Value::Bool(false),                                             // value
-    }
+        value: Value::Bool(false), // value
+    };
     params.add_parameter(
-        ("my parameter").to_string(),       // name
-        parameter_to_set,                   // parameter
+        ("my parameter").to_string(), // name
+        parameter_to_set,             // parameter
     )?;
 }
 <span class="boring">}</span></code></pre></pre>
@@ -2181,7 +2187,13 @@ tokio = { version = "1", features = ["full"] }
 <h3 id="edit-async_param_serversrcmainrs"><a class="header" href="#edit-async_param_serversrcmainrs">Edit <code>async_param_server/src/main.rs</code></a></h3>
 <p><code>async_param_server</code> can be implemented as follows.
 This sets 2 parameters up and waits updating.</p>
-<pre><pre class="playground"><code class="language-rust">use safe_drive::{context::Context, error::DynError, logger::Logger, parameter::Value, pr_info};
+<pre><pre class="playground"><code class="language-rust">use safe_drive::{
+    context::Context,
+    error::DynError,
+    logger::Logger,
+    parameter::{Descriptor, Parameter, Value},
+    pr_info,
+};
 
 #[tokio::main]
 async fn main() -&gt; Result&lt;(), DynError&gt; {
@@ -2213,19 +2225,19 @@ async fn main() -&gt; Result&lt;(), DynError&gt; {
 
         // Add Directly from Parameter struct
         let parameter_to_set = Parameter {
-            Descriptor {
-                Some("my parameter description".to_string()),               // parameter description
-                Some("my parameter addutional_constraints".to_string()),    // parameter additional constraints
-                false,                                                      // read only ?
-                false,                                                      // static or Dynamic
-                None,                                                       // floating point range 
-                None,                                                       // integer point range 
+            descriptor: Descriptor {
+                description: "my parameter description".to_string(), // parameter description
+                additional_constraints: "my parameter addutional_constraints".to_string(), // parameter additional constraints
+                read_only: false,           // read only ?
+                dynamic_typing: false,      // static or Dynamic
+                floating_point_range: None, // floating point range
+                integer_range: None,        // integer point range
             },
-            Value::Bool(false),                                             // value
-        }
+            value: Value::Bool(false), // value
+        };
         params.add_parameter(
-            ("my parameter").to_string(),       // name
-            parameter_to_set,                   // parameter
+            ("my parameter").to_string(), // name
+            parameter_to_set,             // parameter
         )?;
     }
 
@@ -2489,11 +2501,11 @@ it sends a request to the server and receives a response
 by <code>recv_timeout()</code> method.</p>
 <h2 id="state-change"><a class="header" href="#state-change">State Change</a></h2>
 <p>A service's state can be represented as follows.</p>
-<pre><code class="language-mermaid">graph LR;
-   Start--&gt;Send
-   Send--&gt;Receive
-   Receive--&gt;Send
-</code></pre>
+<pre class="mermaid">graph LR;
+    Start--&gt;Send
+    Send--&gt;Receive
+    Receive--&gt;Send
+</pre>
 <p>To represent the state, <code>safe_drive</code> uses the type system of Rust.</p>
 <p>First, a client is created as follows.
 At that time, it must be <code>Send</code> state.</p>
@@ -2682,12 +2694,12 @@ Documents are written in Markdown and located in <a href="https://github.com/tie
 These Markdown files are compiled to HTML files and located in <a href="https://github.com/tier4/safe_drive/tree/main/docs">docs</a>,
 and published at <a href="https://tier4.github.io/safe_drive/">https://tier4.github.io/safe_drive/</a>.</p>
 <p>You can use (Mermaid)[https://mermaid.js.org/#/] notation in Markdown as follows.</p>
-<pre><code class="language-mermaid">graph TD;
+<pre class="mermaid">graph TD;
     A--&gt;B;
     A--&gt;C;
     B--&gt;D;
     C--&gt;D;
-</code></pre>
+</pre>
 <p>The compilation can be done by <code>make</code> as follows.</p>
 <pre><code class="language-text">$ make doc
 </code></pre>
