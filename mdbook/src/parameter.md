@@ -142,7 +142,13 @@ safe_drive = "0.3"
 This sets 2 parameters up and waits updating.
 
 ```rust
-use safe_drive::{context::Context, error::DynError, logger::Logger, parameter::Value, pr_info};
+use safe_drive::{
+    context::Context,
+    error::DynError,
+    logger::Logger,
+    parameter::{Descriptor, Parameter, Value},
+    pr_info,
+};
 
 fn main() -> Result<(), DynError> {
     // Create a context and a node.
@@ -173,19 +179,19 @@ fn main() -> Result<(), DynError> {
 
         // Add Directly from Parameter struct
         let parameter_to_set = Parameter {
-            Descriptor {
-                Some("my parameter description".to_string()),               // parameter description
-                Some("my parameter addutional_constraints".to_string()),    // parameter additional constraints
-                false,                                                      // read only ?
-                false,                                                      // static or Dynamic
-                None,                                                       // floating point range 
-                None,                                                       // integer point range 
+            descriptor: Descriptor {
+                description: "my parameter description".to_string(), // parameter description
+                additional_constraints: "my parameter addutional_constraints".to_string(), // parameter additional constraints
+                read_only: false,           // read only ?
+                dynamic_typing: false,      // static or Dynamic
+                floating_point_range: None, // floating point range
+                integer_range: None,        // integer point range
             },
-            Value::Bool(false),                                             // value
-        }
+            value: Value::Bool(false), // value
+        };
         params.add_parameter(
-            ("my parameter").to_string(),       // name
-            parameter_to_set,                   // parameter
+            ("my parameter").to_string(), // name
+            parameter_to_set,             // parameter
         )?;
     }
 
@@ -250,19 +256,19 @@ for mutual exclusion by `write()` method.
 
     // Add Directly from Parameter struct
     let parameter_to_set = Parameter {
-        Descriptor {
-            Some("my parameter description".to_string()),               // parameter description
-            Some("my parameter addutional_constraints".to_string()),    // parameter additional constraints
-            false,                                                      // read only ?
-            false,                                                      // static or Dynamic
-            None,                                                       // floating point range 
-            None,                                                       // integer point range 
+        descriptor: Descriptor {
+            description: "my parameter description".to_string(), // parameter description
+            additional_constraints: "my parameter addutional_constraints".to_string(), // parameter additional constraints
+            read_only: false,           // read only ?
+            dynamic_typing: false,      // static or Dynamic
+            floating_point_range: None, // floating point range
+            integer_range: None,        // integer point range
         },
-        Value::Bool(false),                                             // value
-    }
+        value: Value::Bool(false), // value
+    };
     params.add_parameter(
-        ("my parameter").to_string(),       // name
-        parameter_to_set,                   // parameter
+        ("my parameter").to_string(), // name
+        parameter_to_set,             // parameter
     )?;
 }
 ```
@@ -355,7 +361,13 @@ tokio = { version = "1", features = ["full"] }
 This sets 2 parameters up and waits updating.
 
 ```rust
-use safe_drive::{context::Context, error::DynError, logger::Logger, parameter::Value, pr_info};
+use safe_drive::{
+    context::Context,
+    error::DynError,
+    logger::Logger,
+    parameter::{Descriptor, Parameter, Value},
+    pr_info,
+};
 
 #[tokio::main]
 async fn main() -> Result<(), DynError> {
@@ -387,19 +399,19 @@ async fn main() -> Result<(), DynError> {
 
         // Add Directly from Parameter struct
         let parameter_to_set = Parameter {
-            Descriptor {
-                Some("my parameter description".to_string()),               // parameter description
-                Some("my parameter addutional_constraints".to_string()),    // parameter additional constraints
-                false,                                                      // read only ?
-                false,                                                      // static or Dynamic
-                None,                                                       // floating point range 
-                None,                                                       // integer point range 
+            descriptor: Descriptor {
+                description: "my parameter description".to_string(), // parameter description
+                additional_constraints: "my parameter addutional_constraints".to_string(), // parameter additional constraints
+                read_only: false,           // read only ?
+                dynamic_typing: false,      // static or Dynamic
+                floating_point_range: None, // floating point range
+                integer_range: None,        // integer point range
             },
-            Value::Bool(false),                                             // value
-        }
+            value: Value::Bool(false), // value
+        };
         params.add_parameter(
-            ("my parameter").to_string(),       // name
-            parameter_to_set,                   // parameter
+            ("my parameter").to_string(), // name
+            parameter_to_set,             // parameter
         )?;
     }
 
