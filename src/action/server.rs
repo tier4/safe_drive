@@ -98,6 +98,7 @@ pub(crate) struct ServerData {
     pub(crate) server: rcl::rcl_action_server_t,
     pub node: Arc<Node>,
     pub(crate) clock: Mutex<Clock>,
+    pub(crate) pending_result_requests: Mutex<BTreeMap<[u8; 16], Vec<rmw_request_id_t>>>,
 }
 
 impl ServerData {
@@ -180,6 +181,7 @@ where
                 server,
                 node,
                 clock: Mutex::new(clock),
+                pending_result_requests: Mutex::new(BTreeMap::new()),
             }),
             results: Arc::new(Mutex::new(BTreeMap::new())),
             handles: Arc::new(Mutex::new(BTreeMap::new())),
@@ -359,14 +361,6 @@ where
             is_waiting: false,
         }
         .await
-    }
-
-    pub async fn process_result_request(self) -> Result<[u8; 16], DynError> {
-        let (sender, req) = self.recv_result_request().await?;
-        if let Err((_sender, e)) = sender.send(req.get_uuid()) {
-            return Err(e);
-        }
-        Ok(*req.get_uuid())
     }
 }
 
@@ -669,11 +663,11 @@ pub struct ServerResultSend<T: ActionMsg> {
 
 impl<T: ActionMsg> ServerResultSend<T> {
     pub fn send(mut self, uuid: &[u8; 16]) -> Result<Server<T>, (Self, DynError)> {
-        let removed = {
-            let mut results = self.results.lock();
-            results.remove(uuid)
+        let res = {
+            let results = self.results.lock();
+            results.get(uuid).cloned()
         };
-        match removed {
+        match res {
             Some(result) => {
                 let mut response = T::new_result_response(GoalStatus::Succeeded as u8, result);
                 let guard = rcl::MT_UNSAFE_FN.lock();
@@ -699,18 +693,17 @@ impl<T: ActionMsg> ServerResultSend<T> {
                 }
             }
             None => {
-                let logger = Logger::new("safe_drive");
-                pr_error_in!(
-                    logger,
-                    "The result for the goal (uuid: {:?}) is not available yet",
-                    uuid
-                );
-                let e = format!(
-                    "The result for the goal (uuid: {:?}) is not available yet",
-                    uuid
-                );
+                {
+                    let mut pending_requests = self.data.pending_result_requests.lock();
+                    let requests = pending_requests.entry(*uuid).or_insert_with(Vec::new);
+                    requests.push(self.request_id);
+                }
 
-                Err((self, e.into()))
+                Ok(Server {
+                    data: self.data,
+                    results: self.results,
+                    handles: self.handles,
+                })
             }
         }
     }

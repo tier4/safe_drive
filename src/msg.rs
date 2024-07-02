@@ -50,7 +50,7 @@ pub trait ActionMsg {
         uuid: [u8; 16],
     ) -> <Self::Goal as ActionGoal>::Request;
 
-    type ResultContent: TypeSupport;
+    type ResultContent: TypeSupport + Clone;
     fn new_result_response(
         status: u8,
         result: Self::ResultContent,

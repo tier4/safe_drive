@@ -3,7 +3,8 @@ use std::{collections::BTreeMap, rc::Rc, sync::Arc};
 
 use super::{server::ServerData, GoalEvent, GoalStatus};
 use crate::{
-    error::{DynError, RCLActionError},
+    error::{DynError, RCLActionError, RCLActionResult},
+    logger::{pr_error_in, Logger},
     msg::ActionMsg,
     rcl,
 };
@@ -60,14 +61,7 @@ where
     }
 
     pub fn canceled(&self, result: T::ResultContent) -> Result<(), DynError> {
-        let mut results = self.results.lock();
-        if results.insert(self.goal_id, result).is_some() {
-            return Err(format!(
-                "the result for the goal (id: {:?}) already exists; it should be set only once",
-                self.goal_id
-            )
-            .into());
-        }
+        self.update_result(result)?;
 
         self.update(GoalEvent::Canceled)?;
         self.data.publish_goal_status()?;
@@ -76,14 +70,7 @@ where
     }
 
     pub fn finish(&self, result: T::ResultContent) -> Result<(), DynError> {
-        let mut results = self.results.lock();
-        if results.insert(self.goal_id, result).is_some() {
-            return Err(format!(
-                "the result for the goal (id: {:?}) already exists; it should be set only once",
-                self.goal_id
-            )
-            .into());
-        }
+        self.update_result(result)?;
 
         self.update(GoalEvent::Succeed)?;
         self.data.publish_goal_status()?;
@@ -109,6 +96,55 @@ where
 
     pub(crate) fn update(&self, event: GoalEvent) -> Result<(), RCLActionError> {
         self.handle.update_goal_state(event)
+    }
+
+    fn update_result(&self, result: T::ResultContent) -> Result<(), DynError> {
+        let mut results = self.results.lock();
+        if results.insert(self.goal_id, result.clone()).is_some() {
+            return Err(format!(
+                "the result for the goal (id: {:?}) already exists; it should be set only once",
+                self.goal_id
+            )
+            .into());
+        }
+
+        self.send_available_results(self.goal_id, result)?;
+
+        Ok(())
+    }
+
+    pub(crate) fn send_available_results(
+        &self,
+        goal_id: [u8; 16],
+        result: T::ResultContent,
+    ) -> RCLActionResult<()> {
+        let mut requests = self.data.pending_result_requests.lock();
+        let guard = rcl::MT_UNSAFE_FN.lock();
+
+        if let Some(reqs) = requests.remove(&goal_id) {
+            for mut request_id in reqs {
+                let response = T::new_result_response(GoalStatus::Succeeded as u8, result.clone());
+
+                match guard.rcl_action_send_result_response(
+                    unsafe { self.data.as_ptr_mut() },
+                    &mut request_id,
+                    &response as *const _ as *mut _,
+                ) {
+                    Ok(()) => {}
+                    Err(e) => {
+                        let logger = Logger::new("safe_drive");
+                        pr_error_in!(
+                            logger,
+                            "failed to send result response from action server: {}",
+                            e
+                        );
+                        return Err(e.into());
+                    }
+                }
+            }
+        }
+
+        Ok(())
     }
 }
 

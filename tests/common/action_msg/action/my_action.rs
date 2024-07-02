@@ -653,7 +653,7 @@ impl GoalResponse for MyAction_SendGoal_Response {
 }
 
 #[repr(C)]
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct MyAction_Result {
     pub b: i64,
 }
