@@ -28,6 +28,9 @@ use crate::qos::humble::*;
 #[cfg(feature = "iron")]
 use crate::qos::iron::*;
 
+#[cfg(feature = "jazzy")]
+use crate::qos::jazzy::*;
+
 use super::{
     handle::GoalHandle, update_goal_status, GetResultServiceRequest, GoalStatus,
     SendGoalServiceRequest,

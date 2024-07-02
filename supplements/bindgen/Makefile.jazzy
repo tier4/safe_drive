@@ -1,0 +1,36 @@
+all: msg.rs
+
+.SUFFIXES: .rs .c
+
+all: msg.rs rcl.rs
+	cp msg.rs ../../src/msg/$(ROS_DISTRO)/runtime_c.rs
+	cp rcl.rs ../../src/rcl/$(ROS_DISTRO).rs
+
+.c.rs:
+	bindgen --no-doc-comments --blocklist-function atexit $< -o $@ -- \
+	-I/opt/ros/$(ROS_DISTRO)/include/rcl \
+	-I/opt/ros/$(ROS_DISTRO)/include/rcutils \
+	-I/opt/ros/$(ROS_DISTRO)/include/rmw \
+	-I/opt/ros/$(ROS_DISTRO)/include/rcl_yaml_param_parser \
+	-I/opt/ros/$(ROS_DISTRO)/include/rosidl_runtime_c \
+	-I/opt/ros/$(ROS_DISTRO)/include/rosidl_typesupport_interface \
+	-I/opt/ros/$(ROS_DISTRO)/include/rcl_action \
+	-I/opt/ros/$(ROS_DISTRO)/include/action_msgs \
+	-I/opt/ros/$(ROS_DISTRO)/include/unique_identifier_msgs \
+	-I/opt/ros/$(ROS_DISTRO)/include/builtin_interfaces \
+	-I/opt/ros/$(ROS_DISTRO)/include/rosidl_dynamic_typesupport \
+	-I/opt/ros/$(ROS_DISTRO)/include/service_msgs \
+	-I/opt/ros/$(ROS_DISTRO)/include/type_description_interfaces
+	sed -i -e 's/"\* */"\* /'  $@
+
+msg.rs: msg.c
+	bindgen --no-doc-comments --blocklist-function atexit $< -o $@ -- \
+	-I/opt/ros/$(ROS_DISTRO)/include/rosidl_runtime_c \
+	-I/opt/ros/$(ROS_DISTRO)/include/builtin_interfaces \
+	-I/opt/ros/$(ROS_DISTRO)/include/rcl \
+	-I/opt/ros/$(ROS_DISTRO)/include/rcutils \
+	-I/opt/ros/$(ROS_DISTRO)/include/rosidl_typesupport_interface
+	sh sed_crate.sh $@
+
+clean:
+	rm -f *.rs

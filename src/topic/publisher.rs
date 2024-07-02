@@ -284,14 +284,14 @@ impl Options {
             allocator: get_allocator(),
             rmw_publisher_options: rcl::MTSafeFn::rmw_get_default_publisher_options(),
 
-            #[cfg(feature = "iron")]
+            #[cfg(any(feature = "iron", feature = "jazzy"))]
             disable_loaned_message: false,
         };
         Options { options }
     }
 
     fn disable_loaned_message(&mut self) {
-        #[cfg(feature = "iron")]
+        #[cfg(any(feature = "iron", feature = "jazzy"))]
         {
             self.options.disable_loaned_message = true;
         }

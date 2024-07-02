@@ -48,6 +48,7 @@ features = ["attributes"]
 default = []
 statistics = ["serde", "serde_json"]
 rcl_stat = ["statistics"]
+jazzy = []
 iron = []
 humble = []
 galactic = []
@@ -56,7 +57,7 @@ custom_alloc = []
 [package.metadata.docs.rs]
 
 # Features to pass to Cargo (default: [])
-features = ["iron", "custom_alloc"]
+features = ["jazzy", "custom_alloc"]
 
 # Whether to pass `--all-features` to Cargo (default: false)
 all-features = false
