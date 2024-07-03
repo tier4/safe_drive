@@ -58,6 +58,20 @@ pub use iron::{
 #[cfg(feature = "iron")]
 pub type size_t = usize;
 
+#[cfg(feature = "jazzy")]
+#[allow(unused_imports)]
+mod jazzy;
+
+#[cfg(feature = "jazzy")]
+pub(crate) use jazzy::*;
+#[cfg(feature = "jazzy")]
+pub use jazzy::{
+    rosidl_action_type_support_t, rosidl_message_type_support_t, rosidl_service_type_support_t,
+};
+
+#[cfg(feature = "jazzy")]
+pub type size_t = usize;
+
 use crate::{
     error::{action_ret_val_to_err, ret_val_to_err, RCLActionResult, RCLError, RCLResult},
     parameter::Value,
