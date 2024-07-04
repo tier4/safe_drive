@@ -290,11 +290,11 @@ it sends a request to the server and receives a response
 by <code>recv_timeout()</code> method.</p>
 <h2 id="state-change"><a class="header" href="#state-change">State Change</a></h2>
 <p>A service's state can be represented as follows.</p>
-<pre><code class="language-mermaid">graph LR;
-   Start--&gt;Send
-   Send--&gt;Receive
-   Receive--&gt;Send
-</code></pre>
+<pre class="mermaid">graph LR;
+    Start--&gt;Send
+    Send--&gt;Receive
+    Receive--&gt;Send
+</pre>
 <p>To represent the state, <code>safe_drive</code> uses the type system of Rust.</p>
 <p>First, a client is created as follows.
 At that time, it must be <code>Send</code> state.</p>

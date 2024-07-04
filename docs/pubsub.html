@@ -180,7 +180,7 @@ This communication is so-called topic by ROS2.
 There are <code>N</code> senders and <code>M</code> receivers in a topic.
 This tutorial implements 1 sender (in Rust) and 2 receivers (in Rust and C++).</p>
 <p>The following figure is a example topology.</p>
-<pre><code class="language-mermaid">graph TD;
+<pre class="mermaid">graph TD;
     Publisher1--&gt;TopicA;
     Publisher2--&gt;TopicA;
     TopicA--&gt;Subscriber1;
@@ -191,7 +191,7 @@ This tutorial implements 1 sender (in Rust) and 2 receivers (in Rust and C++).</
     Publisher5--&gt;TopicB;
     TopicB--&gt;Subscriber4;
     TopicB--&gt;Subscriber5;
-</code></pre>
+</pre>
 <p>There are 2 topics, <code>TopicA</code> and <code>TopicB</code> in this figure.
 If <code>Publisher2</code> of <code>TopicA</code> send a message,
 <code>Subscriber1-3</code> subscribing <code>TopicA</code> receive the message.
@@ -263,14 +263,14 @@ A node contains publishers, subscribers, servers, and clients.
 A node is a functional unit of ROS2.
 Publishers and subscribers can be created by a node.</p>
 <p>The following figure is an example hierarchy.</p>
-<pre><code class="language-mermaid">graph TD;
+<pre class="mermaid">graph TD;
     Context--&gt;NodeA
     NodeA--&gt;SubscriberA
     NodeA--&gt;SubscriberB
     NodeA--&gt;PublisherA
     NodeA--&gt;PublisherB
     NodeA--&gt;PublisherC
-</code></pre>
+</pre>
 <p>In this figure, <code>NodeA</code> is created by a context,
 and subscribers and publishers are created by the node.</p>
 <p>Now, we have understood the basics of ROS2.

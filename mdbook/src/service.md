@@ -199,7 +199,7 @@ You have to create a server by `create_server()` method and register a callback 
 
 ```rust
 use safe_drive::{context::Context, error::DynError, logger::Logger, pr_error, qos::Profile};
-use srvmsg_rs::srvmsg::srv::{AddTwoInts, AddTwoInts_Response};
+use srvmsg::srv::{AddTwoInts, AddTwoInts_Response};
 
 fn main() -> Result<(), DynError> {
     // Create a context.
@@ -321,7 +321,7 @@ In this tutorial, we use [Tokio](https://tokio.rs/), which is the most popular a
 use safe_drive::{
     context::Context, error::DynError, logger::Logger, pr_error, pr_info, pr_warn, qos::Profile,
 };
-use srvmsg_rs::srvmsg::srv::{AddTwoInts, AddTwoInts_Request};
+use srvmsg::srv::{AddTwoInts, AddTwoInts_Request};
 use std::time::Duration;
 use tokio::time::timeout;
 
