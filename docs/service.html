@@ -252,7 +252,7 @@ rosidl_generate_interfaces(${PROJECT_NAME}
 <p>To generate Rust types from <code>.srv</code> files,
 we have to edit <code>Cargo.toml</code> as follows.</p>
 <pre><code class="language-toml">[dependencies]
-safe_drive = "0.3"
+safe_drive = "0.4"
 srvmsg = { path = "/tmp/safe_drive_tutorial/srvtest/srvmsg" }
 tokio = { version = "1", features = ["full"] }
 
@@ -383,7 +383,7 @@ If you pass <code>None</code> instead of <code>Some(Profile::default())</code>, 
 <p><code>safe_drive</code>, and <code>tokio</code> must be added to <code>Cargo.toml</code> as follows.</p>
 <p><code>srvtest/src/client/Cargo.toml</code></p>
 <pre><code class="language-toml">[dependencies]
-safe_drive = "0.3"
+safe_drive = "0.4"
 srvmsg = { path = "/tmp/safe_drive_tutorial/srvtest/srvmsg" }
 tokio = { version = "1", features = ["full"] }
 

@@ -1,0 +1,17 @@
+version: '3'
+services:
+  safe_drive_jazzy:
+    build:
+      context: .
+    stdin_open: true
+    tty: true
+    working_dir: "/safe_drive"
+    volumes:
+      - "../../:/safe_drive"
+    cap_add:
+      - SYS_PTRACE
+      - SYS_ADMIN
+    security_opt:
+      - seccomp:unconfined
+    privileged: true
+    shm_size: '1gb'

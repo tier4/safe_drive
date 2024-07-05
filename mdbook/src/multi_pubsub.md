@@ -97,7 +97,7 @@ To use `async_std`, we have to update `Cargo.toml` as follows.
 ```toml
 [dependencies]
 async-std = { version = "1", features = ["attributes"] }
-safe_drive = "0.3"
+safe_drive = "0.4"
 std_msgs = { path = "/tmp/safe_drive_tutorial/mt_pubsub/std_msgs" }
 
 [package.metadata.ros]

@@ -33,6 +33,7 @@ We specified and tested as follows.
 
 ## Supporting ROS2
 
+- [x] Jazzy, ([PR #25](https://github.com/tier4/safe_drive/pull/25))
 - [x] Humble
 - [ ] Galactic (EOL)
 

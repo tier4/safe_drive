@@ -116,7 +116,7 @@ we have to edit `Cargo.toml` as follows.
 
 ```toml
 [dependencies]
-safe_drive = "0.3"
+safe_drive = "0.4"
 srvmsg = { path = "/tmp/safe_drive_tutorial/srvtest/srvmsg" }
 tokio = { version = "1", features = ["full"] }
 
@@ -272,7 +272,7 @@ The callback function must take a message sent by a client and a header includin
 
 ```toml
 [dependencies]
-safe_drive = "0.3"
+safe_drive = "0.4"
 srvmsg = { path = "/tmp/safe_drive_tutorial/srvtest/srvmsg" }
 tokio = { version = "1", features = ["full"] }
 

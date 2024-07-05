@@ -27,7 +27,7 @@ Add `safe_drive` to dependencies section of `Cargo.toml` as follows.
 
 ```toml
 [dependencies]
-safe_drive = "0.3"
+safe_drive = "0.4"
 ```
 
 ## `main.rs`

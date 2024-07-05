@@ -22519,7 +22519,10 @@ fn bindgen_test_layout_bindgen_action_msgs__msg__GoalInfo() {
     assert_eq!(
         ::std::mem::align_of::<bindgen_action_msgs__msg__GoalInfo>(),
         4usize,
-        concat!("Alignment of ", stringify!(bindgen_action_msgs__msg__GoalInfo))
+        concat!(
+            "Alignment of ",
+            stringify!(bindgen_action_msgs__msg__GoalInfo)
+        )
     );
     assert_eq!(
         unsafe { ::std::ptr::addr_of!((*ptr).goal_id) as usize - ptr as usize },
@@ -22602,7 +22605,9 @@ fn bindgen_test_layout_bindgen_action_msgs__msg__GoalInfo__Sequence() {
     );
 }
 extern "C" {
-    pub fn bindgen_action_msgs__msg__GoalInfo__init(msg: *mut bindgen_action_msgs__msg__GoalInfo) -> bool;
+    pub fn bindgen_action_msgs__msg__GoalInfo__init(
+        msg: *mut bindgen_action_msgs__msg__GoalInfo,
+    ) -> bool;
 }
 extern "C" {
     pub fn bindgen_action_msgs__msg__GoalInfo__fini(msg: *mut bindgen_action_msgs__msg__GoalInfo);
@@ -22611,7 +22616,9 @@ extern "C" {
     pub fn bindgen_action_msgs__msg__GoalInfo__create() -> *mut bindgen_action_msgs__msg__GoalInfo;
 }
 extern "C" {
-    pub fn bindgen_action_msgs__msg__GoalInfo__destroy(msg: *mut bindgen_action_msgs__msg__GoalInfo);
+    pub fn bindgen_action_msgs__msg__GoalInfo__destroy(
+        msg: *mut bindgen_action_msgs__msg__GoalInfo,
+    );
 }
 extern "C" {
     pub fn bindgen_action_msgs__msg__GoalInfo__are_equal(

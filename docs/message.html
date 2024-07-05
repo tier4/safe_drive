@@ -302,7 +302,7 @@ So, <code>MyMsg</code> and <code>MyMsgs</code> are generated as follows.</p>
 The most important thing is to add <code>my_interfaces</code>, which defines message types we use.</p>
 <pre><code class="language-toml"># msgtest/src/talker/Cargo.toml
 [dependencies]
-safe_drive = "0.3"
+safe_drive = "0.4"
 my_interfaces = { path = "/tmp/safe_drive_tutorial/msgtest/my_interfaces" }
 
 [package.metadata.ros]
@@ -461,7 +461,7 @@ you can thus update the elements of the array via the slice.</p>
 <p>The listener also requires <code>my_interfaces</code>, and edit <code>Cargo.toml</code> as follows.</p>
 <pre><code class="language-toml"># msgtest/src/listener/Cargo.toml
 [dependencies]
-safe_drive = "0.3"
+safe_drive = "0.4"
 my_interfaces = { path = "/tmp/safe_drive_tutorial/msgtest/my_interfaces" }
 
 [package.metadata.ros]
