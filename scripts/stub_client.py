@@ -46,6 +46,11 @@ class ExampleActionClient(Node):
     def get_result_callback(self, future):
         result = future.result().result
         self.get_logger().info(f"Result: {result}")
+
+        # get status of the goal
+        status = future.result().status
+        self.get_logger().info(f"Goal status: {status}")
+
         rclpy.shutdown()
 
     def feedback_callback(self, feedback_msg):
