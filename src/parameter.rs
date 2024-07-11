@@ -170,12 +170,13 @@ use crate::{
             self,
             msg::{
                 ParameterDescriptor, ParameterDescriptorSeq, ParameterValue, ParameterValueSeq,
-                SetParametersResultSeq,
+                SetParametersResult, SetParametersResultSeq,
             },
             srv::{
                 DescribeParameters, DescribeParametersResponse, GetParameterTypes,
                 GetParameterTypesResponse, GetParameters, GetParametersResponse, ListParameters,
-                ListParametersResponse, SetParameters, SetParametersResponse,
+                ListParametersResponse, SetParameters, SetParametersAtomically,
+                SetParametersAtomicallyResponse, SetParametersResponse,
             },
         },
         BoolSeq, F64Seq, I64Seq, RosString, RosStringSeq, U8Seq,
@@ -923,7 +924,7 @@ fn param_server(
             "set_parameters",
             cond_callback.clone(),
         )?;
-        add_srv_set(
+        add_srv_set_atomic(
             &node,
             &mut selector,
             params.clone(),
@@ -993,6 +994,7 @@ fn add_srv_set(
                         if original.descriptor.read_only {
                             let reason = format!("{} is read only", key);
                             slice[i].reason.assign(&reason);
+                            slice[i].successful = false;
                             continue;
                         }
 
@@ -1037,6 +1039,95 @@ fn add_srv_set(
 
             let mut response = SetParametersResponse::new().unwrap();
             response.results = results;
+
+            response
+        }),
+    );
+
+    Ok(())
+}
+
+fn add_srv_set_atomic(
+    node: &Arc<Node>,
+    selector: &mut Selector,
+    params: Arc<RwLock<Parameters>>,
+    service_name: &str,
+    cond_callback: GuardCondition,
+) -> RCLResult<()> {
+    let name = node.get_name()?;
+    let srv_set = node.create_server::<SetParametersAtomically>(
+        &format!("{name}/{service_name}"),
+        Some(Profile::default()),
+    )?;
+
+    selector.add_server(
+        srv_set,
+        Box::new(move |req, _| {
+            let mut results = if let Some(seq) = SetParametersResult::new() {
+                seq
+            } else {
+                let response = SetParametersAtomicallyResponse::new().unwrap();
+                return response;
+            };
+
+            let mut updated = 0;
+            {
+                let mut guard = params.write();
+                for param in req.parameters.iter() {
+                    let key = param.name.to_string();
+                    let val: Value = (&param.value).into();
+
+                    if let Some(original) = guard.params.get_mut(&key) {
+                        if original.descriptor.read_only {
+                            let reason = format!("{} is read only", key);
+                            results.reason.assign(&reason);
+                            results.successful = false;
+                            break;
+                        }
+
+                        if !original.check_range(&val) {
+                            let reason = format!("{} is not in the range", key);
+                            results.reason.assign(&reason);
+                            results.successful = false;
+                            break;
+                        }
+
+                        if original.descriptor.dynamic_typing || original.value.type_check(&val) {
+                            original.value = val;
+                            results.successful = true;
+                            updated += 1;
+                            guard.updated.insert(key);
+                        } else {
+                            let reason = format!(
+                                "failed type checking: dst = {}, src = {}",
+                                original.value.type_name(),
+                                val.type_name()
+                            );
+                            results.reason.assign(&reason);
+                            results.successful = false;
+                            break;
+                        }
+                    } else {
+                        let reason = format!("no such parameter: name = {}", key);
+                        results.reason.assign(&reason);
+                        results.successful = false;
+                        break;
+                    }
+                }
+            }
+
+            if updated > 0 && cond_callback.trigger().is_err() {
+                let logger = Logger::new("safe_drive");
+                pr_fatal_in!(
+                    logger,
+                    "{}:{}: failed to trigger a condition variable",
+                    file!(),
+                    line!()
+                );
+            }
+
+            let mut response = SetParametersAtomicallyResponse::new().unwrap();
+            response.result = results;
 
             response
         }),
