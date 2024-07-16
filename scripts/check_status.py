@@ -22,8 +22,6 @@ class ActionStatusMonitor(Node):
             self.get_logger().info("No active goals found")
             return
 
-        # for status in msg.status_list:
-
         status = msg.status_list[-1]
         goal_id = status.goal_info.goal_id.uuid
         status_string = self.goal_status_to_string(status.status)

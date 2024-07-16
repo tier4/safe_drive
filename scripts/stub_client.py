@@ -1,6 +1,7 @@
 import rclpy
 from rclpy.action import ActionClient
 from rclpy.node import Node
+from action_msgs.msg import GoalStatus
 
 # $ . /safe_drive/supplements/ros2/install/setup.*sh
 from example_msg.action import MyAction
@@ -43,6 +44,8 @@ class ExampleActionClient(Node):
         self._get_result_future = goal_handle.get_result_async()
         self._get_result_future.add_done_callback(self.get_result_callback)
 
+        self.monitor_status(goal_handle)
+        
     def get_result_callback(self, future):
         result = future.result().result
         self.get_logger().info(f"Result: {result}")
@@ -56,6 +59,34 @@ class ExampleActionClient(Node):
     def feedback_callback(self, feedback_msg):
         feedback = feedback_msg.feedback
         self.get_logger().info(f"Received feedback: {feedback}")
+
+    def monitor_status(self, goal_handle):
+        self.timer = self.create_timer(0.5, lambda: self.check_status(goal_handle))
+
+    def check_status(self, goal_handle):
+        status = goal_handle.status
+        status_string = self.get_status_string(status)
+        self.get_logger().info(f'Current status: {status_string}')
+
+        if status == GoalStatus.STATUS_SUCCEEDED:
+            self.timer.cancel()
+
+    def get_result_callback(self, future):
+        result = future.result().result
+        self.get_logger().info(f'Result: {result.b}')
+
+    @staticmethod
+    def get_status_string(status):
+        status_dict = {
+            GoalStatus.STATUS_UNKNOWN: 'UNKNOWN',
+            GoalStatus.STATUS_ACCEPTED: 'ACCEPTED',
+            GoalStatus.STATUS_EXECUTING: 'EXECUTING',
+            GoalStatus.STATUS_CANCELING: 'CANCELING',
+            GoalStatus.STATUS_SUCCEEDED: 'SUCCEEDED',
+            GoalStatus.STATUS_CANCELED: 'CANCELED',
+            GoalStatus.STATUS_ABORTED: 'ABORTED'
+        }
+        return status_dict.get(status, 'UNKNOWN')
 
 
 def main(args=None):
