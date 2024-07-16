@@ -83,7 +83,19 @@ fn spawn_worker(handle: GoalHandle<MyAction>) {
         .unwrap();
 }
 
-async fn run_server(server: Server<MyAction>) -> Result<(), DynError> {
+fn spawn_worker_abort(handle: GoalHandle<MyAction>) {
+    std::thread::Builder::new()
+        .name("worker".into())
+        .spawn(move || {
+            std::thread::sleep(Duration::from_secs(2));
+
+            println!("server worker: aborting the goal");
+            handle.abort().unwrap();
+        })
+        .unwrap();
+}
+
+async fn run_server(server: Server<MyAction>, abort: bool) -> Result<(), DynError> {
     let goal = async_std::task::spawn({
         let mut server_ = server.clone();
         async move {
@@ -372,5 +384,13 @@ fn test_async_action_status() -> Result<(), DynError> {
     )
 }
 
-    Ok(())
+#[test]
+fn test_async_action_abort() -> Result<(), DynError> {
+    start_server_client(
+        "test_async_action_abort",
+        "test_async_action_client_abort",
+        "test_async_action_server_abort",
+        |client| Box::pin(run_client_abort(client)),
+        true,
+    )
 }
