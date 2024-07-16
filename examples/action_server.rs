@@ -38,7 +38,7 @@ fn spawn_worker(handle: GoalHandle<MyAction>) {
                 println!("server worker: sending feedback {c}");
                 let feedback = MyAction_Feedback { c };
                 handle.feedback(feedback).unwrap();
-                std::thread::sleep(Duration::from_secs(2));
+                std::thread::sleep(Duration::from_secs(1));
             }
 
             println!("server worker: result is now available");

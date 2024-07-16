@@ -51,11 +51,11 @@ async fn main() -> Result<(), DynError> {
     let recv = client.recv_status();
     client = match async_std::future::timeout(Duration::from_secs(3), recv).await {
         Ok(Ok((c, status))) => {
-            println!("client: status received: {:?}", status);
-            // println!("client: status received: {:?}", GoalStatus::from(s.status));
-            // #=> client: status received: GoalStatusArray { status_list: GoalStatusSeq { data: 0x0, size: 0, capacity: 0 } }
-
-            // TODO: Status should be ACCEPTED
+            println!("client: status received: {:?}", status.status_list);
+            if status.status_list.as_slice().len() > 0 {
+                let s = status.status_list.as_slice().last().unwrap();
+                println!("client: last status: {:?}", GoalStatus::from(s.status));
+            }
 
             c
         }
@@ -68,7 +68,7 @@ async fn main() -> Result<(), DynError> {
     loop {
         let recv = client.recv_feedback();
         client = match async_std::future::timeout(Duration::from_secs(3), recv).await {
-            Ok(Ok((c, feedback))) => {
+            Ok(Ok((mut c, feedback))) => {
                 println!("client: feedback received: {:?}", feedback);
 
                 if feedback.feedback.c == 5 {
@@ -82,6 +82,22 @@ async fn main() -> Result<(), DynError> {
         };
     }
 
+    // receive status
+    let mut client = client;
+    let recv = client.recv_status();
+    client = match async_std::future::timeout(Duration::from_secs(3), recv).await {
+        Ok(Ok((c, status))) => {
+            println!("client: status received: {:?}", status.status_list);
+            if status.status_list.as_slice().len() > 0 {
+                let s = status.status_list.as_slice().last().unwrap();
+                println!("client: last status: {:?}", GoalStatus::from(s.status));
+            }
+            c
+        }
+        Ok(Err(e)) => panic!("{e:?}"),
+        Err(_) => panic!("timed out"),
+    };
+
     thread::sleep(Duration::from_secs(4));
 
     // send a result request
@@ -91,24 +107,9 @@ async fn main() -> Result<(), DynError> {
     })?;
     let recv = receiver.recv();
 
-    let client = match async_std::future::timeout(Duration::from_secs(3), recv).await {
+    let _ = match async_std::future::timeout(Duration::from_secs(3), recv).await {
         Ok(Ok((c, response, header))) => {
             println!("client: result response received: {:?}", response);
-            c
-        }
-        Ok(Err(e)) => panic!("{e:?}"),
-        Err(_) => panic!("timed out"),
-    };
-
-    // receive status
-    let mut client = client;
-    let recv = client.recv_status();
-    client = match async_std::future::timeout(Duration::from_secs(3), recv).await {
-        Ok(Ok((c, status))) => {
-            println!("client: status received: {:?}", status);
-            // let s = status.status_list.as_slice().last().unwrap();
-            // println!("client: status received: {:?}", GoalStatus::from(s.status));
-            // TODO: Status should be FINISHED
             c
         }
         Ok(Err(e)) => panic!("{e:?}"),

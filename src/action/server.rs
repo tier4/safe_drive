@@ -7,10 +7,14 @@ use std::{
 };
 
 use crate::logger::{pr_error_in, Logger};
+use crate::msg::interfaces::action_msgs;
 use crate::msg::interfaces::action_msgs::msg::GoalInfoSeq;
 use crate::msg::interfaces::action_msgs::srv::{ERROR_NONE, ERROR_REJECTED};
-use crate::msg::GetUUID;
-use crate::rcl::action_msgs__msg__GoalInfo__Sequence;
+use crate::msg::{builtin_interfaces__msg__Time, GetUUID};
+use crate::rcl::{
+    action_msgs__msg__GoalInfo__Sequence, action_msgs__msg__GoalStatus,
+    action_msgs__msg__GoalStatus__Sequence,
+};
 use crate::PhantomUnsync;
 use crate::{
     clock::Clock,
@@ -109,10 +113,9 @@ impl ServerData {
     pub(crate) fn publish_goal_status(&self) -> RCLActionResult<()> {
         let guard = rcl::MT_UNSAFE_FN.lock();
 
-        let mut statuses =
-            Box::new(rcl::MTSafeFn::rcl_action_get_zero_initialized_goal_status_array());
+        let mut statuses = rcl::MTSafeFn::rcl_action_get_zero_initialized_goal_status_array();
         guard
-            .rcl_action_get_goal_status_array(&self.server, statuses.as_mut())
+            .rcl_action_get_goal_status_array(&self.server, &mut statuses)
             .unwrap();
 
         guard
