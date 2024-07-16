@@ -1,12 +1,14 @@
 pub mod common;
 
 use common::action_msg::action::my_action::*;
+use futures::Future;
 use safe_drive::{
     self,
     action::{
-        client::Client,
+        client::{Client, ClientGoalRecv, ClientResultRecv},
         handle::GoalHandle,
         server::{Server, ServerQosOption},
+        GoalStatus,
     },
     context::Context,
     error::DynError,
@@ -17,7 +19,7 @@ use safe_drive::{
         GetUUID,
     },
 };
-use std::{sync::Arc, thread, time::Duration};
+use std::{pin::Pin, sync::Arc, thread, time::Duration};
 
 fn create_server(
     ctx: &Arc<Context>,
@@ -39,6 +41,21 @@ fn create_client(
     Client::new(node_client, action, None).map_err(|e| e.into())
 }
 
+async fn assert_status(client: Client<MyAction>, expected: GoalStatus) -> Client<MyAction> {
+    let recv = client.recv_status();
+    match async_std::future::timeout(Duration::from_secs(3), recv).await {
+        Ok(Ok((c, status_array))) => {
+            let list = status_array.status_list.as_slice();
+            assert!(list.len() > 0);
+            let status = list.last().unwrap().status;
+            assert_eq!(status, expected as i8);
+            c
+        }
+        Ok(Err(e)) => panic!("{e:?}"),
+        Err(_) => panic!("timed out"),
+    }
+}
+
 fn spawn_worker(handle: GoalHandle<MyAction>) {
     std::thread::Builder::new()
         .name("worker".into())
@@ -53,7 +70,7 @@ fn spawn_worker(handle: GoalHandle<MyAction>) {
                 println!("server worker: sending feedback {c}");
                 let feedback = MyAction_Feedback { c };
                 handle.feedback(feedback).unwrap();
-                std::thread::sleep(Duration::from_secs(2));
+                std::thread::sleep(Duration::from_secs(1));
             }
 
             println!("server worker: result is now available");
@@ -77,7 +94,13 @@ async fn run_server(server: Server<MyAction>) -> Result<(), DynError> {
                         println!("server: goal received: {:?}", req);
 
                         let s = sender
-                            .accept(|handle| spawn_worker(handle))
+                            .accept(|handle| {
+                                if abort {
+                                    spawn_worker_abort(handle)
+                                } else {
+                                    spawn_worker(handle)
+                                }
+                            })
                             .map_err(|(_sender, err)| err)
                             .expect("could not accept");
                         // let s = sender.reject().map_err(|(_sender, err)| err)?;
@@ -108,7 +131,7 @@ async fn run_server(server: Server<MyAction>) -> Result<(), DynError> {
                             .expect("could not set status to CANCELING");
 
                         // perform shutdown operations for the goals here if needed
-                        thread::sleep(Duration::from_secs(2));
+                        thread::sleep(Duration::from_secs(1));
 
                         // return cancel response
                         let s = sender
@@ -156,25 +179,38 @@ async fn run_server(server: Server<MyAction>) -> Result<(), DynError> {
     Ok(())
 }
 
-async fn run_client(mut client: Client<MyAction>) -> Result<(), DynError> {
-    // send a goal request
-    let uuid: [u8; 16] = rand::random();
-    let goal = MyAction_Goal { a: 10 };
-    let receiver = client.send_goal_with_uuid(goal, uuid)?;
-
-    // receive a goal response
+async fn receive_goal_response(receiver: ClientGoalRecv<MyAction>) -> Client<MyAction> {
     let recv = receiver.recv();
-    let client = match async_std::future::timeout(Duration::from_secs(3), recv).await {
+    match async_std::future::timeout(Duration::from_secs(3), recv).await {
         Ok(Ok((c, response, _header))) => {
             println!("client: goal response received: {:?}", response);
             c
         }
         Ok(Err(e)) => panic!("{e:?}"),
         Err(_) => panic!("timed out"),
-    };
+    }
+}
+
+async fn receive_result_response(receiver: ClientResultRecv<MyAction>) -> Client<MyAction> {
+    let recv = receiver.recv();
+    match async_std::future::timeout(Duration::from_secs(3), recv).await {
+        Ok(Ok((c, response, _header))) => {
+            println!("client: result response received: {:?}", response);
+            c
+        }
+        Ok(Err(e)) => panic!("{e:?}"),
+        Err(_) => panic!("timed out"),
+    }
+}
+
+async fn run_client(client: Client<MyAction>) -> Result<(), DynError> {
+    let uuid: [u8; 16] = rand::random();
+    let goal = MyAction_Goal { a: 10 };
+    let receiver = client.send_goal_with_uuid(goal, uuid)?;
+
+    let mut client = receive_goal_response(receiver).await;
 
     // receive feedback
-    let mut client = client;
     loop {
         let recv = client.recv_feedback();
         client = match async_std::future::timeout(Duration::from_secs(3), recv).await {
@@ -199,38 +235,18 @@ async fn run_client(mut client: Client<MyAction>) -> Result<(), DynError> {
     let receiver = client.send_result_request(&MyAction_GetResult_Request {
         goal_id: UUID { uuid },
     })?;
-    let recv = receiver.recv();
 
-    let client = match async_std::future::timeout(Duration::from_secs(3), recv).await {
-        Ok(Ok((c, response, header))) => {
-            println!("client: result response received: {:?}", response);
-            c
-        }
-        Ok(Err(e)) => panic!("{e:?}"),
-        Err(_) => panic!("timed out"),
-    };
+    let _ = receive_result_response(receiver).await;
 
     Ok(())
 }
 
-async fn run_client_cancel(mut client: Client<MyAction>) -> Result<(), DynError> {
-    // send a goal request
+async fn run_client_cancel(client: Client<MyAction>) -> Result<(), DynError> {
     let uuid: [u8; 16] = rand::random();
     let goal = MyAction_Goal { a: 10 };
     let receiver = client.send_goal_with_uuid(goal, uuid)?;
 
-    // receive a goal response
-    let recv = receiver.recv();
-    // let client = match async_std::future::timeout(Duration::from_secs(3), recv).await {
-    let client = match async_std::future::timeout(Duration::from_secs(3600), recv).await {
-        Ok(Ok((c, response, _header))) => {
-            println!("client: goal response received: {:?}", response);
-            c
-        }
-        Ok(Err(e)) => panic!("{e:?}"),
-        Err(_) => panic!("timed out"),
-    };
-
+    let client = receive_goal_response(receiver).await;
     thread::sleep(Duration::from_secs(1));
 
     // send a cancel request
@@ -242,85 +258,77 @@ async fn run_client_cancel(mut client: Client<MyAction>) -> Result<(), DynError>
     })?;
     println!("client: cancel request sent");
 
-    match receiver.recv().await {
-        Ok((_c, resp, _header)) => {
+    let client = match receiver.recv().await {
+        Ok((c, resp, _header)) => {
             println!("client: cancel response received: {:?}", resp);
+            c
         }
         Err(e) => panic!("client: could not cancel the goal: {e:?}"),
-    }
+    };
+
+    let _ = assert_status(client, GoalStatus::Canceled).await;
 
     Ok(())
 }
 
 async fn run_client_status(client: Client<MyAction>) -> Result<(), DynError> {
-    // send a goal request
     let uuid: [u8; 16] = rand::random();
     let goal = MyAction_Goal { a: 10 };
     let receiver = client.send_goal_with_uuid(goal, uuid)?;
 
-    // receive a goal response
-    let recv = receiver.recv();
-    let client = match async_std::future::timeout(Duration::from_secs(3), recv).await {
-        Ok(Ok((c, response, _header))) => {
-            println!("client: goal response received: {:?}", response);
-            c
-        }
-        Ok(Err(e)) => panic!("{e:?}"),
-        Err(_) => panic!("timed out"),
-    };
+    let client = receive_goal_response(receiver).await;
+    std::thread::sleep(Duration::from_secs(1));
 
-    std::thread::sleep(Duration::from_secs(2));
+    // wait for the task to finish
+    let client = assert_status(client, GoalStatus::Executing).await;
+    std::thread::sleep(Duration::from_secs(10));
 
-    // receive status
-    let mut client = client;
-    let recv = client.recv_status();
-    client = match async_std::future::timeout(Duration::from_secs(3), recv).await {
-        Ok(Ok((c, status))) => {
-            println!("client: status received: {:?}", status);
-            // #=> client: status received: GoalStatusArray { status_list: GoalStatusSeq { data: 0x0, size: 0, capacity: 0 } }
-
-            // TODO: Status should be ACCEPTED
-            c
-        }
-        Ok(Err(e)) => panic!("{e:?}"),
-        Err(_) => panic!("timed out"),
-    };
-
-    std::thread::sleep(Duration::from_secs(10)); // wait for the task to finish
-
-    // receive status
-    let mut client = client;
-    let recv = client.recv_status();
-    client = match async_std::future::timeout(Duration::from_secs(3), recv).await {
-        Ok(Ok((c, status))) => {
-            println!("client: status received: {:?}", status);
-            // TODO: Status should be FINISHED
-            c
-        }
-        Ok(Err(e)) => panic!("{e:?}"),
-        Err(_) => panic!("timed out"),
-    };
+    let _ = assert_status(client, GoalStatus::Succeeded).await;
 
     Ok(())
 }
 
-#[test]
-fn test_async_action() -> Result<(), Box<dyn std::error::Error + Sync + Send + 'static>> {
-    let ctx = Context::new()?;
+async fn run_client_abort(client: Client<MyAction>) -> Result<(), DynError> {
+    let uuid: [u8; 16] = rand::random();
+    let goal = MyAction_Goal { a: 10 };
+    let receiver = client.send_goal_with_uuid(goal, uuid)?;
 
-    let client = create_client(&ctx, "test_async_action_client", "test_action")?;
+    let client = receive_goal_response(receiver).await;
+    std::thread::sleep(Duration::from_secs(1));
 
-    let server = create_server(&ctx, "test_async_action_server", "test_action", None)?;
+    let client = assert_status(client, GoalStatus::Executing).await;
+    std::thread::sleep(Duration::from_secs(3));
+
+    let _ = assert_status(client, GoalStatus::Aborted).await;
+
+    Ok(())
+}
+
+fn start_server_client<G>(
+    action: &str,
+    client_node: &str,
+    server_node: &str,
+    run_client_fn: G,
+    server_abort: bool,
+) -> Result<(), DynError>
+where
+    G: FnOnce(Client<MyAction>) -> Pin<Box<dyn Future<Output = Result<(), DynError>> + Send>>
+        + Send
+        + 'static,
+{
+    let ctx = Context::new().unwrap();
+    let client = create_client(&ctx, client_node, action).unwrap();
+    let server = create_server(&ctx, server_node, action, None).unwrap();
 
     async_std::task::block_on(async {
         let (tx, rx) = crossbeam_channel::unbounded();
 
         async_std::task::spawn({
             let server = server.clone();
-            run_server(server)
+            run_server(server, server_abort)
         });
         async_std::task::spawn(async move {
-            let ret = run_client(client).await;
+            let ret = run_client_fn(client).await;
             let _ = tx.send(());
             ret
         });
@@ -329,72 +337,40 @@ fn test_async_action() -> Result<(), Box<dyn std::error::Error + Sync + Send + '
     });
 
     Ok(())
+}
+
+#[test]
+fn test_async_action() -> Result<(), DynError> {
+    start_server_client(
+        "test_async_action",
+        "test_async_action_client",
+        "test_async_action_server",
+        |client| Box::pin(run_client(client)),
+        false,
+    )
 }
 
 #[test]
 fn test_async_action_cancel() -> Result<(), DynError> {
-    let ctx = Context::new()?;
-    let client = create_client(
-        &ctx,
+    start_server_client(
+        "test_async_action_cancel",
         "test_async_action_client_cancel",
-        "test_async_action_cancel",
-    )?;
-    let server = create_server(
-        &ctx,
         "test_async_action_server_cancel",
-        "test_async_action_cancel",
-        None,
-    )?;
-
-    async_std::task::block_on(async {
-        let (tx, rx) = crossbeam_channel::unbounded();
-
-        async_std::task::spawn({
-            let server = server.clone();
-            run_server(server)
-        });
-        async_std::task::spawn(async move {
-            let ret = run_client_cancel(client).await;
-            let _ = tx.send(());
-            ret
-        });
-
-        let _ = rx.recv();
-    });
-
-    Ok(())
+        |client| Box::pin(run_client_cancel(client)),
+        false,
+    )
 }
 
 #[test]
 fn test_async_action_status() -> Result<(), DynError> {
-    let ctx = Context::new()?;
-    let client = create_client(
-        &ctx,
+    start_server_client(
+        "test_async_action_status",
         "test_async_action_client_status",
-        "test_async_action_status",
-    )?;
-    let server = create_server(
-        &ctx,
         "test_async_action_server_status",
-        "test_async_action_status",
-        None,
-    )?;
-
-    async_std::task::block_on(async {
-        let (tx, rx) = crossbeam_channel::unbounded();
-
-        async_std::task::spawn({
-            let server = server.clone();
-            run_server(server)
-        });
-        async_std::task::spawn(async move {
-            let ret = run_client_status(client).await;
-            let _ = tx.send(());
-            ret
-        });
-
-        let _ = rx.recv();
-    });
+        |client| Box::pin(run_client_status(client)),
+        false,
+    )
+}
 
     Ok(())
 }
