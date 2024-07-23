@@ -3,7 +3,7 @@ import rclpy
 from rclpy.action import ActionServer
 from rclpy.node import Node
 
-# $ . /safe_drive/supplements/ros2/install/setup.*sh
+# make sure to source ../supplements/ros2/install/setup.*sh in advance
 from example_msg.action import MyAction
 
 

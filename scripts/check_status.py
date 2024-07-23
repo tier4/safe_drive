@@ -2,6 +2,8 @@ import rclpy
 from rclpy.node import Node
 from rclpy.action import ActionClient
 from action_msgs.msg import GoalStatusArray
+
+# make sure to source ../supplements/ros2/install/setup.*sh in advance
 from example_msg.action import MyAction
 
 

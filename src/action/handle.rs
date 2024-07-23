@@ -23,7 +23,7 @@ where
 {
     fn clone(&self) -> Self {
         Self {
-            goal_id: self.goal_id.clone(),
+            goal_id: self.goal_id,
             handle: self.handle.clone(),
             data: self.data.clone(),
             results: self.results.clone(),
@@ -138,7 +138,7 @@ where
                             "failed to send result response from action server: {}",
                             e
                         );
-                        return Err(e.into());
+                        return Err(e);
                     }
                 }
             }

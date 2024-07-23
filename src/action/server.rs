@@ -7,14 +7,10 @@ use std::{
 };
 
 use crate::logger::{pr_error_in, Logger};
-use crate::msg::interfaces::action_msgs;
 use crate::msg::interfaces::action_msgs::msg::GoalInfoSeq;
 use crate::msg::interfaces::action_msgs::srv::{ERROR_NONE, ERROR_REJECTED};
-use crate::msg::{builtin_interfaces__msg__Time, GetUUID};
-use crate::rcl::{
-    action_msgs__msg__GoalInfo__Sequence, action_msgs__msg__GoalStatus,
-    action_msgs__msg__GoalStatus__Sequence,
-};
+use crate::msg::GetUUID;
+use crate::rcl::action_msgs__msg__GoalInfo__Sequence;
 use crate::PhantomUnsync;
 use crate::{
     clock::Clock,
@@ -488,19 +484,17 @@ impl<T: ActionMsg> Future for AsyncGoalReceiver<T> {
                 let mut waker = Some(cx.waker().clone());
                 let mut guard = SELECTOR.lock();
 
-                match guard.send_command(
-                    &this.server.data.node.context,
-                    Command::ActionServer {
-                        data: this.server.data.clone(),
-                        goal: Box::new(move || {
-                            let w = waker.take().unwrap();
-                            w.wake();
-                            CallbackResult::Remove
-                        }),
-                        cancel: Box::new(move || CallbackResult::Ok),
-                        result: Box::new(move || CallbackResult::Ok),
-                    },
-                ) {
+                let cmd = Command::ActionServer {
+                    data: this.server.data.clone(),
+                    goal: Box::new(move || {
+                        let w = waker.take().unwrap();
+                        w.wake();
+                        CallbackResult::Remove
+                    }),
+                    cancel: Box::new(move || CallbackResult::Ok),
+                    result: Box::new(move || CallbackResult::Ok),
+                };
+                match guard.send_command(&this.server.data.node.context, cmd) {
                     Ok(_) => {
                         *this.is_waiting = true;
                         Poll::Pending
@@ -698,7 +692,7 @@ impl<T: ActionMsg> ServerResultSend<T> {
             None => {
                 {
                     let mut pending_requests = self.data.pending_result_requests.lock();
-                    let requests = pending_requests.entry(*uuid).or_insert_with(Vec::new);
+                    let requests = pending_requests.entry(*uuid).or_default();
                     requests.push(self.request_id);
                 }
 
@@ -739,19 +733,17 @@ impl<T: ActionMsg> Future for AsyncResultReceiver<T> {
                 let mut waker = Some(cx.waker().clone());
                 let mut guard = SELECTOR.lock();
 
-                match guard.send_command(
-                    &this.server.data.node.context,
-                    Command::ActionServer {
-                        data: this.server.data.clone(),
-                        goal: Box::new(move || CallbackResult::Ok),
-                        cancel: Box::new(move || CallbackResult::Ok),
-                        result: Box::new(move || {
-                            let w = waker.take().unwrap();
-                            w.wake();
-                            CallbackResult::Remove
-                        }),
-                    },
-                ) {
+                let cmd = Command::ActionServer {
+                    data: this.server.data.clone(),
+                    goal: Box::new(move || CallbackResult::Ok),
+                    cancel: Box::new(move || CallbackResult::Ok),
+                    result: Box::new(move || {
+                        let w = waker.take().unwrap();
+                        w.wake();
+                        CallbackResult::Remove
+                    }),
+                };
+                match guard.send_command(&this.server.data.node.context, cmd) {
                     Ok(_) => {
                         *this.is_waiting = true;
                         Poll::Pending
@@ -814,14 +806,14 @@ impl From<crate::rcl::builtin_interfaces__msg__Time> for crate::msg::builtin_int
 fn rcl_action_accept_new_goal(
     server: *mut rcl_action_server_t,
     goal_info: &action_msgs__msg__GoalInfo,
-) -> Result<*mut rcl_action_goal_handle_t, rcl::rcutils_error_string_t> {
+) -> Result<*mut rcl_action_goal_handle_t, Box<rcl::rcutils_error_string_t>> {
     let goal_handle = {
         let guard = rcl::MT_UNSAFE_FN.lock();
         guard.rcl_action_accept_new_goal(server, goal_info)
     };
     if goal_handle.is_null() {
         let msg = unsafe { rcl::rcutils_get_error_string() };
-        return Err(msg);
+        return Err(Box::new(msg));
     }
 
     Ok(goal_handle)

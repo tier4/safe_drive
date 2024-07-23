@@ -131,9 +131,7 @@ macro_rules! def_sequence {
                 if self.0.data.is_null() {
                     &mut []
                 } else {
-                    let s = unsafe {
-                        std::slice::from_raw_parts_mut(self.0.data, self.0.size as usize)
-                    };
+                    let s = unsafe { std::slice::from_raw_parts_mut(self.0.data, self.0.size) };
                     s
                 }
             }
@@ -322,7 +320,7 @@ impl<const N: usize> RosString<N> {
         if self.0.data.is_null() {
             &[]
         } else {
-            let s = unsafe { std::slice::from_raw_parts(self.0.data, self.0.size as usize) };
+            let s = unsafe { std::slice::from_raw_parts(self.0.data, self.0.size) };
             s
         }
     }
@@ -331,7 +329,7 @@ impl<const N: usize> RosString<N> {
         if self.0.data.is_null() {
             &mut []
         } else {
-            let s = unsafe { std::slice::from_raw_parts_mut(self.0.data, self.0.size as usize) };
+            let s = unsafe { std::slice::from_raw_parts_mut(self.0.data, self.0.size) };
             s
         }
     }
@@ -404,7 +402,7 @@ impl<const STRLEN: usize, const SEQLEN: usize> RosStringSeq<STRLEN, SEQLEN> {
         if self.0.data.is_null() {
             &[]
         } else {
-            let s = unsafe { std::slice::from_raw_parts(self.0.data, self.0.size as usize) };
+            let s = unsafe { std::slice::from_raw_parts(self.0.data, self.0.size) };
             unsafe { transmute::<&[rosidl_runtime_c__String], &[RosString<STRLEN>]>(s) }
         }
     }
