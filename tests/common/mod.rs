@@ -28,16 +28,8 @@ pub fn create_publisher(
     topic_name: &str,
     disable_loaned_message: bool,
 ) -> RCLResult<Publisher<Num>> {
-    #[cfg(any(feature = "humble", feature = "galactic"))]
-    {
-        let _ = disable_loaned_message;
-        node.create_publisher(topic_name, Default::default())
-    }
-
-    #[cfg(not(any(feature = "humble", feature = "galactic")))]
-    {
-        node.create_publisher(topic_name, Default::default(), disable_loaned_message)
-    }
+    let _ = disable_loaned_message;
+    node.create_publisher(topic_name, Default::default())
 }
 
 pub fn create_subscriber(
@@ -45,16 +37,8 @@ pub fn create_subscriber(
     topic_name: &str,
     disable_loaned_message: bool,
 ) -> RCLResult<Subscriber<Num>> {
-    #[cfg(any(feature = "humble", feature = "galactic"))]
-    {
-        let _ = disable_loaned_message;
-        node.create_subscriber(topic_name, Default::default())
-    }
-
-    #[cfg(not(any(feature = "humble", feature = "galactic")))]
-    {
-        node.create_subscriber(topic_name, Default::default(), disable_loaned_message)
-    }
+    let _ = disable_loaned_message;
+    node.create_subscriber(topic_name, Default::default())
 }
 
 pub fn create_server(node: Arc<Node>, service_name: &str) -> RCLResult<Server<AddThreeInts>> {

@@ -42,21 +42,10 @@ fn test_wall_timer() -> Result<(), Box<dyn Error + Sync + Send + 'static>> {
     let node = ctx.create_node("test_wall_timer_node", None, Default::default())?;
 
     // create a publisher and a subscriber
-    #[cfg(any(feature = "humble", feature = "galactic"))]
     let publisher =
         node.create_publisher::<std_msgs::msg::String>("test_wall_timer_node_pubsub", None)?;
-
-    #[cfg(any(feature = "humble", feature = "galactic"))]
     let subscriber =
         node.create_subscriber::<std_msgs::msg::String>("test_wall_timer_node_pubsub", None)?;
-
-    #[cfg(not(any(feature = "humble", feature = "galactic")))]
-    let publisher =
-        node.create_publisher::<std_msgs::msg::String>("test_wall_timer_node_pubsub", None, true)?;
-
-    #[cfg(not(any(feature = "humble", feature = "galactic")))]
-    let subscriber =
-        node.create_subscriber::<std_msgs::msg::String>("test_wall_timer_node_pubsub", None, true)?;
 
     // create wall timers
     selector.add_wall_timer(

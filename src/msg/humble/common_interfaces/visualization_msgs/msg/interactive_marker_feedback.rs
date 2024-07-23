@@ -71,8 +71,8 @@ impl Drop for InteractiveMarkerFeedback {
 #[derive(Debug)]
 struct InteractiveMarkerFeedbackSeqRaw {
     data: *mut InteractiveMarkerFeedback,
-    size: usize,
-    capacity: usize,
+    size: size_t,
+    capacity: size_t,
 }
 
 /// Sequence of InteractiveMarkerFeedback.
@@ -82,8 +82,8 @@ struct InteractiveMarkerFeedbackSeqRaw {
 #[derive(Debug)]
 pub struct InteractiveMarkerFeedbackSeq<const N: usize> {
     data: *mut InteractiveMarkerFeedback,
-    size: usize,
-    capacity: usize,
+    size: size_t,
+    capacity: size_t,
 }
 
 impl<const N: usize> InteractiveMarkerFeedbackSeq<N> {
@@ -91,7 +91,7 @@ impl<const N: usize> InteractiveMarkerFeedbackSeq<N> {
     /// `N` represents the maximum number of elements.
     /// If `N` is `0`, the sequence is unlimited.
     pub fn new(size: usize) -> Option<Self> {
-        if N != 0 && size >= N {
+        if N != 0 && size > N {
             // the size exceeds in the maximum number
             return None;
         }
@@ -125,7 +125,7 @@ impl<const N: usize> InteractiveMarkerFeedbackSeq<N> {
         if self.data.is_null() {
             &[]
         } else {
-            let s = unsafe { std::slice::from_raw_parts(self.data, self.size) };
+            let s = unsafe { std::slice::from_raw_parts(self.data, self.size as _) };
             s
         }
     }
@@ -134,7 +134,7 @@ impl<const N: usize> InteractiveMarkerFeedbackSeq<N> {
         if self.data.is_null() {
             &mut []
         } else {
-            let s = unsafe { std::slice::from_raw_parts_mut(self.data, self.size) };
+            let s = unsafe { std::slice::from_raw_parts_mut(self.data, self.size as _) };
             s
         }
     }

@@ -103,16 +103,25 @@ fn main() {
         .and_then(|v| v.into_string().ok())
         .unwrap_or("".to_string())
     {
+        "jazzy" => {
+            println!("cargo:rustc-link-lib=service_msgs__rosidl_typesupport_c");
+            println!("cargo:rustc-link-lib=service_msgs__rosidl_generator_c");
+            println!("cargo:rustc-link-lib=type_description_interfaces__rosidl_typesupport_c");
+            println!("cargo:rustc-link-lib=type_description_interfaces__rosidl_generator_c");
+            println!("cargo:rustc-cfg=feature=\"jazzy\"");
+        }
         "iron" => {
             println!("cargo:rustc-link-lib=service_msgs__rosidl_typesupport_c");
             println!("cargo:rustc-link-lib=service_msgs__rosidl_generator_c");
+            println!("cargo:rustc-link-lib=type_description_interfaces__rosidl_typesupport_c");
+            println!("cargo:rustc-link-lib=type_description_interfaces__rosidl_generator_c");
             println!("cargo:rustc-cfg=feature=\"iron\"");
         }
         "humble" => println!("cargo:rustc-cfg=feature=\"humble\""),
         "galactic" => println!("cargo:rustc-cfg=feature=\"galactic\""),
 
         _ => {
-            let default = "iron";
+            let default = "jazzy";
 
             println!("cargo:warning='ROS_DISTRO is not set properly. Defaulting to {default}.'");
             println!("cargo:rustc-link-lib=service_msgs__rosidl_typesupport_c");

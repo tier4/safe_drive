@@ -8,7 +8,7 @@
 //! use safe_drive::{
 //!     context::Context,
 //!     logger::Logger,
-//!     parameter::{ParameterServer, Value},
+//!     parameter::{ParameterServer, Value, Parameter, Descriptor},
 //!     pr_info,
 //! };
 //!
@@ -37,6 +37,24 @@
 //!         false,                              // read only?
 //!         Some("my dynamic type flag's description".to_string()), // description
 //!     ).unwrap();
+//!
+//!     // Add Directly from Parameter struct
+//!     let parameter_to_set = Parameter {
+//!         descriptor: Descriptor {
+//!             description: "my parameter description".to_string(),                       // parameter description
+//!             additional_constraints: "my parameter addutional_constraints".to_string(), // parameter additional constraints
+//!             read_only: false,                                                          // read only ?
+//!             dynamic_typing: false,                                                     // static or Dynamic
+//!             floating_point_range: None,                                                // floating point range
+//!             integer_range: None,                                                       // integer point range
+//!         },
+//!         value: Value::Bool(false),                                                     // value
+//!     };
+//!
+//!     let _= params.add_parameter(
+//!         ("my parameter").to_string(), // name
+//!         parameter_to_set,             // parameter
+//!     );
 //! }
 //!
 //! // Create a logger and a selector.
@@ -70,7 +88,7 @@
 //!     context::Context,
 //!     error::DynError,
 //!     logger::Logger,
-//!     parameter::{ParameterServer, Value},
+//!     parameter::{ParameterServer, Value, Parameter, Descriptor},
 //!     pr_info,
 //! };
 //!
@@ -99,6 +117,24 @@
 //!         false,                              // read only?
 //!         Some("my dynamic type flag's description".to_string()), // description
 //!     ).unwrap();
+//!
+//!     // Add Directly from Parameter struct
+//!     let parameter_to_set = Parameter {
+//!         descriptor: Descriptor {
+//!             description: "my parameter description".to_string(),                       // parameter description
+//!             additional_constraints: "my parameter addutional_constraints".to_string(), // parameter additional constraints
+//!             read_only: false,                                                          // read only ?
+//!             dynamic_typing: false,                                                     // static or Dynamic
+//!             floating_point_range: None,                                                // floating point range
+//!             integer_range: None,                                                       // integer point range
+//!         },
+//!         value: Value::Bool(false),                                                     // value
+//!     };
+//!
+//!     let _ = params.add_parameter(
+//!         ("my parameter").to_string(), // name
+//!         parameter_to_set,             // parameter
+//!     );
 //! }
 //!
 //! async fn run_wait(mut param_server: ParameterServer) {
@@ -134,12 +170,13 @@ use crate::{
             self,
             msg::{
                 ParameterDescriptor, ParameterDescriptorSeq, ParameterValue, ParameterValueSeq,
-                SetParametersResultSeq,
+                SetParametersResult, SetParametersResultSeq,
             },
             srv::{
                 DescribeParameters, DescribeParametersResponse, GetParameterTypes,
                 GetParameterTypesResponse, GetParameters, GetParametersResponse, ListParameters,
-                ListParametersResponse, SetParameters, SetParametersResponse,
+                ListParametersResponse, SetParameters, SetParametersAtomically,
+                SetParametersAtomicallyResponse, SetParametersResponse,
             },
         },
         BoolSeq, F64Seq, I64Seq, RosString, RosStringSeq, U8Seq,
@@ -175,7 +212,7 @@ use std::{
 /// ```
 /// use safe_drive::{
 ///     context::Context,
-///     parameter::{ParameterServer, Value},
+///     parameter::{ParameterServer, Value, Parameter, Descriptor},
 /// };
 ///
 /// // Create a context and a node.
@@ -203,6 +240,24 @@ use std::{
 ///         false,                              // read only?
 ///         Some("my dynamic type flag's description".to_string()), // description
 ///     ).unwrap();
+///
+///     // Add Directly from Parameter struct
+///     let parameter_to_set = Parameter {
+///         descriptor: Descriptor {
+///             description: "my parameter description".to_string(),                       // parameter description
+///             additional_constraints: "my parameter addutional_constraints".to_string(), // parameter additional constraints
+///             read_only: false,                                                          // read only ?
+///             dynamic_typing: false,                                                     // static or Dynamic
+///             floating_point_range: None,                                                // floating point range
+///             integer_range: None,                                                       // integer point range
+///         },
+///         value: Value::Bool(false),                                                     // value
+///     };
+///
+///     let _ = params.add_parameter(
+///         ("my parameter").to_string(), // name
+///         parameter_to_set,             // parameter
+///     );
 /// }
 /// ```
 pub struct ParameterServer {
@@ -348,6 +403,21 @@ impl Parameters {
 
     pub fn get_parameter(&self, name: &str) -> Option<&Parameter> {
         self.params.get(name)
+    }
+
+    pub fn add_parameter(&mut self, name: String, parameter: Parameter) -> Result<(), DynError> {
+        if let Some(_) = self.params.get_mut(&name) {
+            let msg: String = format!("{} is already declared", name);
+            Err(msg.into())
+        } else {
+            if parameter.check_range(&parameter.value) {
+                self.params.insert(name, parameter);
+                Ok(())
+            } else {
+                let msg = format!("{} is exceeding the range", name);
+                return Err(msg.into());
+            }
+        }
     }
 
     pub fn set_parameter(
@@ -759,23 +829,23 @@ impl From<&rcl_variant_t> for Value {
             Value::String(s.to_str().unwrap_or("").into())
         } else if !var.bool_array_value.is_null() {
             let v = &unsafe { *var.bool_array_value };
-            let s = unsafe { from_raw_parts(v.values, v.size as usize) };
+            let s = unsafe { from_raw_parts(v.values, v.size.try_into().unwrap()) };
             Value::VecBool(s.into())
         } else if !var.integer_array_value.is_null() {
             let v = &unsafe { *var.integer_array_value };
-            let s = unsafe { from_raw_parts(v.values, v.size as usize) };
+            let s = unsafe { from_raw_parts(v.values, v.size.try_into().unwrap()) };
             Value::VecI64(s.into())
         } else if !var.byte_array_value.is_null() {
             let v = &unsafe { *var.byte_array_value };
-            let s = unsafe { from_raw_parts(v.values, v.size as usize) };
+            let s = unsafe { from_raw_parts(v.values, v.size.try_into().unwrap()) };
             Value::VecU8(s.into())
         } else if !var.double_array_value.is_null() {
             let v = &unsafe { *var.double_array_value };
-            let s = unsafe { from_raw_parts(v.values, v.size as usize) };
+            let s = unsafe { from_raw_parts(v.values, v.size.try_into().unwrap()) };
             Value::VecF64(s.into())
         } else if !var.string_array_value.is_null() {
             let v = &unsafe { *var.string_array_value };
-            let s = unsafe { from_raw_parts(v.data, v.size as usize) };
+            let s = unsafe { from_raw_parts(v.data, v.size.try_into().unwrap()) };
             let s = s
                 .iter()
                 .map(|p| unsafe { CStr::from_ptr(*p).to_str().unwrap_or("").into() })
@@ -789,7 +859,17 @@ impl From<&rcl_variant_t> for Value {
 
 impl ParameterServer {
     pub(crate) fn new(node: Arc<Node>) -> Result<Self, DynError> {
-        let params = Arc::new(RwLock::new(Parameters::new()));
+        let params_value = {
+            let mut guard = crate::rcl::MT_UNSAFE_FN.lock();
+            let fqn = node.get_fully_qualified_name()?;
+            let arguments = unsafe { &mut (*node.context.as_ptr_mut()).global_arguments };
+            guard.parameter_map(fqn.as_str(), arguments)?
+        };
+        let mut params = Parameters::new();
+        for (k, v) in params_value.into_iter() {
+            let _ = params.set_parameter(k, v, false, None);
+        }
+        let params = Arc::new(RwLock::new(params));
         let ps = params.clone();
         let n = node.clone();
 
@@ -844,7 +924,7 @@ fn param_server(
             "set_parameters",
             cond_callback.clone(),
         )?;
-        add_srv_set(
+        add_srv_set_atomic(
             &node,
             &mut selector,
             params.clone(),
@@ -885,7 +965,7 @@ fn add_srv_set(
     service_name: &str,
     cond_callback: GuardCondition,
 ) -> RCLResult<()> {
-    let name = node.get_name();
+    let name = node.get_name()?;
     let srv_set = node.create_server::<SetParameters>(
         &format!("{name}/{service_name}"),
         Some(Profile::default()),
@@ -914,6 +994,7 @@ fn add_srv_set(
                         if original.descriptor.read_only {
                             let reason = format!("{} is read only", key);
                             slice[i].reason.assign(&reason);
+                            slice[i].successful = false;
                             continue;
                         }
 
@@ -966,12 +1047,101 @@ fn add_srv_set(
     Ok(())
 }
 
+fn add_srv_set_atomic(
+    node: &Arc<Node>,
+    selector: &mut Selector,
+    params: Arc<RwLock<Parameters>>,
+    service_name: &str,
+    cond_callback: GuardCondition,
+) -> RCLResult<()> {
+    let name = node.get_name()?;
+    let srv_set = node.create_server::<SetParametersAtomically>(
+        &format!("{name}/{service_name}"),
+        Some(Profile::default()),
+    )?;
+
+    selector.add_server(
+        srv_set,
+        Box::new(move |req, _| {
+            let mut results = if let Some(seq) = SetParametersResult::new() {
+                seq
+            } else {
+                let response = SetParametersAtomicallyResponse::new().unwrap();
+                return response;
+            };
+
+            let mut updated = 0;
+            {
+                let mut guard = params.write();
+                for param in req.parameters.iter() {
+                    let key = param.name.to_string();
+                    let val: Value = (&param.value).into();
+
+                    if let Some(original) = guard.params.get_mut(&key) {
+                        if original.descriptor.read_only {
+                            let reason = format!("{} is read only", key);
+                            results.reason.assign(&reason);
+                            results.successful = false;
+                            break;
+                        }
+
+                        if !original.check_range(&val) {
+                            let reason = format!("{} is not in the range", key);
+                            results.reason.assign(&reason);
+                            results.successful = false;
+                            break;
+                        }
+
+                        if original.descriptor.dynamic_typing || original.value.type_check(&val) {
+                            original.value = val;
+                            results.successful = true;
+                            updated += 1;
+                            guard.updated.insert(key);
+                        } else {
+                            let reason = format!(
+                                "failed type checking: dst = {}, src = {}",
+                                original.value.type_name(),
+                                val.type_name()
+                            );
+                            results.reason.assign(&reason);
+                            results.successful = false;
+                            break;
+                        }
+                    } else {
+                        let reason = format!("no such parameter: name = {}", key);
+                        results.reason.assign(&reason);
+                        results.successful = false;
+                        break;
+                    }
+                }
+            }
+
+            if updated > 0 && cond_callback.trigger().is_err() {
+                let logger = Logger::new("safe_drive");
+                pr_fatal_in!(
+                    logger,
+                    "{}:{}: failed to trigger a condition variable",
+                    file!(),
+                    line!()
+                );
+            }
+
+            let mut response = SetParametersAtomicallyResponse::new().unwrap();
+            response.result = results;
+
+            response
+        }),
+    );
+
+    Ok(())
+}
+
 fn add_srv_get(
     node: &Arc<Node>,
     selector: &mut Selector,
     params: Arc<RwLock<Parameters>>,
 ) -> RCLResult<()> {
-    let name = node.get_name();
+    let name = node.get_name()?;
     let srv_get = node.create_server::<GetParameters>(
         &format!("{name}/get_parameters"),
         Some(Profile::default()),
@@ -1020,7 +1190,7 @@ fn add_srv_describe(
     selector: &mut Selector,
     params: Arc<RwLock<Parameters>>,
 ) -> RCLResult<()> {
-    let name = node.get_name();
+    let name = node.get_name()?;
     let srv_describe = node.create_server::<DescribeParameters>(
         &format!("{name}/describe_parameters"),
         Some(Profile::default()),
@@ -1078,7 +1248,7 @@ fn add_srv_describe(
             let mut response = DescribeParametersResponse::new().unwrap();
             if let Some(mut seq) = ParameterDescriptorSeq::new(results.len()) {
                 seq.iter_mut()
-                    .zip(results.into_iter())
+                    .zip(results)
                     .for_each(|(dst, src)| *dst = src);
                 response.descriptors = seq;
             };
@@ -1095,7 +1265,7 @@ fn add_srv_get_types(
     selector: &mut Selector,
     params: Arc<RwLock<Parameters>>,
 ) -> RCLResult<()> {
-    let name = node.get_name();
+    let name = node.get_name()?;
     let srv_get_types = node.create_server::<GetParameterTypes>(
         &format!("{name}/get_parameter_types"),
         Some(Profile::default()),
@@ -1136,7 +1306,7 @@ fn add_srv_list(
     selector: &mut Selector,
     params: Arc<RwLock<Parameters>>,
 ) -> RCLResult<()> {
-    let name = node.get_name();
+    let name = node.get_name()?;
     let srv_list = node.create_server::<ListParameters>(
         &format!("{name}/list_parameters"),
         Some(Profile::default()),
@@ -1289,8 +1459,6 @@ impl<'a> Drop for AsyncWait<'a> {
                 Command::RemoveConditionVar(self.param_server.cond_callback.clone()),
             )
             .is_err()
-        {
-            return;
-        }
+        {}
     }
 }

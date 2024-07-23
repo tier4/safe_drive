@@ -1,0 +1,4 @@
+. "$HOME/.cargo/env"
+source /opt/ros/jazzy/setup.zsh
+source /opt/ros/jazzy/share/ros2cli/environment/ros2-argcomplete.zsh
+source /opt/pyvenv_safe_drive/bin/activate

@@ -10,7 +10,6 @@ use crate::logger::{pr_error_in, Logger};
 use crate::msg::interfaces::action_msgs::msg::GoalInfoSeq;
 use crate::msg::interfaces::action_msgs::srv::{ERROR_NONE, ERROR_REJECTED};
 use crate::msg::GetUUID;
-use crate::rcl::action_msgs__msg__GoalInfo__Sequence;
 use crate::PhantomUnsync;
 use crate::{
     clock::Clock,
@@ -23,8 +22,9 @@ use crate::{
     node::Node,
     qos::Profile,
     rcl::{
-        self, action_msgs__msg__GoalInfo, rcl_action_cancel_request_t, rcl_action_goal_handle_t,
-        rcl_action_server_t, rmw_request_id_t, unique_identifier_msgs__msg__UUID,
+        self, bindgen_action_msgs__msg__GoalInfo, bindgen_action_msgs__msg__GoalInfo__Sequence,
+        rcl_action_cancel_request_t, rcl_action_goal_handle_t, rcl_action_server_t,
+        rmw_request_id_t, unique_identifier_msgs__msg__UUID,
     },
     selector::{
         async_selector::{Command, SELECTOR},
@@ -560,8 +560,8 @@ impl<T: ActionMsg> ServerCancelSend<T> {
         } else {
             ERROR_NONE
         };
-        response.msg.goals_canceling = action_msgs__msg__GoalInfo__Sequence {
-            data: accepted_goals.as_mut_ptr() as *mut _ as *mut action_msgs__msg__GoalInfo,
+        response.msg.goals_canceling = bindgen_action_msgs__msg__GoalInfo__Sequence {
+            data: accepted_goals.as_mut_ptr() as *mut _ as *mut bindgen_action_msgs__msg__GoalInfo,
             size: accepted_goals.len() as rcl::size_t,
             capacity: accepted_goals.capacity() as rcl::size_t,
         };
@@ -779,8 +779,8 @@ impl<T: ActionMsg> Clone for Server<T> {
     }
 }
 
-impl From<action_msgs__msg__GoalInfo> for GoalInfo {
-    fn from(value: action_msgs__msg__GoalInfo) -> Self {
+impl From<bindgen_action_msgs__msg__GoalInfo> for GoalInfo {
+    fn from(value: bindgen_action_msgs__msg__GoalInfo) -> Self {
         Self {
             goal_id: value.goal_id.into(),
             stamp: value.stamp.into(),
@@ -803,9 +803,10 @@ impl From<crate::rcl::builtin_interfaces__msg__Time> for crate::msg::builtin_int
     }
 }
 
+#[allow(clippy::result_large_err)]
 fn rcl_action_accept_new_goal(
     server: *mut rcl_action_server_t,
-    goal_info: &action_msgs__msg__GoalInfo,
+    goal_info: &bindgen_action_msgs__msg__GoalInfo,
 ) -> Result<*mut rcl_action_goal_handle_t, Box<rcl::rcutils_error_string_t>> {
     let goal_handle = {
         let guard = rcl::MT_UNSAFE_FN.lock();

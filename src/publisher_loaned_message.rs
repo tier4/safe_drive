@@ -105,6 +105,7 @@ impl<T: TypeSupport> Loaned<T> {
         })
     }
 
+    #[allow(clippy::mut_from_ref)]
     pub(crate) fn get(&self) -> &mut T {
         unsafe { &mut *self.chunk }
     }

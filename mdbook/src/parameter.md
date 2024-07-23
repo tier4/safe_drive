@@ -133,7 +133,7 @@ Add `safe_drive` to the dependencies section of `Cargo.toml` as follows.
 
 ```toml
 [dependencies]
-safe_drive = "0.3"
+safe_drive = "0.4"
 ```
 
 ### Edit `param_server/src/main.rs`
@@ -142,7 +142,13 @@ safe_drive = "0.3"
 This sets 2 parameters up and waits updating.
 
 ```rust
-use safe_drive::{context::Context, error::DynError, logger::Logger, parameter::Value, pr_info};
+use safe_drive::{
+    context::Context,
+    error::DynError,
+    logger::Logger,
+    parameter::{Descriptor, Parameter, Value},
+    pr_info,
+};
 
 fn main() -> Result<(), DynError> {
     // Create a context and a node.
@@ -169,6 +175,23 @@ fn main() -> Result<(), DynError> {
             Value::Bool(false),                 // value
             false,                              // read only?
             Some("my dynamic type flag's description".to_string()), // description
+        )?;
+
+        // Add Directly from Parameter struct
+        let parameter_to_set = Parameter {
+            descriptor: Descriptor {
+                description: "my parameter description".to_string(), // parameter description
+                additional_constraints: "my parameter addutional_constraints".to_string(), // parameter additional constraints
+                read_only: false,           // read only ?
+                dynamic_typing: false,      // static or Dynamic
+                floating_point_range: None, // floating point range
+                integer_range: None,        // integer point range
+            },
+            value: Value::Bool(false), // value
+        };
+        params.add_parameter(
+            ("my parameter").to_string(), // name
+            parameter_to_set,             // parameter
         )?;
     }
 
@@ -230,6 +253,23 @@ for mutual exclusion by `write()` method.
         false,                              // read only?
         Some("my dynamic type flag's description".to_string()), // description
     )?;
+
+    // Add Directly from Parameter struct
+    let parameter_to_set = Parameter {
+        descriptor: Descriptor {
+            description: "my parameter description".to_string(), // parameter description
+            additional_constraints: "my parameter addutional_constraints".to_string(), // parameter additional constraints
+            read_only: false,           // read only ?
+            dynamic_typing: false,      // static or Dynamic
+            floating_point_range: None, // floating point range
+            integer_range: None,        // integer point range
+        },
+        value: Value::Bool(false), // value
+    };
+    params.add_parameter(
+        ("my parameter").to_string(), // name
+        parameter_to_set,             // parameter
+    )?;
 }
 ```
 
@@ -239,6 +279,9 @@ by a value whose type is different from original type.
 
 To set a dynamically typed parameters, use `set_dynamically_typed_parameter()`.
 A dynamically typed parameter can be updated by an arbitrary type.
+
+To set directly from the Parameter struct, use `add_parameter()`.
+A Parameter struct can contain additional_constraints.
 
 Finally, register a callback function to wait updating
 parameters as follows.
@@ -308,7 +351,7 @@ Add `safe_drive` and `tokio` to the dependencies section of `Cargo.toml` as foll
 
 ```toml
 [dependencies]
-safe_drive = "0.3"
+safe_drive = "0.4"
 tokio = { version = "1", features = ["full"] }
 ```
 
@@ -318,7 +361,13 @@ tokio = { version = "1", features = ["full"] }
 This sets 2 parameters up and waits updating.
 
 ```rust
-use safe_drive::{context::Context, error::DynError, logger::Logger, parameter::Value, pr_info};
+use safe_drive::{
+    context::Context,
+    error::DynError,
+    logger::Logger,
+    parameter::{Descriptor, Parameter, Value},
+    pr_info,
+};
 
 #[tokio::main]
 async fn main() -> Result<(), DynError> {
@@ -346,6 +395,23 @@ async fn main() -> Result<(), DynError> {
             Value::Bool(false),                 // value
             false,                              // read only?
             Some("my dynamic type flag's description".to_string()), // description
+        )?;
+
+        // Add Directly from Parameter struct
+        let parameter_to_set = Parameter {
+            descriptor: Descriptor {
+                description: "my parameter description".to_string(), // parameter description
+                additional_constraints: "my parameter addutional_constraints".to_string(), // parameter additional constraints
+                read_only: false,           // read only ?
+                dynamic_typing: false,      // static or Dynamic
+                floating_point_range: None, // floating point range
+                integer_range: None,        // integer point range
+            },
+            value: Value::Bool(false), // value
+        };
+        params.add_parameter(
+            ("my parameter").to_string(), // name
+            parameter_to_set,             // parameter
         )?;
     }
 

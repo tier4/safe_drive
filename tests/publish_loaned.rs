@@ -1,7 +1,7 @@
 pub mod common;
 
 use common::msgs::example_msg::msg::Num;
-use safe_drive::{self, context::Context};
+use safe_drive::context::Context;
 use std::error::Error;
 
 const TOPIC_NAME: &str = "test_publish_loaned";
@@ -13,11 +13,7 @@ fn test_publish_loaned() -> Result<(), Box<dyn Error + Sync + Send + 'static>> {
         .create_node("test_publish_node", None, Default::default())
         .unwrap();
 
-    #[cfg(any(feature = "humble", feature = "galactic"))]
     let publisher = node.create_publisher::<Num>(TOPIC_NAME, Default::default())?;
-
-    #[cfg(not(any(feature = "humble", feature = "galactic")))]
-    let publisher = node.create_publisher::<Num>(TOPIC_NAME, Default::default(), false)?;
 
     let mut loaned = publisher.borrow_loaned_message()?;
     *loaned = Num { num: 100 };

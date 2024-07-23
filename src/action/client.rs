@@ -84,9 +84,11 @@ where
         qos: Option<ClientQosOption>,
     ) -> RCLActionResult<Self> {
         let mut client = rcl::MTSafeFn::rcl_action_get_zero_initialized_client();
+        println!("action_name: {}", action_name);
         let options = qos
             .map(rcl::rcl_action_client_options_t::from)
             .unwrap_or_else(rcl::MTSafeFn::rcl_action_client_get_default_options);
+        println!("action_name: {}", action_name);
         let action_name = CString::new(action_name).unwrap_or_default();
 
         {

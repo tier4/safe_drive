@@ -2,7 +2,7 @@
 
 use crate::{
     msg::{ActionGoal, ActionMsg, ActionResult},
-    rcl::action_msgs__srv__CancelGoal_Request,
+    rcl::bindgen_action_msgs__srv__CancelGoal_Request,
 };
 
 pub mod client;
@@ -13,7 +13,7 @@ pub type SendGoalServiceRequest<T> = <<T as ActionMsg>::Goal as ActionGoal>::Req
 type SendGoalServiceResponse<T> = <<T as ActionMsg>::Goal as ActionGoal>::Response;
 type GetResultServiceRequest<T> = <<T as ActionMsg>::Result as ActionResult>::Request;
 type GetResultServiceResponse<T> = <<T as ActionMsg>::Result as ActionResult>::Response;
-pub type CancelRequest = action_msgs__srv__CancelGoal_Request;
+pub type CancelRequest = bindgen_action_msgs__srv__CancelGoal_Request;
 
 #[derive(Debug, Copy, Clone, PartialEq, Eq)]
 pub enum GoalStatus {

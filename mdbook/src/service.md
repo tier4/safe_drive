@@ -116,7 +116,7 @@ we have to edit `Cargo.toml` as follows.
 
 ```toml
 [dependencies]
-safe_drive = "0.3"
+safe_drive = "0.4"
 srvmsg = { path = "/tmp/safe_drive_tutorial/srvtest/srvmsg" }
 tokio = { version = "1", features = ["full"] }
 
@@ -199,7 +199,7 @@ You have to create a server by `create_server()` method and register a callback 
 
 ```rust
 use safe_drive::{context::Context, error::DynError, logger::Logger, pr_error, qos::Profile};
-use srvmsg_rs::srvmsg::srv::{AddTwoInts, AddTwoInts_Response};
+use srvmsg::srv::{AddTwoInts, AddTwoInts_Response};
 
 fn main() -> Result<(), DynError> {
     // Create a context.
@@ -272,7 +272,7 @@ The callback function must take a message sent by a client and a header includin
 
 ```toml
 [dependencies]
-safe_drive = "0.3"
+safe_drive = "0.4"
 srvmsg = { path = "/tmp/safe_drive_tutorial/srvtest/srvmsg" }
 tokio = { version = "1", features = ["full"] }
 
@@ -321,7 +321,7 @@ In this tutorial, we use [Tokio](https://tokio.rs/), which is the most popular a
 use safe_drive::{
     context::Context, error::DynError, logger::Logger, pr_error, pr_info, pr_warn, qos::Profile,
 };
-use srvmsg_rs::srvmsg::srv::{AddTwoInts, AddTwoInts_Request};
+use srvmsg::srv::{AddTwoInts, AddTwoInts_Request};
 use std::time::Duration;
 use tokio::time::timeout;
 

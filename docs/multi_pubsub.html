@@ -1,5 +1,5 @@
 <!DOCTYPE HTML>
-<html lang="en" class="sidebar-visible no-js light">
+<html lang="en" class="light" dir="ltr">
     <head>
         <!-- Book generated using mdBook -->
         <meta charset="UTF-8">
@@ -10,7 +10,7 @@
         
         <meta name="description" content="">
         <meta name="viewport" content="width=device-width, initial-scale=1">
-        <meta name="theme-color" content="#ffffff" />
+        <meta name="theme-color" content="#ffffff">
 
         <link rel="icon" href="favicon.svg">
         <link rel="shortcut icon" href="favicon.png">
@@ -31,7 +31,7 @@
         <!-- Custom theme stylesheets -->
 
     </head>
-    <body>
+    <body class="sidebar-visible no-js">
     <div id="body-container">
         <!-- Provide site root to javascript -->
         <script>
@@ -61,31 +61,38 @@
             try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
             if (theme === null || theme === undefined) { theme = default_theme; }
             var html = document.querySelector('html');
-            html.classList.remove('no-js')
             html.classList.remove('light')
             html.classList.add(theme);
-            html.classList.add('js');
+            var body = document.querySelector('body');
+            body.classList.remove('no-js')
+            body.classList.add('js');
         </script>
+
+        <input type="checkbox" id="sidebar-toggle-anchor" class="hidden">
 
         <!-- Hide / unhide sidebar before it is displayed -->
         <script>
-            var html = document.querySelector('html');
+            var body = document.querySelector('body');
             var sidebar = null;
+            var sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
             if (document.body.clientWidth >= 1080) {
                 try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
                 sidebar = sidebar || 'visible';
             } else {
                 sidebar = 'hidden';
             }
-            html.classList.remove('sidebar-visible');
-            html.classList.add("sidebar-" + sidebar);
+            sidebar_toggle.checked = sidebar === 'visible';
+            body.classList.remove('sidebar-visible');
+            body.classList.add("sidebar-" + sidebar);
         </script>
 
         <nav id="sidebar" class="sidebar" aria-label="Table of contents">
             <div class="sidebar-scrollbox">
                 <ol class="chapter"><li class="chapter-item expanded "><a href="index.html"><strong aria-hidden="true">1.</strong> Top</a></li><li class="chapter-item expanded "><a href="tutorial.html"><strong aria-hidden="true">2.</strong> Tutorial</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="setup.html"><strong aria-hidden="true">2.1.</strong> Setting-up</a></li><li class="chapter-item expanded "><a href="pubsub.html"><strong aria-hidden="true">2.2.</strong> Publish and Subscribe</a></li><li class="chapter-item expanded "><a href="timer.html"><strong aria-hidden="true">2.3.</strong> Timer</a></li><li class="chapter-item expanded "><a href="multi_pubsub.html" class="active"><strong aria-hidden="true">2.4.</strong> Multi-threaded Publish and Subscribe</a></li><li class="chapter-item expanded "><a href="message.html"><strong aria-hidden="true">2.5.</strong> User Defined Data Structure</a></li><li class="chapter-item expanded "><a href="service.html"><strong aria-hidden="true">2.6.</strong> Service</a></li><li class="chapter-item expanded "><a href="parameter.html"><strong aria-hidden="true">2.7.</strong> Parameter</a></li><li class="chapter-item expanded "><a href="zerocopy.html"><strong aria-hidden="true">2.8.</strong> Zero Copy Publish and Subscribe</a></li><li class="chapter-item expanded "><a href="allocator.html"><strong aria-hidden="true">2.9.</strong> Custom Memory Allocator</a></li><li class="chapter-item expanded "><a href="pusbsub_and_service.html"><strong aria-hidden="true">2.10.</strong> Request to Server in Callback</a></li></ol></li><li class="chapter-item expanded "><a href="contribution.html"><strong aria-hidden="true">3.</strong> Contribution Guide</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="setup_contribution.html"><strong aria-hidden="true">3.1.</strong> Setting-up for Contribution</a></li><li class="chapter-item expanded "><a href="build_and_test.html"><strong aria-hidden="true">3.2.</strong> Build and Test</a></li><li class="chapter-item expanded "><a href="editor_setup.html"><strong aria-hidden="true">3.3.</strong> Editor Setting-up</a></li><li class="chapter-item expanded "><a href="internal_msgs.html"><strong aria-hidden="true">3.4.</strong> Generating Messages Included by safe_drive</a></li><li class="chapter-item expanded "><a href="c_apis.html"><strong aria-hidden="true">3.5.</strong> C APIs</a></li><li class="chapter-item expanded "><a href="document.html"><strong aria-hidden="true">3.6.</strong> Documentation</a></li></ol></li></ol>
             </div>
-            <div id="sidebar-resize-handle" class="sidebar-resize-handle"></div>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle">
+                <div class="sidebar-resize-indicator"></div>
+            </div>
         </nav>
 
         <!-- Track and set sidebar scroll position -->
@@ -116,9 +123,9 @@
                                 <div id="menu-bar-hover-placeholder"></div>
                 <div id="menu-bar" class="menu-bar sticky">
                     <div class="left-buttons">
-                        <button id="sidebar-toggle" class="icon-button" type="button" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                        <label id="sidebar-toggle" class="icon-button" for="sidebar-toggle-anchor" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
                             <i class="fa fa-bars"></i>
-                        </button>
+                        </label>
                         <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
                             <i class="fa fa-paint-brush"></i>
                         </button>
@@ -207,19 +214,19 @@ At the moment, the following directories is present.</p>
 prepare workspace's <code>Cargo.toml</code> as follows.</p>
 <p><code>mt_pubsub/src/Cargo.toml</code></p>
 <pre><code class="language-toml">[workspace]
-members = [&quot;publishers&quot;, &quot;subscribers&quot;]
+members = ["publishers", "subscribers"]
 </code></pre>
 <p><code>package.xml</code>s are almost same as <a href="./pubsub.html">Publish and Subscribe</a>.
 If you cannot understand what these files do,
 please go back to the previous chapter.</p>
 <p><code>publishers/package.xml</code></p>
-<pre><code class="language-xml">&lt;?xml version=&quot;1.0&quot;?&gt;
-&lt;?xml-model href=&quot;http://download.ros.org/schema/package_format3.xsd&quot; schematypens=&quot;http://www.w3.org/2001/XMLSchema&quot;?&gt;
-&lt;package format=&quot;3&quot;&gt;
+<pre><code class="language-xml">&lt;?xml version="1.0"?&gt;
+&lt;?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?&gt;
+&lt;package format="3"&gt;
   &lt;name&gt;publishers&lt;/name&gt;
   &lt;version&gt;0.0.0&lt;/version&gt;
   &lt;description&gt;MT-Publishers&lt;/description&gt;
-  &lt;maintainer email=&quot;yuuki.takano@tier4.jp&quot;&gt;Yuuki Takano&lt;/maintainer&gt;
+  &lt;maintainer email="yuuki.takano@tier4.jp"&gt;Yuuki Takano&lt;/maintainer&gt;
   &lt;license&gt;Apache License 2.0&lt;/license&gt;
 
   &lt;depend&gt;std_msgs&lt;/depend&gt;
@@ -239,14 +246,14 @@ please go back to the previous chapter.</p>
 <p>To use <code>async_std</code>, we have to update <code>Cargo.toml</code> as follows.</p>
 <p><code>Cargo.toml</code></p>
 <pre><code class="language-toml">[dependencies]
-async-std = { version = &quot;1&quot;, features = [&quot;attributes&quot;] }
-safe_drive = &quot;0.3&quot;
-std_msgs = { path = &quot;/tmp/safe_drive_tutorial/mt_pubsub/std_msgs&quot; }
+async-std = { version = "1", features = ["attributes"] }
+safe_drive = "0.4"
+std_msgs = { path = "/tmp/safe_drive_tutorial/mt_pubsub/std_msgs" }
 
 [package.metadata.ros]
-msg = [&quot;std_msgs&quot;]
-msg_dir = &quot;/tmp/safe_drive_tutorial/mt_pubsub&quot;
-safe_drive_version = &quot;0.3&quot;
+msg = ["std_msgs"]
+msg_dir = "/tmp/safe_drive_tutorial/mt_pubsub"
+safe_drive_version = "0.3"
 </code></pre>
 <h2 id="publishers"><a class="header" href="#publishers">Publishers</a></h2>
 <p>The <code>publishers</code> publishes messages to 2 topics periodically.
@@ -262,26 +269,26 @@ use std::time::Duration;
 async fn main() -&gt; Result&lt;(), DynError&gt; {
     // Create a context and a node.
     let ctx = Context::new()?;
-    let node = ctx.create_node(&quot;publishers&quot;, None, Default::default())?;
+    let node = ctx.create_node("publishers", None, Default::default())?;
 
     // Create publishers.
-    let publisher1 = node.create_publisher::&lt;std_msgs::msg::String&gt;(&quot;topic1&quot;, None, true)?;
-    let publisher2 = node.create_publisher::&lt;std_msgs::msg::String&gt;(&quot;topic2&quot;, None, true)?;
+    let publisher1 = node.create_publisher::&lt;std_msgs::msg::String&gt;("topic1", None)?;
+    let publisher2 = node.create_publisher::&lt;std_msgs::msg::String&gt;("topic2", None)?;
 
-    // Create a task which sends &quot;Hello, World!&quot;.
+    // Create a task which sends "Hello, World!".
     let task1 = async_std::task::spawn(async move {
         let mut msg = std_msgs::msg::String::new().unwrap();
-        msg.data.assign(&quot;Hello, World!&quot;);
+        msg.data.assign("Hello, World!");
         for _ in 0..50 {
             publisher1.send(&amp;msg).unwrap(); // Send a message.
             async_std::task::sleep(Duration::from_millis(500)).await; // Sleep 500ms.
         }
     });
 
-    // Create a task which sends &quot;Hello, Universe!&quot;.
+    // Create a task which sends "Hello, Universe!".
     let task2 = async_std::task::spawn(async move {
         let mut msg = std_msgs::msg::String::new().unwrap();
-        msg.data.assign(&quot;Hello, Universe!&quot;);
+        msg.data.assign("Hello, Universe!");
         for _ in 0..100 {
             publisher2.send(&amp;msg).unwrap(); // Send a message.
             async_std::task::sleep(Duration::from_millis(250)).await; // Sleep 250ms.
@@ -295,14 +302,14 @@ async fn main() -&gt; Result&lt;(), DynError&gt; {
 }</code></pre></pre>
 <p>The <code>async_std::task::spawn</code> creates a asynchronous task,
 which is similar to a thread.
-The following is a excerpt creating a task which sends &quot;Hello, World!&quot;
-to &quot;topic1&quot; every 500ms.</p>
+The following is a excerpt creating a task which sends "Hello, World!"
+to "topic1" every 500ms.</p>
 <pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
 </span><span class="boring">fn main() {
-</span>// Create a task which sends &quot;Hello, World!&quot;.
+</span>// Create a task which sends "Hello, World!".
 let task1 = async_std::task::spawn(async move {
     let mut msg = std_msgs::msg::String::new().unwrap();
-    msg.data.assign(&quot;Hello, World!&quot;);
+    msg.data.assign("Hello, World!");
     for _ in 0..50 {
         publisher1.send(&amp;msg).unwrap(); // Send a message.
         async_std::task::sleep(Duration::from_millis(500)).await; // Sleep 500ms.
@@ -325,11 +332,11 @@ The main function is almost same as previous one.</p>
 async fn main() -&gt; Result&lt;(), DynError&gt; {
     // Create a context and a node.
     let ctx = Context::new()?;
-    let node = ctx.create_node(&quot;subscribers&quot;, None, Default::default())?;
+    let node = ctx.create_node("subscribers", None, Default::default())?;
 
     // Create subscribers.
-    let subscriber1 = node.create_subscriber::&lt;std_msgs::msg::String&gt;(&quot;topic1&quot;, None, true)?;
-    let subscriber2 = node.create_subscriber::&lt;std_msgs::msg::String&gt;(&quot;topic2&quot;, None, true)?;
+    let subscriber1 = node.create_subscriber::&lt;std_msgs::msg::String&gt;("topic1", None)?;
+    let subscriber2 = node.create_subscriber::&lt;std_msgs::msg::String&gt;("topic2", None)?;
 
     // Receive messages.
     let task1 = async_std::task::spawn(receiver(subscriber1));
@@ -347,7 +354,7 @@ async fn receiver(mut subscriber: Subscriber&lt;std_msgs::msg::String&gt;) -&gt;
     loop {
         // Receive a message
         let msg = subscriber.recv().await?;
-        pr_info!(logger, &quot;{}&quot;, msg.data);
+        pr_info!(logger, "{}", msg.data);
     }
 }</code></pre></pre>
 <p><code>Subscriber::recv</code> is an asynchronous function to receive a message.
@@ -369,10 +376,10 @@ async fn receiver(mut subscriber: Subscriber&lt;std_msgs::msg::String&gt;) -&gt;
     loop {
         // Receive a message with 3s timeout.
         match timeout(Duration::from_secs(3), subscriber.recv()).await {
-            Ok(result) =&gt; pr_info!(logger, &quot;received: {}&quot;, result?.data),
+            Ok(result) =&gt; pr_info!(logger, "received: {}", result?.data),
             Err(_) =&gt; {
                 // Timed out. Finish receiving.
-                pr_warn!(logger, &quot;timeout&quot;);
+                pr_warn!(logger, "timeout");
                 break;
             }
         }
@@ -416,7 +423,7 @@ In addition to that, the timeouts work correctly.</p>
                                 <i class="fa fa-angle-left"></i>
                             </a>
 
-                            <a rel="next" href="message.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                            <a rel="next prefetch" href="message.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                                 <i class="fa fa-angle-right"></i>
                             </a>
 
@@ -430,7 +437,7 @@ In addition to that, the timeouts work correctly.</p>
                         <i class="fa fa-angle-left"></i>
                     </a>
 
-                    <a rel="next" href="message.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                    <a rel="next prefetch" href="message.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                         <i class="fa fa-angle-right"></i>
                     </a>
             </nav>

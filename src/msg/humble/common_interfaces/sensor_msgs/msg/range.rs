@@ -52,8 +52,8 @@ impl Drop for Range {
 #[derive(Debug)]
 struct RangeSeqRaw {
     data: *mut Range,
-    size: usize,
-    capacity: usize,
+    size: size_t,
+    capacity: size_t,
 }
 
 /// Sequence of Range.
@@ -63,8 +63,8 @@ struct RangeSeqRaw {
 #[derive(Debug)]
 pub struct RangeSeq<const N: usize> {
     data: *mut Range,
-    size: usize,
-    capacity: usize,
+    size: size_t,
+    capacity: size_t,
 }
 
 impl<const N: usize> RangeSeq<N> {
@@ -72,7 +72,7 @@ impl<const N: usize> RangeSeq<N> {
     /// `N` represents the maximum number of elements.
     /// If `N` is `0`, the sequence is unlimited.
     pub fn new(size: usize) -> Option<Self> {
-        if N != 0 && size >= N {
+        if N != 0 && size > N {
             // the size exceeds in the maximum number
             return None;
         }
@@ -102,7 +102,7 @@ impl<const N: usize> RangeSeq<N> {
         if self.data.is_null() {
             &[]
         } else {
-            let s = unsafe { std::slice::from_raw_parts(self.data, self.size) };
+            let s = unsafe { std::slice::from_raw_parts(self.data, self.size as _) };
             s
         }
     }
@@ -111,7 +111,7 @@ impl<const N: usize> RangeSeq<N> {
         if self.data.is_null() {
             &mut []
         } else {
-            let s = unsafe { std::slice::from_raw_parts_mut(self.data, self.size) };
+            let s = unsafe { std::slice::from_raw_parts_mut(self.data, self.size as _) };
             s
         }
     }

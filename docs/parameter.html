@@ -1,5 +1,5 @@
 <!DOCTYPE HTML>
-<html lang="en" class="sidebar-visible no-js light">
+<html lang="en" class="light" dir="ltr">
     <head>
         <!-- Book generated using mdBook -->
         <meta charset="UTF-8">
@@ -10,7 +10,7 @@
         
         <meta name="description" content="">
         <meta name="viewport" content="width=device-width, initial-scale=1">
-        <meta name="theme-color" content="#ffffff" />
+        <meta name="theme-color" content="#ffffff">
 
         <link rel="icon" href="favicon.svg">
         <link rel="shortcut icon" href="favicon.png">
@@ -31,7 +31,7 @@
         <!-- Custom theme stylesheets -->
 
     </head>
-    <body>
+    <body class="sidebar-visible no-js">
     <div id="body-container">
         <!-- Provide site root to javascript -->
         <script>
@@ -61,31 +61,38 @@
             try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
             if (theme === null || theme === undefined) { theme = default_theme; }
             var html = document.querySelector('html');
-            html.classList.remove('no-js')
             html.classList.remove('light')
             html.classList.add(theme);
-            html.classList.add('js');
+            var body = document.querySelector('body');
+            body.classList.remove('no-js')
+            body.classList.add('js');
         </script>
+
+        <input type="checkbox" id="sidebar-toggle-anchor" class="hidden">
 
         <!-- Hide / unhide sidebar before it is displayed -->
         <script>
-            var html = document.querySelector('html');
+            var body = document.querySelector('body');
             var sidebar = null;
+            var sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
             if (document.body.clientWidth >= 1080) {
                 try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
                 sidebar = sidebar || 'visible';
             } else {
                 sidebar = 'hidden';
             }
-            html.classList.remove('sidebar-visible');
-            html.classList.add("sidebar-" + sidebar);
+            sidebar_toggle.checked = sidebar === 'visible';
+            body.classList.remove('sidebar-visible');
+            body.classList.add("sidebar-" + sidebar);
         </script>
 
         <nav id="sidebar" class="sidebar" aria-label="Table of contents">
             <div class="sidebar-scrollbox">
                 <ol class="chapter"><li class="chapter-item expanded "><a href="index.html"><strong aria-hidden="true">1.</strong> Top</a></li><li class="chapter-item expanded "><a href="tutorial.html"><strong aria-hidden="true">2.</strong> Tutorial</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="setup.html"><strong aria-hidden="true">2.1.</strong> Setting-up</a></li><li class="chapter-item expanded "><a href="pubsub.html"><strong aria-hidden="true">2.2.</strong> Publish and Subscribe</a></li><li class="chapter-item expanded "><a href="timer.html"><strong aria-hidden="true">2.3.</strong> Timer</a></li><li class="chapter-item expanded "><a href="multi_pubsub.html"><strong aria-hidden="true">2.4.</strong> Multi-threaded Publish and Subscribe</a></li><li class="chapter-item expanded "><a href="message.html"><strong aria-hidden="true">2.5.</strong> User Defined Data Structure</a></li><li class="chapter-item expanded "><a href="service.html"><strong aria-hidden="true">2.6.</strong> Service</a></li><li class="chapter-item expanded "><a href="parameter.html" class="active"><strong aria-hidden="true">2.7.</strong> Parameter</a></li><li class="chapter-item expanded "><a href="zerocopy.html"><strong aria-hidden="true">2.8.</strong> Zero Copy Publish and Subscribe</a></li><li class="chapter-item expanded "><a href="allocator.html"><strong aria-hidden="true">2.9.</strong> Custom Memory Allocator</a></li><li class="chapter-item expanded "><a href="pusbsub_and_service.html"><strong aria-hidden="true">2.10.</strong> Request to Server in Callback</a></li></ol></li><li class="chapter-item expanded "><a href="contribution.html"><strong aria-hidden="true">3.</strong> Contribution Guide</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="setup_contribution.html"><strong aria-hidden="true">3.1.</strong> Setting-up for Contribution</a></li><li class="chapter-item expanded "><a href="build_and_test.html"><strong aria-hidden="true">3.2.</strong> Build and Test</a></li><li class="chapter-item expanded "><a href="editor_setup.html"><strong aria-hidden="true">3.3.</strong> Editor Setting-up</a></li><li class="chapter-item expanded "><a href="internal_msgs.html"><strong aria-hidden="true">3.4.</strong> Generating Messages Included by safe_drive</a></li><li class="chapter-item expanded "><a href="c_apis.html"><strong aria-hidden="true">3.5.</strong> C APIs</a></li><li class="chapter-item expanded "><a href="document.html"><strong aria-hidden="true">3.6.</strong> Documentation</a></li></ol></li></ol>
             </div>
-            <div id="sidebar-resize-handle" class="sidebar-resize-handle"></div>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle">
+                <div class="sidebar-resize-indicator"></div>
+            </div>
         </nav>
 
         <!-- Track and set sidebar scroll position -->
@@ -116,9 +123,9 @@
                                 <div id="menu-bar-hover-placeholder"></div>
                 <div id="menu-bar" class="menu-bar sticky">
                     <div class="left-buttons">
-                        <button id="sidebar-toggle" class="icon-button" type="button" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                        <label id="sidebar-toggle" class="icon-button" for="sidebar-toggle-anchor" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
                             <i class="fa fa-bars"></i>
-                        </button>
+                        </label>
                         <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
                             <i class="fa fa-paint-brush"></i>
                         </button>
@@ -195,7 +202,7 @@ $ cargo new async_param_server
 <p>To manage 2 packages, let's prepare <code>Cargo.toml</code> file for a workspace as follows.</p>
 <p><code>params/Cargo.toml</code></p>
 <pre><code class="language-toml">[workspace]
-members = [&quot;param_server&quot;, &quot;async_param_server&quot;]
+members = ["param_server", "async_param_server"]
 </code></pre>
 <p>The following table shows files we use in this chapter.</p>
 <div class="table-wrapper"><table><thead><tr><th>File</th><th>What?</th></tr></thead><tbody>
@@ -269,17 +276,23 @@ and how to wait updating by using a callback function.</p>
 <h3 id="edit-param_servercargotoml"><a class="header" href="#edit-param_servercargotoml">Edit <code>param_server/Cargo.toml</code></a></h3>
 <p>Add <code>safe_drive</code> to the dependencies section of <code>Cargo.toml</code> as follows.</p>
 <pre><code class="language-toml">[dependencies]
-safe_drive = &quot;0.3&quot;
+safe_drive = "0.4"
 </code></pre>
 <h3 id="edit-param_serversrcmainrs"><a class="header" href="#edit-param_serversrcmainrs">Edit <code>param_server/src/main.rs</code></a></h3>
 <p><code>param_server</code> can be implemented as follows.
 This sets 2 parameters up and waits updating.</p>
-<pre><pre class="playground"><code class="language-rust">use safe_drive::{context::Context, error::DynError, logger::Logger, parameter::Value, pr_info};
+<pre><pre class="playground"><code class="language-rust">use safe_drive::{
+    context::Context,
+    error::DynError,
+    logger::Logger,
+    parameter::{Descriptor, Parameter, Value},
+    pr_info,
+};
 
 fn main() -&gt; Result&lt;(), DynError&gt; {
     // Create a context and a node.
     let ctx = Context::new()?;
-    let node = ctx.create_node(&quot;param_server&quot;, None, Default::default())?;
+    let node = ctx.create_node("param_server", None, Default::default())?;
 
     // Create a parameter server.
     let param_server = node.create_parameter_server()?;
@@ -289,23 +302,40 @@ fn main() -&gt; Result&lt;(), DynError&gt; {
 
         // Statically typed parameter.
         params.set_parameter(
-            &quot;my_flag&quot;.to_string(),                     // parameter name
+            "my_flag".to_string(),                     // parameter name
             Value::Bool(false),                        // value
             false,                                     // read only?
-            Some(&quot;my flag's description&quot;.to_string()), // description
+            Some("my flag's description".to_string()), // description
         )?;
 
         // Dynamically typed parameter.
         params.set_dynamically_typed_parameter(
-            &quot;my_dynamic_type_flag&quot;.to_string(), // parameter name
+            "my_dynamic_type_flag".to_string(), // parameter name
             Value::Bool(false),                 // value
             false,                              // read only?
-            Some(&quot;my dynamic type flag's description&quot;.to_string()), // description
+            Some("my dynamic type flag's description".to_string()), // description
+        )?;
+
+        // Add Directly from Parameter struct
+        let parameter_to_set = Parameter {
+            descriptor: Descriptor {
+                description: "my parameter description".to_string(), // parameter description
+                additional_constraints: "my parameter addutional_constraints".to_string(), // parameter additional constraints
+                read_only: false,           // read only ?
+                dynamic_typing: false,      // static or Dynamic
+                floating_point_range: None, // floating point range
+                integer_range: None,        // integer point range
+            },
+            value: Value::Bool(false), // value
+        };
+        params.add_parameter(
+            ("my parameter").to_string(), // name
+            parameter_to_set,             // parameter
         )?;
     }
 
     // Create a logger and a selector.
-    let logger = Logger::new(&quot;param_server&quot;);
+    let logger = Logger::new("param_server");
     let mut selector = ctx.create_selector()?;
 
     // Add a callback function to the parameter server.
@@ -316,9 +346,9 @@ fn main() -&gt; Result&lt;(), DynError&gt; {
             let mut keys = String::new();
             for key in updated.iter() {
                 let value = &amp;params.get_parameter(key).unwrap().value;
-                keys = format!(&quot;{keys}{key} = {}, &quot;, value);
+                keys = format!("{keys}{key} = {}, ", value);
             }
-            pr_info!(logger, &quot;updated parameters: {keys}&quot;);
+            pr_info!(logger, "updated parameters: {keys}");
         }),
     );
 
@@ -345,18 +375,35 @@ for mutual exclusion by <code>write()</code> method.</p>
 
     // Statically typed parameter.
     params.set_parameter(
-        &quot;my_flag&quot;.to_string(),                     // parameter name
+        "my_flag".to_string(),                     // parameter name
         Value::Bool(false),                        // value
         false,                                     // read only?
-        Some(&quot;my flag's description&quot;.to_string()), // description
+        Some("my flag's description".to_string()), // description
     )?;
 
     // Dynamically typed parameter.
     params.set_dynamically_typed_parameter(
-        &quot;my_dynamic_type_flag&quot;.to_string(), // parameter name
+        "my_dynamic_type_flag".to_string(), // parameter name
         Value::Bool(false),                 // value
         false,                              // read only?
-        Some(&quot;my dynamic type flag's description&quot;.to_string()), // description
+        Some("my dynamic type flag's description".to_string()), // description
+    )?;
+
+    // Add Directly from Parameter struct
+    let parameter_to_set = Parameter {
+        descriptor: Descriptor {
+            description: "my parameter description".to_string(), // parameter description
+            additional_constraints: "my parameter addutional_constraints".to_string(), // parameter additional constraints
+            read_only: false,           // read only ?
+            dynamic_typing: false,      // static or Dynamic
+            floating_point_range: None, // floating point range
+            integer_range: None,        // integer point range
+        },
+        value: Value::Bool(false), // value
+    };
+    params.add_parameter(
+        ("my parameter").to_string(), // name
+        parameter_to_set,             // parameter
     )?;
 }
 <span class="boring">}</span></code></pre></pre>
@@ -365,6 +412,8 @@ A statically typed parameter cannot be updated
 by a value whose type is different from original type.</p>
 <p>To set a dynamically typed parameters, use <code>set_dynamically_typed_parameter()</code>.
 A dynamically typed parameter can be updated by an arbitrary type.</p>
+<p>To set directly from the Parameter struct, use <code>add_parameter()</code>.
+A Parameter struct can contain additional_constraints.</p>
 <p>Finally, register a callback function to wait updating
 parameters as follows.</p>
 <pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
@@ -377,9 +426,9 @@ selector.add_parameter_server(
         let mut keys = String::new();
         for key in updated.iter() {
             let value = &amp;params.get_parameter(key).unwrap().value;
-            keys = format!(&quot;{keys}{key} = {}, &quot;, value);
+            keys = format!("{keys}{key} = {}, ", value);
         }
-        pr_info!(logger, &quot;updated parameters: {keys}&quot;);
+        pr_info!(logger, "updated parameters: {keys}");
     }),
 );
 
@@ -417,19 +466,25 @@ and statically typed.</p>
 <h3 id="edit-async_param_servercargotoml"><a class="header" href="#edit-async_param_servercargotoml">Edit <code>async_param_server/Cargo.toml</code></a></h3>
 <p>Add <code>safe_drive</code> and <code>tokio</code> to the dependencies section of <code>Cargo.toml</code> as follows.</p>
 <pre><code class="language-toml">[dependencies]
-safe_drive = &quot;0.3&quot;
-tokio = { version = &quot;1&quot;, features = [&quot;full&quot;] }
+safe_drive = "0.4"
+tokio = { version = "1", features = ["full"] }
 </code></pre>
 <h3 id="edit-async_param_serversrcmainrs"><a class="header" href="#edit-async_param_serversrcmainrs">Edit <code>async_param_server/src/main.rs</code></a></h3>
 <p><code>async_param_server</code> can be implemented as follows.
 This sets 2 parameters up and waits updating.</p>
-<pre><pre class="playground"><code class="language-rust">use safe_drive::{context::Context, error::DynError, logger::Logger, parameter::Value, pr_info};
+<pre><pre class="playground"><code class="language-rust">use safe_drive::{
+    context::Context,
+    error::DynError,
+    logger::Logger,
+    parameter::{Descriptor, Parameter, Value},
+    pr_info,
+};
 
 #[tokio::main]
 async fn main() -&gt; Result&lt;(), DynError&gt; {
     // Create a context and a node.
     let ctx = Context::new()?;
-    let node = ctx.create_node(&quot;async_param_server&quot;, None, Default::default())?;
+    let node = ctx.create_node("async_param_server", None, Default::default())?;
 
     // Create a parameter server.
     let mut param_server = node.create_parameter_server()?;
@@ -439,23 +494,40 @@ async fn main() -&gt; Result&lt;(), DynError&gt; {
 
         // Statically typed parameter.
         params.set_parameter(
-            &quot;my_flag&quot;.to_string(),                     // parameter name
+            "my_flag".to_string(),                     // parameter name
             Value::Bool(false),                        // value
             false,                                     // read only?
-            Some(&quot;my flag's description&quot;.to_string()), // description
+            Some("my flag's description".to_string()), // description
         )?;
 
         // Dynamically typed parameter.
         params.set_dynamically_typed_parameter(
-            &quot;my_dynamic_type_flag&quot;.to_string(), // parameter name
+            "my_dynamic_type_flag".to_string(), // parameter name
             Value::Bool(false),                 // value
             false,                              // read only?
-            Some(&quot;my dynamic type flag's description&quot;.to_string()), // description
+            Some("my dynamic type flag's description".to_string()), // description
+        )?;
+
+        // Add Directly from Parameter struct
+        let parameter_to_set = Parameter {
+            descriptor: Descriptor {
+                description: "my parameter description".to_string(), // parameter description
+                additional_constraints: "my parameter addutional_constraints".to_string(), // parameter additional constraints
+                read_only: false,           // read only ?
+                dynamic_typing: false,      // static or Dynamic
+                floating_point_range: None, // floating point range
+                integer_range: None,        // integer point range
+            },
+            value: Value::Bool(false), // value
+        };
+        params.add_parameter(
+            ("my parameter").to_string(), // name
+            parameter_to_set,             // parameter
         )?;
     }
 
     // Create a logger.
-    let logger = Logger::new(&quot;async_param_server&quot;);
+    let logger = Logger::new("async_param_server");
 
     loop {
         // Wait update asynchronously.
@@ -467,9 +539,9 @@ async fn main() -&gt; Result&lt;(), DynError&gt; {
         let mut keys = String::new();
         for key in updated.iter() {
             let value = &amp;params.get_parameter(key).unwrap().value;
-            keys = format!(&quot;{keys}{key} = {}, &quot;, value);
+            keys = format!("{keys}{key} = {}, ", value);
         }
-        pr_info!(logger, &quot;updated parameters: {keys}&quot;);
+        pr_info!(logger, "updated parameters: {keys}");
     }
 }</code></pre></pre>
 <p>Important things are only following 2 lines.</p>
@@ -493,7 +565,7 @@ to read parameters.
                                 <i class="fa fa-angle-left"></i>
                             </a>
 
-                            <a rel="next" href="zerocopy.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                            <a rel="next prefetch" href="zerocopy.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                                 <i class="fa fa-angle-right"></i>
                             </a>
 
@@ -507,7 +579,7 @@ to read parameters.
                         <i class="fa fa-angle-left"></i>
                     </a>
 
-                    <a rel="next" href="zerocopy.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                    <a rel="next prefetch" href="zerocopy.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                         <i class="fa fa-angle-right"></i>
                     </a>
             </nav>

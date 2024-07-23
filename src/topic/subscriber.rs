@@ -29,15 +29,11 @@
 //! // Create a subscriber.
 //! let subscriber = node
 //!     .create_subscriber::<std_msgs::msg::UInt32>("subscriber_rs_try_recv_topic", None,
-//!     #[cfg(not(any(feature = "humble", feature = "galactic")))]
-//!     true
 //! ).unwrap();
 //!
 //! // Create a publisher.
 //! let publisher = node
 //!     .create_publisher::<std_msgs::msg::UInt32>("subscriber_rs_try_recv_topic", None,
-//!     #[cfg(not(any(feature = "humble", feature = "galactic")))]
-//!     true
 //! ).unwrap();
 //!
 //! let logger = Logger::new("subscriber_rs");
@@ -77,8 +73,6 @@
 //! // Create a subscriber.
 //! let subscriber = node_sub
 //!     .create_subscriber::<std_msgs::msg::String>("subscriber_rs_recv_topic", None,
-//!         #[cfg(not(any(feature = "humble", feature = "galactic")))]
-//!         true
 //!     )
 //!     .unwrap();
 //!
@@ -127,8 +121,6 @@
 //! // Use default QoS profile.
 //! let subscriber = node
 //! .create_subscriber::<std_msgs::msg::Empty>("subscriber_rs_topic", None,
-//!     #[cfg(not(any(feature = "humble", feature = "galactic")))]
-//!     true
 //! )
 //! .unwrap();
 //! ```
@@ -154,8 +146,6 @@
 //! // Specify the QoS profile.
 //! let subscriber = node
 //!     .create_subscriber::<std_msgs::msg::Empty>("subscriber_rs_topic", Some(profile),
-//!     #[cfg(not(any(feature = "humble", feature = "galactic")))]
-//!     true
 //! ).unwrap();
 //! ```
 //!
@@ -237,19 +227,50 @@ impl<T: TypeSupport> Subscriber<T> {
         node: Arc<Node>,
         topic_name: &str,
         qos: Option<qos::Profile>,
-
-        #[cfg(all(not(feature = "humble"), not(feature = "galactic")))]
-        disable_loaned_massage: bool,
     ) -> RCLResult<Self> {
         let mut subscription = Box::new(rcl::MTSafeFn::rcl_get_zero_initialized_subscription());
 
         let topic_name_c = CString::new(topic_name).unwrap_or_default();
 
-        #[cfg(any(feature = "humble", feature = "galactic"))]
         let options = Options::new(&qos.unwrap_or_default());
 
-        #[cfg(all(not(feature = "humble"), not(feature = "galactic")))]
-        let options = Options::new(&qos.unwrap_or_default(), disable_loaned_massage);
+        {
+            let guard = rcl::MT_UNSAFE_FN.lock();
+
+            guard.rcl_subscription_init(
+                subscription.as_mut(),
+                node.as_ptr(),
+                T::type_support(),
+                topic_name_c.as_ptr(),
+                options.as_ptr(),
+            )?;
+        }
+
+        Ok(Subscriber {
+            subscription: Arc::new(RCLSubscription {
+                subscription,
+                node,
+                topic_name: topic_name.to_string(),
+
+                #[cfg(feature = "rcl_stat")]
+                latency_take: Mutex::new(TimeStatistics::new()),
+            }),
+            _phantom: Default::default(),
+            _unsync: Default::default(),
+        })
+    }
+
+    pub(crate) fn new_disable_loaned_message(
+        node: Arc<Node>,
+        topic_name: &str,
+        qos: Option<qos::Profile>,
+    ) -> RCLResult<Self> {
+        let mut subscription = Box::new(rcl::MTSafeFn::rcl_get_zero_initialized_subscription());
+
+        let topic_name_c = CString::new(topic_name).unwrap_or_default();
+
+        let mut options = Options::new(&qos.unwrap_or_default());
+        options.disable_loaned_message();
 
         {
             let guard = rcl::MT_UNSAFE_FN.lock();
@@ -460,7 +481,7 @@ impl<'a, T> Future for AsyncReceiver<'a, T> {
 }
 
 #[pinned_drop]
-impl<'a, T> PinnedDrop for AsyncReceiver<'a, T> {
+impl<T> PinnedDrop for AsyncReceiver<'_, T> {
     fn drop(self: Pin<&mut Self>) {
         if self.is_waiting {
             let mut guard = SELECTOR.lock();
@@ -478,20 +499,23 @@ struct Options {
 }
 
 impl Options {
-    fn new(
-        qos: &qos::Profile,
-
-        #[cfg(not(any(feature = "humble", feature = "galactic")))] disable_loaned_message: bool,
-    ) -> Self {
+    fn new(qos: &qos::Profile) -> Self {
         let options = rcl::rcl_subscription_options_t {
             qos: qos.into(),
             allocator: get_allocator(),
             rmw_subscription_options: rcl::MTSafeFn::rmw_get_default_subscription_options(),
 
-            #[cfg(not(any(feature = "humble", feature = "galactic")))]
-            disable_loaned_message,
+            #[cfg(any(feature = "iron", feature = "jazzy"))]
+            disable_loaned_message: false,
         };
         Options { options }
+    }
+
+    fn disable_loaned_message(&mut self) {
+        #[cfg(any(feature = "iron", feature = "jazzy"))]
+        {
+            self.options.disable_loaned_message = true;
+        }
     }
 
     pub(crate) fn as_ptr(&self) -> *const rcl::rcl_subscription_options_t {

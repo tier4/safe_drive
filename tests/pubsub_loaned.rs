@@ -1,7 +1,7 @@
 pub mod common;
 
 use common::msgs::example_msg::msg::Num;
-use safe_drive::{self, context::Context};
+use safe_drive::context::Context;
 use std::error::Error;
 
 const TOPIC_NAME: &str = "test_pubsub_loaned";

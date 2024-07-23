@@ -1,5 +1,5 @@
 <!DOCTYPE HTML>
-<html lang="en" class="sidebar-visible no-js light">
+<html lang="en" class="light" dir="ltr">
     <head>
         <!-- Book generated using mdBook -->
         <meta charset="UTF-8">
@@ -10,7 +10,7 @@
         
         <meta name="description" content="">
         <meta name="viewport" content="width=device-width, initial-scale=1">
-        <meta name="theme-color" content="#ffffff" />
+        <meta name="theme-color" content="#ffffff">
 
         <link rel="icon" href="favicon.svg">
         <link rel="shortcut icon" href="favicon.png">
@@ -31,7 +31,7 @@
         <!-- Custom theme stylesheets -->
 
     </head>
-    <body>
+    <body class="sidebar-visible no-js">
     <div id="body-container">
         <!-- Provide site root to javascript -->
         <script>
@@ -61,31 +61,38 @@
             try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
             if (theme === null || theme === undefined) { theme = default_theme; }
             var html = document.querySelector('html');
-            html.classList.remove('no-js')
             html.classList.remove('light')
             html.classList.add(theme);
-            html.classList.add('js');
+            var body = document.querySelector('body');
+            body.classList.remove('no-js')
+            body.classList.add('js');
         </script>
+
+        <input type="checkbox" id="sidebar-toggle-anchor" class="hidden">
 
         <!-- Hide / unhide sidebar before it is displayed -->
         <script>
-            var html = document.querySelector('html');
+            var body = document.querySelector('body');
             var sidebar = null;
+            var sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
             if (document.body.clientWidth >= 1080) {
                 try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
                 sidebar = sidebar || 'visible';
             } else {
                 sidebar = 'hidden';
             }
-            html.classList.remove('sidebar-visible');
-            html.classList.add("sidebar-" + sidebar);
+            sidebar_toggle.checked = sidebar === 'visible';
+            body.classList.remove('sidebar-visible');
+            body.classList.add("sidebar-" + sidebar);
         </script>
 
         <nav id="sidebar" class="sidebar" aria-label="Table of contents">
             <div class="sidebar-scrollbox">
                 <ol class="chapter"><li class="chapter-item expanded "><a href="index.html"><strong aria-hidden="true">1.</strong> Top</a></li><li class="chapter-item expanded "><a href="tutorial.html"><strong aria-hidden="true">2.</strong> Tutorial</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="setup.html"><strong aria-hidden="true">2.1.</strong> Setting-up</a></li><li class="chapter-item expanded "><a href="pubsub.html"><strong aria-hidden="true">2.2.</strong> Publish and Subscribe</a></li><li class="chapter-item expanded "><a href="timer.html"><strong aria-hidden="true">2.3.</strong> Timer</a></li><li class="chapter-item expanded "><a href="multi_pubsub.html"><strong aria-hidden="true">2.4.</strong> Multi-threaded Publish and Subscribe</a></li><li class="chapter-item expanded "><a href="message.html"><strong aria-hidden="true">2.5.</strong> User Defined Data Structure</a></li><li class="chapter-item expanded "><a href="service.html" class="active"><strong aria-hidden="true">2.6.</strong> Service</a></li><li class="chapter-item expanded "><a href="parameter.html"><strong aria-hidden="true">2.7.</strong> Parameter</a></li><li class="chapter-item expanded "><a href="zerocopy.html"><strong aria-hidden="true">2.8.</strong> Zero Copy Publish and Subscribe</a></li><li class="chapter-item expanded "><a href="allocator.html"><strong aria-hidden="true">2.9.</strong> Custom Memory Allocator</a></li><li class="chapter-item expanded "><a href="pusbsub_and_service.html"><strong aria-hidden="true">2.10.</strong> Request to Server in Callback</a></li></ol></li><li class="chapter-item expanded "><a href="contribution.html"><strong aria-hidden="true">3.</strong> Contribution Guide</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="setup_contribution.html"><strong aria-hidden="true">3.1.</strong> Setting-up for Contribution</a></li><li class="chapter-item expanded "><a href="build_and_test.html"><strong aria-hidden="true">3.2.</strong> Build and Test</a></li><li class="chapter-item expanded "><a href="editor_setup.html"><strong aria-hidden="true">3.3.</strong> Editor Setting-up</a></li><li class="chapter-item expanded "><a href="internal_msgs.html"><strong aria-hidden="true">3.4.</strong> Generating Messages Included by safe_drive</a></li><li class="chapter-item expanded "><a href="c_apis.html"><strong aria-hidden="true">3.5.</strong> C APIs</a></li><li class="chapter-item expanded "><a href="document.html"><strong aria-hidden="true">3.6.</strong> Documentation</a></li></ol></li></ol>
             </div>
-            <div id="sidebar-resize-handle" class="sidebar-resize-handle"></div>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle">
+                <div class="sidebar-resize-indicator"></div>
+            </div>
         </nav>
 
         <!-- Track and set sidebar scroll position -->
@@ -116,9 +123,9 @@
                                 <div id="menu-bar-hover-placeholder"></div>
                 <div id="menu-bar" class="menu-bar sticky">
                     <div class="left-buttons">
-                        <button id="sidebar-toggle" class="icon-button" type="button" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                        <label id="sidebar-toggle" class="icon-button" for="sidebar-toggle-anchor" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
                             <i class="fa fa-bars"></i>
-                        </button>
+                        </label>
                         <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
                             <i class="fa fa-paint-brush"></i>
                         </button>
@@ -199,7 +206,7 @@ $ ros2 pkg create --build-type ament_cmake srvmsg
 <p>In addition to that, create the workspace's <code>Cargo.toml</code> as follows.</p>
 <p><code>srvtest/src/Cargo.toml</code></p>
 <pre><code class="language-toml">[workspace]
-members = [ &quot;client&quot;, &quot;server&quot;]
+members = [ "client", "server"]
 </code></pre>
 <h2 id="define-protocol"><a class="header" href="#define-protocol">Define Protocol</a></h2>
 <p>First of all, let's define a protocol for a service.
@@ -229,7 +236,7 @@ and returns the summation of the values.</p>
 find_package(rosidl_default_generators REQUIRED)
 
 rosidl_generate_interfaces(${PROJECT_NAME}
-  &quot;srv/AddTwoInts.srv&quot;
+  "srv/AddTwoInts.srv"
 )
 </code></pre>
 <h3 id="edit-srvmsgpackagexml"><a class="header" href="#edit-srvmsgpackagexml">Edit <code>srvmsg/package.xml</code></a></h3>
@@ -245,25 +252,25 @@ rosidl_generate_interfaces(${PROJECT_NAME}
 <p>To generate Rust types from <code>.srv</code> files,
 we have to edit <code>Cargo.toml</code> as follows.</p>
 <pre><code class="language-toml">[dependencies]
-safe_drive = &quot;0.3&quot;
-srvmsg = { path = &quot;/tmp/safe_drive_tutorial/srvtest/srvmsg&quot; }
-tokio = { version = &quot;1&quot;, features = [&quot;full&quot;] }
+safe_drive = "0.4"
+srvmsg = { path = "/tmp/safe_drive_tutorial/srvtest/srvmsg" }
+tokio = { version = "1", features = ["full"] }
 
 [package.metadata.ros]
-msg = [&quot;srvmsg&quot;]
-msg_dir = &quot;/tmp/safe_drive_tutorial/srvtest&quot;
-safe_drive_version = &quot;0.3&quot;
+msg = ["srvmsg"]
+msg_dir = "/tmp/safe_drive_tutorial/srvtest"
+safe_drive_version = "0.3"
 </code></pre>
 <h3 id="create-serverpackagexml"><a class="header" href="#create-serverpackagexml">Create <code>server/package.xml</code></a></h3>
 <p><code>package.xml</code> is also required as follows.</p>
 <p><code>srvtest/src/server/package.xml</code></p>
-<pre><code class="language-xml">&lt;?xml version=&quot;1.0&quot;?&gt;
-&lt;?xml-model href=&quot;http://download.ros.org/schema/package_format3.xsd&quot; schematypens=&quot;http://www.w3.org/2001/XMLSchema&quot;?&gt;
-&lt;package format=&quot;3&quot;&gt;
+<pre><code class="language-xml">&lt;?xml version="1.0"?&gt;
+&lt;?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?&gt;
+&lt;package format="3"&gt;
   &lt;name&gt;server&lt;/name&gt;
   &lt;version&gt;0.0.0&lt;/version&gt;
   &lt;description&gt;Server in Rust&lt;/description&gt;
-  &lt;maintainer email=&quot;yuuki.takano@tier4.jp&quot;&gt;Yuuki Takano&lt;/maintainer&gt;
+  &lt;maintainer email="yuuki.takano@tier4.jp"&gt;Yuuki Takano&lt;/maintainer&gt;
   &lt;license&gt;Apache License 2.0&lt;/license&gt;
 
   &lt;test_depend&gt;ament_lint_auto&lt;/test_depend&gt;
@@ -315,29 +322,29 @@ pub struct AddTwoInts_Response {
 <h3 id="edit-serversrcmainrs"><a class="header" href="#edit-serversrcmainrs">Edit <code>server/src/main.rs</code></a></h3>
 <p>You have to create a server by <code>create_server()</code> method and register a callback function to a selector as follows.</p>
 <pre><pre class="playground"><code class="language-rust">use safe_drive::{context::Context, error::DynError, logger::Logger, pr_error, qos::Profile};
-use srvmsg_rs::srvmsg::srv::{AddTwoInts, AddTwoInts_Response};
+use srvmsg::srv::{AddTwoInts, AddTwoInts_Response};
 
 fn main() -&gt; Result&lt;(), DynError&gt; {
     // Create a context.
     let ctx = Context::new()?;
 
     // Create a node.
-    let node = ctx.create_node(&quot;server_node&quot;, None, Default::default())?;
+    let node = ctx.create_node("server_node", None, Default::default())?;
 
     // Create a server.
-    let server = node.create_server::&lt;AddTwoInts&gt;(&quot;my_service&quot;, Some(Profile::default()))?;
+    let server = node.create_server::&lt;AddTwoInts&gt;("my_service", Some(Profile::default()))?;
 
     // Create a selector.
     let mut selector = ctx.create_selector()?;
 
     // Create a logger.
-    let logger = Logger::new(&quot;server&quot;);
+    let logger = Logger::new("server");
 
     selector.add_server(
         server,
         Box::new(move |msg, _header| {
             let mut response = AddTwoInts_Response::new().unwrap();
-            pr_error!(logger, &quot;recv: {:?}&quot;, msg);
+            pr_error!(logger, "recv: {:?}", msg);
             response.result = msg.x + msg.y;
             response
         }),
@@ -351,10 +358,10 @@ fn main() -&gt; Result&lt;(), DynError&gt; {
 <pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
 </span><span class="boring">fn main() {
 </span>// Create a server.
-let server = node.create_server::&lt;AddTwoInts&gt;(&quot;my_service&quot;, Some(Profile::default()))?;
+let server = node.create_server::&lt;AddTwoInts&gt;("my_service", Some(Profile::default()))?;
 <span class="boring">}</span></code></pre></pre>
 <p><code>AddTwoInts</code> of <code>create_server::&lt;AddTwoInts&gt;</code> indicates the protocol of the server.
-The arguments of <code>&quot;my_service&quot;</code> and <code>Some(Profile::default())</code> are the service name and QoS.
+The arguments of <code>"my_service"</code> and <code>Some(Profile::default())</code> are the service name and QoS.
 If you pass <code>None</code> instead of <code>Some(Profile::default())</code>, <code>Profile::default()</code> is used.</p>
 <p>The callback was passed as follows.</p>
 <pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
@@ -363,7 +370,7 @@ If you pass <code>None</code> instead of <code>Some(Profile::default())</code>, 
     server,
     Box::new(move |msg, _header| {
         let mut response = AddTwoInts_Response::new().unwrap();
-        pr_error!(logger, &quot;recv: {:?}&quot;, msg);
+        pr_error!(logger, "recv: {:?}", msg);
         response.result = msg.x + msg.y;
         response
     }),
@@ -376,25 +383,25 @@ If you pass <code>None</code> instead of <code>Some(Profile::default())</code>, 
 <p><code>safe_drive</code>, and <code>tokio</code> must be added to <code>Cargo.toml</code> as follows.</p>
 <p><code>srvtest/src/client/Cargo.toml</code></p>
 <pre><code class="language-toml">[dependencies]
-safe_drive = &quot;0.3&quot;
-srvmsg = { path = &quot;/tmp/safe_drive_tutorial/srvtest/srvmsg&quot; }
-tokio = { version = &quot;1&quot;, features = [&quot;full&quot;] }
+safe_drive = "0.4"
+srvmsg = { path = "/tmp/safe_drive_tutorial/srvtest/srvmsg" }
+tokio = { version = "1", features = ["full"] }
 
 [package.metadata.ros]
-msg = [&quot;srvmsg&quot;]
-msg_dir = &quot;/tmp/safe_drive_tutorial/srvtest&quot;
-safe_drive_version = &quot;0.3&quot;
+msg = ["srvmsg"]
+msg_dir = "/tmp/safe_drive_tutorial/srvtest"
+safe_drive_version = "0.3"
 </code></pre>
 <h3 id="create-clientpackagexml"><a class="header" href="#create-clientpackagexml">Create <code>client/package.xml</code></a></h3>
 <p><code>package.xml</code> is also required as follows.</p>
 <p><code>srvtest/src/client/package.xml</code></p>
-<pre><code class="language-xml">&lt;?xml version=&quot;1.0&quot;?&gt;
-&lt;?xml-model href=&quot;http://download.ros.org/schema/package_format3.xsd&quot; schematypens=&quot;http://www.w3.org/2001/XMLSchema&quot;?&gt;
-&lt;package format=&quot;3&quot;&gt;
+<pre><code class="language-xml">&lt;?xml version="1.0"?&gt;
+&lt;?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?&gt;
+&lt;package format="3"&gt;
   &lt;name&gt;client&lt;/name&gt;
   &lt;version&gt;0.0.0&lt;/version&gt;
   &lt;description&gt;Client in Rust&lt;/description&gt;
-  &lt;maintainer email=&quot;yuuki.takano@tier4.jp&quot;&gt;Yuuki Takano&lt;/maintainer&gt;
+  &lt;maintainer email="yuuki.takano@tier4.jp"&gt;Yuuki Takano&lt;/maintainer&gt;
   &lt;license&gt;Apache License 2.0&lt;/license&gt;
 
   &lt;test_depend&gt;ament_lint_auto&lt;/test_depend&gt;
@@ -415,7 +422,7 @@ In this tutorial, we use <a href="https://tokio.rs/">Tokio</a>, which is the mos
 <pre><pre class="playground"><code class="language-rust">use safe_drive::{
     context::Context, error::DynError, logger::Logger, pr_error, pr_info, pr_warn, qos::Profile,
 };
-use srvmsg_rs::srvmsg::srv::{AddTwoInts, AddTwoInts_Request};
+use srvmsg::srv::{AddTwoInts, AddTwoInts_Request};
 use std::time::Duration;
 use tokio::time::timeout;
 
@@ -423,12 +430,12 @@ use tokio::time::timeout;
 async fn main() -&gt; Result&lt;(), DynError&gt; {
     // Create a context and a node.
     let ctx = Context::new()?;
-    let node = ctx.create_node(&quot;client&quot;, None, Default::default())?;
+    let node = ctx.create_node("client", None, Default::default())?;
 
-    let logger = Logger::new(&quot;client&quot;);
+    let logger = Logger::new("client");
 
     // Create a client.
-    let mut client = node.create_client::&lt;AddTwoInts&gt;(&quot;my_service&quot;, Some(Profile::default()))?;
+    let mut client = node.create_client::&lt;AddTwoInts&gt;("my_service", Some(Profile::default()))?;
 
     let mut n = 0;
     loop {
@@ -445,15 +452,15 @@ async fn main() -&gt; Result&lt;(), DynError&gt; {
 
         match timeout(Duration::from_secs(1), &amp;mut receiver).await {
             Ok(Ok((c, response, _header))) =&gt; {
-                pr_info!(logger, &quot;received {:?}&quot;, response);
+                pr_info!(logger, "received {:?}", response);
                 client = c;
             }
             Ok(Err(e)) =&gt; {
-                pr_error!(logger, &quot;error: {e}&quot;);
+                pr_error!(logger, "error: {e}");
                 return Err(e);
             }
             Err(elapsed) =&gt; {
-                pr_warn!(logger, &quot;timeout: {elapsed}&quot;);
+                pr_warn!(logger, "timeout: {elapsed}");
                 client = receiver.give_up();
             }
         }
@@ -510,7 +517,7 @@ and it can be used for the server as follows.</p>
                                 <i class="fa fa-angle-left"></i>
                             </a>
 
-                            <a rel="next" href="parameter.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                            <a rel="next prefetch" href="parameter.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                                 <i class="fa fa-angle-right"></i>
                             </a>
 
@@ -524,7 +531,7 @@ and it can be used for the server as follows.</p>
                         <i class="fa fa-angle-left"></i>
                     </a>
 
-                    <a rel="next" href="parameter.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                    <a rel="next prefetch" href="parameter.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                         <i class="fa fa-angle-right"></i>
                     </a>
             </nav>

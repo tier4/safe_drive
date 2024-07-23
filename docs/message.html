@@ -1,5 +1,5 @@
 <!DOCTYPE HTML>
-<html lang="en" class="sidebar-visible no-js light">
+<html lang="en" class="light" dir="ltr">
     <head>
         <!-- Book generated using mdBook -->
         <meta charset="UTF-8">
@@ -10,7 +10,7 @@
         
         <meta name="description" content="">
         <meta name="viewport" content="width=device-width, initial-scale=1">
-        <meta name="theme-color" content="#ffffff" />
+        <meta name="theme-color" content="#ffffff">
 
         <link rel="icon" href="favicon.svg">
         <link rel="shortcut icon" href="favicon.png">
@@ -31,7 +31,7 @@
         <!-- Custom theme stylesheets -->
 
     </head>
-    <body>
+    <body class="sidebar-visible no-js">
     <div id="body-container">
         <!-- Provide site root to javascript -->
         <script>
@@ -61,31 +61,38 @@
             try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
             if (theme === null || theme === undefined) { theme = default_theme; }
             var html = document.querySelector('html');
-            html.classList.remove('no-js')
             html.classList.remove('light')
             html.classList.add(theme);
-            html.classList.add('js');
+            var body = document.querySelector('body');
+            body.classList.remove('no-js')
+            body.classList.add('js');
         </script>
+
+        <input type="checkbox" id="sidebar-toggle-anchor" class="hidden">
 
         <!-- Hide / unhide sidebar before it is displayed -->
         <script>
-            var html = document.querySelector('html');
+            var body = document.querySelector('body');
             var sidebar = null;
+            var sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
             if (document.body.clientWidth >= 1080) {
                 try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
                 sidebar = sidebar || 'visible';
             } else {
                 sidebar = 'hidden';
             }
-            html.classList.remove('sidebar-visible');
-            html.classList.add("sidebar-" + sidebar);
+            sidebar_toggle.checked = sidebar === 'visible';
+            body.classList.remove('sidebar-visible');
+            body.classList.add("sidebar-" + sidebar);
         </script>
 
         <nav id="sidebar" class="sidebar" aria-label="Table of contents">
             <div class="sidebar-scrollbox">
                 <ol class="chapter"><li class="chapter-item expanded "><a href="index.html"><strong aria-hidden="true">1.</strong> Top</a></li><li class="chapter-item expanded "><a href="tutorial.html"><strong aria-hidden="true">2.</strong> Tutorial</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="setup.html"><strong aria-hidden="true">2.1.</strong> Setting-up</a></li><li class="chapter-item expanded "><a href="pubsub.html"><strong aria-hidden="true">2.2.</strong> Publish and Subscribe</a></li><li class="chapter-item expanded "><a href="timer.html"><strong aria-hidden="true">2.3.</strong> Timer</a></li><li class="chapter-item expanded "><a href="multi_pubsub.html"><strong aria-hidden="true">2.4.</strong> Multi-threaded Publish and Subscribe</a></li><li class="chapter-item expanded "><a href="message.html" class="active"><strong aria-hidden="true">2.5.</strong> User Defined Data Structure</a></li><li class="chapter-item expanded "><a href="service.html"><strong aria-hidden="true">2.6.</strong> Service</a></li><li class="chapter-item expanded "><a href="parameter.html"><strong aria-hidden="true">2.7.</strong> Parameter</a></li><li class="chapter-item expanded "><a href="zerocopy.html"><strong aria-hidden="true">2.8.</strong> Zero Copy Publish and Subscribe</a></li><li class="chapter-item expanded "><a href="allocator.html"><strong aria-hidden="true">2.9.</strong> Custom Memory Allocator</a></li><li class="chapter-item expanded "><a href="pusbsub_and_service.html"><strong aria-hidden="true">2.10.</strong> Request to Server in Callback</a></li></ol></li><li class="chapter-item expanded "><a href="contribution.html"><strong aria-hidden="true">3.</strong> Contribution Guide</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="setup_contribution.html"><strong aria-hidden="true">3.1.</strong> Setting-up for Contribution</a></li><li class="chapter-item expanded "><a href="build_and_test.html"><strong aria-hidden="true">3.2.</strong> Build and Test</a></li><li class="chapter-item expanded "><a href="editor_setup.html"><strong aria-hidden="true">3.3.</strong> Editor Setting-up</a></li><li class="chapter-item expanded "><a href="internal_msgs.html"><strong aria-hidden="true">3.4.</strong> Generating Messages Included by safe_drive</a></li><li class="chapter-item expanded "><a href="c_apis.html"><strong aria-hidden="true">3.5.</strong> C APIs</a></li><li class="chapter-item expanded "><a href="document.html"><strong aria-hidden="true">3.6.</strong> Documentation</a></li></ol></li></ol>
             </div>
-            <div id="sidebar-resize-handle" class="sidebar-resize-handle"></div>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle">
+                <div class="sidebar-resize-indicator"></div>
+            </div>
         </nav>
 
         <!-- Track and set sidebar scroll position -->
@@ -116,9 +123,9 @@
                                 <div id="menu-bar-hover-placeholder"></div>
                 <div id="menu-bar" class="menu-bar sticky">
                     <div class="left-buttons">
-                        <button id="sidebar-toggle" class="icon-button" type="button" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                        <label id="sidebar-toggle" class="icon-button" for="sidebar-toggle-anchor" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
                             <i class="fa fa-bars"></i>
-                        </button>
+                        </label>
                         <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
                             <i class="fa fa-paint-brush"></i>
                         </button>
@@ -185,7 +192,7 @@ In this tutorial, we will describe how to define user defined types.</p>
 <p>The workspace's <code>Cargo.toml</code> should be created as follows.</p>
 <p><code>msgtest/src/Cargo.toml</code></p>
 <pre><code class="language-toml">[workspace]
-members = [&quot;talker&quot;, &quot;listener&quot;]
+members = ["talker", "listener"]
 </code></pre>
 <p>Then, create projects as follows.</p>
 <pre><code class="language-text">$ cd msgtest/src
@@ -203,7 +210,7 @@ $ mkdir msg
 $ cd msg
 </code></pre>
 <h3 id="primitive-type-my_interfacesmsgmymsgmsg"><a class="header" href="#primitive-type-my_interfacesmsgmymsgmsg">Primitive Type: <code>my_interfaces/msg/MyMsg.msg</code></a></h3>
-<p>Then create a file, <code>msgtest/src/my_interfaces/msg</code>, as follows.</p>
+<p>Then create a file, <code>msgtest/src/my_interfaces/msg/MyMsg.msg</code>, as follows.</p>
 <pre><code class="language-text">int32 integer_value
 int32[] unbounded_integer_array
 int32[5] five_integers_array
@@ -244,9 +251,9 @@ we have to edit <code>CMakeLists.txt</code> as follows.</p>
 <pre><code class="language-cmake">find_package(rosidl_default_generators REQUIRED)
 
 rosidl_generate_interfaces(${PROJECT_NAME}
-  &quot;msg/MyMsg.msg&quot;
-  &quot;msg/MyMsgs.msg&quot;
-  &quot;msg/MyMsgStr.msg&quot;
+  "msg/MyMsg.msg"
+  "msg/MyMsgs.msg"
+  "msg/MyMsgStr.msg"
 )
 </code></pre>
 <p>We have to specify messages files in <code>CMakeLists.txt</code>.</p>
@@ -295,24 +302,24 @@ So, <code>MyMsg</code> and <code>MyMsgs</code> are generated as follows.</p>
 The most important thing is to add <code>my_interfaces</code>, which defines message types we use.</p>
 <pre><code class="language-toml"># msgtest/src/talker/Cargo.toml
 [dependencies]
-safe_drive = &quot;0.3&quot;
-my_interfaces = { path = &quot;/tmp/safe_drive_tutorial/msgtest/my_interfaces&quot; }
+safe_drive = "0.4"
+my_interfaces = { path = "/tmp/safe_drive_tutorial/msgtest/my_interfaces" }
 
 [package.metadata.ros]
-msg = [&quot;my_interfaces&quot;]
-msg_dir = &quot;/tmp/safe_drive_tutorial/msgtest&quot;
-safe_drive_version = &quot;0.3&quot;
+msg = ["my_interfaces"]
+msg_dir = "/tmp/safe_drive_tutorial/msgtest"
+safe_drive_version = "0.3"
 </code></pre>
 <h3 id="create-talkerpackagexml"><a class="header" href="#create-talkerpackagexml">Create <code>talker/package.xml</code></a></h3>
 <p>Then create <code>package.xml</code> as follows.</p>
 <p><code>msgtest/src/talker/package.xml</code></p>
-<pre><code class="language-xml">&lt;?xml version=&quot;1.0&quot;?&gt;
-&lt;?xml-model href=&quot;http://download.ros.org/schema/package_format3.xsd&quot; schematypens=&quot;http://www.w3.org/2001/XMLSchema&quot;?&gt;
-&lt;package format=&quot;3&quot;&gt;
+<pre><code class="language-xml">&lt;?xml version="1.0"?&gt;
+&lt;?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?&gt;
+&lt;package format="3"&gt;
   &lt;name&gt;talker&lt;/name&gt;
   &lt;version&gt;0.0.0&lt;/version&gt;
   &lt;description&gt;Talker in Rust&lt;/description&gt;
-  &lt;maintainer email=&quot;yuuki.takano@tier4.jp&quot;&gt;Yuuki Takano&lt;/maintainer&gt;
+  &lt;maintainer email="yuuki.takano@tier4.jp"&gt;Yuuki Takano&lt;/maintainer&gt;
   &lt;license&gt;Apache License 2.0&lt;/license&gt;
 
   &lt;test_depend&gt;ament_lint_auto&lt;/test_depend&gt;
@@ -371,24 +378,24 @@ fn main() -&gt; Result&lt;(), DynError&gt; {
     let ctx = Context::new()?;
 
     // Create a node.
-    let node = ctx.create_node(&quot;talker&quot;, None, Default::default())?;
+    let node = ctx.create_node("talker", None, Default::default())?;
 
     // Create a publisher.
-    let publisher = node.create_publisher::&lt;my_interfaces::msg::MyMsgs&gt;(&quot;my_topic&quot;, None, true)?;
+    let publisher = node.create_publisher::&lt;my_interfaces::msg::MyMsgs&gt;("my_topic", None)?;
 
     // Create a logger.
-    let logger = Logger::new(&quot;talker&quot;);
+    let logger = Logger::new("talker");
 
     // Create a message
     let my_msg1 = create_message()?;
     let my_msg2 = create_message()?;
 
-    let mut my_msgs = my_interfaces::msg::MyMsgs::new().ok_or(&quot;failed to create MyMsgs&quot;)?;
+    let mut my_msgs = my_interfaces::msg::MyMsgs::new().ok_or("failed to create MyMsgs")?;
     my_msgs.msg1 = my_msg1;
     my_msgs.msg2 = my_msg2;
 
     loop {
-        pr_info!(logger, &quot;send: {:?}&quot;, my_msgs); // Print log.
+        pr_info!(logger, "send: {:?}", my_msgs); // Print log.
 
         // Send a message.
         publisher.send(&amp;my_msgs)?;
@@ -454,24 +461,24 @@ you can thus update the elements of the array via the slice.</p>
 <p>The listener also requires <code>my_interfaces</code>, and edit <code>Cargo.toml</code> as follows.</p>
 <pre><code class="language-toml"># msgtest/src/listener/Cargo.toml
 [dependencies]
-safe_drive = &quot;0.3&quot;
-my_interfaces = { path = &quot;/tmp/safe_drive_tutorial/msgtest/my_interfaces&quot; }
+safe_drive = "0.4"
+my_interfaces = { path = "/tmp/safe_drive_tutorial/msgtest/my_interfaces" }
 
 [package.metadata.ros]
-msg = [&quot;my_interfaces&quot;]
-msg_dir = &quot;/tmp/safe_drive_tutorial/msgtest&quot;
-safe_drive_version = &quot;0.3&quot;
+msg = ["my_interfaces"]
+msg_dir = "/tmp/safe_drive_tutorial/msgtest"
+safe_drive_version = "0.3"
 </code></pre>
 <h3 id="create-listenerpackagexml"><a class="header" href="#create-listenerpackagexml">Create <code>listener/package.xml</code></a></h3>
 <p>Then create <code>package.xml</code> as follows.</p>
 <p><code>msgtest/src/listener/package.xml</code></p>
-<pre><code class="language-xml">&lt;?xml version=&quot;1.0&quot;?&gt;
-&lt;?xml-model href=&quot;http://download.ros.org/schema/package_format3.xsd&quot; schematypens=&quot;http://www.w3.org/2001/XMLSchema&quot;?&gt;
-&lt;package format=&quot;3&quot;&gt;
+<pre><code class="language-xml">&lt;?xml version="1.0"?&gt;
+&lt;?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?&gt;
+&lt;package format="3"&gt;
   &lt;name&gt;listener&lt;/name&gt;
   &lt;version&gt;0.0.0&lt;/version&gt;
   &lt;description&gt;Listener in Rust&lt;/description&gt;
-  &lt;maintainer email=&quot;yuuki.takano@tier4.jp&quot;&gt;Yuuki Takano&lt;/maintainer&gt;
+  &lt;maintainer email="yuuki.takano@tier4.jp"&gt;Yuuki Takano&lt;/maintainer&gt;
   &lt;license&gt;Apache License 2.0&lt;/license&gt;
 
   &lt;test_depend&gt;ament_lint_auto&lt;/test_depend&gt;
@@ -488,7 +495,7 @@ safe_drive_version = &quot;0.3&quot;
 <h3 id="edit-listenersrcmainrs"><a class="header" href="#edit-listenersrcmainrs">Edit <code>listener/src/main.rs</code></a></h3>
 <p>The listener can also be implemented straightforwardly as follows.</p>
 <p><code>msgtest/src/listener/src/main.rs</code></p>
-<pre><pre class="playground"><code class="language-rust">use my_interfaces_rs::my_interfaces;
+<pre><pre class="playground"><code class="language-rust">use my_interfaces;
 use safe_drive::{context::Context, error::DynError, logger::Logger, pr_info};
 
 fn main() -&gt; Result&lt;(), DynError&gt; {
@@ -496,18 +503,18 @@ fn main() -&gt; Result&lt;(), DynError&gt; {
     let ctx = Context::new()?;
 
     // Create a node.
-    let node = ctx.create_node(&quot;listener&quot;, None, Default::default())?;
+    let node = ctx.create_node("listener", None, Default::default())?;
 
     // Create a subscriber.
-    let subscriber = node.create_subscriber::&lt;my_interfaces::msg::MyMsgs&gt;(&quot;my_topic&quot;, None, true)?;
+    let subscriber = node.create_subscriber::&lt;my_interfaces::msg::MyMsgs&gt;("my_topic", None)?;
 
     // Create a logger.
-    let logger = Logger::new(&quot;listener&quot;);
+    let logger = Logger::new("listener");
 
     // Create a selector.
     let mut selector = ctx.create_selector()?;
 
-    pr_info!(logger, &quot;listening&quot;);
+    pr_info!(logger, "listening");
 
     // Add a callback function.
     selector.add_subscriber(
@@ -515,21 +522,20 @@ fn main() -&gt; Result&lt;(), DynError&gt; {
         Box::new(move |msg| {
             let msg = &amp;msg.msg1;
 
-            pr_info!(logger, &quot;message: {}&quot;, msg.integer_value);
+            pr_info!(logger, "message: {}", msg.integer_value);
 
             for msg in msg.five_integers_array.iter() {
-                pr_info!(logger, &quot;five_integers_array: {}&quot;, msg);
+                pr_info!(logger, "five_integers_array: {}", msg);
             }
 
             for msg in msg.unbounded_integer_array.iter() {
-                pr_info!(logger, &quot;unbounded_integer_array: {}&quot;, msg);
+                pr_info!(logger, "unbounded_integer_array: {}", msg);
             }
 
             for msg in msg.up_to_five_integers_array.iter() {
-                pr_info!(logger, &quot;up_to_five_integers_array: {}&quot;, msg);
+                pr_info!(logger, "up_to_five_integers_array: {}", msg);
             }
         }),
-        false,
     );
 
     // Spin.
@@ -622,47 +628,47 @@ we can use <code>as_slice_mut()</code> or <code>as_slice_mut()</code> as follows
     let mut my_msg = my_interfaces::msg::MyMsgStr::new().unwrap();
 
     // string message
-    my_msg.message.assign(&quot;Hello, World!&quot;);
+    my_msg.message.assign("Hello, World!");
 
     // string[2] static_array_str
-    my_msg.static_array_str[0].assign(&quot;static array 0&quot;);
-    my_msg.static_array_str[1].assign(&quot;static array 1&quot;);
+    my_msg.static_array_str[0].assign("static array 0");
+    my_msg.static_array_str[1].assign("static array 1");
 
     // string[] dynamic_array_str
-    let mut msgs = RosStringSeq::new(3).ok_or(&quot;failed to create string&quot;)?;
+    let mut msgs = RosStringSeq::new(3).ok_or("failed to create string")?;
     let ref_msgs = msgs.as_slice_mut();
-    ref_msgs[0].assign(&quot;dynamic array 0&quot;);
-    ref_msgs[1].assign(&quot;dynamic array 1&quot;);
-    ref_msgs[2].assign(&quot;dynamic array 2&quot;);
+    ref_msgs[0].assign("dynamic array 0");
+    ref_msgs[1].assign("dynamic array 1");
+    ref_msgs[2].assign("dynamic array 2");
     my_msg.dynamic_array_str = msgs;
 
     // string[&lt;=3] bounded_array_str
-    let mut msgs = RosStringSeq::new(2).ok_or(&quot;failed to create string&quot;)?;
+    let mut msgs = RosStringSeq::new(2).ok_or("failed to create string")?;
     let ref_msgs = msgs.as_slice_mut();
-    ref_msgs[0].assign(&quot;bounded array 0&quot;);
-    ref_msgs[1].assign(&quot;bounded array 1&quot;);
+    ref_msgs[0].assign("bounded array 0");
+    ref_msgs[1].assign("bounded array 1");
     my_msg.bounded_array_str = msgs;
 
     // string&lt;=10 bounded_str
-    my_msg.bounded_str.assign(&quot;Hello!&quot;);
+    my_msg.bounded_str.assign("Hello!");
 
     // string&lt;=10[2] static_array_bounded_str
-    my_msg.static_array_bounded_str[0].assign(&quot;msg1&quot;);
-    my_msg.static_array_bounded_str[1].assign(&quot;msg2&quot;);
+    my_msg.static_array_bounded_str[0].assign("msg1");
+    my_msg.static_array_bounded_str[1].assign("msg2");
 
     // string&lt;=10[] dynamic_array_bounded_str
-    let mut msgs = RosStringSeq::new(3).ok_or(&quot;failed to create string&quot;)?;
+    let mut msgs = RosStringSeq::new(3).ok_or("failed to create string")?;
     let ref_msgs = msgs.as_slice_mut();
-    ref_msgs[0].assign(&quot;msg3&quot;);
-    ref_msgs[1].assign(&quot;msg4&quot;);
-    ref_msgs[2].assign(&quot;msg5&quot;);
+    ref_msgs[0].assign("msg3");
+    ref_msgs[1].assign("msg4");
+    ref_msgs[2].assign("msg5");
     my_msg.dynamic_array_bounded_str = msgs;
 
     // string&lt;=10[&lt;=3] bounded_array_bounded_str
-    let mut msgs = RosStringSeq::new(2).ok_or(&quot;failed to create string&quot;)?;
+    let mut msgs = RosStringSeq::new(2).ok_or("failed to create string")?;
     let ref_msgs = msgs.as_slice_mut();
-    ref_msgs[0].assign(&quot;msg3&quot;);
-    ref_msgs[1].assign(&quot;msg5&quot;);
+    ref_msgs[0].assign("msg3");
+    ref_msgs[1].assign("msg5");
     my_msg.bounded_array_bounded_str = msgs;
 
     Ok(my_msg)
@@ -677,7 +683,7 @@ we can use <code>as_slice_mut()</code> or <code>as_slice_mut()</code> as follows
                                 <i class="fa fa-angle-left"></i>
                             </a>
 
-                            <a rel="next" href="service.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                            <a rel="next prefetch" href="service.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                                 <i class="fa fa-angle-right"></i>
                             </a>
 
@@ -691,7 +697,7 @@ we can use <code>as_slice_mut()</code> or <code>as_slice_mut()</code> as follows
                         <i class="fa fa-angle-left"></i>
                     </a>
 
-                    <a rel="next" href="service.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                    <a rel="next prefetch" href="service.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                         <i class="fa fa-angle-right"></i>
                     </a>
             </nav>

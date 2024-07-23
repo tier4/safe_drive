@@ -1,7 +1,7 @@
 pub mod common;
 
 use common::msgs::example_msg::msg::Num;
-use safe_drive::{self, node::Node};
+use safe_drive::node::Node;
 use std::{cell::Cell, error::Error, rc::Rc, sync::Arc, thread, time::Duration};
 
 const TOPIC_NAME_1: &str = "test_select_1";

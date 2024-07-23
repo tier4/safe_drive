@@ -28,7 +28,7 @@ Then, add `safe_drive` to the dependencies of `Cargo.toml`.
 
 ```toml
 [dependencies]
-safe_drive = "0.3"
+safe_drive = "0.4"
 ```
 
 The following code is an example using a wall-timer.
@@ -45,8 +45,8 @@ fn main() -> Result<(), DynError> {
     // Create a context, a node, a subscriber, a publisher, and a selector.
     let ctx = Context::new()?;
     let node = ctx.create_node("my_node", None, Default::default())?;
-    let subscriber = node.create_subscriber::<std_msgs::msg::UInt64>("my_topic", None, true)?;
-    let publisher = node.create_publisher::<std_msgs::msg::UInt64>("my_topic", None, true)?;
+    let subscriber = node.create_subscriber::<std_msgs::msg::UInt64>("my_topic", None)?;
+    let publisher = node.create_publisher::<std_msgs::msg::UInt64>("my_topic", None)?;
     let mut selector = ctx.create_selector()?;
 
     // Create a logger.

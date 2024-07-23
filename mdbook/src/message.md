@@ -56,7 +56,7 @@ $ cd msg
 
 ### Primitive Type: `my_interfaces/msg/MyMsg.msg`
 
-Then create a file, `msgtest/src/my_interfaces/msg`, as follows.
+Then create a file, `msgtest/src/my_interfaces/msg/MyMsg.msg`, as follows.
 
 ```text
 int32 integer_value
@@ -182,7 +182,7 @@ The most important thing is to add `my_interfaces`, which defines message types 
 ```toml
 # msgtest/src/talker/Cargo.toml
 [dependencies]
-safe_drive = "0.3"
+safe_drive = "0.4"
 my_interfaces = { path = "/tmp/safe_drive_tutorial/msgtest/my_interfaces" }
 
 [package.metadata.ros]
@@ -279,7 +279,7 @@ fn main() -> Result<(), DynError> {
     let node = ctx.create_node("talker", None, Default::default())?;
 
     // Create a publisher.
-    let publisher = node.create_publisher::<my_interfaces::msg::MyMsgs>("my_topic", None, true)?;
+    let publisher = node.create_publisher::<my_interfaces::msg::MyMsgs>("my_topic", None)?;
 
     // Create a logger.
     let logger = Logger::new("talker");
@@ -369,7 +369,7 @@ The listener also requires `my_interfaces`, and edit `Cargo.toml` as follows.
 ```toml
 # msgtest/src/listener/Cargo.toml
 [dependencies]
-safe_drive = "0.3"
+safe_drive = "0.4"
 my_interfaces = { path = "/tmp/safe_drive_tutorial/msgtest/my_interfaces" }
 
 [package.metadata.ros]
@@ -414,7 +414,7 @@ The listener can also be implemented straightforwardly as follows.
 `msgtest/src/listener/src/main.rs`
 
 ```rust
-use my_interfaces_rs::my_interfaces;
+use my_interfaces;
 use safe_drive::{context::Context, error::DynError, logger::Logger, pr_info};
 
 fn main() -> Result<(), DynError> {
@@ -425,7 +425,7 @@ fn main() -> Result<(), DynError> {
     let node = ctx.create_node("listener", None, Default::default())?;
 
     // Create a subscriber.
-    let subscriber = node.create_subscriber::<my_interfaces::msg::MyMsgs>("my_topic", None, true)?;
+    let subscriber = node.create_subscriber::<my_interfaces::msg::MyMsgs>("my_topic", None)?;
 
     // Create a logger.
     let logger = Logger::new("listener");
@@ -455,7 +455,6 @@ fn main() -> Result<(), DynError> {
                 pr_info!(logger, "up_to_five_integers_array: {}", msg);
             }
         }),
-        false,
     );
 
     // Spin.

@@ -97,7 +97,7 @@ To use `async_std`, we have to update `Cargo.toml` as follows.
 ```toml
 [dependencies]
 async-std = { version = "1", features = ["attributes"] }
-safe_drive = "0.3"
+safe_drive = "0.4"
 std_msgs = { path = "/tmp/safe_drive_tutorial/mt_pubsub/std_msgs" }
 
 [package.metadata.ros]
@@ -127,8 +127,8 @@ async fn main() -> Result<(), DynError> {
     let node = ctx.create_node("publishers", None, Default::default())?;
 
     // Create publishers.
-    let publisher1 = node.create_publisher::<std_msgs::msg::String>("topic1", None, true)?;
-    let publisher2 = node.create_publisher::<std_msgs::msg::String>("topic2", None, true)?;
+    let publisher1 = node.create_publisher::<std_msgs::msg::String>("topic1", None)?;
+    let publisher2 = node.create_publisher::<std_msgs::msg::String>("topic2", None)?;
 
     // Create a task which sends "Hello, World!".
     let task1 = async_std::task::spawn(async move {
@@ -198,8 +198,8 @@ async fn main() -> Result<(), DynError> {
     let node = ctx.create_node("subscribers", None, Default::default())?;
 
     // Create subscribers.
-    let subscriber1 = node.create_subscriber::<std_msgs::msg::String>("topic1", None, true)?;
-    let subscriber2 = node.create_subscriber::<std_msgs::msg::String>("topic2", None, true)?;
+    let subscriber1 = node.create_subscriber::<std_msgs::msg::String>("topic1", None)?;
+    let subscriber2 = node.create_subscriber::<std_msgs::msg::String>("topic2", None)?;
 
     // Receive messages.
     let task1 = async_std::task::spawn(receiver(subscriber1));

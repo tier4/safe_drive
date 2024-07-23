@@ -93,13 +93,13 @@ and we need to specify the path as follows.
 
 ```toml
 [dependencies]
-safe_drive = "0.2"
+safe_drive = "0.4"
 std_msgs = { path = "/tmp/safe_drive_tutorial/pubsub/std_msgs" }
 
 [package.metadata.ros]
 msg = ["std_msgs"]
 msg_dir = "/tmp/safe_drive_tutorial/pubsub"
-safe_drive_version = "0.2"
+safe_drive_version = "0.3"
 ```
 
 ### Edit `my_talker/src/main.rs`
@@ -153,7 +153,7 @@ fn main() -> Result<(), DynError> {
     let node = ctx.create_node("my_talker", None, Default::default())?;
 
     // Create a publisher.
-    let publisher = node.create_publisher::<std_msgs::msg::String>("my_topic", None, true)?;
+    let publisher = node.create_publisher::<std_msgs::msg::String>("my_topic", None)?;
 
     // Create a logger.
     let logger = Logger::new("my_talker");
@@ -198,7 +198,7 @@ The arguments indicate as follows.
 
 ```rust
 // Create a publisher.
-let publisher = node.create_publisher::<std_msgs::msg::String>("my_topic", None, true)?;
+let publisher = node.create_publisher::<std_msgs::msg::String>("my_topic", None)?;
 ```
 
 - `<std_msgs::msg::String>` : the publisher can send values of `std_msgs::msg::String`.
@@ -323,7 +323,7 @@ Add safe_drive to the dependencies as follows.
 ```toml
 # pubsub/src/my_listener/Cargo.toml
 [dependencies]
-safe_drive = "0.3"
+safe_drive = "0.4"
 std_msgs = { path = "/tmp/safe_drive_tutorial/pubsub/std_msgs" }
 
 [package.metadata.ros]
@@ -353,7 +353,7 @@ fn main() -> Result<(), DynError> {
     let node = ctx.create_node("my_listener", None, Default::default())?;
 
     // Create a subscriber.
-    let subscriber = node.create_subscriber::<std_msgs::msg::String>("my_topic", None, true)?;
+    let subscriber = node.create_subscriber::<std_msgs::msg::String>("my_topic", None)?;
 
     // Create a logger.
     let logger = Logger::new("my_listener");
@@ -383,7 +383,7 @@ Similar to the publisher,
 
 ```rust
 // Create a subscriber.
-let subscriber = node.create_subscriber::<std_msgs::msg::String>("my_topic", None, true)?;
+let subscriber = node.create_subscriber::<std_msgs::msg::String>("my_topic", None)?;
 ```
 
 The arguments are as follows.
@@ -469,7 +469,7 @@ execute it by using `ros2` command as follows.
 
 ```text
 $ . ./install/setup.bash
-$ ros2 run my_talker my_talker
+$ ros2 run my_listener my_listener
 [INFO] [1656050459.231579900] [my_listener]: receive: Hello, World!: cnt = 4
 [INFO] [1656050460.231831200] [my_listener]: receive: Hello, World!: cnt = 5
 [INFO] [1656050461.232120000] [my_listener]: receive: Hello, World!: cnt = 6

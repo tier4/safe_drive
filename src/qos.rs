@@ -9,6 +9,9 @@ pub mod humble;
 #[cfg(feature = "iron")]
 pub mod iron;
 
+#[cfg(feature = "jazzy")]
+pub mod jazzy;
+
 pub mod policy;
 
 // pub mod policy;
@@ -166,7 +169,7 @@ impl From<&rcl::rmw_qos_profile_t> for Profile {
     fn from(qos: &rcl::rmw_qos_profile_t) -> Self {
         Self {
             history: FromPrimitive::from_u32(qos.history).unwrap_or(HistoryPolicy::Unknown),
-            depth: qos.depth as usize,
+            depth: qos.depth.try_into().unwrap(),
             reliability: FromPrimitive::from_u32(qos.reliability)
                 .unwrap_or(ReliabilityPolicy::Unknown),
             durability: FromPrimitive::from_u32(qos.durability)
@@ -201,7 +204,7 @@ impl From<&Profile> for rcl::rmw_qos_profile_t {
         }
     }
 
-    #[cfg(any(feature = "humble", feature = "iron"))]
+    #[cfg(any(feature = "humble", feature = "iron", feature = "jazzy"))]
     fn from(qos: &Profile) -> Self {
         rcl::rmw_qos_profile_t {
             history: ToPrimitive::to_u32(&qos.history)

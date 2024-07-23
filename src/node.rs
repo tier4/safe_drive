@@ -35,8 +35,6 @@ static SET_ATEXIT: InitOnce = InitOnce::new();
 /// Node of ROS2.
 pub struct Node {
     node: rcl::rcl_node_t,
-    name: String,
-    namespace: Option<String>,
     init_param_server: InitOnce,
     pub(crate) context: Arc<Context>,
 }
@@ -71,8 +69,6 @@ impl Node {
 
         Ok(Arc::new(Node {
             node,
-            name: name.to_string(),
-            namespace: namespace.map_or_else(|| None, |v| Some(v.to_string())),
             init_param_server: InitOnce::new(),
             context,
         }))
@@ -86,12 +82,16 @@ impl Node {
         &self.node as *const _ as *mut _
     }
 
-    pub fn get_name(&self) -> &str {
-        &self.name
+    pub fn get_name(&self) -> RCLResult<String> {
+        rcl::MTSafeFn::rcl_node_get_name(&self.node)
     }
 
-    pub fn get_namespace(&self) -> &Option<String> {
-        &self.namespace
+    pub fn get_fully_qualified_name(&self) -> RCLResult<String> {
+        rcl::MTSafeFn::rcl_node_get_fully_qualified_name(&self.node)
+    }
+
+    pub fn get_namespace(&self) -> RCLResult<String> {
+        rcl::MTSafeFn::rcl_node_get_namespace(&self.node)
     }
 
     pub fn create_parameter_server(self: &Arc<Self>) -> Result<ParameterServer, DynError> {
@@ -114,34 +114,41 @@ impl Node {
     /// use std::sync::Arc;
     ///
     /// fn create_new_publisher(node: Arc<Node>) -> Publisher<std_msgs::msg::Bool> {
-    ///     #[cfg(not(any(feature = "humble", feature = "galactic")))]
-    ///     {
-    ///         node.create_publisher("topic_name", None, true).unwrap()
-    ///     }
-    ///
-    ///     #[cfg(any(feature = "humble", feature = "galactic"))]
-    ///     {
-    ///         node.create_publisher("topic_name", None).unwrap()
-    ///     }
+    ///     node.create_publisher("topic_name", None).unwrap()
     /// }
     /// ```
     pub fn create_publisher<T: TypeSupport>(
         self: &Arc<Self>,
         topic_name: &str,
         qos: Option<qos::Profile>,
-
-        #[cfg(all(not(feature = "humble"), not(feature = "galactic")))]
-        disable_loaned_massage: bool,
     ) -> RCLResult<Publisher<T>> {
-        #[cfg(all(not(feature = "humble"), not(feature = "galactic")))]
-        {
-            Publisher::new(self.clone(), topic_name, qos, disable_loaned_massage)
-        }
+        Publisher::new(self.clone(), topic_name, qos)
+    }
 
-        #[cfg(any(feature = "humble", feature = "galactic"))]
-        {
-            Publisher::new(self.clone(), topic_name, qos)
-        }
+    /// Create a publisher.
+    /// If `qos` is specified `None`,
+    /// the default profile is used.
+    ///
+    /// `T` is the type of messages the created publisher send.
+    ///
+    /// This function is the same as `create_publisher` but it disables loaned message.
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// use safe_drive::{msg::common_interfaces::std_msgs, node::Node, topic::publisher::Publisher};
+    /// use std::sync::Arc;
+    ///
+    /// fn create_publisher_disable_loaned_message(node: Arc<Node>) -> Publisher<std_msgs::msg::Bool> {
+    ///     node.create_publisher_disable_loaned_message("topic_name", None).unwrap()
+    /// }
+    /// ```
+    pub fn create_publisher_disable_loaned_message<T: TypeSupport>(
+        self: &Arc<Self>,
+        topic_name: &str,
+        qos: Option<qos::Profile>,
+    ) -> RCLResult<Publisher<T>> {
+        Publisher::new_disable_loaned_message(self.clone(), topic_name, qos)
     }
 
     /// Create a subscriber.
@@ -157,33 +164,39 @@ impl Node {
     /// use std::sync::Arc;
     ///
     /// fn create_new_subscriber(node: Arc<Node>) -> Subscriber<std_msgs::msg::Bool> {
-    ///     #[cfg(any(feature = "humble", feature = "galactic"))]
-    ///     {
-    ///         node.create_subscriber("topic_name", None).unwrap()
-    ///     }
-    ///
-    ///     #[cfg(not(any(feature = "humble", feature = "galactic")))]
-    ///     {
-    ///         node.create_subscriber("topic_name", None, true).unwrap()
-    ///     }
+    ///     node.create_subscriber("topic_name", None).unwrap()
     /// }
     /// ```
     pub fn create_subscriber<T: TypeSupport>(
         self: &Arc<Self>,
         topic_name: &str,
         qos: Option<qos::Profile>,
-
-        #[cfg(not(any(feature = "humble", feature = "galactic")))] disable_loaned_massage: bool,
     ) -> RCLResult<Subscriber<T>> {
-        #[cfg(not(any(feature = "humble", feature = "galactic")))]
-        {
-            Subscriber::new(self.clone(), topic_name, qos, disable_loaned_massage)
-        }
+        Subscriber::new(self.clone(), topic_name, qos)
+    }
 
-        #[cfg(any(feature = "humble", feature = "galactic"))]
-        {
-            Subscriber::new(self.clone(), topic_name, qos)
-        }
+    /// Create a subscriber.
+    /// If `qos` is specified `None`,
+    /// the default profile is used.
+    ///
+    /// `T` is the type of messages the created subscriber receive.
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// use safe_drive::{msg::common_interfaces::std_msgs, node::Node, topic::subscriber::Subscriber};
+    /// use std::sync::Arc;
+    ///
+    /// fn create_subscriber_disable_loaned_message(node: Arc<Node>) -> Subscriber<std_msgs::msg::Bool> {
+    ///     node.create_subscriber_disable_loaned_message("topic_name", None).unwrap()
+    /// }
+    /// ```
+    pub fn create_subscriber_disable_loaned_message<T: TypeSupport>(
+        self: &Arc<Self>,
+        topic_name: &str,
+        qos: Option<qos::Profile>,
+    ) -> RCLResult<Subscriber<T>> {
+        Subscriber::new_disable_loaned_message(self.clone(), topic_name, qos)
     }
 
     /// Create a server.

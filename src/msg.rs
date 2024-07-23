@@ -23,6 +23,11 @@ mod iron;
 #[cfg(feature = "iron")]
 pub use iron::*;
 
+#[cfg(feature = "jazzy")]
+mod jazzy;
+#[cfg(feature = "jazzy")]
+pub use jazzy::*;
+
 use self::builtin_interfaces::UnsafeTime;
 use crate::rcl;
 use std::{ffi::CString, fmt::Display, intrinsics::transmute};
@@ -99,7 +104,7 @@ macro_rules! def_sequence {
 
         impl<const N: usize> $ty<N> {
             pub fn new(size: usize) -> Option<Self> {
-                if N != 0 && size >= N {
+                if N != 0 && size > N {
                     // the size exceeds in the maximum number
                     return None;
                 }
@@ -131,7 +136,9 @@ macro_rules! def_sequence {
                 if self.0.data.is_null() {
                     &mut []
                 } else {
-                    let s = unsafe { std::slice::from_raw_parts_mut(self.0.data, self.0.size) };
+                    let s = unsafe {
+                        std::slice::from_raw_parts_mut(self.0.data, self.0.size as usize)
+                    };
                     s
                 }
             }
@@ -320,7 +327,7 @@ impl<const N: usize> RosString<N> {
         if self.0.data.is_null() {
             &[]
         } else {
-            let s = unsafe { std::slice::from_raw_parts(self.0.data, self.0.size) };
+            let s = unsafe { std::slice::from_raw_parts(self.0.data, self.0.size as usize) };
             s
         }
     }
@@ -329,7 +336,7 @@ impl<const N: usize> RosString<N> {
         if self.0.data.is_null() {
             &mut []
         } else {
-            let s = unsafe { std::slice::from_raw_parts_mut(self.0.data, self.0.size) };
+            let s = unsafe { std::slice::from_raw_parts_mut(self.0.data, self.0.size as usize) };
             s
         }
     }
@@ -378,7 +385,7 @@ pub struct RosStringSeq<const STRLEN: usize, const SEQLEN: usize>(
 
 impl<const STRLEN: usize, const SEQLEN: usize> RosStringSeq<STRLEN, SEQLEN> {
     pub fn new(size: usize) -> Option<Self> {
-        if SEQLEN != 0 && size >= SEQLEN {
+        if SEQLEN != 0 && size > SEQLEN {
             // the size exceeds in the maximum number
             return None;
         }
@@ -402,7 +409,7 @@ impl<const STRLEN: usize, const SEQLEN: usize> RosStringSeq<STRLEN, SEQLEN> {
         if self.0.data.is_null() {
             &[]
         } else {
-            let s = unsafe { std::slice::from_raw_parts(self.0.data, self.0.size) };
+            let s = unsafe { std::slice::from_raw_parts(self.0.data, self.0.size as usize) };
             unsafe { transmute::<&[rosidl_runtime_c__String], &[RosString<STRLEN>]>(s) }
         }
     }
@@ -411,7 +418,9 @@ impl<const STRLEN: usize, const SEQLEN: usize> RosStringSeq<STRLEN, SEQLEN> {
         if self.0.data.is_null() {
             &mut []
         } else {
-            let s = unsafe { std::slice::from_raw_parts_mut(self.0.data, self.0.size as usize) };
+            let s = unsafe {
+                std::slice::from_raw_parts_mut(self.0.data, self.0.size.try_into().unwrap())
+            };
             unsafe { transmute::<&mut [rosidl_runtime_c__String], &mut [RosString<STRLEN>]>(s) }
         }
     }
