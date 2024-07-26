@@ -85,7 +85,7 @@ async fn run_server(server: Server<MyAction>) -> Result<(), DynError> {
                         let accepted = candidates; // filter requests if needed
 
                         sender
-                            .accept(&accepted)
+                            .send(&accepted)
                             .expect("could not set status to CANCELING");
 
                         // perform shutdown operations for the goals here if needed

@@ -136,20 +136,15 @@ async fn run_server(server: Server<MyAction>, abort: bool) -> Result<(), DynErro
                     Ok((sender, candidates)) => {
                         println!("server: received cancel request for: {:?}", candidates);
 
-                        let accepted = candidates; // filter requests if needed
+                        let accepted = candidates;
 
-                        sender
-                            .accept(&accepted)
-                            .expect("could not set status to CANCELING");
-
-                        // perform shutdown operations for the goals here if needed
-                        thread::sleep(Duration::from_secs(1));
-
-                        // return cancel response
                         let s = sender
                             .send(accepted)
                             .map_err(|(_s, err)| err)
-                            .expect("could not send cancel response");
+                            .expect("could not cancel the goal");
+
+                        // perform shutdown operations for the accepted (canceled) goals
+
                         println!("server: cancel response sent");
 
                         server_ = s;
@@ -277,6 +272,8 @@ async fn run_client_cancel(client: Client<MyAction>) -> Result<(), DynError> {
         }
         Err(e) => panic!("client: could not cancel the goal: {e:?}"),
     };
+
+    std::thread::sleep(Duration::from_secs(2));
 
     let _ = assert_status(client, GoalStatus::Canceled).await;
 

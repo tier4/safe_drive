@@ -7,8 +7,11 @@ use std::{
 };
 
 use crate::logger::{pr_error_in, Logger};
+use crate::msg::common_interfaces::diagnostic_msgs::msg::ERROR;
 use crate::msg::interfaces::action_msgs::msg::GoalInfoSeq;
-use crate::msg::interfaces::action_msgs::srv::{ERROR_NONE, ERROR_REJECTED};
+use crate::msg::interfaces::action_msgs::srv::{
+    ERROR_GOAL_TERMINATED, ERROR_NONE, ERROR_REJECTED, ERROR_UNKNOWN_GOAL_ID,
+};
 use crate::msg::GetUUID;
 use crate::PhantomUnsync;
 use crate::{
@@ -531,40 +534,34 @@ pub struct ServerCancelSend<T: ActionMsg> {
 
 impl<T: ActionMsg> ServerCancelSend<T> {
     /// Accept the cancel requests for accepted_goals and set them to CANCELING state. The shutdown operation should be performed after calling accept(), and you should call send() when it's done.
-    pub fn accept(&self, accepted_goals: &[GoalInfo]) -> Result<(), DynError> {
-        let accepted_uuids: Vec<[u8; 16]> = accepted_goals
-            .iter()
-            .map(|goal| goal.goal_id.uuid)
-            .collect();
-
-        let handles = self.handles.lock();
-        for uuid in accepted_uuids {
-            let handle = handles.get(&uuid).unwrap();
-            handle.update(GoalEvent::CancelGoal)?;
-        }
-
-        self.data.publish_goal_status()?;
-
-        Ok(())
-    }
-
-    /// Send a response for CancelGoal service.
     pub fn send(
         mut self,
         mut accepted_goals: Vec<GoalInfo>,
     ) -> Result<Server<T>, (Self, DynError)> {
         let mut response = rcl::MTSafeFn::rcl_action_get_zero_initialized_cancel_response();
 
-        response.msg.return_code = if accepted_goals.is_empty() {
-            ERROR_REJECTED
+        let code = match self.cancel_goals(&accepted_goals) {
+            Ok(code) => code,
+            Err(e) => return Err((self, e)),
+        };
+
+        response.msg.return_code = code;
+
+        if code == ERROR_NONE {
+            response.msg.goals_canceling = bindgen_action_msgs__msg__GoalInfo__Sequence {
+                data: accepted_goals.as_mut_ptr() as *mut _
+                    as *mut bindgen_action_msgs__msg__GoalInfo,
+                size: accepted_goals.len() as rcl::size_t,
+                capacity: accepted_goals.capacity() as rcl::size_t,
+            };
         } else {
-            ERROR_NONE
-        };
-        response.msg.goals_canceling = bindgen_action_msgs__msg__GoalInfo__Sequence {
-            data: accepted_goals.as_mut_ptr() as *mut _ as *mut bindgen_action_msgs__msg__GoalInfo,
-            size: accepted_goals.len() as rcl::size_t,
-            capacity: accepted_goals.capacity() as rcl::size_t,
-        };
+            let mut empty = vec![];
+            response.msg.goals_canceling = bindgen_action_msgs__msg__GoalInfo__Sequence {
+                data: empty.as_mut_ptr() as *mut _ as *mut bindgen_action_msgs__msg__GoalInfo,
+                size: 0,
+                capacity: 0,
+            };
+        }
 
         let server = unsafe { self.data.as_ptr_mut() };
 
@@ -581,6 +578,38 @@ impl<T: ActionMsg> ServerCancelSend<T> {
             }),
             Err(e) => Err((self, e.into())),
         }
+    }
+
+    /// Cancel the goals. Returns the status code for the CancelGoal response.
+    fn cancel_goals(&mut self, goals: &[GoalInfo]) -> Result<i8, DynError> {
+        if goals.is_empty() {
+            return Ok(ERROR_REJECTED);
+        }
+
+        let handles = self.handles.lock();
+
+        // Make sure that all the goals are found in the handles beforehand
+        for goal in goals {
+            if !handles.contains_key(&goal.goal_id.uuid) {
+                return Ok(ERROR_UNKNOWN_GOAL_ID);
+            }
+        }
+
+        // Make sure all the goals are not in terminal state
+        for goal in goals {
+            let handle = handles.get(&goal.goal_id.uuid).unwrap();
+            if handle.is_terminal()? {
+                return Ok(ERROR_GOAL_TERMINATED);
+            }
+        }
+
+        for goal in goals {
+            let uuid = goal.goal_id.uuid;
+            let handle = handles.get(&uuid).unwrap();
+            handle.update(GoalEvent::CancelGoal)?;
+        }
+
+        Ok(ERROR_NONE)
     }
 }
 

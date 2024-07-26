@@ -79,13 +79,12 @@ where
     }
 
     pub fn is_canceling(&self) -> Result<bool, DynError> {
-        let mut s: rcl::rcl_action_goal_state_t = GoalStatus::Unknown as i8;
-        let guard = rcl::MT_UNSAFE_FN.lock();
-        guard
-            .rcl_action_goal_handle_get_status(self.handle.0, &mut s)
-            .unwrap();
+        Ok(GoalStatus::Canceling == self.status()?)
+    }
 
-        Ok(GoalStatus::Canceling == GoalStatus::from(s))
+    pub fn is_terminal(&self) -> Result<bool, DynError> {
+        let s = self.status()?;
+        Ok(GoalStatus::Succeeded == s || GoalStatus::Canceled == s || GoalStatus::Aborted == s)
     }
 
     pub fn abort(&self) -> Result<(), RCLActionError> {
@@ -96,21 +95,6 @@ where
 
     pub(crate) fn update(&self, event: GoalEvent) -> Result<(), RCLActionError> {
         self.handle.update_goal_state(event)
-    }
-
-    fn update_result(&self, result: T::ResultContent) -> Result<(), DynError> {
-        let mut results = self.results.lock();
-        if results.insert(self.goal_id, result.clone()).is_some() {
-            return Err(format!(
-                "the result for the goal (id: {:?}) already exists; it should be set only once",
-                self.goal_id
-            )
-            .into());
-        }
-
-        self.send_available_results(self.goal_id, result)?;
-
-        Ok(())
     }
 
     pub(crate) fn send_available_results(
@@ -145,6 +129,31 @@ where
         }
 
         Ok(())
+    }
+
+    fn update_result(&self, result: T::ResultContent) -> Result<(), DynError> {
+        let mut results = self.results.lock();
+        if results.insert(self.goal_id, result.clone()).is_some() {
+            return Err(format!(
+                "the result for the goal (id: {:?}) already exists; it should be set only once",
+                self.goal_id
+            )
+            .into());
+        }
+
+        self.send_available_results(self.goal_id, result)?;
+
+        Ok(())
+    }
+
+    fn status(&self) -> Result<GoalStatus, DynError> {
+        let mut s: rcl::rcl_action_goal_state_t = GoalStatus::Unknown as i8;
+        let guard = rcl::MT_UNSAFE_FN.lock();
+        guard
+            .rcl_action_goal_handle_get_status(self.handle.0, &mut s)
+            .unwrap();
+
+        Ok(GoalStatus::from(s))
     }
 }
 
