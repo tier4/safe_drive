@@ -1,6 +1,3 @@
-pub mod common;
-
-use common::action_msg::action::my_action::*;
 use safe_drive::{
     self,
     action::{client::Client, GoalStatus},
@@ -9,6 +6,9 @@ use safe_drive::{
     msg::unique_identifier_msgs::msg::UUID,
 };
 use std::{sync::Arc, thread, time::Duration};
+
+mod my_action;
+use my_action::{MyAction, MyAction_GetResult_Request, MyAction_Goal};
 
 fn create_client(
     ctx: &Arc<Context>,

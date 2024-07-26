@@ -1,6 +1,3 @@
-mod common;
-
-use common::action_msg::action::my_action::*;
 use safe_drive::{
     self,
     action::{
@@ -12,6 +9,9 @@ use safe_drive::{
     msg::GetUUID,
 };
 use std::{sync::Arc, thread, time::Duration};
+
+mod my_action;
+use my_action::{MyAction, MyAction_Feedback, MyAction_Result};
 
 fn create_server(
     ctx: &Arc<Context>,

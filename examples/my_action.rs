@@ -1,3 +1,6 @@
+// Copied from tests/common/action_msg/action/my_action.rs
+#![allow(dead_code)]
+
 use safe_drive::{
     msg::{
         builtin_interfaces::UnsafeTime, unique_identifier_msgs, ActionGoal, ActionMsg,
@@ -653,7 +656,7 @@ impl GoalResponse for MyAction_SendGoal_Response {
 }
 
 #[repr(C)]
-#[derive(Debug)]
+#[derive(Clone, Debug)]
 pub struct MyAction_Result {
     pub b: i64,
 }
