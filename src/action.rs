@@ -1,12 +1,8 @@
 //! Actions
 
 use crate::{
-    error::RCLActionResult,
-    msg::{interfaces::action_msgs::msg::GoalStatusSeq, ActionGoal, ActionMsg, ActionResult},
-    rcl::{
-        self, bindgen_action_msgs__srv__CancelGoal_Request, rcl_action_goal_status_array_t,
-        rcl_action_server_t,
-    },
+    msg::{ActionGoal, ActionMsg, ActionResult},
+    rcl::bindgen_action_msgs__srv__CancelGoal_Request,
 };
 
 pub mod client;
@@ -45,28 +41,24 @@ impl From<i8> for GoalStatus {
     }
 }
 
-pub(crate) fn update_goal_status(
-    server: *const rcl_action_server_t,
-    goal_ids: &[[u8; 16]],
-    new_status: GoalStatus,
-) -> RCLActionResult<()> {
-    let guard = rcl::MT_UNSAFE_FN.lock();
+#[derive(Debug, Copy, Clone, PartialEq, Eq)]
+pub enum GoalEvent {
+    Execute = 0,
+    CancelGoal = 1,
+    Succeed = 2,
+    Abort = 3,
+    Canceled = 4,
+}
 
-    let mut statuses: rcl_action_goal_status_array_t =
-        rcl::MTSafeFn::rcl_action_get_zero_initialized_goal_status_array();
-    guard.rcl_action_get_goal_status_array(server, &mut statuses)?;
-    let status_seq_ptr = &mut statuses.msg.status_list as *mut _ as *mut GoalStatusSeq<0>;
-    let status_seq = unsafe { &mut (*status_seq_ptr) };
-
-    for status in status_seq.iter_mut() {
-        if goal_ids
-            .iter()
-            .any(|id| status.goal_info.goal_id.uuid.eq(id))
-        {
-            status.status = new_status as i8;
+impl From<i8> for GoalEvent {
+    fn from(s: i8) -> Self {
+        match s {
+            0 => GoalEvent::Execute,
+            1 => GoalEvent::CancelGoal,
+            2 => GoalEvent::Succeed,
+            3 => GoalEvent::Abort,
+            4 => GoalEvent::Canceled,
+            _ => unreachable!(),
         }
     }
-    guard.rcl_action_publish_status(server, &statuses as *const _ as *const _)?;
-
-    Ok(())
 }
