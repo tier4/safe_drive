@@ -320,11 +320,6 @@ where
                     request_id: header,
                     _unsync: Default::default(),
                 };
-                println!(
-                    "uuid: {:?}, header = request_id: {:?}",
-                    request.get_uuid(),
-                    header
-                );
                 RecvResult::Ok((sender, request))
             }
             Err(RCLActionError::ServerTakeFailed) => RecvResult::RetryLater(()),
@@ -807,6 +802,77 @@ impl<T: ActionMsg> Clone for Server<T> {
             results: self.results.clone(),
             handles: self.handles.clone(),
         }
+    }
+}
+
+pub struct AsyncServer<T: ActionMsg> {
+    server: Server<T>,
+}
+
+impl<T: ActionMsg + 'static> AsyncServer<T> {
+    pub fn new(server: Server<T>) -> Self {
+        Self { server }
+    }
+
+    /// Listen for goal, cancel, and result requests.
+    pub async fn listen<G, C>(&mut self, goal_handler: G, cancel_handler: C) -> Result<(), DynError>
+    where
+        G: Fn(ServerGoalSend<T>, SendGoalServiceRequest<T>) -> Server<T> + Send + 'static,
+        C: Fn(ServerCancelSend<T>, Vec<GoalInfo>) -> Server<T> + Send + 'static,
+    {
+        let goal = async_std::task::spawn({
+            let mut server_ = self.server.clone();
+            async move {
+                loop {
+                    let result = server_.recv_goal_request().await;
+                    match result {
+                        Ok((sender, req)) => {
+                            server_ = goal_handler(sender, req);
+                        }
+                        Err(e) => break Err(e),
+                    }
+                }
+            }
+        });
+
+        let cancel = async_std::task::spawn({
+            let mut server_ = self.server.clone();
+            async move {
+                loop {
+                    let result = server_.recv_cancel_request().await;
+                    match result {
+                        Ok((sender, candidates)) => {
+                            server_ = cancel_handler(sender, candidates);
+                        }
+                        Err(e) => break Err(e),
+                    }
+                }
+            }
+        });
+
+        let result = async_std::task::spawn({
+            let mut server_ = self.server.clone();
+            async move {
+                loop {
+                    let result = server_.recv_result_request().await;
+                    match result {
+                        Ok((sender, req)) => match sender.send(req.get_uuid()) {
+                            Ok(s) => server_ = s,
+                            Err((_s, e)) => {
+                                break Err(e);
+                            }
+                        },
+                        Err(e) => break Err(e),
+                    }
+                }
+            }
+        });
+
+        let _ = goal.await?;
+        let _ = cancel.await?;
+        let _ = result.await?;
+
+        Ok(())
     }
 }
 

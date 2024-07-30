@@ -23,6 +23,7 @@ signal-hook = "0.3"
 libc = "0.2"
 pin-project = "1.0"
 regex = "1.10.4"
+async-std = "1.12"
 
 [dependencies.serde]
 version = "1"

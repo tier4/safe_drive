@@ -7,7 +7,7 @@ use safe_drive::{
     action::{
         client::{Client, ClientGoalRecv, ClientResultRecv},
         handle::GoalHandle,
-        server::{Server, ServerQosOption},
+        server::{AsyncServer, Server, ServerCancelSend, ServerGoalSend, ServerQosOption},
         GoalStatus,
     },
     context::Context,
@@ -16,7 +16,6 @@ use safe_drive::{
         builtin_interfaces::UnsafeTime,
         interfaces::action_msgs::{msg::GoalInfo, srv::CancelGoalRequest},
         unique_identifier_msgs::msg::UUID,
-        GetUUID,
     },
 };
 use std::{pin::Pin, sync::Arc, thread, time::Duration};
@@ -96,94 +95,47 @@ fn spawn_worker_abort(handle: GoalHandle<MyAction>) {
 }
 
 async fn run_server(server: Server<MyAction>, abort: bool) -> Result<(), DynError> {
-    let goal = async_std::task::spawn({
-        let mut server_ = server.clone();
-        async move {
-            loop {
-                let result = server_.recv_goal_request().await;
-                match result {
-                    Ok((sender, req)) => {
-                        println!("server: goal received: {:?}", req);
+    let mut server = AsyncServer::new(server);
 
-                        let s = sender
-                            .accept(|handle| {
-                                if abort {
-                                    spawn_worker_abort(handle)
-                                } else {
-                                    spawn_worker(handle)
-                                }
-                            })
-                            .map_err(|(_sender, err)| err)
-                            .expect("could not accept");
-                        // let s = sender.reject().map_err(|(_sender, err)| err)?;
+    let goal = move |sender: ServerGoalSend<MyAction>, req| {
+        println!("server: goal received: {:?}", req);
 
-                        println!("server: goal response sent");
-
-                        server_ = s;
-                    }
-                    Err(e) => panic!("{e:?}"),
+        let s = sender
+            .accept(|handle| {
+                if abort {
+                    spawn_worker_abort(handle)
+                } else {
+                    spawn_worker(handle)
                 }
-            }
-        }
-    });
+            })
+            .map_err(|(_sender, err)| err)
+            .expect("could not accept");
+        // let s = sender.reject().map_err(|(_sender, err)| err)?;
 
-    let cancel = async_std::task::spawn({
-        let mut server_ = server.clone();
-        async move {
-            loop {
-                let result = server_.recv_cancel_request().await;
-                match result {
-                    Ok((sender, candidates)) => {
-                        println!("server: received cancel request for: {:?}", candidates);
+        println!("server: goal response sent");
 
-                        let accepted = candidates;
+        s
+    };
 
-                        let s = sender
-                            .send(accepted)
-                            .map_err(|(_s, err)| err)
-                            .expect("could not cancel the goal");
+    let cancel = move |sender: ServerCancelSend<MyAction>, candidates| {
+        println!("server: received cancel request for: {:?}", candidates);
 
-                        // perform shutdown operations for the accepted (canceled) goals
+        let accepted = candidates; // filter requests here if needed
 
-                        println!("server: cancel response sent");
+        // return cancel response
+        let s = sender
+            .send(accepted)
+            .map_err(|(_s, err)| err)
+            .expect("could not send cancel response");
 
-                        server_ = s;
-                    }
-                    Err(e) => panic!("{e:?}"),
-                }
-            }
-        }
-    });
+        // perform shutdown operations for the goals here if needed
 
-    let result = async_std::task::spawn({
-        let mut server_ = server.clone();
-        async move {
-            loop {
-                let result = server_.recv_result_request().await;
-                match result {
-                    Ok((sender, req)) => {
-                        println!("server: received result request for: {:?}", req);
+        println!("server: cancel response sent");
 
-                        // return result response
-                        let s = sender
-                            .send(req.get_uuid())
-                            .map_err(|(_s, err)| err)
-                            .expect("could not send");
-                        println!("server: result response sent");
+        s
+    };
 
-                        server_ = s;
-                    }
-                    Err(e) => panic!("{e:?}"),
-                }
-            }
-        }
-    });
-
-    let _ = goal.await;
-    let _ = cancel.await;
-    let _ = result.await;
-
-    Ok(())
+    server.listen(goal, cancel).await
 }
 
 async fn receive_goal_response(receiver: ClientGoalRecv<MyAction>) -> Client<MyAction> {
