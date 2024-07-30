@@ -164,8 +164,7 @@ where
         let options = qos
             .map(rcl::rcl_action_server_options_t::from)
             .unwrap_or_else(rcl::MTSafeFn::rcl_action_server_get_default_options);
-        // TODO: reconcile RCLResult and RCLActionResult to avoid unwrap
-        let clock = Clock::new().unwrap();
+        let clock = Clock::new()?;
         let action_name = CString::new(action_name).unwrap_or_default();
 
         {

@@ -144,6 +144,12 @@ impl From<RCLActionError> for u32 {
     }
 }
 
+impl From<RCLError> for RCLActionError {
+    fn from(err: RCLError) -> Self {
+        RCLActionError::RCLError(err)
+    }
+}
+
 impl std::fmt::Display for rcl::rcutils_error_string_t {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         let s = self.str_;
