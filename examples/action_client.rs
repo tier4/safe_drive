@@ -68,7 +68,7 @@ async fn main() -> Result<(), DynError> {
     loop {
         let recv = client.recv_feedback();
         client = match async_std::future::timeout(Duration::from_secs(3), recv).await {
-            Ok(Ok((mut c, feedback))) => {
+            Ok(Ok((c, feedback))) => {
                 println!("client: feedback received: {:?}", feedback);
 
                 if feedback.feedback.c == 5 {
@@ -108,7 +108,7 @@ async fn main() -> Result<(), DynError> {
     let recv = receiver.recv();
 
     let _ = match async_std::future::timeout(Duration::from_secs(3), recv).await {
-        Ok(Ok((c, response, header))) => {
+        Ok(Ok((c, response, _header))) => {
             println!("client: result response received: {:?}", response);
             c
         }

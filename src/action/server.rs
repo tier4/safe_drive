@@ -7,7 +7,6 @@ use std::{
 };
 
 use crate::logger::{pr_error_in, Logger};
-use crate::msg::common_interfaces::diagnostic_msgs::msg::ERROR;
 use crate::msg::interfaces::action_msgs::msg::GoalInfoSeq;
 use crate::msg::interfaces::action_msgs::srv::{
     ERROR_GOAL_TERMINATED, ERROR_NONE, ERROR_REJECTED, ERROR_UNKNOWN_GOAL_ID,

@@ -8,7 +8,7 @@ use safe_drive::{
     error::DynError,
     msg::GetUUID,
 };
-use std::{sync::Arc, thread, time::Duration};
+use std::{sync::Arc, time::Duration};
 
 mod my_action;
 use my_action::{MyAction, MyAction_Feedback, MyAction_Result};
@@ -84,21 +84,12 @@ async fn run_server(server: Server<MyAction>) -> Result<(), DynError> {
 
                         let accepted = candidates; // filter requests if needed
 
-                        sender
-                            .send(&accepted)
-                            .expect("could not set status to CANCELING");
-
-                        // perform shutdown operations for the goals here if needed
-                        thread::sleep(Duration::from_secs(2));
-
-                        // return cancel response
-                        let s = sender
+                        server_ = sender
                             .send(accepted)
                             .map_err(|(_s, err)| err)
-                            .expect("could not send cancel response");
-                        println!("server: cancel response sent");
+                            .expect("could not cancel the goal");
 
-                        server_ = s;
+                        println!("server: cancel response sent");
                     }
                     Err(e) => panic!("{e:?}"),
                 }
