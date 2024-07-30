@@ -150,6 +150,8 @@ pub struct Server<T: ActionMsg> {
 unsafe impl<T> Send for Server<T> where T: ActionMsg {}
 unsafe impl<T> Sync for Server<T> where T: ActionMsg {}
 
+/// Action server.
+/// Pass this `Server<T>` to [`AsyncServer<T>`] to receive requests on async/await context.
 impl<T> Server<T>
 where
     T: ActionMsg,
@@ -396,6 +398,7 @@ impl<T: ActionMsg> ServerGoalSend<T> {
         Ok(ret)
     }
 
+    /// Reject the goal request.
     pub fn reject(self) -> Result<Server<T>, (Self, DynError)> {
         let timestamp = {
             let mut clock = self.data.clock.lock();
@@ -529,7 +532,7 @@ pub struct ServerCancelSend<T: ActionMsg> {
 }
 
 impl<T: ActionMsg> ServerCancelSend<T> {
-    /// Accept the cancel requests for accepted_goals and set them to CANCELING state. The shutdown operation should be performed after calling accept(), and you should call send() when it's done.
+    /// Accept the cancel requests for accepted_goals and set them to CANCELING state. `accepted_goals` can be empty if no goals are to be canceled. The shutdown operation fo each goal should be performed after calling send(), and use [`GoalHandle::canceled`] when it is done.
     pub fn send(
         mut self,
         mut accepted_goals: Vec<GoalInfo>,
