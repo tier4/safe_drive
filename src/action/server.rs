@@ -142,6 +142,7 @@ impl Drop for ServerData {
 }
 
 /// An action server.
+/// Pass this `Server<T>` to [`AsyncServer<T>`] to receive requests on async/await context.
 pub struct Server<T: ActionMsg> {
     pub(crate) data: Arc<ServerData>,
     /// Once the server has completed the result for a goal, it is kept here and the result requests are responsed with the result value in this map.
@@ -152,8 +153,6 @@ pub struct Server<T: ActionMsg> {
 unsafe impl<T> Send for Server<T> where T: ActionMsg {}
 unsafe impl<T> Sync for Server<T> where T: ActionMsg {}
 
-/// Action server.
-/// Pass this `Server<T>` to [`AsyncServer<T>`] to receive requests on async/await context.
 impl<T> Server<T>
 where
     T: ActionMsg,
@@ -845,6 +844,11 @@ impl Future for CombinedFuture {
     }
 }
 
+/// An action server which works on async/await context.
+///
+/// `AsyncServer<T>` does the same job as [`Server<T>`] but on async/await context.
+///
+/// Consult `examples/action_server.rs` for example usage.
 pub struct AsyncServer<T: ActionMsg> {
     server: Server<T>,
 }
@@ -854,12 +858,8 @@ impl<T: ActionMsg + 'static> AsyncServer<T> {
         Self { server }
     }
 
-    pub async fn listen<G, C>(
-        &mut self,
-        goal_handler: G,
-        cancel_handler: C,
-        // ) -> impl Future<Output = Result<(), DynError>>
-    ) -> Result<(), DynError>
+    /// Listen for incoming requests.
+    pub async fn listen<G, C>(&mut self, goal_handler: G, cancel_handler: C) -> Result<(), DynError>
     where
         G: Fn(ServerGoalSend<T>, SendGoalServiceRequest<T>) -> Server<T> + Send + 'static,
         C: Fn(ServerCancelSend<T>, Vec<GoalInfo>) -> Server<T> + Send + 'static,
