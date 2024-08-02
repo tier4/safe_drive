@@ -1,6 +1,8 @@
+use futures::try_join;
 use parking_lot::Mutex;
 use pin_project::{pin_project, pinned_drop};
 use std::future::Future;
+use std::task::Context;
 use std::{
     collections::BTreeMap, ffi::CString, mem::MaybeUninit, pin::Pin, sync::Arc, task::Poll,
     time::Duration,
@@ -807,6 +809,42 @@ impl<T: ActionMsg> Clone for Server<T> {
     }
 }
 
+struct CombinedFuture {
+    goal_future: Pin<Box<dyn Future<Output = Result<(), DynError>> + Send>>,
+    cancel_future: Pin<Box<dyn Future<Output = Result<(), DynError>> + Send>>,
+    result_future: Pin<Box<dyn Future<Output = Result<(), DynError>> + Send>>,
+}
+
+impl Future for CombinedFuture {
+    type Output = Result<(), DynError>;
+
+    fn poll(self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<Self::Output> {
+        let this = self.get_mut();
+
+        let goal_poll = this.goal_future.as_mut().poll(cx);
+        let cancel_poll = this.cancel_future.as_mut().poll(cx);
+        let result_poll = this.result_future.as_mut().poll(cx);
+
+        if let Poll::Ready(Err(e)) = goal_poll {
+            return Poll::Ready(Err(e));
+        }
+
+        if let Poll::Ready(Err(e)) = cancel_poll {
+            return Poll::Ready(Err(e));
+        }
+
+        if let Poll::Ready(Err(e)) = result_poll {
+            return Poll::Ready(Err(e));
+        }
+
+        if goal_poll.is_ready() && cancel_poll.is_ready() && result_poll.is_ready() {
+            Poll::Ready(Ok(()))
+        } else {
+            Poll::Pending
+        }
+    }
+}
+
 pub struct AsyncServer<T: ActionMsg> {
     server: Server<T>,
 }
@@ -816,65 +854,63 @@ impl<T: ActionMsg + 'static> AsyncServer<T> {
         Self { server }
     }
 
-    /// Listen for goal, cancel, and result requests.
-    pub async fn listen<G, C>(&mut self, goal_handler: G, cancel_handler: C) -> Result<(), DynError>
+    pub async fn listen<G, C>(
+        &mut self,
+        goal_handler: G,
+        cancel_handler: C,
+        // ) -> impl Future<Output = Result<(), DynError>>
+    ) -> Result<(), DynError>
     where
         G: Fn(ServerGoalSend<T>, SendGoalServiceRequest<T>) -> Server<T> + Send + 'static,
         C: Fn(ServerCancelSend<T>, Vec<GoalInfo>) -> Server<T> + Send + 'static,
     {
-        let goal = async_std::task::spawn({
-            let mut server_ = self.server.clone();
-            async move {
-                loop {
-                    let result = server_.recv_goal_request().await;
-                    match result {
-                        Ok((sender, req)) => {
-                            server_ = goal_handler(sender, req);
+        let server_for_goal = self.server.clone();
+        let server_for_cancel = self.server.clone();
+        let server_for_result = self.server.clone();
+
+        let goal_future = async move {
+            let mut server_ = server_for_goal;
+            loop {
+                let result = server_.recv_goal_request().await;
+                match result {
+                    Ok((sender, req)) => {
+                        server_ = goal_handler(sender, req);
+                    }
+                    Err(e) => break Err::<(), DynError>(e),
+                }
+            }
+        };
+
+        let cancel_future = async move {
+            let mut server_ = server_for_cancel;
+            loop {
+                let result = server_.recv_cancel_request().await;
+                match result {
+                    Ok((sender, candidates)) => {
+                        server_ = cancel_handler(sender, candidates);
+                    }
+                    Err(e) => break Err::<(), DynError>(e),
+                }
+            }
+        };
+
+        let result_future = async move {
+            let mut server_ = server_for_result;
+            loop {
+                let result = server_.recv_result_request().await;
+                match result {
+                    Ok((sender, req)) => match sender.send(req.get_uuid()) {
+                        Ok(s) => server_ = s,
+                        Err((_s, e)) => {
+                            break Err::<(), DynError>(e);
                         }
-                        Err(e) => break Err(e),
-                    }
+                    },
+                    Err(e) => break Err::<(), DynError>(e),
                 }
             }
-        });
+        };
 
-        let cancel = async_std::task::spawn({
-            let mut server_ = self.server.clone();
-            async move {
-                loop {
-                    let result = server_.recv_cancel_request().await;
-                    match result {
-                        Ok((sender, candidates)) => {
-                            server_ = cancel_handler(sender, candidates);
-                        }
-                        Err(e) => break Err(e),
-                    }
-                }
-            }
-        });
-
-        let result = async_std::task::spawn({
-            let mut server_ = self.server.clone();
-            async move {
-                loop {
-                    let result = server_.recv_result_request().await;
-                    match result {
-                        Ok((sender, req)) => match sender.send(req.get_uuid()) {
-                            Ok(s) => server_ = s,
-                            Err((_s, e)) => {
-                                break Err(e);
-                            }
-                        },
-                        Err(e) => break Err(e),
-                    }
-                }
-            }
-        });
-
-        let _ = goal.await?;
-        let _ = cancel.await?;
-        let _ = result.await?;
-
-        Ok(())
+        try_join!(goal_future, cancel_future, result_future).map(|_: (_, _, _)| ())
     }
 }
 
