@@ -1,13 +1,14 @@
+use futures::try_join;
 use parking_lot::Mutex;
 use pin_project::{pin_project, pinned_drop};
 use std::future::Future;
+use std::task::Context;
 use std::{
     collections::BTreeMap, ffi::CString, mem::MaybeUninit, pin::Pin, sync::Arc, task::Poll,
     time::Duration,
 };
 
 use crate::logger::{pr_error_in, Logger};
-use crate::msg::common_interfaces::diagnostic_msgs::msg::ERROR;
 use crate::msg::interfaces::action_msgs::msg::GoalInfoSeq;
 use crate::msg::interfaces::action_msgs::srv::{
     ERROR_GOAL_TERMINATED, ERROR_NONE, ERROR_REJECTED, ERROR_UNKNOWN_GOAL_ID,
@@ -45,6 +46,9 @@ use crate::qos::humble::*;
 
 #[cfg(feature = "iron")]
 use crate::qos::iron::*;
+
+#[cfg(feature = "jazzy")]
+use crate::qos::jazzy::*;
 
 use super::GoalEvent;
 use super::{handle::GoalHandle, GetResultServiceRequest, GoalStatus, SendGoalServiceRequest};
@@ -138,6 +142,7 @@ impl Drop for ServerData {
 }
 
 /// An action server.
+/// Pass this `Server<T>` to [`AsyncServer<T>`] to receive requests on async/await context.
 pub struct Server<T: ActionMsg> {
     pub(crate) data: Arc<ServerData>,
     /// Once the server has completed the result for a goal, it is kept here and the result requests are responsed with the result value in this map.
@@ -162,8 +167,7 @@ where
         let options = qos
             .map(rcl::rcl_action_server_options_t::from)
             .unwrap_or_else(rcl::MTSafeFn::rcl_action_server_get_default_options);
-        // TODO: reconcile RCLResult and RCLActionResult to avoid unwrap
-        let clock = Clock::new().unwrap();
+        let clock = Clock::new()?;
         let action_name = CString::new(action_name).unwrap_or_default();
 
         {
@@ -318,11 +322,6 @@ where
                     request_id: header,
                     _unsync: Default::default(),
                 };
-                println!(
-                    "uuid: {:?}, header = request_id: {:?}",
-                    request.get_uuid(),
-                    header
-                );
                 RecvResult::Ok((sender, request))
             }
             Err(RCLActionError::ServerTakeFailed) => RecvResult::RetryLater(()),
@@ -400,6 +399,7 @@ impl<T: ActionMsg> ServerGoalSend<T> {
         Ok(ret)
     }
 
+    /// Reject the goal request.
     pub fn reject(self) -> Result<Server<T>, (Self, DynError)> {
         let timestamp = {
             let mut clock = self.data.clock.lock();
@@ -533,7 +533,7 @@ pub struct ServerCancelSend<T: ActionMsg> {
 }
 
 impl<T: ActionMsg> ServerCancelSend<T> {
-    /// Accept the cancel requests for accepted_goals and set them to CANCELING state. The shutdown operation should be performed after calling accept(), and you should call send() when it's done.
+    /// Accept the cancel requests for accepted_goals and set them to CANCELING state. `accepted_goals` can be empty if no goals are to be canceled. The shutdown operation fo each goal should be performed after calling send(), and use [`GoalHandle::canceled`] when it is done.
     pub fn send(
         mut self,
         mut accepted_goals: Vec<GoalInfo>,
@@ -805,6 +805,112 @@ impl<T: ActionMsg> Clone for Server<T> {
             results: self.results.clone(),
             handles: self.handles.clone(),
         }
+    }
+}
+
+struct CombinedFuture {
+    goal_future: Pin<Box<dyn Future<Output = Result<(), DynError>> + Send>>,
+    cancel_future: Pin<Box<dyn Future<Output = Result<(), DynError>> + Send>>,
+    result_future: Pin<Box<dyn Future<Output = Result<(), DynError>> + Send>>,
+}
+
+impl Future for CombinedFuture {
+    type Output = Result<(), DynError>;
+
+    fn poll(self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<Self::Output> {
+        let this = self.get_mut();
+
+        let goal_poll = this.goal_future.as_mut().poll(cx);
+        let cancel_poll = this.cancel_future.as_mut().poll(cx);
+        let result_poll = this.result_future.as_mut().poll(cx);
+
+        if let Poll::Ready(Err(e)) = goal_poll {
+            return Poll::Ready(Err(e));
+        }
+
+        if let Poll::Ready(Err(e)) = cancel_poll {
+            return Poll::Ready(Err(e));
+        }
+
+        if let Poll::Ready(Err(e)) = result_poll {
+            return Poll::Ready(Err(e));
+        }
+
+        if goal_poll.is_ready() && cancel_poll.is_ready() && result_poll.is_ready() {
+            Poll::Ready(Ok(()))
+        } else {
+            Poll::Pending
+        }
+    }
+}
+
+/// An action server which works on async/await context.
+///
+/// `AsyncServer<T>` does the same job as [`Server<T>`] but on async/await context.
+///
+/// Consult `examples/action_server.rs` for example usage.
+pub struct AsyncServer<T: ActionMsg> {
+    server: Server<T>,
+}
+
+impl<T: ActionMsg + 'static> AsyncServer<T> {
+    pub fn new(server: Server<T>) -> Self {
+        Self { server }
+    }
+
+    /// Listen for incoming requests.
+    pub async fn listen<G, C>(&mut self, goal_handler: G, cancel_handler: C) -> Result<(), DynError>
+    where
+        G: Fn(ServerGoalSend<T>, SendGoalServiceRequest<T>) -> Server<T> + Send + 'static,
+        C: Fn(ServerCancelSend<T>, Vec<GoalInfo>) -> Server<T> + Send + 'static,
+    {
+        let server_for_goal = self.server.clone();
+        let server_for_cancel = self.server.clone();
+        let server_for_result = self.server.clone();
+
+        let goal_future = async move {
+            let mut server_ = server_for_goal;
+            loop {
+                let result = server_.recv_goal_request().await;
+                match result {
+                    Ok((sender, req)) => {
+                        server_ = goal_handler(sender, req);
+                    }
+                    Err(e) => break Err::<(), DynError>(e),
+                }
+            }
+        };
+
+        let cancel_future = async move {
+            let mut server_ = server_for_cancel;
+            loop {
+                let result = server_.recv_cancel_request().await;
+                match result {
+                    Ok((sender, candidates)) => {
+                        server_ = cancel_handler(sender, candidates);
+                    }
+                    Err(e) => break Err::<(), DynError>(e),
+                }
+            }
+        };
+
+        let result_future = async move {
+            let mut server_ = server_for_result;
+            loop {
+                let result = server_.recv_result_request().await;
+                match result {
+                    Ok((sender, req)) => match sender.send(req.get_uuid()) {
+                        Ok(s) => server_ = s,
+                        Err((_s, e)) => {
+                            break Err::<(), DynError>(e);
+                        }
+                    },
+                    Err(e) => break Err::<(), DynError>(e),
+                }
+            }
+        };
+
+        try_join!(goal_future, cancel_future, result_future).map(|_: (_, _, _)| ())
     }
 }
 

@@ -49,6 +49,7 @@ where
         }
     }
 
+    /// Publish a feedback.
     pub fn feedback(&self, content: T::FeedbackContent) -> Result<(), DynError> {
         let mut msg = <T as ActionMsg>::new_feedback_message(content, self.goal_id);
 
@@ -60,6 +61,7 @@ where
         Ok(())
     }
 
+    /// Notify the server that the goal is successfully canceled.
     pub fn canceled(&self, result: T::ResultContent) -> Result<(), DynError> {
         self.update_result(result)?;
 
@@ -69,6 +71,7 @@ where
         Ok(())
     }
 
+    /// Notify the server that the goal is successfully finished.
     pub fn finish(&self, result: T::ResultContent) -> Result<(), DynError> {
         self.update_result(result)?;
 
@@ -82,6 +85,7 @@ where
         Ok(GoalStatus::Canceling == self.status()?)
     }
 
+    /// Returns true if the goal is in a terminal state (succeeded, canceled, or aborted).
     pub fn is_terminal(&self) -> Result<bool, DynError> {
         let s = self.status()?;
         Ok(GoalStatus::Succeeded == s || GoalStatus::Canceled == s || GoalStatus::Aborted == s)

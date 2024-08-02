@@ -232,7 +232,6 @@ where
     }
 
     /// Takes a status message for all the ongoing goals.
-    // TODO: maybe return status_array.status_list. could it be cloned?
     pub fn try_recv_status(&self) -> RecvResult<GoalStatusArray, ()> {
         match rcl_action_take_status(&self.data.client) {
             Ok(status_array) => RecvResult::Ok(status_array),
