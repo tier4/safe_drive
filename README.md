@@ -54,7 +54,7 @@ We specified and tested as follows.
 - [x] Signal handling
 - [x] Parameter
 - [x] Timer
-- [ ] Action (service + topic)
+- [x] Action (service + topic)
 - [x] Rust code generation from .msg and .srv files
   - [safe_drive_msg](https://github.com/tier4/safe_drive_msg)
 - [x] Formal Specification
