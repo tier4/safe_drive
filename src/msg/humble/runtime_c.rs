@@ -173,6 +173,9 @@ pub const _THREAD_MUTEX_INTERNAL_H: u32 = 1;
 pub const __PTHREAD_MUTEX_HAVE_PREV: u32 = 1;
 pub const __have_pthread_attr_t: u32 = 1;
 pub const _ALLOCA_H: u32 = 1;
+#[cfg(target_os = "windows")]
+pub type size_t = usize;
+#[cfg(not(target_os = "windows"))]
 pub type size_t = ::std::os::raw::c_ulong;
 pub type wchar_t = ::std::os::raw::c_int;
 #[repr(C)]
