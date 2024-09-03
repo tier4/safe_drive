@@ -1,3 +1,5 @@
+//! Goal handle representing each action goal.
+
 use parking_lot::Mutex;
 use std::{collections::BTreeMap, rc::Rc, sync::Arc};
 
