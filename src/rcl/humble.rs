@@ -304,6 +304,9 @@ pub const RCL_RET_ACTION_GOAL_HANDLE_INVALID: u32 = 2300;
 pub const RCL_RET_ACTION_GOAL_EVENT_INVALID: u32 = 2301;
 pub const UUID_SIZE: u32 = 16;
 pub const GOAL_STATE_NUM_STATES: u32 = 7;
+#[cfg(target_os = "windows")]
+pub type size_t = usize;
+#[cfg(not(target_os = "windows"))]
 pub type size_t = ::std::os::raw::c_ulong;
 pub type wchar_t = ::std::os::raw::c_int;
 #[repr(C)]
