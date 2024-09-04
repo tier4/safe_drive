@@ -42,6 +42,10 @@
 //!   - [`service::client::ClientRecv`]
 //!   - [`service::server::Server`]
 //!   - [`service::server::ServerSend`]
+//! - Action
+//!   - [`action::client::Client`]
+//!   - [`action::server::Server`]
+//!
 //!
 //! ## Examples
 //!

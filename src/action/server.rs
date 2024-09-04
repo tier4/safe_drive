@@ -1,3 +1,5 @@
+//! Action server.
+
 use futures::try_join;
 use parking_lot::Mutex;
 use pin_project::{pin_project, pinned_drop};
@@ -142,6 +144,7 @@ impl Drop for ServerData {
 }
 
 /// An action server.
+///
 /// Pass this `Server<T>` to [`AsyncServer<T>`] to receive requests on async/await context.
 pub struct Server<T: ActionMsg> {
     pub(crate) data: Arc<ServerData>,

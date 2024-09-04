@@ -1,3 +1,5 @@
+//! Action client.
+
 use pin_project::{pin_project, pinned_drop};
 use std::future::Future;
 use std::pin::Pin;
@@ -68,6 +70,8 @@ unsafe impl Sync for ClientData {}
 unsafe impl Send for ClientData {}
 
 /// An action client.
+///
+/// Consult `examples/action_client.rs` for a working example.
 pub struct Client<T: ActionMsg> {
     data: Arc<ClientData>,
     _phantom: PhantomData<T>,
@@ -84,11 +88,9 @@ where
         qos: Option<ClientQosOption>,
     ) -> RCLActionResult<Self> {
         let mut client = rcl::MTSafeFn::rcl_action_get_zero_initialized_client();
-        println!("action_name: {}", action_name);
         let options = qos
             .map(rcl::rcl_action_client_options_t::from)
             .unwrap_or_else(rcl::MTSafeFn::rcl_action_client_get_default_options);
-        println!("action_name: {}", action_name);
         let action_name = CString::new(action_name).unwrap_or_default();
 
         {
@@ -108,6 +110,7 @@ where
         })
     }
 
+    /// Returns true if the corresponding action server is available.
     pub fn is_server_available(&self) -> RCLActionResult<bool> {
         let guard = rcl::MT_UNSAFE_FN.lock();
 
@@ -128,7 +131,7 @@ where
     }
 
     /// Send a goal request to the server with given uuid. the uuid can be any 16-bit slice [u8; 16] i.e. does not have to
-    /// strictly conform to the UUID v4 standard.
+    /// conform to the UUID v4 standard. Use the returned [`ClientGoalRecv<T>`] to receive the response.
     pub fn send_goal_with_uuid(
         self,
         goal: <T as ActionMsg>::GoalContent,
@@ -138,8 +141,8 @@ where
         self.send_goal_request(&request)
     }
 
-    /// Send a goal request.
-    pub fn send_goal_request(
+    /// Send a goal request. Use the returned [`ClientGoalRecv<T>`] to receive the response.
+    fn send_goal_request(
         self,
         data: &SendGoalServiceRequest<T>,
     ) -> Result<ClientGoalRecv<T>, DynError> {
@@ -160,7 +163,7 @@ where
         })
     }
 
-    /// Send a result request to the server.
+    /// Send a result request to the server. Use the returned [`ClientResultRecv<T>`] to receive the response.
     pub fn send_result_request(
         self,
         data: &GetResultServiceRequest<T>,
@@ -178,7 +181,7 @@ where
         })
     }
 
-    /// Send a cancel request.
+    /// Send a cancel request. Use the returned [`ClientCancelRecv<T>`] to receive the response.
     pub fn send_cancel_request(
         self,
         request: &CancelGoalRequest,
@@ -198,7 +201,7 @@ where
         })
     }
 
-    /// Takes a feedback for the goal.
+    /// Takes a feedback for the goal. If there is no feedback, it returns [`RecvResult::RetryLater`].
     pub fn try_recv_feedback(&self) -> RecvResult<<T as ActionMsg>::Feedback, ()> {
         match rcl_action_take_feedback::<T>(&self.data.client) {
             Ok(feedback) => RecvResult::Ok(feedback),
@@ -254,7 +257,7 @@ where
         }
     }
 
-    // Asynchronously receive a status message.
+    /// Asynchronously receive a status message.
     pub async fn recv_status(self) -> Result<(Self, GoalStatusArray), DynError> {
         AsyncStatusReceiver {
             data: self.data.clone(),
@@ -266,7 +269,7 @@ where
 }
 
 #[derive(Clone)]
-pub struct ClientRecv<T> {
+pub(crate) struct ClientRecv<T> {
     data: Arc<ClientData>,
     _phantom: PhantomData<T>,
     _unsync: PhantomUnsync,
@@ -282,6 +285,9 @@ impl<T: ActionMsg> ClientRecv<T> {
     }
 }
 
+/// A receiver for the response of the goal request, usually returned by [`Client::send_goal_with_uuid`].
+///
+/// Use one of [`ClientGoalRecv::try_recv`], [`ClientGoalRecv::recv_timeout`], or [`ClientGoalRecv::recv`] to receive the response. The action client [`Client<T>`] is returned together with the response so that another request can be made.
 #[derive(Clone)]
 pub struct ClientGoalRecv<T> {
     pub(crate) inner: ClientRecv<T>,
@@ -289,6 +295,7 @@ pub struct ClientGoalRecv<T> {
 }
 
 impl<T: ActionMsg> ClientGoalRecv<T> {
+    /// Returns a response if available. If there is no response, it returns [`RecvResult::RetryLater`].
     pub fn try_recv(
         self,
     ) -> RecvResult<(Client<T>, SendGoalServiceResponse<T>, rcl::rmw_request_id_t), Self> {
@@ -324,11 +331,15 @@ impl<T: ActionMsg> ClientGoalRecv<T> {
         }
     }
 
-    pub fn recv(self) -> AsyncGoalReceiver<T> {
+    /// Asynchronously receive the response.
+    pub async fn recv(
+        self,
+    ) -> Result<(Client<T>, SendGoalServiceResponse<T>, rcl::rmw_request_id_t), DynError> {
         AsyncGoalReceiver {
             client: self,
             is_waiting: false,
         }
+        .await
     }
 }
 
@@ -601,11 +612,21 @@ impl<T: ActionMsg> ClientResultRecv<T> {
         }
     }
 
-    pub fn recv(self) -> AsyncResultReceiver<T> {
+    pub async fn recv(
+        self,
+    ) -> Result<
+        (
+            Client<T>,
+            GetResultServiceResponse<T>,
+            rcl::rmw_request_id_t,
+        ),
+        DynError,
+    > {
         AsyncResultReceiver {
             client: self,
             is_waiting: false,
         }
+        .await
     }
 }
 

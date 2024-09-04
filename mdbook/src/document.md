@@ -5,7 +5,7 @@ Documents are written in Markdown and located in [mdbook](https://github.com/tie
 These Markdown files are compiled to HTML files and located in [docs](https://github.com/tier4/safe_drive/tree/main/docs),
 and published at [https://tier4.github.io/safe_drive/](https://tier4.github.io/safe_drive/).
 
-You can use (Mermaid)[https://mermaid.js.org/#/] notation in Markdown as follows.
+You can use [Mermaid](https://mermaid.js.org/#/) notation in Markdown as follows.
 
 ```mermaid
 graph TD;
