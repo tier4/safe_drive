@@ -109,6 +109,12 @@ use std::{
     sync::Arc, task::Poll,
 };
 
+#[cfg(feature = "iron")]
+use crate::qos::iron::*;
+
+#[cfg(feature = "jazzy")]
+use crate::qos::jazzy::*;
+
 pub(crate) struct ServerData {
     pub(crate) service: rcl::rcl_service_t,
     pub(crate) node: Arc<Node>,
@@ -119,6 +125,13 @@ impl Drop for ServerData {
         let guard = rcl::MT_UNSAFE_FN.lock();
         let _ = guard.rcl_service_fini(&mut self.service, unsafe { self.node.as_ptr_mut() });
     }
+}
+
+#[cfg(any(feature = "iron", feature = "jazzy"))]
+pub enum RCLServiceIntrospection {
+    RCLServiceIntrospectionOff,
+    RCLServiceIntrospectionMetadata,
+    RCLServiceIntrospectionContents
 }
 
 unsafe impl Sync for ServerData {}
@@ -162,6 +175,44 @@ impl<T: ServiceMsg> Server<T> {
             _phantom: Default::default(),
             _unsync: Default::default(),
         })
+    }
+
+    #[cfg(any(feature = "iron", feature = "jazzy"))]
+    pub fn configure_introspection(
+        &mut self,
+        clock: &Clock,
+        qos: Profile,
+        introspection_state: RCLServiceIntrospection,)
+    {
+
+        let mut pub_opts = unsafe {rcl::rcl_publisher_get_default_options()};
+        pub_opts.qos = (&qos).into();
+
+        let rcl_introspection_state = match introspection_state {
+            RCLServiceIntrospection::RCLServiceIntrospectionMetadata => {
+                rcl::rcl_service_introspection_state_e_RCL_SERVICE_INTROSPECTION_METADATA
+            }
+            RCLServiceIntrospection::RCLServiceIntrospectionContents => {
+                rcl::rcl_service_introspection_state_e_RCL_SERVICE_INTROSPECTION_CONTENTS
+            }
+            _ => {
+                rcl::rcl_service_introspection_state_e_RCL_SERVICE_INTROSPECTION_OFF
+            }
+        };
+        let mut service = self.data.service;
+
+        let ret = unsafe {
+            rcl::rcl_service_configure_service_introspection(
+                &mut service,
+                self.data.node.as_ptr_mut(),
+                clock.as_ptr_mut(),
+                <T as ServiceMsg>::type_support(),
+                pub_opts,
+                rcl_introspection_state)
+        };
+        if ret != rcl::RCL_RET_OK.try_into().unwrap(){
+            eprintln!("Failed to configure service introspection: {}", ret);
+        }
     }
 
     /// Receive a request.
