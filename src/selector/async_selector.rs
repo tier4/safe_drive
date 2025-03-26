@@ -25,10 +25,10 @@ pub(crate) enum Command {
     ),
     RemoveSubscription(Arc<RCLSubscription>),
     Server(
-        Arc<ServerData>,
+        Arc<Mutex<ServerData>>,
         Box<dyn FnMut() -> CallbackResult + Send + Sync + 'static>,
     ),
-    RemoveServer(Arc<ServerData>),
+    RemoveServer(Arc<Mutex<ServerData>>),
     Client(
         Arc<ClientData>,
         Box<dyn FnMut() -> CallbackResult + Send + Sync + 'static>,

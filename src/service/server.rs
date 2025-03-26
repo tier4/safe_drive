@@ -92,7 +92,7 @@ use super::Header;
 use crate::{
     error::{DynError, RCLError, RCLResult},
     get_allocator, is_halt,
-    msg::ServiceMsg,
+    msg::{interfaces::rosgraph_msgs::msg::Clock, ServiceMsg},
     node::Node,
     qos::Profile,
     rcl::{self, rmw_request_id_t},
@@ -103,17 +103,12 @@ use crate::{
     signal_handler::Signaled,
     PhantomUnsync, RecvResult,
 };
+use parking_lot::Mutex;
 use pin_project::{pin_project, pinned_drop};
 use std::{
     ffi::CString, future::Future, marker::PhantomData, mem::MaybeUninit, os::raw::c_void, pin::Pin,
     sync::Arc, task::Poll,
 };
-
-#[cfg(feature = "iron")]
-use crate::qos::iron::*;
-
-#[cfg(feature = "jazzy")]
-use crate::qos::jazzy::*;
 
 pub(crate) struct ServerData {
     pub(crate) service: rcl::rcl_service_t,
@@ -131,7 +126,7 @@ impl Drop for ServerData {
 pub enum RCLServiceIntrospection {
     RCLServiceIntrospectionOff,
     RCLServiceIntrospectionMetadata,
-    RCLServiceIntrospectionContents
+    RCLServiceIntrospectionContents,
 }
 
 unsafe impl Sync for ServerData {}
@@ -140,7 +135,7 @@ unsafe impl Send for ServerData {}
 /// Server.
 #[must_use]
 pub struct Server<T> {
-    pub(crate) data: Arc<ServerData>,
+    pub(crate) data: Arc<Mutex<ServerData>>,
     _phantom: PhantomData<T>,
     _unsync: PhantomUnsync,
 }
@@ -171,21 +166,19 @@ impl<T: ServiceMsg> Server<T> {
         }
 
         Ok(Server {
-            data: Arc::new(ServerData { service, node }),
+            data: Arc::new(Mutex::new(ServerData { service, node })),
             _phantom: Default::default(),
             _unsync: Default::default(),
         })
     }
 
-    #[cfg(any(feature = "iron", feature = "jazzy"))]
     pub fn configure_introspection(
-        &mut self,
-        clock: &Clock,
+        &self,
+        clock: &mut Clock,
         qos: Profile,
-        introspection_state: RCLServiceIntrospection,)
-    {
-
-        let mut pub_opts = unsafe {rcl::rcl_publisher_get_default_options()};
+        introspection_state: RCLServiceIntrospection,
+    ) -> RCLResult<()> {
+        let mut pub_opts = unsafe { rcl::rcl_publisher_get_default_options() };
         pub_opts.qos = (&qos).into();
 
         let rcl_introspection_state = match introspection_state {
@@ -195,24 +188,20 @@ impl<T: ServiceMsg> Server<T> {
             RCLServiceIntrospection::RCLServiceIntrospectionContents => {
                 rcl::rcl_service_introspection_state_e_RCL_SERVICE_INTROSPECTION_CONTENTS
             }
-            _ => {
-                rcl::rcl_service_introspection_state_e_RCL_SERVICE_INTROSPECTION_OFF
-            }
+            _ => rcl::rcl_service_introspection_state_e_RCL_SERVICE_INTROSPECTION_OFF,
         };
-        let mut service = self.data.service;
 
-        let ret = unsafe {
-            rcl::rcl_service_configure_service_introspection(
-                &mut service,
-                self.data.node.as_ptr_mut(),
-                clock.as_ptr_mut(),
-                <T as ServiceMsg>::type_support(),
-                pub_opts,
-                rcl_introspection_state)
-        };
-        if ret != rcl::RCL_RET_OK.try_into().unwrap(){
-            eprintln!("Failed to configure service introspection: {}", ret);
-        }
+        let mut data = self.data.lock();
+        let guard = rcl::MT_UNSAFE_FN.lock();
+
+        guard.rcl_service_configure_service_introspection(
+            &mut data.service,
+            unsafe { data.node.as_ptr_mut() },
+            clock as *mut Clock as *mut _,
+            <T as ServiceMsg>::type_support(),
+            pub_opts,
+            rcl_introspection_state,
+        )
     }
 
     /// Receive a request.
@@ -266,12 +255,19 @@ impl<T: ServiceMsg> Server<T> {
     /// - `RCLError::Error` if an unspecified error occurs.
     #[must_use]
     pub fn try_recv(self) -> RecvResult<(ServerSend<T>, <T as ServiceMsg>::Request, Header), Self> {
+        let data = self.data.lock();
+
         let (request, header) =
-            match rcl_take_request_with_info::<<T as ServiceMsg>::Request>(&self.data.service) {
+            match rcl_take_request_with_info::<<T as ServiceMsg>::Request>(&data.service) {
                 Ok(data) => data,
-                Err(RCLError::ServiceTakeFailed) => return RecvResult::RetryLater(self),
+                Err(RCLError::ServiceTakeFailed) => {
+                    drop(data);
+                    return RecvResult::RetryLater(self);
+                }
                 Err(e) => return RecvResult::Err(e.into()),
             };
+
+        drop(data);
 
         RecvResult::Ok((
             ServerSend {
@@ -344,7 +340,7 @@ unsafe impl<T> Send for Server<T> {}
 /// Sender to send a response.
 #[must_use]
 pub struct ServerSend<T> {
-    data: Arc<ServerData>,
+    data: Arc<Mutex<ServerData>>,
     request_id: rmw_request_id_t,
     _phantom: PhantomData<T>,
     _unsync: PhantomUnsync,
@@ -396,13 +392,18 @@ impl<T: ServiceMsg> ServerSend<T> {
         mut self,
         data: &<T as ServiceMsg>::Response,
     ) -> Result<Server<T>, (Self, RCLError)> {
+        let server_data = self.data.lock();
+
         if let Err(e) = rcl::MTSafeFn::rcl_send_response(
-            &self.data.service,
+            &server_data.service,
             &mut self.request_id,
             data as *const _ as *mut c_void,
         ) {
+            drop(server_data);
             return Err((self, e));
         }
+
+        drop(server_data);
 
         Ok(Server {
             data: self.data,
@@ -463,7 +464,9 @@ impl<T: ServiceMsg> Future for AsyncReceiver<T> {
         // };
         *this.is_waiting = false;
 
-        match rcl_take_request_with_info::<<T as ServiceMsg>::Request>(&this.server.data.service) {
+        let data = this.server.data.lock();
+
+        match rcl_take_request_with_info::<<T as ServiceMsg>::Request>(&data.service) {
             Ok((request, header)) => Poll::Ready(Ok((
                 ServerSend {
                     data: this.server.data.clone(),
@@ -478,7 +481,7 @@ impl<T: ServiceMsg> Future for AsyncReceiver<T> {
                 let mut waker = Some(cx.waker().clone());
                 let mut guard = SELECTOR.lock();
                 if let Err(e) = guard.send_command(
-                    &this.server.data.node.context,
+                    &data.node.context,
                     async_selector::Command::Server(
                         this.server.data.clone(),
                         Box::new(move || {
@@ -503,10 +506,12 @@ impl<T: ServiceMsg> Future for AsyncReceiver<T> {
 impl<T> PinnedDrop for AsyncReceiver<T> {
     fn drop(self: Pin<&mut Self>) {
         if self.is_waiting {
+            let cloned = self.server.data.clone();
+            let data = self.server.data.lock();
             let mut guard = SELECTOR.lock();
             let _ = guard.send_command(
-                &self.server.data.node.context,
-                async_selector::Command::RemoveServer(self.server.data.clone()),
+                &data.node.context,
+                async_selector::Command::RemoveServer(cloned),
             );
         }
     }

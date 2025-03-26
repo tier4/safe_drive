@@ -870,6 +870,27 @@ impl MTUnsafeFn {
         }
         Ok(params_map)
     }
+
+    pub fn rcl_service_configure_service_introspection(
+        &self,
+        service: *mut rcl_service_t,
+        node: *mut rcl_node_t,
+        clock: *mut rcl_clock_t,
+        type_support: *const rosidl_service_type_support_t,
+        publisher_options: rcl_publisher_options_t,
+        introspection_state: rcl_service_introspection_state_t,
+    ) -> RCLResult<()> {
+        ret_val_to_err(unsafe {
+            self::rcl_service_configure_service_introspection(
+                service,
+                node,
+                clock,
+                type_support,
+                publisher_options,
+                introspection_state,
+            )
+        })
+    }
 }
 
 impl MTUnsafeLogFn {
